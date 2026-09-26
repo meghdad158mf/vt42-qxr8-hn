@@ -1119,7 +1119,63 @@
      پنل «پروفایل» هم می‌شینه — باید override بشه، وگرنه قانون ستونی بالا
      (label{flex-direction:column}) روش هم اعمال می‌شه و چیدمانش می‌شکنه */
   .chan-row-profile-fields label.chan-row-news{ flex-direction:row; }
-  #chan-list{ max-height:360px; overflow-y:auto; }
+  #chan-list{ max-height:520px; overflow-y:auto; }
+  .chan-intro{ font-size:12.5px; color: var(--text-dim); line-height:1.8; margin:0 0 12px; }
+  .chan-toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+  .chan-toolbar #chan-search{ flex:1; min-width:180px; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:9px 12px; border-radius: var(--radius-control); font:inherit; font-size:13px; }
+  .chan-toolbar select{ background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:9px 10px; border-radius: var(--radius-control); font:inherit; font-size:13px; }
+  .chan-section-chips{ margin-bottom:8px; }
+  .chan-section-chips .news-topic-chip{ background: var(--surface-2); border-color: var(--border-strong); color: var(--text-dim); }
+  .chan-section-chips .news-topic-chip.active{ background: rgba(234,179,147,0.35); border-color: var(--accent); color: var(--text); }
+  .chan-section-chips .news-topic-chip b{ font-weight:700; margin-inline-start:4px; }
+  .chan-item{ display:flex; align-items:center; gap:12px; padding:10px 8px; border-bottom:1px solid var(--border); border-radius:10px; cursor:pointer; transition: background .15s ease; }
+  .chan-item:hover{ background: var(--surface-2); }
+  .chan-item:last-child{ border-bottom:none; }
+  .chan-item-avatar{ width:38px; height:38px; border-radius:50%; overflow:hidden; flex:none; background: var(--surface-2); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; color: var(--text-faint); font-weight:800; }
+  .chan-item-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .chan-item-main{ flex:1; min-width:0; }
+  .chan-item-name{ font-size:13px; font-weight:700; color: var(--text); }
+  .chan-item-sub{ font-size:11px; color: var(--text-faint); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:ltr; text-align:right; }
+  .chan-item-badges{ display:flex; flex-wrap:wrap; gap:5px; justify-content:flex-end; max-width:48%; }
+  .chan-badge{ font-size:10.5px; font-weight:600; padding:3px 9px; border-radius: var(--radius-pill); background: rgba(234,179,147,0.28); color: var(--accent-strong); white-space:nowrap; }
+  .chan-badge.none{ background: var(--danger-soft); color: var(--danger); }
+  .chan-item-edit{ font-size:12px; color: var(--text-dim); border:1px solid var(--border-strong); background:none; border-radius:999px; padding:5px 12px; font:inherit; font-size:12px; cursor:pointer; flex:none; }
+  .chan-item:hover .chan-item-edit{ border-color: var(--accent-strong); color: var(--accent-strong); }
+  @media (max-width:640px){ .chan-item{ flex-wrap:wrap; } .chan-item-badges{ max-width:100%; order:5; width:100%; justify-content:flex-start; padding-inline-start:50px; } .chan-item-edit{ display:none; } }
+
+  .chan-editor-card{ max-width:640px; padding:28px; }
+  .ce-step{ border-top:1px solid var(--border); padding:16px 0; }
+  .ce-step-head{ display:flex; align-items:center; gap:10px; font-size:14px; font-weight:800; color: var(--text); margin-bottom:12px; }
+  .ce-num{ width:24px; height:24px; border-radius:50%; background: var(--accent); color:#16202a; font-size:12.5px; display:inline-flex; align-items:center; justify-content:center; flex:none; }
+  .chan-editor-card .field label{ display:block; font-size:12px; font-weight:600; color: var(--text-dim); margin-bottom:5px; }
+  .chan-editor-card .field input, .chan-editor-card .field select{ width:100%; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:9px 12px; border-radius:8px; font:inherit; font-size:13px; box-sizing:border-box; }
+  .chan-editor-card .field input:focus, .chan-editor-card .field select:focus{ outline:none; border-color: var(--accent-strong); }
+  .ce-hint{ font-size:11.5px !important; color: var(--text-faint) !important; line-height:1.7 !important; margin-top:5px !important; }
+  .ce-identity{ display:flex; gap:16px; align-items:flex-start; }
+  .ce-avatar{ position:relative; flex:none; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; }
+  .ce-avatar #ce-avatar-preview{ width:76px; height:76px; border-radius:50%; overflow:hidden; background: var(--surface-2); border:2px dashed var(--border-strong); display:flex; align-items:center; justify-content:center; color: var(--text-faint); font-size:26px; font-weight:800; }
+  .ce-avatar #ce-avatar-preview img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .ce-avatar input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .ce-avatar small{ font-size:11px; color: var(--accent-strong); font-weight:600; }
+  .ce-fields{ flex:1; display:flex; flex-direction:column; gap:10px; min-width:0; }
+  .ce-fields-row{ display:grid; grid-template-columns: 1fr 1.6fr; gap:10px; }
+  @media (max-width:560px){ .ce-identity{ flex-direction:column; align-items:center; } .ce-fields{ width:100%; } .ce-fields-row{ grid-template-columns:1fr; } .chan-editor-card{ padding:22px 16px; } }
+  .ce-section{ border:1px solid var(--border-strong); border-radius:12px; margin-bottom:10px; transition:border-color .15s ease, background .15s ease; }
+  .ce-section.on{ border-color: var(--accent); background: rgba(234,179,147,0.08); }
+  .ce-section-toggle{ display:flex; gap:12px; align-items:flex-start; padding:12px 14px; cursor:pointer; }
+  .ce-section-toggle input{ width:18px; height:18px; margin-top:2px; accent-color: var(--accent-strong); flex:none; cursor:pointer; }
+  .ce-section-toggle b{ display:block; font-size:13.5px; color: var(--text); }
+  .ce-section-toggle span{ display:block; font-size:11.5px; color: var(--text-faint); line-height:1.7; margin-top:2px; }
+  .ce-section-extra{ display:none; padding:0 14px 14px 14px; padding-inline-start:44px; }
+  .ce-section.on .ce-section-extra{ display:grid; gap:10px; grid-template-columns:1fr 1fr; }
+  .ce-section-extra .ce-full{ grid-column:1 / -1; }
+  @media (max-width:560px){ .ce-section.on .ce-section-extra{ grid-template-columns:1fr; padding-inline-start:14px; } }
+  .ce-check{ display:flex; align-items:center; gap:8px; font-size:12.5px; color: var(--text); cursor:pointer; }
+  .ce-check input{ width:16px; height:16px; accent-color: var(--accent-strong); }
+  .ce-sub-label{ display:block; font-size:12px; font-weight:600; color: var(--text-dim); margin-bottom:6px; }
+  .ce-groups{ display:flex; flex-wrap:wrap; gap:8px 16px; }
+  .ce-actions{ display:flex; gap:10px; justify-content:flex-end; border-top:1px solid var(--border); padding-top:16px; }
+  .ce-actions .btn{ min-width:110px; }
   .chan-filter-row{ padding-top:12px; border-top:1px dashed var(--border); }
   .chan-filter-row #chan-search{ flex:2; min-width:180px; }
   .chan-filter-count{ font-size:11.5px; color: var(--text-faint); white-space:nowrap; margin-inline-start:auto; }
@@ -1150,6 +1206,24 @@
 
   /* settings */
   .settings-grid{ display:flex; flex-direction:column; gap:16px; }
+  .settings-group-title{ color:#fff; font-size:15px; font-weight:800; margin:18px 0 -4px; display:flex; align-items:center; gap:12px; }
+  .settings-group-title:first-child{ margin-top:0; }
+  .settings-group-title::after{ content:''; flex:1; height:1px; background:linear-gradient(90deg, rgba(234,179,147,0), rgba(234,179,147,0.45)); }
+  .settings-accordion > summary.panel-head{ gap:12px; }
+  .settings-sum-desc{ flex:1; font-size:12px; color: var(--text-faint); line-height:1.6; }
+  @media (max-width:640px){ .settings-accordion > summary.panel-head{ flex-wrap:wrap; } .settings-sum-desc{ order:3; flex-basis:100%; } }
+  .settings-help{ font-size:12px; color: var(--text-dim); margin:0 0 12px; line-height:1.8; }
+  .cat-card .name.renamable, .cat-card .pg-name.renamable{ cursor:text; border-bottom:1px dashed transparent; }
+  .cat-card .name.renamable:hover, .cat-card .pg-name.renamable:hover{ border-bottom-color: var(--accent-strong); }
+  .rename-input{ width:100%; font:inherit; font-size:12.5px; padding:4px 6px; border:1px solid var(--accent-strong); border-radius:6px; background: var(--surface); color: var(--text); }
+  .cat-card .count{ font-family:inherit !important; font-size:11px !important; color: var(--text-faint) !important; font-weight:600 !important; white-space:nowrap; }
+  .pw-item-note{ font-size:11.5px; color: var(--text-faint); font-weight:400; }
+  .pw-modal-card{ max-width:440px; }
+  .pw-modal-card .field{ margin-bottom:12px; }
+  .pw-modal-card .field label{ display:block; font-size:12px; font-weight:600; color: var(--text-dim); margin-bottom:5px; }
+  .pw-modal-card .field input{ width:100%; box-sizing:border-box; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius:8px; font:inherit; font-size:14px; direction:ltr; text-align:left; }
+  .pw-modal-warn{ font-size:12.5px !important; background: rgba(234,179,147,0.18); color: var(--accent-strong) !important; padding:9px 12px; border-radius:8px; margin-bottom:14px; }
+  .pw-modal-error{ font-size:12.5px !important; color: var(--danger) !important; min-height:20px; margin:8px 0 4px !important; }
   .settings-row-2col{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
   .settings-row-2col > .panel{ margin-bottom:0; }
   @media (max-width:900px){ .settings-row-2col{ grid-template-columns:1fr; } }
@@ -1385,6 +1459,74 @@
         <div style="display:flex; gap:10px; margin-top:18px;">
           <button class="btn" onclick="closeDeleteChannelModal()" style="flex:1;">انصراف</button>
           <button class="btn danger" id="confirm-delete-channel-btn" style="flex:1;">حذف قطعی</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="pw-modal" onclick="if(event.target===this) closePwModal()">
+      <div class="modal-card pw-modal-card">
+        <button class="modal-close" onclick="closePwModal()" aria-label="بستن">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <h3 id="pw-modal-title">تغییر رمز</h3>
+        <p class="pw-modal-warn" id="pw-modal-warn"></p>
+        <div class="field"><label>رمز جدید</label><input type="password" id="pw-new" autocomplete="new-password" /></div>
+        <div class="field"><label>تکرار رمز جدید</label><input type="password" id="pw-new2" autocomplete="new-password" /></div>
+        <label class="ce-check"><input type="checkbox" id="pw-show" /> نمایش رمز</label>
+        <p class="pw-modal-error" id="pw-modal-error"></p>
+        <div class="ce-actions">
+          <button class="btn" type="button" onclick="closePwModal()">انصراف</button>
+          <button class="btn primary" type="button" id="pw-save-btn">ذخیره‌ی رمز جدید</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="chan-editor-modal" onclick="if(event.target===this) closeChanEditor()">
+      <div class="modal-card chan-editor-card">
+        <button class="modal-close" onclick="closeChanEditor()" aria-label="بستن">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <h3 id="ce-title">ویرایش منبع</h3>
+
+        <div class="ce-step">
+          <div class="ce-step-head"><span class="ce-num">۱</span>مشخصات منبع</div>
+          <div class="ce-identity">
+            <label class="ce-avatar" title="انتخاب عکس یا لوگو">
+              <span id="ce-avatar-preview"></span>
+              <input type="file" id="ce-avatar-input" accept="image/*" />
+              <small>تغییر عکس</small>
+            </label>
+            <div class="ce-fields">
+              <div class="field"><label>نام نمایشی</label><input type="text" id="ce-name" placeholder="مثلاً خبرگزاری فارس" /></div>
+              <div class="ce-fields-row">
+                <div class="field"><label>بستر</label>
+                  <select id="ce-platform">
+                    <option value="eitaa">ایتا</option>
+                    <option value="telegram">تلگرام</option>
+                    <option value="website">وب‌سایت (RSS)</option>
+                    <option value="bale" disabled>بله</option>
+                  </select>
+                </div>
+                <div class="field"><label id="ce-handle-label">یوزرنیم کانال</label><input type="text" id="ce-handle" class="mono" dir="ltr" /></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ce-step">
+          <div class="ce-step-head"><span class="ce-num">۲</span>موضوع</div>
+          <div class="field"><select id="ce-cat"></select>
+            <p class="ce-hint">برای فیلتر «دسته‌بندی» و ستون «موضوع» در جدول کنشگران استفاده می‌شود.</p></div>
+        </div>
+
+        <div class="ce-step">
+          <div class="ce-step-head"><span class="ce-num">۳</span>در کدام بخش‌های سایت نمایش داده شود؟</div>
+          <div id="ce-sections"></div>
+        </div>
+
+        <div class="ce-actions">
+          <button class="btn" type="button" onclick="closeChanEditor()">انصراف</button>
+          <button class="btn primary" type="button" id="ce-save-btn">ذخیره</button>
         </div>
       </div>
     </div>
@@ -2044,62 +2186,38 @@
     <!-- SETTINGS -->
     <section class="section" id="sec-settings">
       <div class="settings-grid">
+          <h3 class="settings-group-title">منابع</h3>
           <details class="panel settings-accordion" open>
-            <summary class="panel-head"><span class="panel-pill">مدیریت کانال‌ها</span></summary>
-            <div class="add-row">
-              <input type="text" id="new-chan-name" placeholder="نام کانال" />
-              <input type="text" id="new-chan-handle" class="mono" placeholder="یوزرنیم (بدون @)" />
-              <select id="new-chan-platform">
-                <option value="eitaa">ایتا</option>
-                <option value="telegram">تلگرام</option>
-                <option value="website">وب‌سایت (RSS)</option>
-              </select>
-              <select id="new-chan-region">
-                <option value="">بدون حوزه‌ی جغرافیایی</option>
-              </select>
-              <select id="new-chan-cat"></select>
-              <details class="chan-domains-details">
-                <summary>نمایش در بخش‌ها</summary>
-                <div class="chan-domains">
-                  <label class="chan-news-toggle"><input type="checkbox" id="new-chan-show-news" /> اخبار و رویدادها</label>
-                  <label class="chan-news-toggle"><input type="checkbox" id="new-chan-show-cyberspace" /> کنشگری مجازی</label>
-                  <label class="chan-news-toggle"><input type="checkbox" id="new-chan-show-people" /> یادداشت</label>
-                  <label class="chan-news-toggle"><input type="checkbox" id="new-chan-show-orgs" /> تحلیل سازمان‌ها</label>
-                </div>
-              </details>
-              <button class="btn primary" id="add-chan-btn">افزودن کانال</button>
-            </div>
-            <div class="add-row chan-filter-row">
-              <input type="text" id="chan-search" placeholder="جست‌وجو در نام یا آدرس کانال…" />
+            <summary class="panel-head"><span class="panel-pill">مدیریت منابع</span><span class="settings-sum-desc">کانال‌ها و سایت‌هایی که سامانه از آن‌ها مطلب جمع می‌کند، و محل نمایش هرکدام در سایت</span></summary>
+            <p class="chan-intro">با کلیک روی هر منبع، مشخصات و بخش‌هایی از سایت که در آن نمایش داده می‌شود را ویرایش کنید.</p>
+            <div class="chan-toolbar">
+              <button class="btn primary" id="add-chan-btn" type="button">+ افزودن منبع جدید</button>
+              <input type="text" id="chan-search" placeholder="جست‌وجو در نام یا آدرس…" />
               <select id="chan-filter-platform">
                 <option value="">همه‌ی بسترها</option>
                 <option value="eitaa">ایتا</option>
                 <option value="telegram">تلگرام</option>
                 <option value="website">وب‌سایت (RSS)</option>
-              </select>
-              <select id="chan-filter-domain">
-                <option value="">همه‌ی بخش‌ها</option>
-                <option value="show_in_news">اخبار و رویدادها</option>
-                <option value="show_in_cyberspace">کنشگری مجازی</option>
-                <option value="show_in_people">یادداشت</option>
-                <option value="show_in_orgs">تحلیل سازمان‌ها</option>
+                <option value="bale">بله</option>
               </select>
               <span class="chan-filter-count" id="chan-filter-count"></span>
             </div>
+            <div class="news-topic-chips chan-section-chips" id="chan-section-chips"></div>
             <div id="chan-list"></div>
           </details>
 
+          <h3 class="settings-group-title">برچسب‌های منابع</h3>
           <div class="settings-row-2col">
             <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">دسته‌بندی‌ها</span></summary>
+              <summary class="panel-head"><span class="panel-pill">موضوع منابع</span><span class="settings-sum-desc">در فیلتر «دسته‌بندی» و ستون «موضوع» جدول کنشگران</span></summary>
               <div class="add-row">
-                <input type="text" id="new-cat-name" placeholder="نام دسته‌بندی جدید" />
-                <button class="btn primary" id="add-cat-btn">افزودن دسته</button>
+                <input type="text" id="new-cat-name" placeholder="نام موضوع جدید (مثلاً اقتصادی)" />
+                <button class="btn primary" id="add-cat-btn">افزودن موضوع</button>
               </div>
               <div class="cat-grid" id="cat-grid"></div>
             </details>
             <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">مناطق جغرافیایی</span></summary>
+              <summary class="panel-head"><span class="panel-pill">منطقه‌های جغرافیایی</span><span class="settings-sum-desc">در فیلتر «منطقه» تب‌های اخبار</span></summary>
               <div class="add-row">
                 <input type="text" id="new-region-name" placeholder="نام منطقه‌ی جدید" />
                 <button class="btn primary" id="add-region-btn">افزودن منطقه</button>
@@ -2108,32 +2226,9 @@
             </details>
           </div>
 
-          <div class="settings-row-2col">
-            <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">موضوعات جستجوی ذخیره‌شده</span></summary>
-              <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">هر موضوع یه اسم و یه لیست کلیدواژه (جدا با ویرگول) داره؛ توی تب‌های «شبکه‌های اجتماعی»/«وب‌سایت‌ها»/«ادعاها و شایعات» با کلیک روی موضوع، پست‌هایی که حداقل یکی از کلیدواژه‌ها رو توی عنوان/متنشون دارن نشون داده می‌شن.</p>
-              <div class="add-row">
-                <input type="text" id="new-topic-name" placeholder="نام موضوع (مثل سیاسی)" />
-                <input type="text" id="new-topic-keywords" placeholder="کلیدواژه‌ها، جدا با ویرگول" />
-                <button class="btn primary" id="add-topic-btn">افزودن موضوع</button>
-              </div>
-              <div class="cat-grid" id="topic-grid"></div>
-            </details>
-            <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">موضوعات «پرونده‌های موضوعی»</span></summary>
-              <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">موضوعات موقت/چرخشی که تب «پرونده‌های موضوعی» (بخش «اخبار و رویدادها») نشون می‌ده. هر موضوع یه لیست کلیدواژه (جدا با ویرگول) داره که با کلیدواژه‌ی هوش مصنوعی هر پست تطبیق داده می‌شه (هر ۲ ساعت خودکار). فقط موضوعات فعال به بیننده نشون داده می‌شن؛ غیرفعال‌کردن یه موضوع، پست‌هاش رو حذف نمی‌کنه (برای استفاده‌ی دوباره‌ی بعدی).</p>
-              <div class="add-row">
-                <input type="text" id="new-dossier-topic-name" placeholder="نام موضوع (مثل مذاکرات هسته‌ای)" />
-                <input type="text" id="new-dossier-topic-keywords" placeholder="کلیدواژه‌ها، جدا با ویرگول" />
-                <button class="btn primary" id="add-dossier-topic-btn">افزودن موضوع</button>
-              </div>
-              <div id="dossier-topic-admin-list"></div>
-            </details>
-          </div>
-
           <details class="panel settings-accordion">
-            <summary class="panel-head"><span class="panel-pill">گروه‌های «چهره‌ها» و «سازمان‌ها»</span></summary>
-            <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">گروه‌بندی گالری لوگوی دو تب بخش «یادداشت‌ها» (مثل حزب ۱ / حزب ۲). گروه‌های هر تب جدا تعریف می‌شن. عضویت هر کانال در گروه‌ها از دراپ‌داون «گروه‌ها» توی ردیف همون کانال (مدیریت کانال‌ها) تنظیم می‌شه؛ هر کانال می‌تونه عضو چند گروه باشه.</p>
+            <summary class="panel-head"><span class="panel-pill">گروه‌های چهره‌ها و سازمان‌ها</span><span class="settings-sum-desc">گروه‌بندی گالری لوگوها در بخش «یادداشت‌ها»</span></summary>
+            <p class="settings-help">گروه‌ها (مثل حزب ۱ / حزب ۲) برای هر تب جداگانه تعریف می‌شوند. عضویت هر منبع در گروه‌ها از پنجره‌ی ویرایش همان منبع تنظیم می‌شود و هر منبع می‌تواند عضو چند گروه باشد.</p>
             <div class="add-row">
               <input type="text" id="new-profile-group-name" placeholder="نام گروه (مثل حزب ۱)" />
               <select id="new-profile-group-kind">
@@ -2144,34 +2239,43 @@
             </div>
             <div class="cat-grid" id="profile-group-grid"></div>
           </details>
-
+          <h3 class="settings-group-title">اخبار</h3>
           <div class="settings-row-2col">
             <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">رمزهای عبور</span></summary>
-              <div class="pw-item">
-                <div class="pw-item-head"><b>رمز مدیر</b><span class="role admin">مدیر</span></div>
-                <div class="pw-item-body">
-                  <input type="password" value="••••••••" disabled />
-                  <button class="btn" onclick="changePassword('admin')">تغییر رمز</button>
-                </div>
+              <summary class="panel-head"><span class="panel-pill">میان‌برهای جست‌وجوی وب‌سایت‌ها</span><span class="settings-sum-desc">دکمه‌های جست‌وجوی آماده در تب «وب‌سایت‌ها»</span></summary>
+              <p class="settings-help">هر میان‌بر یک نام و چند کلیدواژه (جدا با ویرگول) دارد. در تب «وب‌سایت‌ها»، با کلیک روی میان‌بر، مطالبی نمایش داده می‌شوند که دست‌کم یکی از کلیدواژه‌ها را در عنوان یا متن داشته باشند.</p>
+              <div class="add-row">
+                <input type="text" id="new-topic-name" placeholder="نام میان‌بر (مثلاً انتخابات)" />
+                <input type="text" id="new-topic-keywords" placeholder="کلیدواژه‌ها، جدا با ویرگول" />
+                <button class="btn primary" id="add-topic-btn">افزودن میان‌بر</button>
               </div>
-              <div class="pw-item">
-                <div class="pw-item-head"><b>رمز بیننده</b><span class="role">بیننده</span></div>
-                <div class="pw-item-body">
-                  <input type="password" value="••••••••" disabled />
-                  <button class="btn" onclick="changePassword('viewer')">تغییر رمز</button>
-                </div>
-              </div>
+              <div class="cat-grid" id="topic-grid"></div>
             </details>
             <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">اتصال داده</span></summary>
-              <div class="kv">
-                <div><b>منبع فعلی</b><span>gist raw json</span></div>
-                <div><b>مقصد بعدی</b><span>postgrest / vps</span></div>
-                <div><b>احراز هویت</b><span>pgcrypto + pgjwt</span></div>
+              <summary class="panel-head"><span class="panel-pill">پرونده‌های موضوعی</span><span class="settings-sum-desc">موضوعات تب «پرونده‌های موضوعی»</span></summary>
+              <p class="settings-help">موضوعات موقت که هر چند روز یک‌بار عوض می‌شوند. کلیدواژه‌های هر موضوع (جدا با ویرگول) هر ۲ ساعت با کلیدواژه‌های هوش مصنوعی مطالب تازه تطبیق داده می‌شوند. فقط موضوعات فعال به بیننده نمایش داده می‌شوند؛ غیرفعال‌کردن یک موضوع، مطالبش را حذف نمی‌کند.</p>
+              <div class="add-row">
+                <input type="text" id="new-dossier-topic-name" placeholder="نام موضوع (مثل مذاکرات هسته‌ای)" />
+                <input type="text" id="new-dossier-topic-keywords" placeholder="کلیدواژه‌ها، جدا با ویرگول" />
+                <button class="btn primary" id="add-dossier-topic-btn">افزودن موضوع</button>
               </div>
+              <div id="dossier-topic-admin-list"></div>
             </details>
           </div>
+
+
+          <h3 class="settings-group-title">امنیت</h3>
+          <details class="panel settings-accordion">
+            <summary class="panel-head"><span class="panel-pill">رمزهای عبور</span><span class="settings-sum-desc">رمز ورود نقش‌های مدیر و بیننده</span></summary>
+            <div class="pw-item">
+              <div class="pw-item-head"><b>رمز مدیر</b><span class="role admin">مدیر</span><span class="pw-item-note">دسترسی کامل، شامل همین صفحه</span></div>
+              <button class="btn" type="button" onclick="changePassword('admin')">تغییر رمز مدیر</button>
+            </div>
+            <div class="pw-item">
+              <div class="pw-item-head"><b>رمز بیننده</b><span class="role">بیننده</span><span class="pw-item-note">فقط مشاهده‌ی سایت</span></div>
+              <button class="btn" type="button" onclick="changePassword('viewer')">تغییر رمز بیننده</button>
+            </div>
+          </details>
       </div>
     </section>
 
@@ -4814,47 +4918,64 @@
   const regionGridEl = document.getElementById('region-grid');
   const topicGridEl = document.getElementById('topic-grid');
   const chanListEl = document.getElementById('chan-list');
-  const newChanCatEl = document.getElementById('new-chan-cat');
-  const newChanRegionEl = document.getElementById('new-chan-region');
-  const CHAN_DOMAIN_FIELDS = [
-    { field: 'show_in_news', label: 'اخبار و رویدادها', onChange: () => renderNewsFeed() },
-    { field: 'show_in_cyberspace', label: 'کنشگری مجازی', onChange: () => { renderPosts(); renderCyberPeopleGrid(); } },
-    { field: 'show_in_people', label: 'یادداشت', onChange: () => renderPoliticalFigures() },
-    { field: 'show_in_orgs', label: 'تحلیل سازمان‌ها', onChange: () => renderPoliticalFigures() },
-  ];
 
   const chanSearchEl = document.getElementById('chan-search');
   const chanFilterPlatformEl = document.getElementById('chan-filter-platform');
-  const chanFilterDomainEl = document.getElementById('chan-filter-domain');
+  // فیلتر بخش با چیپ (نه select): '' = همه، '__none' = منابع بدون هیچ بخشی
+  let chanDomainFilter = '';
   const chanFilterCountEl = document.getElementById('chan-filter-count');
   function filteredChanList(){
     const q = chanSearchEl.value.trim().toLowerCase();
     const platform = chanFilterPlatformEl.value;
-    const domain = chanFilterDomainEl.value;
+    const domain = chanDomainFilter;
     return CHANNELS.filter(ch=>{
       if(platform && ch.platform !== platform) return false;
-      if(domain && !ch[domain]) return false;
+      if(domain === '__none'){ if(chanSectionsOf(ch).length) return false; }
+      else if(domain && !ch[domain]) return false;
       if(q && !((ch.title||'').toLowerCase().includes(q) || (ch.username||'').toLowerCase().includes(q))) return false;
       return true;
     });
   }
   chanSearchEl.addEventListener('input', renderChanList);
   chanFilterPlatformEl.addEventListener('change', renderChanList);
-  chanFilterDomainEl.addEventListener('change', renderChanList);
-
-  const newChanPlatformEl = document.getElementById('new-chan-platform');
-  const newChanHandleEl = document.getElementById('new-chan-handle');
-  newChanPlatformEl.addEventListener('change', ()=>{
-    newChanHandleEl.placeholder = newChanPlatformEl.value === 'website' ? 'لینک فید RSS' : 'یوزرنیم (بدون @)';
+  document.getElementById('chan-section-chips').addEventListener('click', e=>{
+    const chip = e.target.closest('.news-topic-chip'); if(!chip) return;
+    chanDomainFilter = chip.dataset.domain || '';
+    renderChanList();
   });
 
-  function refreshCatOptions(){
-    newChanCatEl.innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  }
+  // گزینه‌های «موضوع»/«منطقه» حالا فقط توی پنجره‌ی ویرایش منبع هستن و موقع
+  // باز شدنش پر می‌شن — این دو تابع برای سازگاری با صداکننده‌های قدیمی موندن
+  function refreshCatOptions(){}
+  function refreshRegionOptions(){}
 
-  function refreshRegionOptions(){
-    newChanRegionEl.innerHTML = '<option value="">بدون حوزه‌ی جغرافیایی</option>' +
-      REGIONS.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  // تغییر نام درجا برای کارت‌های موضوع/منطقه/گروه: کلیک روی نام → کادر
+  // ویرایش؛ Enter یا خروج از کادر ذخیره می‌کند، Esc لغو
+  function makeRenamable(nameEl, current, save){
+    nameEl.classList.add('renamable');
+    nameEl.title = 'برای تغییر نام کلیک کنید';
+    nameEl.addEventListener('click', ()=>{
+      if(nameEl.querySelector('input')) return;
+      const inp = document.createElement('input'); inp.type='text'; inp.value=current; inp.className='rename-input';
+      nameEl.innerHTML=''; nameEl.appendChild(inp); inp.focus(); inp.select();
+      let done = false;
+      const finish = async commit=>{
+        if(done) return; done = true;
+        const val = inp.value.trim();
+        if(commit && val && val !== current){
+          try{ await save(val); showToast('نام تغییر کرد'); }
+          catch(e){ showToast('تغییر نام ناموفق بود'); }
+        }else{
+          nameEl.textContent = current;
+        }
+      };
+      inp.addEventListener('keydown', e=>{ if(e.key==='Enter') finish(true); if(e.key==='Escape'){ e.stopPropagation(); finish(false); } });
+      inp.addEventListener('blur', ()=> finish(true));
+    });
+  }
+  async function patchOk(path, body){
+    const r = await api(path, {method:'PATCH', body: JSON.stringify(body)});
+    if(!r.ok) throw new Error('patch');
   }
 
   function renderRegionGrid(){
@@ -4862,10 +4983,14 @@
     REGIONS.forEach(r=>{
       const count = CHANNELS.filter(ch=>ch.region_id===r.id).length;
       const el=document.createElement('div'); el.className='cat-card';
-      el.innerHTML = `<span class="name">${r.name}</span><span class="cc-actions"><span class="count mono">${count}</span></span>`;
+      el.innerHTML = `<span class="name">${escAttr(r.name)}</span><span class="cc-actions"><span class="count mono" title="تعداد منابع">${toFaDigits(count)} منبع</span></span>`;
+      makeRenamable(el.querySelector('.name'), r.name, async val=>{
+        await patchOk('/regions?id=eq.'+r.id, {name: val});
+        await loadRegions(); renderRegionGrid(); renderNewsRegionChips(); renderNewsFeed();
+      });
       const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف منطقه'; del.setAttribute('aria-label','حذف منطقه‌ی '+r.name);
       del.addEventListener('click', async ()=>{
-        if(!confirm('این منطقه حذف شود؟')) return;
+        if(!confirm('منطقه‌ی «' + r.name + '» حذف شود؟' + (count ? '\n' + count + ' منبع بدون منطقه می‌شوند.' : ''))) return;
         await api('/regions?id=eq.'+r.id, {method:'DELETE'});
         await loadRegions(); await loadChannels();
         refreshRegionOptions(); renderRegionGrid(); renderNewsRegionChips(); renderChanList(); renderNewsFeed();
@@ -4880,10 +5005,14 @@
     CATEGORIES.forEach(c=>{
       const count = CHANNELS.filter(ch=>ch.category_id===c.id).length;
       const el=document.createElement('div'); el.className='cat-card';
-      el.innerHTML = `<span class="name">${c.name}</span><span class="cc-actions"><span class="count mono">${count}</span></span>`;
-      const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف دسته‌بندی'; del.setAttribute('aria-label','حذف دسته‌بندی '+c.name);
+      el.innerHTML = `<span class="name">${escAttr(c.name)}</span><span class="cc-actions"><span class="count mono" title="تعداد منابع">${toFaDigits(count)} منبع</span></span>`;
+      makeRenamable(el.querySelector('.name'), c.name, async val=>{
+        await patchOk('/categories?id=eq.'+c.id, {name: val});
+        await loadCategories(); renderCatGrid(); renderChanList(); renderCyberPeopleGrid(); populatePostFilters(); populateExportFilters();
+      });
+      const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف موضوع'; del.setAttribute('aria-label','حذف موضوع '+c.name);
       del.addEventListener('click', async ()=>{
-        if(!confirm('این دسته‌بندی حذف شود؟')) return;
+        if(!confirm('موضوع «' + c.name + '» حذف شود؟' + (count ? '\n' + count + ' منبع بدون موضوع می‌شوند.' : ''))) return;
         await api('/categories?id=eq.'+c.id, {method:'DELETE'});
         await loadCategories(); await loadChannels();
         refreshCatOptions(); renderCatGrid(); renderChanList(); renderChannelCards(); renderCyberPeopleGrid(); populatePostFilters(); populateExportFilters();
@@ -4893,195 +5022,220 @@
     });
   }
 
+  // هر بخش سایت که یه منبع می‌تونه توش نمایش داده بشه — منبع واحد برای
+  // برچسب‌های فهرست، چیپ‌های فیلتر و مرحله‌ی ۳ پنجره‌ی ویرایش
+  const CHAN_SECTIONS = [
+    { field:'show_in_news', label:'اخبار و رویدادها', short:'اخبار',
+      hint:'پست‌ها در تب «شبکه‌های اجتماعی» (ایتا/تلگرام) یا «وب‌سایت‌ها» می‌آیند و در تحلیل «در یک نگاه» حساب می‌شوند.' },
+    { field:'show_in_cyberspace', label:'کنشگری مجازی', short:'کنشگری',
+      hint:'پست‌ها در «پست‌های منتشر شده» می‌آیند و منبع در جدول «افراد و مجموعه‌ها» معرفی می‌شود.' },
+    { field:'show_in_people', label:'چهره‌ها و فعالان سیاسی', short:'چهره‌ها',
+      hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری چهره‌ها نمایش داده می‌شود.' },
+    { field:'show_in_orgs', label:'تحلیل سازمان‌ها', short:'سازمان‌ها',
+      hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری سازمان‌ها نمایش داده می‌شود.' },
+  ];
+  const CHAN_PLATFORM_LABEL = { eitaa:'ایتا', telegram:'تلگرام', website:'وب‌سایت', bale:'بله' };
+  function chanSectionsOf(ch){
+    const out = CHAN_SECTIONS.filter(sec=>ch[sec.field]).map(sec=>sec.short);
+    // کانال بله فقط تب «ادعاها و شایعات» رو تغذیه می‌کنه، نه فید عمومی اخبار
+    if(ch.show_in_news && ch.platform === 'bale') out[0] = 'ادعاها و شایعات';
+    if(ch.show_in_news && ch.show_in_hawza) out.splice(1, 0, 'اخبار حوزه');
+    return out;
+  }
+  function chanAvatarHtml(ch){
+    if(ch.avatar_url) return `<img src="${escAttr(ch.avatar_url)}" alt="" />`;
+    return escAttr((ch.title || ch.username || '؟').trim().charAt(0));
+  }
+
+  function renderChanSectionChips(){
+    const wrap = document.getElementById('chan-section-chips');
+    if(!wrap) return;
+    const opts = [{key:'', label:'همه', n:CHANNELS.length}]
+      .concat(CHAN_SECTIONS.map(sec=>({key:sec.field, label:sec.label, n:CHANNELS.filter(c=>c[sec.field]).length})))
+      .concat([{key:'show_in_hawza', label:'اخبار حوزه', n:CHANNELS.filter(c=>c.show_in_hawza).length},
+               {key:'__none', label:'بدون بخش', n:CHANNELS.filter(c=>!chanSectionsOf(c).length).length}]);
+    wrap.innerHTML = opts.map(o=>`<button type="button" class="news-topic-chip${chanDomainFilter===o.key?' active':''}" data-domain="${o.key}">${o.label}<b>${toFaDigits(o.n)}</b></button>`).join('');
+  }
+
   function renderChanList(){
+    renderChanSectionChips();
     chanListEl.innerHTML = '';
     const list = filteredChanList();
     chanFilterCountEl.textContent = list.length===CHANNELS.length
-      ? `${toFaDigits(CHANNELS.length)} کانال`
-      : `${toFaDigits(list.length)} از ${toFaDigits(CHANNELS.length)} کانال`;
+      ? `${toFaDigits(CHANNELS.length)} منبع`
+      : `${toFaDigits(list.length)} از ${toFaDigits(CHANNELS.length)} منبع`;
     if(!list.length){
-      chanListEl.innerHTML = '<p style="font-size:12px;color:var(--text-faint);padding:14px 4px;">کانالی با این فیلتر پیدا نشد.</p>';
+      chanListEl.innerHTML = '<p style="font-size:12px;color:var(--text-faint);padding:14px 4px;">منبعی با این فیلتر پیدا نشد.</p>';
       return;
     }
     list.forEach(ch=>{
-      const row=document.createElement('div'); row.className='chan-row';
-      const avatarBtn=document.createElement('label'); avatarBtn.className='chan-avatar-btn'; avatarBtn.title='عکس پیش‌فرض کانال (برای پست‌های بدون عکس)';
-      avatarBtn.innerHTML = ch.avatar_url ? `<img src="${escAttr(ch.avatar_url)}" alt="" />` : ICONS.photo;
-      const avatarInput=document.createElement('input'); avatarInput.type='file'; avatarInput.accept='image/*';
-      avatarInput.addEventListener('change', async ()=>{
-        const file = avatarInput.files[0];
-        if(!file) return;
-        try{
-          const url = await uploadChannelAvatarFile(file);
-          await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify({avatar_url: url})});
-          ch.avatar_url = url;
-          avatarBtn.innerHTML = `<img src="${escAttr(url)}" alt="" />`;
-          avatarBtn.appendChild(avatarInput);
-          renderNewsFeed();
-          showToast('عکس پیش‌فرض کانال ذخیره شد');
-        }catch(e){
-          showToast('بارگذاری عکس ناموفق بود');
-        }
-      });
-      avatarBtn.appendChild(avatarInput);
-      row.appendChild(avatarBtn);
-      const nameInput=document.createElement('input');
-      nameInput.className='name-edit'; nameInput.value=ch.title||ch.username;
-      let saveTimer;
-      nameInput.addEventListener('input', e=>{
-        clearTimeout(saveTimer);
-        const val = e.target.value;
-        saveTimer = setTimeout(async ()=>{
-          await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify({title: val})});
-          ch.title = val;
-        }, 600);
-      });
-      row.appendChild(nameInput);
-      const handleSpan=document.createElement('span'); handleSpan.className='chan mono';
-      const platformLabel = ch.platform==='telegram' ? 'تلگرام' : ch.platform==='website' ? 'RSS' : 'ایتا';
+      const row=document.createElement('div'); row.className='chan-item';
+      row.title = 'ویرایش ' + (ch.title || ch.username);
+      const sections = chanSectionsOf(ch);
       const handleText = ch.platform==='website' ? ch.username : '@'+ch.username;
-      handleSpan.textContent = handleText+' · '+platformLabel;
-      row.appendChild(handleSpan);
-      const catSel=document.createElement('select'); catSel.className='cat-select';
-      catSel.innerHTML = CATEGORIES.map(c=>`<option value="${c.id}" ${c.id===ch.category_id?'selected':''}>${c.name}</option>`).join('');
-      catSel.addEventListener('change', async ()=>{
-        await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify({category_id: Number(catSel.value)})});
-        ch.category_id = Number(catSel.value);
-        renderCatGrid(); renderChannelCards();
-      });
-      row.appendChild(catSel);
-      const regionSel=document.createElement('select'); regionSel.className='cat-select region-select'; regionSel.title='منطقه‌ی جغرافیایی';
-      regionSel.innerHTML = `<option value="">بدون منطقه</option>` + REGIONS.map(r=>`<option value="${r.id}" ${ch.region_id===r.id?'selected':''}>${r.name}</option>`).join('');
-      regionSel.addEventListener('change', async ()=>{
-        const val = regionSel.value ? Number(regionSel.value) : null;
-        await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify({region_id: val})});
-        ch.region_id = val;
-        renderNewsFeed();
-      });
-      row.appendChild(regionSel);
-      const domainsDetails=document.createElement('details'); domainsDetails.className='chan-row-domains-details';
-      const domainsSummary=document.createElement('summary'); domainsSummary.textContent='بخش‌ها';
-      domainsDetails.appendChild(domainsSummary);
-      const domainsWrap=document.createElement('div'); domainsWrap.className='chan-row-domains';
-      CHAN_DOMAIN_FIELDS.forEach(({field, label, onChange})=>{
-        const lbl=document.createElement('label'); lbl.className='chan-row-news';
-        const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=!!ch[field];
-        chk.addEventListener('change', async ()=>{
-          await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify({[field]: chk.checked})});
-          ch[field] = chk.checked;
-          if(onChange) onChange();
-        });
-        lbl.appendChild(chk);
-        lbl.appendChild(document.createTextNode(label));
-        domainsWrap.appendChild(lbl);
-      });
-      domainsDetails.appendChild(domainsWrap);
-      row.appendChild(domainsDetails);
-      // گروه‌های گالری «یادداشت‌ها» — فقط گروه‌های تبی که کانال عضوشه
-      // (show_in_people → چهره‌ها، show_in_orgs → سازمان‌ها)؛ موقع باز شدن
-      // ساخته می‌شه تا با تیک‌های تازه‌ی «بخش‌ها» هم‌خوان بمونه
-      const groupsDetails=document.createElement('details'); groupsDetails.className='chan-row-domains-details';
-      const groupsSummary=document.createElement('summary'); groupsSummary.textContent='گروه‌ها';
-      groupsDetails.appendChild(groupsSummary);
-      const groupsWrap=document.createElement('div'); groupsWrap.className='chan-row-domains';
-      groupsDetails.appendChild(groupsWrap);
-      groupsDetails.addEventListener('toggle', ()=>{
-        if(!groupsDetails.open) return;
-        const kinds = [ch.show_in_people && 'figures', ch.show_in_orgs && 'orgs'].filter(Boolean);
-        const groups = PROFILE_GROUPS.filter(g=>kinds.includes(g.kind));
-        groupsWrap.innerHTML = '';
-        if(!groups.length){
-          const hint=document.createElement('span'); hint.className='chan-row-news';
-          hint.textContent = kinds.length ? 'هنوز گروهی تعریف نشده' : 'فقط برای کانال‌های «یادداشت»/«تحلیل سازمان‌ها»';
-          groupsWrap.appendChild(hint);
-          return;
-        }
-        groups.forEach(g=>{
-          const lbl=document.createElement('label'); lbl.className='chan-row-news';
-          const chk=document.createElement('input'); chk.type='checkbox';
-          chk.checked = CHANNEL_PROFILE_GROUPS.some(x=>x.channel_id===ch.id && x.group_id===g.id);
-          chk.addEventListener('change', async ()=>{
-            const r = chk.checked
-              ? await api('/channel_profile_groups', {method:'POST', headers:{Prefer:'return=minimal'}, body: JSON.stringify({channel_id: ch.id, group_id: g.id})})
-              : await api('/channel_profile_groups?channel_id=eq.'+ch.id+'&group_id=eq.'+g.id, {method:'DELETE'});
-            if(!r.ok){ chk.checked = !chk.checked; alert('خطایی رخ داد.'); return; }
-            await loadChannelProfileGroups();
-            renderProfileGroupAdmin(); renderPoliticalFigures();
-          });
-          lbl.appendChild(chk);
-          lbl.appendChild(document.createTextNode(g.name + (kinds.length > 1 ? ' ('+PROFILE_GROUP_KIND_LABEL[g.kind]+')' : '')));
-          groupsWrap.appendChild(lbl);
-        });
-      });
-      row.appendChild(groupsDetails);
-      // پروفایل کنشگر (صاحب کانال + تعداد مخاطب) — برای گالری «افراد و
-      // مجموعه‌ها» توی کنشگری مجازی؛ دو فیلد دستی، نه خودکار (بخش
-      // «هوش مصنوعی» رو نگاه کن، هیچ کالکتوری این دو رو زنده نمی‌گیره)
-      const profileDetails=document.createElement('details'); profileDetails.className='chan-row-domains-details';
-      const profileSummary=document.createElement('summary'); profileSummary.textContent='پروفایل';
-      profileDetails.appendChild(profileSummary);
-      const profileWrap=document.createElement('div'); profileWrap.className='chan-row-domains chan-row-profile-fields';
-      const ownerLbl=document.createElement('label'); ownerLbl.appendChild(document.createTextNode('صاحب کانال'));
-      const ownerInput=document.createElement('input'); ownerInput.type='text'; ownerInput.placeholder='نام صاحب کانال'; ownerInput.value=ch.owner_name||'';
-      let ownerSaveTimer;
-      ownerInput.addEventListener('input', e=>{
-        clearTimeout(ownerSaveTimer);
-        const val = e.target.value.trim() || null;
-        ownerSaveTimer = setTimeout(async ()=>{
-          await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify({owner_name: val})});
-          ch.owner_name = val;
-          renderCyberPeopleGrid();
-        }, 600);
-      });
-      ownerLbl.appendChild(ownerInput);
-      profileWrap.appendChild(ownerLbl);
-      const subLbl=document.createElement('label'); subLbl.appendChild(document.createTextNode('تعداد مخاطب'));
-      const subInput=document.createElement('input'); subInput.type='number'; subInput.min='0'; subInput.placeholder='مثلاً ۱۲۰۰۰'; subInput.value = ch.subscriber_count==null ? '' : ch.subscriber_count;
-      let subSaveTimer;
-      subInput.addEventListener('input', e=>{
-        clearTimeout(subSaveTimer);
-        const raw = e.target.value;
-        const val = raw==='' ? null : Number(raw);
-        subSaveTimer = setTimeout(async ()=>{
-          await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify({subscriber_count: val})});
-          ch.subscriber_count = val;
-          renderCyberPeopleGrid();
-        }, 600);
-      });
-      subLbl.appendChild(subInput);
-      profileWrap.appendChild(subLbl);
-      const talabehLbl=document.createElement('label'); talabehLbl.className='chan-row-news';
-      const talabehChk=document.createElement('input'); talabehChk.type='checkbox'; talabehChk.checked=!!ch.is_khorasan_talabeh;
-      talabehChk.addEventListener('change', async ()=>{
-        await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify({is_khorasan_talabeh: talabehChk.checked})});
-        ch.is_khorasan_talabeh = talabehChk.checked;
-        renderCyberPeopleGrid(); renderPosts();
-      });
-      talabehLbl.appendChild(talabehChk);
-      talabehLbl.appendChild(document.createTextNode('طلبه‌ی حوزه‌ی خراسان'));
-      profileWrap.appendChild(talabehLbl);
-      // تیک «اخبار حوزه» فقط برای کانال‌های website معنا داره (تب «اخبار
-      // حوزه» فقط سایت‌های خبری رو نشون می‌ده، نه ایتا/تلگرام/بله)
-      if(ch.platform === 'website'){
-        const hawzaLbl=document.createElement('label'); hawzaLbl.className='chan-row-news';
-        const hawzaChk=document.createElement('input'); hawzaChk.type='checkbox'; hawzaChk.checked=!!ch.show_in_hawza;
-        hawzaChk.addEventListener('change', async ()=>{
-          await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify({show_in_hawza: hawzaChk.checked})});
-          ch.show_in_hawza = hawzaChk.checked;
-          renderNewsFeed();
-        });
-        hawzaLbl.appendChild(hawzaChk);
-        hawzaLbl.appendChild(document.createTextNode('اخبار حوزه'));
-        profileWrap.appendChild(hawzaLbl);
-      }
-      profileDetails.appendChild(profileWrap);
-      row.appendChild(profileDetails);
-      const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف کانال'; del.setAttribute('aria-label','حذف کانال '+(ch.title||ch.username));
-      del.addEventListener('click', ()=> openDeleteChannelModal(ch));
+      const cat = CATEGORIES.find(c=>c.id===ch.category_id);
+      row.innerHTML = `
+        <span class="chan-item-avatar">${chanAvatarHtml(ch)}</span>
+        <div class="chan-item-main">
+          <div class="chan-item-name">${escAttr(ch.title||ch.username)}</div>
+          <div class="chan-item-sub">${escAttr(handleText)} · ${CHAN_PLATFORM_LABEL[ch.platform]||ch.platform}${cat ? ' · '+escAttr(cat.name) : ''}</div>
+        </div>
+        <div class="chan-item-badges">${sections.length
+          ? sections.map(t=>`<span class="chan-badge">${t}</span>`).join('')
+          : '<span class="chan-badge none">در هیچ بخشی نمایش داده نمی‌شود</span>'}</div>
+        <button type="button" class="chan-item-edit">ویرایش</button>`;
+      row.addEventListener('click', ()=> openChanEditor(ch));
+      const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف منبع'; del.setAttribute('aria-label','حذف منبع '+(ch.title||ch.username));
+      del.addEventListener('click', e=>{ e.stopPropagation(); openDeleteChannelModal(ch); });
       row.appendChild(del);
       chanListEl.appendChild(row);
     });
   }
+
+  // ---- پنجره‌ی ویرایش/افزودن منبع (سه مرحله: مشخصات، موضوع، بخش‌ها) ----
+  let CE_CHANNEL = null;      // null = افزودن منبع جدید
+  let CE_AVATAR_FILE = null;  // عکس انتخاب‌شده، تا کلیک «ذخیره» آپلود نمی‌شه
+  const ceEl = id => document.getElementById(id);
+
+  function ceUpdateHandleLabel(){
+    const isWeb = ceEl('ce-platform').value === 'website';
+    ceEl('ce-handle-label').textContent = isWeb ? 'آدرس فید RSS' : 'یوزرنیم کانال (بدون @)';
+    ceEl('ce-handle').placeholder = isWeb ? 'https://example.com/rss' : 'channel_name';
+    ceRenderSections();
+  }
+
+  function ceRenderSections(){
+    const ch = CE_CHANNEL || {};
+    const wrap = ceEl('ce-sections');
+    // وضعیت فعلی تیک‌ها (اگه کاربر قبلاً توی همین پنجره عوض کرده) حفظ بشه
+    const prev = {};
+    wrap.querySelectorAll('[data-ce]').forEach(el=>{ prev[el.dataset.ce] = el.type==='checkbox' ? el.checked : el.value; });
+    const val = (key, fallback)=> key in prev ? prev[key] : fallback;
+    const isWeb = ceEl('ce-platform').value === 'website';
+    const chGroups = ch.id ? CHANNEL_PROFILE_GROUPS.filter(x=>x.channel_id===ch.id).map(x=>x.group_id) : [];
+    const groupsHtml = kind=>{
+      const gs = PROFILE_GROUPS.filter(g=>g.kind===kind);
+      if(!gs.length) return `<p class="ce-hint ce-full">هنوز گروهی برای این بخش تعریف نشده (تنظیمات ← گروه‌های «چهره‌ها» و «سازمان‌ها»).</p>`;
+      return `<div class="ce-full"><label class="ce-sub-label">گروه‌ها (می‌توانید چند گروه انتخاب کنید)</label><div class="ce-groups">${gs.map(g=>
+        `<label class="ce-check"><input type="checkbox" data-ce="group-${g.id}" ${val('group-'+g.id, chGroups.includes(g.id)) ? 'checked' : ''}/>${escAttr(g.name)}</label>`).join('')}</div></div>`;
+    };
+    const extras = {
+      show_in_news: `
+        <div class="field"><label>منطقه‌ی جغرافیایی</label><select data-ce="region_id">
+          <option value="">بدون منطقه</option>${REGIONS.map(r=>`<option value="${r.id}" ${String(val('region_id', ch.region_id||''))===String(r.id)?'selected':''}>${escAttr(r.name)}</option>`).join('')}
+        </select></div>
+        ${isWeb ? `<label class="ce-check ce-full"><input type="checkbox" data-ce="show_in_hawza" ${val('show_in_hawza', !!ch.show_in_hawza)?'checked':''}/>این سایت، خبرگزاری حوزوی است (مطالبش در تب «اخبار حوزه» می‌آید، نه «وب‌سایت‌ها»)</label>` : ''}`,
+      show_in_cyberspace: `
+        <div class="field"><label>صاحب کانال</label><input type="text" data-ce="owner_name" value="${escAttr(val('owner_name', ch.owner_name||''))}" placeholder="نام صاحب کانال" /></div>
+        <div class="field"><label>تعداد مخاطب</label><input type="number" min="0" data-ce="subscriber_count" value="${escAttr(val('subscriber_count', ch.subscriber_count==null?'':ch.subscriber_count))}" placeholder="مثلاً ۱۲۰۰۰" /></div>
+        <label class="ce-check ce-full"><input type="checkbox" data-ce="is_khorasan_talabeh" ${val('is_khorasan_talabeh', !!ch.is_khorasan_talabeh)?'checked':''}/>صاحب کانال، طلبه‌ی حوزه‌ی خراسان است</label>`,
+      show_in_people: groupsHtml('figures'),
+      show_in_orgs: groupsHtml('orgs'),
+    };
+    wrap.innerHTML = CHAN_SECTIONS.map(sec=>{
+      const on = val(sec.field, !!ch[sec.field]);
+      return `<div class="ce-section${on?' on':''}">
+        <label class="ce-section-toggle"><input type="checkbox" data-ce="${sec.field}" ${on?'checked':''}/>
+          <div><b>${sec.label}</b><span>${sec.hint}</span></div></label>
+        <div class="ce-section-extra">${extras[sec.field]}</div>
+      </div>`;
+    }).join('');
+    wrap.querySelectorAll('.ce-section-toggle input').forEach(chk=>{
+      chk.addEventListener('change', ()=> chk.closest('.ce-section').classList.toggle('on', chk.checked));
+    });
+  }
+
+  function openChanEditor(ch){
+    CE_CHANNEL = ch || null;
+    CE_AVATAR_FILE = null;
+    ceEl('ce-title').textContent = ch ? 'ویرایش «' + (ch.title || ch.username) + '»' : 'افزودن منبع جدید';
+    ceEl('ce-name').value = ch ? (ch.title || '') : '';
+    ceEl('ce-handle').value = ch ? (ch.username || '') : '';
+    ceEl('ce-platform').value = ch ? ch.platform : 'eitaa';
+    // بستر منبع ثبت‌شده عوض نمی‌شه (کالکتورها بر اساس همین پست جمع می‌کنن)
+    ceEl('ce-platform').disabled = !!ch;
+    ceEl('ce-avatar-preview').innerHTML = ch ? chanAvatarHtml(ch) : ICONS.photo;
+    ceEl('ce-cat').innerHTML = '<option value="">بدون موضوع</option>' +
+      CATEGORIES.map(c=>`<option value="${c.id}" ${ch && c.id===ch.category_id ? 'selected':''}>${escAttr(c.name)}</option>`).join('');
+    ceEl('ce-sections').innerHTML = '';
+    ceUpdateHandleLabel();
+    ceEl('chan-editor-modal').classList.add('active');
+    ceEl('chan-editor-modal').querySelector('.modal-card').scrollTop = 0;
+  }
+  function closeChanEditor(){
+    ceEl('chan-editor-modal').classList.remove('active');
+    CE_CHANNEL = null; CE_AVATAR_FILE = null;
+  }
+
+  ceEl('ce-platform').addEventListener('change', ceUpdateHandleLabel);
+  ceEl('ce-avatar-input').addEventListener('change', ()=>{
+    const file = ceEl('ce-avatar-input').files[0];
+    if(!file) return;
+    CE_AVATAR_FILE = file;
+    ceEl('ce-avatar-preview').innerHTML = `<img src="${URL.createObjectURL(file)}" alt="" />`;
+  });
+  ceEl('add-chan-btn').addEventListener('click', ()=> openChanEditor(null));
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape' && ceEl('chan-editor-modal').classList.contains('active')) closeChanEditor();
+  });
+
+  ceEl('ce-save-btn').addEventListener('click', async ()=>{
+    const btn = ceEl('ce-save-btn');
+    const ch = CE_CHANNEL;
+    const platform = ceEl('ce-platform').value;
+    const name = ceEl('ce-name').value.trim();
+    const rawHandle = ceEl('ce-handle').value.trim();
+    const handle = platform === 'website' ? rawHandle : rawHandle.replace(/^@/,'');
+    if(!name){ showToast('نام منبع را وارد کنید'); ceEl('ce-name').focus(); return; }
+    if(!handle){ showToast(platform==='website' ? 'آدرس فید RSS را وارد کنید' : 'یوزرنیم کانال را وارد کنید'); ceEl('ce-handle').focus(); return; }
+    const get = key=>{ const el = ceEl('ce-sections').querySelector(`[data-ce="${key}"]`); return el ? (el.type==='checkbox' ? el.checked : el.value) : undefined; };
+    const catVal = ceEl('ce-cat').value;
+    const body = { title:name, username:handle, category_id: catVal ? Number(catVal) : null };
+    CHAN_SECTIONS.forEach(sec=>{ body[sec.field] = !!get(sec.field); });
+    if(body.show_in_news){
+      const reg = get('region_id'); body.region_id = reg ? Number(reg) : null;
+      body.show_in_hawza = platform === 'website' ? !!get('show_in_hawza') : false;
+    }else{
+      body.show_in_hawza = false;
+    }
+    if(body.show_in_cyberspace){
+      body.owner_name = (get('owner_name')||'').trim() || null;
+      const sub = get('subscriber_count'); body.subscriber_count = sub==='' || sub==null ? null : Number(faDigitsToEn(String(sub)));
+      body.is_khorasan_talabeh = !!get('is_khorasan_talabeh');
+    }
+    btn.disabled = true; btn.textContent = 'در حال ذخیره…';
+    try{
+      if(CE_AVATAR_FILE) body.avatar_url = await uploadChannelAvatarFile(CE_AVATAR_FILE);
+      let id = ch && ch.id;
+      if(ch){
+        const r = await api('/channels?id=eq.'+ch.id, {method:'PATCH', body: JSON.stringify(body)});
+        if(!r.ok) throw new Error('patch');
+      }else{
+        body.platform = platform;
+        const r = await api('/channels', {method:'POST', headers:{Prefer:'return=representation'}, body: JSON.stringify(body)});
+        if(!r.ok){ showToast('این منبع از قبل ثبت شده یا خطایی رخ داد'); return; }
+        id = (await r.json())[0].id;
+      }
+      // گروه‌ها: فقط گروه‌های بخش‌هایی که تیکشون خورده؛ بقیه‌ی عضویت‌ها حذف می‌شن
+      const kinds = [body.show_in_people && 'figures', body.show_in_orgs && 'orgs'].filter(Boolean);
+      const wanted = new Set(PROFILE_GROUPS.filter(g=>kinds.includes(g.kind) && get('group-'+g.id)).map(g=>g.id));
+      const current = new Set(CHANNEL_PROFILE_GROUPS.filter(x=>x.channel_id===id).map(x=>x.group_id));
+      const ops = [];
+      wanted.forEach(gid=>{ if(!current.has(gid)) ops.push(api('/channel_profile_groups', {method:'POST', headers:{Prefer:'return=minimal'}, body: JSON.stringify({channel_id:id, group_id:gid})})); });
+      current.forEach(gid=>{ if(!wanted.has(gid)) ops.push(api('/channel_profile_groups?channel_id=eq.'+id+'&group_id=eq.'+gid, {method:'DELETE'})); });
+      await Promise.all(ops);
+      await Promise.all([loadChannels(), loadChannelProfileGroups()]);
+      closeChanEditor();
+      renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
+      renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures(); renderProfileGroupAdmin();
+      showToast(ch ? 'تغییرات ذخیره شد' : 'منبع جدید اضافه شد');
+    }catch(e){
+      showToast('ذخیره ناموفق بود؛ دوباره تلاش کنید');
+    }finally{
+      btn.disabled = false; btn.textContent = 'ذخیره';
+    }
+  });
+
 
   document.getElementById('add-cat-btn').addEventListener('click', async ()=>{
     const el = document.getElementById('new-cat-name');
@@ -5143,10 +5297,14 @@
     PROFILE_GROUPS.forEach(g=>{
       const n = CHANNEL_PROFILE_GROUPS.filter(x=>x.group_id===g.id).length;
       const el=document.createElement('div'); el.className='cat-card';
-      el.innerHTML = `<span class="name"><b>${escAttr(g.name)}</b><div style="font-size:11px;font-weight:500;color:var(--text-faint);margin-top:2px;">${PROFILE_GROUP_KIND_LABEL[g.kind]||g.kind} · ${toFaDigits(n)} کانال</div></span><span class="cc-actions"></span>`;
+      el.innerHTML = `<span class="name"><b class="pg-name">${escAttr(g.name)}</b><div style="font-size:11px;font-weight:500;color:var(--text-faint);margin-top:2px;">${PROFILE_GROUP_KIND_LABEL[g.kind]||g.kind} · ${toFaDigits(n)} منبع</div></span><span class="cc-actions"></span>`;
+      makeRenamable(el.querySelector('.pg-name'), g.name, async val=>{
+        await patchOk('/profile_groups?id=eq.'+g.id, {name: val});
+        await loadProfileGroups(); renderProfileGroupAdmin(); renderPoliticalFigures();
+      });
       const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف گروه'; del.setAttribute('aria-label','حذف گروه '+g.name);
       del.addEventListener('click', async ()=>{
-        if(!confirm('گروه «' + g.name + '» حذف شود؟ (کانال‌ها حذف نمی‌شوند، فقط از این گروه خارج می‌شوند)')) return;
+        if(!confirm('گروه «' + g.name + '» حذف شود؟' + (n ? '\n' + n + ' منبع از این گروه خارج می‌شوند (خود منابع حذف نمی‌شوند).' : ''))) return;
         await api('/profile_groups?id=eq.'+g.id, {method:'DELETE'});
         await Promise.all([loadProfileGroups(), loadChannelProfileGroups()]);
         renderProfileGroupAdmin(); renderPoliticalFigures();
@@ -5361,35 +5519,6 @@
     await loadDossierTopicPosts();
     renderDossierTopicAdminList();
   }
-
-  document.getElementById('add-chan-btn').addEventListener('click', async ()=>{
-    const nameEl = document.getElementById('new-chan-name');
-    const handleEl = document.getElementById('new-chan-handle');
-    const platformEl = document.getElementById('new-chan-platform');
-    const regionEl = document.getElementById('new-chan-region');
-    const showNewsEl = document.getElementById('new-chan-show-news');
-    const showCyberspaceEl = document.getElementById('new-chan-show-cyberspace');
-    const showPeopleEl = document.getElementById('new-chan-show-people');
-    const showOrgsEl = document.getElementById('new-chan-show-orgs');
-    const name = nameEl.value.trim();
-    const rawHandle = handleEl.value.trim();
-    const handle = platformEl.value === 'website' ? rawHandle : rawHandle.replace(/^@/,'');
-    if(!name || !handle) return;
-    const catVal = newChanCatEl.value;
-    const body = {
-      username: handle, title: name, platform: platformEl.value, region_id: regionEl.value ? Number(regionEl.value) : null, category_id: catVal ? Number(catVal) : null,
-      show_in_news: showNewsEl.checked, show_in_cyberspace: showCyberspaceEl.checked, show_in_people: showPeopleEl.checked, show_in_orgs: showOrgsEl.checked,
-    };
-    const r = await api('/channels', {method:'POST', headers:{Prefer:'return=minimal'}, body: JSON.stringify(body)});
-    if(r.ok){
-      nameEl.value=''; handleEl.value=''; regionEl.value='';
-      showNewsEl.checked=false; showCyberspaceEl.checked=false; showPeopleEl.checked=false; showOrgsEl.checked=false;
-      await loadChannels();
-      renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters(); renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); renderPoliticalFigures();
-    }else{
-      alert('این کانال از قبل ثبت شده یا خطایی رخ داد.');
-    }
-  });
 
   // ---- magazines library (بخش تحلیلی) ----
   const MAG_TYPE_LABEL = { pdf:'PDF', images:'چند عکس' };
@@ -5943,14 +6072,48 @@
   }
 
   // ---- settings: password change ----
-  async function changePassword(role){
+  // تغییر رمز در پنجره‌ی اختصاصی (نه prompt مرورگر): رمز پنهان + تکرار برای
+  // جلوگیری از قفل‌شدن مدیر با یک غلط تایپی
+  let PW_ROLE = null;
+  const PW_MIN_LEN = 6;
+  function changePassword(role){
+    PW_ROLE = role;
     const label = role==='admin' ? 'مدیر' : 'بیننده';
-    const newPw = prompt('رمز عبور جدید برای ' + label + ':');
-    if(!newPw) return;
-    const r = await api('/rpc/change_password', {method:'POST', body: JSON.stringify({target_role: role, new_password: newPw})});
-    if(r.ok) showToast('رمز عبور ' + label + ' به‌روزرسانی شد');
-    else alert('فقط مدیر می‌تواند رمز عبور را تغییر دهد.');
+    document.getElementById('pw-modal-title').textContent = 'تغییر رمز ' + label;
+    document.getElementById('pw-modal-warn').textContent = role==='admin'
+      ? 'این رمز برای ورود خود شما به‌عنوان مدیر است؛ آن را جایی امن یادداشت کنید.'
+      : 'همه‌ی کاربرانی که با نقش بیننده وارد می‌شوند باید از رمز جدید استفاده کنند.';
+    ['pw-new','pw-new2'].forEach(id=>{ const el=document.getElementById(id); el.value=''; el.type='password'; });
+    document.getElementById('pw-show').checked = false;
+    document.getElementById('pw-modal-error').textContent = '';
+    document.getElementById('pw-modal').classList.add('active');
+    setTimeout(()=> document.getElementById('pw-new').focus(), 50);
   }
+  function closePwModal(){
+    document.getElementById('pw-modal').classList.remove('active');
+    PW_ROLE = null;
+  }
+  document.getElementById('pw-show').addEventListener('change', e=>{
+    ['pw-new','pw-new2'].forEach(id=> document.getElementById(id).type = e.target.checked ? 'text' : 'password');
+  });
+  document.getElementById('pw-save-btn').addEventListener('click', async ()=>{
+    const pw = document.getElementById('pw-new').value;
+    const pw2 = document.getElementById('pw-new2').value;
+    const err = document.getElementById('pw-modal-error');
+    if(pw.length < PW_MIN_LEN){ err.textContent = 'رمز باید دست‌کم ' + toFaDigits(PW_MIN_LEN) + ' نویسه باشد.'; return; }
+    if(pw !== pw2){ err.textContent = 'رمز و تکرار آن یکسان نیستند.'; return; }
+    const role = PW_ROLE, label = role==='admin' ? 'مدیر' : 'بیننده';
+    const btn = document.getElementById('pw-save-btn');
+    btn.disabled = true;
+    try{
+      const r = await api('/rpc/change_password', {method:'POST', body: JSON.stringify({target_role: role, new_password: pw})});
+      if(r.ok){ closePwModal(); showToast('رمز ' + label + ' تغییر کرد'); }
+      else err.textContent = 'تغییر رمز ناموفق بود؛ فقط مدیر می‌تواند رمز را تغییر دهد.';
+    }finally{ btn.disabled = false; }
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape' && document.getElementById('pw-modal').classList.contains('active')) closePwModal();
+  });
 
   // ---- export ----
   function populateExportFilters(){
