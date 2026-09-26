@@ -718,6 +718,13 @@
   @media (prefers-reduced-motion:reduce){ .pf-logo-card{ animation:none; transition:none; } }
   @media (max-width:560px){ .pf-logo-grid{ grid-template-columns:repeat(2,1fr); gap:20px 10px; } .pf-logo{ width:88px; height:88px; font-size:32px; } }
 
+  .pf-group-chips{ margin:4px 0 18px; }
+  .pf-group-section + .pf-group-section{ margin-top:34px; }
+  .pf-group-title{ display:flex; align-items:center; gap:12px; color:#fff; font-size:15px; font-weight:800; margin:0 0 6px; }
+  .pf-group-title::after{ content:''; flex:1; height:1px; background:linear-gradient(90deg, rgba(234,179,147,0), rgba(234,179,147,0.45)); }
+  .pf-group-title small{ color:rgba(255,255,255,0.45); font-size:12px; font-weight:500; }
+  .pf-feed-groups{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .pf-feed-groups span{ font-size:11px; font-weight:600; padding:3px 10px; border-radius:var(--radius-pill); background:rgba(234,179,147,0.18); color:var(--accent); }
   .pf-feed-head{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
   .pf-feed-identity{ display:flex; align-items:center; gap:14px; }
   .pf-feed-identity .pf-logo{ width:64px; height:64px; font-size:24px; }
@@ -1811,6 +1818,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
             </div>
           </div>
+          <div class="news-topic-chips pf-group-chips" id="pf-group-row" style="display:none;"></div>
           <p class="posts-empty" id="pf-gallery-empty" style="display:none;"></p>
           <div class="pf-logo-grid" id="pf-logo-grid"></div>
         </div>
@@ -2120,6 +2128,20 @@
               <div id="dossier-topic-admin-list"></div>
             </details>
           </div>
+
+          <details class="panel settings-accordion">
+            <summary class="panel-head"><span class="panel-pill">گروه‌های «چهره‌ها» و «سازمان‌ها»</span></summary>
+            <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">گروه‌بندی گالری لوگوی دو تب بخش «یادداشت‌ها» (مثل حزب ۱ / حزب ۲). گروه‌های هر تب جدا تعریف می‌شن. عضویت هر کانال در گروه‌ها از دراپ‌داون «گروه‌ها» توی ردیف همون کانال (مدیریت کانال‌ها) تنظیم می‌شه؛ هر کانال می‌تونه عضو چند گروه باشه.</p>
+            <div class="add-row">
+              <input type="text" id="new-profile-group-name" placeholder="نام گروه (مثل حزب ۱)" />
+              <select id="new-profile-group-kind">
+                <option value="figures">چهره‌ها و فعالان سیاسی</option>
+                <option value="orgs">تحلیل سازمان‌ها</option>
+              </select>
+              <button class="btn primary" id="add-profile-group-btn">افزودن گروه</button>
+            </div>
+            <div class="cat-grid" id="profile-group-grid"></div>
+          </details>
 
           <div class="settings-row-2col">
             <details class="panel settings-accordion">
@@ -2601,6 +2623,8 @@
   let CHANNELS = [];    // {id, platform, username, title, type, category_id, active}
   let CATEGORIES = [];  // {id, name, color}
   let REGIONS = [];     // {id, name}
+  let PROFILE_GROUPS = []; // {id, name, kind:'figures'|'orgs', sort_order} — گروه‌های گالری «یادداشت‌ها»
+  let CHANNEL_PROFILE_GROUPS = []; // {id, channel_id, group_id} — عضویت چندگانه‌ی کانال در گروه‌ها
   let NEWS_TOPICS = []; // {id, name, keywords, sort_order} — موضوعات جستجوی ذخیره‌شده («اخبار رسمی»)
   let DOSSIER_TOPICS = []; // {id, name, keywords, active, sort_order} — موضوعات موقت «پرونده‌های موضوعی»
   let DOSSIER_TOPIC_POSTS = []; // {id, topic_id, post_id, source, excluded} — پست‌های منتسب به هر موضوع
@@ -3563,6 +3587,14 @@
     const r = await api('/regions?select=*&order=id.asc');
     REGIONS = r.ok ? await r.json() : [];
   }
+  async function loadProfileGroups(){
+    const r = await api('/profile_groups?select=*&order=sort_order.asc,id.asc');
+    PROFILE_GROUPS = r.ok ? await r.json() : [];
+  }
+  async function loadChannelProfileGroups(){
+    const r = await api('/channel_profile_groups?select=id,channel_id,group_id');
+    CHANNEL_PROFILE_GROUPS = r.ok ? await r.json() : [];
+  }
   async function loadNewsTopics(){
     const r = await api('/news_topics?select=*&order=sort_order.asc');
     NEWS_TOPICS = r.ok ? await r.json() : [];
@@ -3759,7 +3791,7 @@
     // کوئری اضافه‌ی پشت‌سرهم داخل خودِ loadPosts (loadHawzaPosts/
     // loadClaimsPosts) این تأخیر برای زمان ورود به سایت محسوس شده بود
     // (بخش «سرعت ورود» CLAUDE.md رو ببین).
-    await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadPosts()]);
+    await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadProfileGroups(), loadChannelProfileGroups(), loadPosts()]);
     renderDashHeroStats();
     renderChannelCards();
     populatePostFilters();
@@ -3775,6 +3807,7 @@
     renderNewsRegionChips();
     renderNewsTopicRow();
     renderTopicGrid();
+    renderProfileGroupAdmin();
     renderDossierTopicAdminList();
     renderChanList();
     renderMagazines();
@@ -4314,8 +4347,15 @@
     return CHANNELS.filter(c=>c[field]);
   }
 
+  let pfGroupFilter = null; // id گروه انتخاب‌شده در ردیف چیپ‌ها (null = همه)
+
+  function pfGroupsOfKind(){ return PROFILE_GROUPS.filter(g=>g.kind === pfMode); }
+  function pfGroupIdsOf(channelId){
+    return CHANNEL_PROFILE_GROUPS.filter(x=>x.channel_id === channelId).map(x=>x.group_id);
+  }
+
   function setPfMode(mode){
-    if(pfMode !== mode){ pfMode = mode; pfSelectedChannel = null; }
+    if(pfMode !== mode){ pfMode = mode; pfSelectedChannel = null; pfGroupFilter = null; }
     if(pfGallerySearchEl) pfGallerySearchEl.value = '';
     renderPoliticalFigures();
   }
@@ -4363,7 +4403,7 @@
     }
     empty.style.display = channels.length ? 'none' : 'block';
     const unit = pfMode === 'orgs' ? 'مطلب' : 'یادداشت';
-    grid.innerHTML = channels.map((ch,i)=>{
+    const cardHtml = (ch,i)=>{
       const st = stats[ch.id];
       const meta = st ? `${toFaDigits(st.n)} ${unit} · ${newsRelTime(st.last)}` : `بدون ${unit} اخیر`;
       return `<button type="button" class="pf-logo-card" data-ch="${ch.id}" style="animation-delay:${Math.min(i,12)*30}ms" title="مشاهده‌ی مطالب ${escAttr(ch.title||ch.username)}">
@@ -4371,7 +4411,35 @@
           <span class="pf-logo-name">${escAttr(ch.title||ch.username)}</span>
           <span class="pf-logo-meta">${meta}</span>
         </button>`;
-    }).join('');
+    };
+    // گروه‌ها: ردیف چیپ («همه» + گروه‌های همین تب)؛ در حالت «همه» لوگوها
+    // زیر تیتر هر گروه بخش‌بخش می‌شن (کانال چندگروهه توی هر گروهش تکرار
+    // می‌شه) + بخش «سایر» برای بدون‌گروه‌ها؛ با انتخاب یه گروه فقط همون
+    const groups = pfGroupsOfKind();
+    if(pfGroupFilter && !groups.some(g=>g.id===pfGroupFilter)) pfGroupFilter = null;
+    const chipRow = document.getElementById('pf-group-row');
+    chipRow.style.display = groups.length ? '' : 'none';
+    chipRow.innerHTML = [`<button type="button" class="news-topic-chip${pfGroupFilter ? '' : ' active'}" data-group="">همه</button>`]
+      .concat(groups.map(g=>`<button type="button" class="news-topic-chip${pfGroupFilter===g.id ? ' active' : ''}" data-group="${g.id}">${escAttr(g.name)}</button>`)).join('');
+    const inGroup = (ch, gid)=> pfGroupIdsOf(ch.id).includes(gid);
+    let visible = channels;
+    if(pfGroupFilter) visible = channels.filter(ch=>inGroup(ch, pfGroupFilter));
+    empty.style.display = visible.length ? 'none' : 'block';
+    if(pfGroupFilter && channels.length && !visible.length) empty.textContent = 'موردی در این گروه نیست.';
+    if(pfGroupFilter || !groups.length){
+      grid.className = 'pf-logo-grid';
+      grid.innerHTML = visible.map(cardHtml).join('');
+      return;
+    }
+    grid.className = '';
+    const sections = groups.map(g=>({title:g.name, items:channels.filter(ch=>inGroup(ch, g.id))}));
+    const groupIds = new Set(groups.map(g=>g.id));
+    sections.push({title:'سایر', items:channels.filter(ch=>!pfGroupIdsOf(ch.id).some(id=>groupIds.has(id)))});
+    grid.innerHTML = sections.filter(sec=>sec.items.length).map(sec=>`
+      <div class="pf-group-section">
+        <h4 class="pf-group-title">${escAttr(sec.title)} <small>${toFaDigits(sec.items.length)}</small></h4>
+        <div class="pf-logo-grid">${sec.items.map(cardHtml).join('')}</div>
+      </div>`).join('');
   }
 
   function openPfChannel(id){
@@ -4396,6 +4464,12 @@
   const pfBackBtnEl = document.getElementById('pf-back-btn');
   if(pfBackBtnEl) pfBackBtnEl.addEventListener('click', closePfChannel);
   if(pfGallerySearchEl) pfGallerySearchEl.addEventListener('input', renderPfGallery);
+  const pfGroupRowEl = document.getElementById('pf-group-row');
+  if(pfGroupRowEl) pfGroupRowEl.addEventListener('click', e=>{
+    const chip = e.target.closest('.news-topic-chip'); if(!chip) return;
+    pfGroupFilter = chip.dataset.group ? Number(chip.dataset.group) : null;
+    renderPfGallery();
+  });
 
   function filteredPoliticalFigurePosts(){
     const timeFilter = pfFilterTimeEl ? pfFilterTimeEl.value : '';
@@ -4425,7 +4499,9 @@
     const url = pfChannelUrl(selCh);
     document.getElementById('pf-feed-identity').innerHTML = `${pfLogoHtml(selCh)}
       <div><h3>${escAttr(selCh.title||selCh.username)}</h3>
-      ${url ? `<a href="${escAttr(url)}" target="_blank" rel="noopener">${NEWS_PLATFORM_LABEL[selCh.platform]||selCh.platform} ↗</a>` : ''}</div>`;
+      ${url ? `<a href="${escAttr(url)}" target="_blank" rel="noopener">${NEWS_PLATFORM_LABEL[selCh.platform]||selCh.platform} ↗</a>` : ''}
+      ${(()=>{ const names = pfGroupsOfKind().filter(g=>pfGroupIdsOf(selCh.id).includes(g.id)).map(g=>`<span>${escAttr(g.name)}</span>`);
+        return names.length ? `<div class="pf-feed-groups">${names.join('')}</div>` : ''; })()}</div>`;
     const filtered = filteredPoliticalFigurePosts();
     pfEmpty.style.display = filtered.length ? 'none' : 'block';
     const list = filtered.slice(0,150);
@@ -4899,6 +4975,43 @@
       });
       domainsDetails.appendChild(domainsWrap);
       row.appendChild(domainsDetails);
+      // گروه‌های گالری «یادداشت‌ها» — فقط گروه‌های تبی که کانال عضوشه
+      // (show_in_people → چهره‌ها، show_in_orgs → سازمان‌ها)؛ موقع باز شدن
+      // ساخته می‌شه تا با تیک‌های تازه‌ی «بخش‌ها» هم‌خوان بمونه
+      const groupsDetails=document.createElement('details'); groupsDetails.className='chan-row-domains-details';
+      const groupsSummary=document.createElement('summary'); groupsSummary.textContent='گروه‌ها';
+      groupsDetails.appendChild(groupsSummary);
+      const groupsWrap=document.createElement('div'); groupsWrap.className='chan-row-domains';
+      groupsDetails.appendChild(groupsWrap);
+      groupsDetails.addEventListener('toggle', ()=>{
+        if(!groupsDetails.open) return;
+        const kinds = [ch.show_in_people && 'figures', ch.show_in_orgs && 'orgs'].filter(Boolean);
+        const groups = PROFILE_GROUPS.filter(g=>kinds.includes(g.kind));
+        groupsWrap.innerHTML = '';
+        if(!groups.length){
+          const hint=document.createElement('span'); hint.className='chan-row-news';
+          hint.textContent = kinds.length ? 'هنوز گروهی تعریف نشده' : 'فقط برای کانال‌های «یادداشت»/«تحلیل سازمان‌ها»';
+          groupsWrap.appendChild(hint);
+          return;
+        }
+        groups.forEach(g=>{
+          const lbl=document.createElement('label'); lbl.className='chan-row-news';
+          const chk=document.createElement('input'); chk.type='checkbox';
+          chk.checked = CHANNEL_PROFILE_GROUPS.some(x=>x.channel_id===ch.id && x.group_id===g.id);
+          chk.addEventListener('change', async ()=>{
+            const r = chk.checked
+              ? await api('/channel_profile_groups', {method:'POST', headers:{Prefer:'return=minimal'}, body: JSON.stringify({channel_id: ch.id, group_id: g.id})})
+              : await api('/channel_profile_groups?channel_id=eq.'+ch.id+'&group_id=eq.'+g.id, {method:'DELETE'});
+            if(!r.ok){ chk.checked = !chk.checked; alert('خطایی رخ داد.'); return; }
+            await loadChannelProfileGroups();
+            renderProfileGroupAdmin(); renderPoliticalFigures();
+          });
+          lbl.appendChild(chk);
+          lbl.appendChild(document.createTextNode(g.name + (kinds.length > 1 ? ' ('+PROFILE_GROUP_KIND_LABEL[g.kind]+')' : '')));
+          groupsWrap.appendChild(lbl);
+        });
+      });
+      row.appendChild(groupsDetails);
       // پروفایل کنشگر (صاحب کانال + تعداد مخاطب) — برای گالری «افراد و
       // مجموعه‌ها» توی کنشگری مجازی؛ دو فیلد دستی، نه خودکار (بخش
       // «هوش مصنوعی» رو نگاه کن، هیچ کالکتوری این دو رو زنده نمی‌گیره)
@@ -5014,6 +5127,43 @@
       nameEl.value=''; kwEl.value='';
       await loadNewsTopics();
       renderTopicGrid(); renderNewsTopicRow();
+    }else{
+      alert('خطایی رخ داد.');
+    }
+  });
+
+  // ---- گروه‌های گالری «یادداشت‌ها» (چهره‌ها / سازمان‌ها) ----
+  const PROFILE_GROUP_KIND_LABEL = { figures:'چهره‌ها', orgs:'سازمان‌ها' };
+  function renderProfileGroupAdmin(){
+    const grid = document.getElementById('profile-group-grid');
+    if(!grid) return;
+    grid.innerHTML = '';
+    PROFILE_GROUPS.forEach(g=>{
+      const n = CHANNEL_PROFILE_GROUPS.filter(x=>x.group_id===g.id).length;
+      const el=document.createElement('div'); el.className='cat-card';
+      el.innerHTML = `<span class="name"><b>${escAttr(g.name)}</b><div style="font-size:11px;font-weight:500;color:var(--text-faint);margin-top:2px;">${PROFILE_GROUP_KIND_LABEL[g.kind]||g.kind} · ${toFaDigits(n)} کانال</div></span><span class="cc-actions"></span>`;
+      const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف گروه'; del.setAttribute('aria-label','حذف گروه '+g.name);
+      del.addEventListener('click', async ()=>{
+        if(!confirm('گروه «' + g.name + '» حذف شود؟ (کانال‌ها حذف نمی‌شوند، فقط از این گروه خارج می‌شوند)')) return;
+        await api('/profile_groups?id=eq.'+g.id, {method:'DELETE'});
+        await Promise.all([loadProfileGroups(), loadChannelProfileGroups()]);
+        renderProfileGroupAdmin(); renderPoliticalFigures();
+      });
+      el.querySelector('.cc-actions').appendChild(del);
+      grid.appendChild(el);
+    });
+  }
+
+  document.getElementById('add-profile-group-btn').addEventListener('click', async ()=>{
+    const nameEl = document.getElementById('new-profile-group-name');
+    const kind = document.getElementById('new-profile-group-kind').value;
+    const name = nameEl.value.trim();
+    if(!name) return;
+    const r = await api('/profile_groups', {method:'POST', headers:{Prefer:'return=minimal'}, body: JSON.stringify({name, kind, sort_order: PROFILE_GROUPS.length})});
+    if(r.ok){
+      nameEl.value='';
+      await loadProfileGroups();
+      renderProfileGroupAdmin(); renderPoliticalFigures();
     }else{
       alert('خطایی رخ داد.');
     }
