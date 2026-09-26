@@ -1206,6 +1206,24 @@
 
   /* settings */
   .settings-grid{ display:flex; flex-direction:column; gap:16px; }
+  .settings-group-title{ color:#fff; font-size:15px; font-weight:800; margin:18px 0 -4px; display:flex; align-items:center; gap:12px; }
+  .settings-group-title:first-child{ margin-top:0; }
+  .settings-group-title::after{ content:''; flex:1; height:1px; background:linear-gradient(90deg, rgba(234,179,147,0), rgba(234,179,147,0.45)); }
+  .settings-accordion > summary.panel-head{ gap:12px; }
+  .settings-sum-desc{ flex:1; font-size:12px; color: var(--text-faint); line-height:1.6; }
+  @media (max-width:640px){ .settings-accordion > summary.panel-head{ flex-wrap:wrap; } .settings-sum-desc{ order:3; flex-basis:100%; } }
+  .settings-help{ font-size:12px; color: var(--text-dim); margin:0 0 12px; line-height:1.8; }
+  .cat-card .name.renamable, .cat-card .pg-name.renamable{ cursor:text; border-bottom:1px dashed transparent; }
+  .cat-card .name.renamable:hover, .cat-card .pg-name.renamable:hover{ border-bottom-color: var(--accent-strong); }
+  .rename-input{ width:100%; font:inherit; font-size:12.5px; padding:4px 6px; border:1px solid var(--accent-strong); border-radius:6px; background: var(--surface); color: var(--text); }
+  .cat-card .count{ font-family:inherit !important; font-size:11px !important; color: var(--text-faint) !important; font-weight:600 !important; white-space:nowrap; }
+  .pw-item-note{ font-size:11.5px; color: var(--text-faint); font-weight:400; }
+  .pw-modal-card{ max-width:440px; }
+  .pw-modal-card .field{ margin-bottom:12px; }
+  .pw-modal-card .field label{ display:block; font-size:12px; font-weight:600; color: var(--text-dim); margin-bottom:5px; }
+  .pw-modal-card .field input{ width:100%; box-sizing:border-box; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius:8px; font:inherit; font-size:14px; direction:ltr; text-align:left; }
+  .pw-modal-warn{ font-size:12.5px !important; background: rgba(234,179,147,0.18); color: var(--accent-strong) !important; padding:9px 12px; border-radius:8px; margin-bottom:14px; }
+  .pw-modal-error{ font-size:12.5px !important; color: var(--danger) !important; min-height:20px; margin:8px 0 4px !important; }
   .settings-row-2col{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
   .settings-row-2col > .panel{ margin-bottom:0; }
   @media (max-width:900px){ .settings-row-2col{ grid-template-columns:1fr; } }
@@ -1441,6 +1459,24 @@
         <div style="display:flex; gap:10px; margin-top:18px;">
           <button class="btn" onclick="closeDeleteChannelModal()" style="flex:1;">انصراف</button>
           <button class="btn danger" id="confirm-delete-channel-btn" style="flex:1;">حذف قطعی</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="pw-modal" onclick="if(event.target===this) closePwModal()">
+      <div class="modal-card pw-modal-card">
+        <button class="modal-close" onclick="closePwModal()" aria-label="بستن">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <h3 id="pw-modal-title">تغییر رمز</h3>
+        <p class="pw-modal-warn" id="pw-modal-warn"></p>
+        <div class="field"><label>رمز جدید</label><input type="password" id="pw-new" autocomplete="new-password" /></div>
+        <div class="field"><label>تکرار رمز جدید</label><input type="password" id="pw-new2" autocomplete="new-password" /></div>
+        <label class="ce-check"><input type="checkbox" id="pw-show" /> نمایش رمز</label>
+        <p class="pw-modal-error" id="pw-modal-error"></p>
+        <div class="ce-actions">
+          <button class="btn" type="button" onclick="closePwModal()">انصراف</button>
+          <button class="btn primary" type="button" id="pw-save-btn">ذخیره‌ی رمز جدید</button>
         </div>
       </div>
     </div>
@@ -2150,9 +2186,10 @@
     <!-- SETTINGS -->
     <section class="section" id="sec-settings">
       <div class="settings-grid">
+          <h3 class="settings-group-title">منابع</h3>
           <details class="panel settings-accordion" open>
-            <summary class="panel-head"><span class="panel-pill">مدیریت کانال‌ها</span></summary>
-            <p class="chan-intro">هر کانال یا سایت خبری یک «منبع» است. با کلیک روی هر منبع، مشخصات و محل نمایشش در سایت را ویرایش کنید.</p>
+            <summary class="panel-head"><span class="panel-pill">مدیریت منابع</span><span class="settings-sum-desc">کانال‌ها و سایت‌هایی که سامانه از آن‌ها مطلب جمع می‌کند، و محل نمایش هرکدام در سایت</span></summary>
+            <p class="chan-intro">با کلیک روی هر منبع، مشخصات و بخش‌هایی از سایت که در آن نمایش داده می‌شود را ویرایش کنید.</p>
             <div class="chan-toolbar">
               <button class="btn primary" id="add-chan-btn" type="button">+ افزودن منبع جدید</button>
               <input type="text" id="chan-search" placeholder="جست‌وجو در نام یا آدرس…" />
@@ -2169,17 +2206,18 @@
             <div id="chan-list"></div>
           </details>
 
+          <h3 class="settings-group-title">برچسب‌های منابع</h3>
           <div class="settings-row-2col">
             <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">دسته‌بندی‌ها</span></summary>
+              <summary class="panel-head"><span class="panel-pill">موضوع منابع</span><span class="settings-sum-desc">در فیلتر «دسته‌بندی» و ستون «موضوع» جدول کنشگران</span></summary>
               <div class="add-row">
-                <input type="text" id="new-cat-name" placeholder="نام دسته‌بندی جدید" />
-                <button class="btn primary" id="add-cat-btn">افزودن دسته</button>
+                <input type="text" id="new-cat-name" placeholder="نام موضوع جدید (مثلاً اقتصادی)" />
+                <button class="btn primary" id="add-cat-btn">افزودن موضوع</button>
               </div>
               <div class="cat-grid" id="cat-grid"></div>
             </details>
             <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">مناطق جغرافیایی</span></summary>
+              <summary class="panel-head"><span class="panel-pill">منطقه‌های جغرافیایی</span><span class="settings-sum-desc">در فیلتر «منطقه» تب‌های اخبار</span></summary>
               <div class="add-row">
                 <input type="text" id="new-region-name" placeholder="نام منطقه‌ی جدید" />
                 <button class="btn primary" id="add-region-btn">افزودن منطقه</button>
@@ -2188,32 +2226,9 @@
             </details>
           </div>
 
-          <div class="settings-row-2col">
-            <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">موضوعات جستجوی ذخیره‌شده</span></summary>
-              <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">هر موضوع یه اسم و یه لیست کلیدواژه (جدا با ویرگول) داره؛ توی تب‌های «شبکه‌های اجتماعی»/«وب‌سایت‌ها»/«ادعاها و شایعات» با کلیک روی موضوع، پست‌هایی که حداقل یکی از کلیدواژه‌ها رو توی عنوان/متنشون دارن نشون داده می‌شن.</p>
-              <div class="add-row">
-                <input type="text" id="new-topic-name" placeholder="نام موضوع (مثل سیاسی)" />
-                <input type="text" id="new-topic-keywords" placeholder="کلیدواژه‌ها، جدا با ویرگول" />
-                <button class="btn primary" id="add-topic-btn">افزودن موضوع</button>
-              </div>
-              <div class="cat-grid" id="topic-grid"></div>
-            </details>
-            <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">موضوعات «پرونده‌های موضوعی»</span></summary>
-              <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">موضوعات موقت/چرخشی که تب «پرونده‌های موضوعی» (بخش «اخبار و رویدادها») نشون می‌ده. هر موضوع یه لیست کلیدواژه (جدا با ویرگول) داره که با کلیدواژه‌ی هوش مصنوعی هر پست تطبیق داده می‌شه (هر ۲ ساعت خودکار). فقط موضوعات فعال به بیننده نشون داده می‌شن؛ غیرفعال‌کردن یه موضوع، پست‌هاش رو حذف نمی‌کنه (برای استفاده‌ی دوباره‌ی بعدی).</p>
-              <div class="add-row">
-                <input type="text" id="new-dossier-topic-name" placeholder="نام موضوع (مثل مذاکرات هسته‌ای)" />
-                <input type="text" id="new-dossier-topic-keywords" placeholder="کلیدواژه‌ها، جدا با ویرگول" />
-                <button class="btn primary" id="add-dossier-topic-btn">افزودن موضوع</button>
-              </div>
-              <div id="dossier-topic-admin-list"></div>
-            </details>
-          </div>
-
           <details class="panel settings-accordion">
-            <summary class="panel-head"><span class="panel-pill">گروه‌های «چهره‌ها» و «سازمان‌ها»</span></summary>
-            <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">گروه‌بندی گالری لوگوی دو تب بخش «یادداشت‌ها» (مثل حزب ۱ / حزب ۲). گروه‌های هر تب جدا تعریف می‌شن. عضویت هر کانال در گروه‌ها از دراپ‌داون «گروه‌ها» توی ردیف همون کانال (مدیریت کانال‌ها) تنظیم می‌شه؛ هر کانال می‌تونه عضو چند گروه باشه.</p>
+            <summary class="panel-head"><span class="panel-pill">گروه‌های چهره‌ها و سازمان‌ها</span><span class="settings-sum-desc">گروه‌بندی گالری لوگوها در بخش «یادداشت‌ها»</span></summary>
+            <p class="settings-help">گروه‌ها (مثل حزب ۱ / حزب ۲) برای هر تب جداگانه تعریف می‌شوند. عضویت هر منبع در گروه‌ها از پنجره‌ی ویرایش همان منبع تنظیم می‌شود و هر منبع می‌تواند عضو چند گروه باشد.</p>
             <div class="add-row">
               <input type="text" id="new-profile-group-name" placeholder="نام گروه (مثل حزب ۱)" />
               <select id="new-profile-group-kind">
@@ -2224,34 +2239,43 @@
             </div>
             <div class="cat-grid" id="profile-group-grid"></div>
           </details>
-
+          <h3 class="settings-group-title">اخبار</h3>
           <div class="settings-row-2col">
             <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">رمزهای عبور</span></summary>
-              <div class="pw-item">
-                <div class="pw-item-head"><b>رمز مدیر</b><span class="role admin">مدیر</span></div>
-                <div class="pw-item-body">
-                  <input type="password" value="••••••••" disabled />
-                  <button class="btn" onclick="changePassword('admin')">تغییر رمز</button>
-                </div>
+              <summary class="panel-head"><span class="panel-pill">میان‌برهای جست‌وجوی وب‌سایت‌ها</span><span class="settings-sum-desc">دکمه‌های جست‌وجوی آماده در تب «وب‌سایت‌ها»</span></summary>
+              <p class="settings-help">هر میان‌بر یک نام و چند کلیدواژه (جدا با ویرگول) دارد. در تب «وب‌سایت‌ها»، با کلیک روی میان‌بر، مطالبی نمایش داده می‌شوند که دست‌کم یکی از کلیدواژه‌ها را در عنوان یا متن داشته باشند.</p>
+              <div class="add-row">
+                <input type="text" id="new-topic-name" placeholder="نام میان‌بر (مثلاً انتخابات)" />
+                <input type="text" id="new-topic-keywords" placeholder="کلیدواژه‌ها، جدا با ویرگول" />
+                <button class="btn primary" id="add-topic-btn">افزودن میان‌بر</button>
               </div>
-              <div class="pw-item">
-                <div class="pw-item-head"><b>رمز بیننده</b><span class="role">بیننده</span></div>
-                <div class="pw-item-body">
-                  <input type="password" value="••••••••" disabled />
-                  <button class="btn" onclick="changePassword('viewer')">تغییر رمز</button>
-                </div>
-              </div>
+              <div class="cat-grid" id="topic-grid"></div>
             </details>
             <details class="panel settings-accordion">
-              <summary class="panel-head"><span class="panel-pill">اتصال داده</span></summary>
-              <div class="kv">
-                <div><b>منبع فعلی</b><span>gist raw json</span></div>
-                <div><b>مقصد بعدی</b><span>postgrest / vps</span></div>
-                <div><b>احراز هویت</b><span>pgcrypto + pgjwt</span></div>
+              <summary class="panel-head"><span class="panel-pill">پرونده‌های موضوعی</span><span class="settings-sum-desc">موضوعات تب «پرونده‌های موضوعی»</span></summary>
+              <p class="settings-help">موضوعات موقت که هر چند روز یک‌بار عوض می‌شوند. کلیدواژه‌های هر موضوع (جدا با ویرگول) هر ۲ ساعت با کلیدواژه‌های هوش مصنوعی مطالب تازه تطبیق داده می‌شوند. فقط موضوعات فعال به بیننده نمایش داده می‌شوند؛ غیرفعال‌کردن یک موضوع، مطالبش را حذف نمی‌کند.</p>
+              <div class="add-row">
+                <input type="text" id="new-dossier-topic-name" placeholder="نام موضوع (مثل مذاکرات هسته‌ای)" />
+                <input type="text" id="new-dossier-topic-keywords" placeholder="کلیدواژه‌ها، جدا با ویرگول" />
+                <button class="btn primary" id="add-dossier-topic-btn">افزودن موضوع</button>
               </div>
+              <div id="dossier-topic-admin-list"></div>
             </details>
           </div>
+
+
+          <h3 class="settings-group-title">امنیت</h3>
+          <details class="panel settings-accordion">
+            <summary class="panel-head"><span class="panel-pill">رمزهای عبور</span><span class="settings-sum-desc">رمز ورود نقش‌های مدیر و بیننده</span></summary>
+            <div class="pw-item">
+              <div class="pw-item-head"><b>رمز مدیر</b><span class="role admin">مدیر</span><span class="pw-item-note">دسترسی کامل، شامل همین صفحه</span></div>
+              <button class="btn" type="button" onclick="changePassword('admin')">تغییر رمز مدیر</button>
+            </div>
+            <div class="pw-item">
+              <div class="pw-item-head"><b>رمز بیننده</b><span class="role">بیننده</span><span class="pw-item-note">فقط مشاهده‌ی سایت</span></div>
+              <button class="btn" type="button" onclick="changePassword('viewer')">تغییر رمز بیننده</button>
+            </div>
+          </details>
       </div>
     </section>
 
@@ -4925,15 +4949,48 @@
   function refreshCatOptions(){}
   function refreshRegionOptions(){}
 
+  // تغییر نام درجا برای کارت‌های موضوع/منطقه/گروه: کلیک روی نام → کادر
+  // ویرایش؛ Enter یا خروج از کادر ذخیره می‌کند، Esc لغو
+  function makeRenamable(nameEl, current, save){
+    nameEl.classList.add('renamable');
+    nameEl.title = 'برای تغییر نام کلیک کنید';
+    nameEl.addEventListener('click', ()=>{
+      if(nameEl.querySelector('input')) return;
+      const inp = document.createElement('input'); inp.type='text'; inp.value=current; inp.className='rename-input';
+      nameEl.innerHTML=''; nameEl.appendChild(inp); inp.focus(); inp.select();
+      let done = false;
+      const finish = async commit=>{
+        if(done) return; done = true;
+        const val = inp.value.trim();
+        if(commit && val && val !== current){
+          try{ await save(val); showToast('نام تغییر کرد'); }
+          catch(e){ showToast('تغییر نام ناموفق بود'); }
+        }else{
+          nameEl.textContent = current;
+        }
+      };
+      inp.addEventListener('keydown', e=>{ if(e.key==='Enter') finish(true); if(e.key==='Escape'){ e.stopPropagation(); finish(false); } });
+      inp.addEventListener('blur', ()=> finish(true));
+    });
+  }
+  async function patchOk(path, body){
+    const r = await api(path, {method:'PATCH', body: JSON.stringify(body)});
+    if(!r.ok) throw new Error('patch');
+  }
+
   function renderRegionGrid(){
     regionGridEl.innerHTML = '';
     REGIONS.forEach(r=>{
       const count = CHANNELS.filter(ch=>ch.region_id===r.id).length;
       const el=document.createElement('div'); el.className='cat-card';
-      el.innerHTML = `<span class="name">${r.name}</span><span class="cc-actions"><span class="count mono">${count}</span></span>`;
+      el.innerHTML = `<span class="name">${escAttr(r.name)}</span><span class="cc-actions"><span class="count mono" title="تعداد منابع">${toFaDigits(count)} منبع</span></span>`;
+      makeRenamable(el.querySelector('.name'), r.name, async val=>{
+        await patchOk('/regions?id=eq.'+r.id, {name: val});
+        await loadRegions(); renderRegionGrid(); renderNewsRegionChips(); renderNewsFeed();
+      });
       const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف منطقه'; del.setAttribute('aria-label','حذف منطقه‌ی '+r.name);
       del.addEventListener('click', async ()=>{
-        if(!confirm('این منطقه حذف شود؟')) return;
+        if(!confirm('منطقه‌ی «' + r.name + '» حذف شود؟' + (count ? '\n' + count + ' منبع بدون منطقه می‌شوند.' : ''))) return;
         await api('/regions?id=eq.'+r.id, {method:'DELETE'});
         await loadRegions(); await loadChannels();
         refreshRegionOptions(); renderRegionGrid(); renderNewsRegionChips(); renderChanList(); renderNewsFeed();
@@ -4948,10 +5005,14 @@
     CATEGORIES.forEach(c=>{
       const count = CHANNELS.filter(ch=>ch.category_id===c.id).length;
       const el=document.createElement('div'); el.className='cat-card';
-      el.innerHTML = `<span class="name">${c.name}</span><span class="cc-actions"><span class="count mono">${count}</span></span>`;
-      const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف دسته‌بندی'; del.setAttribute('aria-label','حذف دسته‌بندی '+c.name);
+      el.innerHTML = `<span class="name">${escAttr(c.name)}</span><span class="cc-actions"><span class="count mono" title="تعداد منابع">${toFaDigits(count)} منبع</span></span>`;
+      makeRenamable(el.querySelector('.name'), c.name, async val=>{
+        await patchOk('/categories?id=eq.'+c.id, {name: val});
+        await loadCategories(); renderCatGrid(); renderChanList(); renderCyberPeopleGrid(); populatePostFilters(); populateExportFilters();
+      });
+      const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف موضوع'; del.setAttribute('aria-label','حذف موضوع '+c.name);
       del.addEventListener('click', async ()=>{
-        if(!confirm('این دسته‌بندی حذف شود؟')) return;
+        if(!confirm('موضوع «' + c.name + '» حذف شود؟' + (count ? '\n' + count + ' منبع بدون موضوع می‌شوند.' : ''))) return;
         await api('/categories?id=eq.'+c.id, {method:'DELETE'});
         await loadCategories(); await loadChannels();
         refreshCatOptions(); renderCatGrid(); renderChanList(); renderChannelCards(); renderCyberPeopleGrid(); populatePostFilters(); populateExportFilters();
@@ -5236,10 +5297,14 @@
     PROFILE_GROUPS.forEach(g=>{
       const n = CHANNEL_PROFILE_GROUPS.filter(x=>x.group_id===g.id).length;
       const el=document.createElement('div'); el.className='cat-card';
-      el.innerHTML = `<span class="name"><b>${escAttr(g.name)}</b><div style="font-size:11px;font-weight:500;color:var(--text-faint);margin-top:2px;">${PROFILE_GROUP_KIND_LABEL[g.kind]||g.kind} · ${toFaDigits(n)} کانال</div></span><span class="cc-actions"></span>`;
+      el.innerHTML = `<span class="name"><b class="pg-name">${escAttr(g.name)}</b><div style="font-size:11px;font-weight:500;color:var(--text-faint);margin-top:2px;">${PROFILE_GROUP_KIND_LABEL[g.kind]||g.kind} · ${toFaDigits(n)} منبع</div></span><span class="cc-actions"></span>`;
+      makeRenamable(el.querySelector('.pg-name'), g.name, async val=>{
+        await patchOk('/profile_groups?id=eq.'+g.id, {name: val});
+        await loadProfileGroups(); renderProfileGroupAdmin(); renderPoliticalFigures();
+      });
       const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف گروه'; del.setAttribute('aria-label','حذف گروه '+g.name);
       del.addEventListener('click', async ()=>{
-        if(!confirm('گروه «' + g.name + '» حذف شود؟ (کانال‌ها حذف نمی‌شوند، فقط از این گروه خارج می‌شوند)')) return;
+        if(!confirm('گروه «' + g.name + '» حذف شود؟' + (n ? '\n' + n + ' منبع از این گروه خارج می‌شوند (خود منابع حذف نمی‌شوند).' : ''))) return;
         await api('/profile_groups?id=eq.'+g.id, {method:'DELETE'});
         await Promise.all([loadProfileGroups(), loadChannelProfileGroups()]);
         renderProfileGroupAdmin(); renderPoliticalFigures();
@@ -6007,14 +6072,48 @@
   }
 
   // ---- settings: password change ----
-  async function changePassword(role){
+  // تغییر رمز در پنجره‌ی اختصاصی (نه prompt مرورگر): رمز پنهان + تکرار برای
+  // جلوگیری از قفل‌شدن مدیر با یک غلط تایپی
+  let PW_ROLE = null;
+  const PW_MIN_LEN = 6;
+  function changePassword(role){
+    PW_ROLE = role;
     const label = role==='admin' ? 'مدیر' : 'بیننده';
-    const newPw = prompt('رمز عبور جدید برای ' + label + ':');
-    if(!newPw) return;
-    const r = await api('/rpc/change_password', {method:'POST', body: JSON.stringify({target_role: role, new_password: newPw})});
-    if(r.ok) showToast('رمز عبور ' + label + ' به‌روزرسانی شد');
-    else alert('فقط مدیر می‌تواند رمز عبور را تغییر دهد.');
+    document.getElementById('pw-modal-title').textContent = 'تغییر رمز ' + label;
+    document.getElementById('pw-modal-warn').textContent = role==='admin'
+      ? 'این رمز برای ورود خود شما به‌عنوان مدیر است؛ آن را جایی امن یادداشت کنید.'
+      : 'همه‌ی کاربرانی که با نقش بیننده وارد می‌شوند باید از رمز جدید استفاده کنند.';
+    ['pw-new','pw-new2'].forEach(id=>{ const el=document.getElementById(id); el.value=''; el.type='password'; });
+    document.getElementById('pw-show').checked = false;
+    document.getElementById('pw-modal-error').textContent = '';
+    document.getElementById('pw-modal').classList.add('active');
+    setTimeout(()=> document.getElementById('pw-new').focus(), 50);
   }
+  function closePwModal(){
+    document.getElementById('pw-modal').classList.remove('active');
+    PW_ROLE = null;
+  }
+  document.getElementById('pw-show').addEventListener('change', e=>{
+    ['pw-new','pw-new2'].forEach(id=> document.getElementById(id).type = e.target.checked ? 'text' : 'password');
+  });
+  document.getElementById('pw-save-btn').addEventListener('click', async ()=>{
+    const pw = document.getElementById('pw-new').value;
+    const pw2 = document.getElementById('pw-new2').value;
+    const err = document.getElementById('pw-modal-error');
+    if(pw.length < PW_MIN_LEN){ err.textContent = 'رمز باید دست‌کم ' + toFaDigits(PW_MIN_LEN) + ' نویسه باشد.'; return; }
+    if(pw !== pw2){ err.textContent = 'رمز و تکرار آن یکسان نیستند.'; return; }
+    const role = PW_ROLE, label = role==='admin' ? 'مدیر' : 'بیننده';
+    const btn = document.getElementById('pw-save-btn');
+    btn.disabled = true;
+    try{
+      const r = await api('/rpc/change_password', {method:'POST', body: JSON.stringify({target_role: role, new_password: pw})});
+      if(r.ok){ closePwModal(); showToast('رمز ' + label + ' تغییر کرد'); }
+      else err.textContent = 'تغییر رمز ناموفق بود؛ فقط مدیر می‌تواند رمز را تغییر دهد.';
+    }finally{ btn.disabled = false; }
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape' && document.getElementById('pw-modal').classList.contains('active')) closePwModal();
+  });
 
   // ---- export ----
   function populateExportFilters(){
