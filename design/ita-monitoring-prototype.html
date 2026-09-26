@@ -976,10 +976,10 @@
      صفحه RTLه، پس اولین `.news-analytics-col` توی DOM (ستون راست) توی
      ستون اول گرید قرار می‌گیره که سمت راست دیده می‌شه.
      زیر ۹۰۰px به یک‌ستونه برمی‌گرده تا روی موبایل جمع‌وجور نشه */
-  .news-analytics-columns{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
+  .news-analytics-columns{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:start; }
   .news-analytics-col{ display:flex; flex-direction:column; gap:16px; }
   .news-analytics-col .panel{ margin-bottom:0; }
-  @media (max-width:900px){ .news-analytics-columns{ grid-template-columns:1fr; } }
+  @media (max-width:900px){ .news-analytics-columns{ grid-template-columns:minmax(0,1fr); } }
 
   /* نمودارهای Chart.js — کانتینر با ارتفاع کمینه‌ی یکسان (نه attribute
      height خودِ canvas) چون به همراه maintainAspectRatio:false توی JS،
@@ -1332,13 +1332,37 @@
   /* تب «روزنامه‌ها» — گرید صفحه‌ی اول روزنامه‌های امروز، همون زبان بصری کاور مجله (mag-tile) */
   .newspaper-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:20px 16px; margin-top:8px; }
   @media (max-width:900px){ .newspaper-grid{ grid-template-columns: repeat(2,1fr); } }
-  @media (max-width:560px){ .newspaper-grid{ grid-template-columns: 1fr; } }
+  @media (max-width:560px){ .newspaper-grid{ grid-template-columns: repeat(2,minmax(0,1fr)); gap:16px 10px; } }
   .newspaper-card{ cursor:pointer; display:flex; flex-direction:column; gap:9px; }
   .newspaper-cover{ width:100%; aspect-ratio: 4/3; border-radius: var(--radius-control); overflow:hidden; background: var(--surface); border:1px solid var(--border); box-shadow: var(--shadow); transition: transform .2s ease, box-shadow .2s ease; }
   .newspaper-card:hover .newspaper-cover{ transform:translateY(-5px) scale(1.02); box-shadow: var(--shadow-hover); }
   .newspaper-cover img{ width:100%; height:100%; object-fit:contain; display:block; }
   .newspaper-title{ font-size:12px; font-weight:600; color: rgba(255,255,255,0.82); text-align:center; line-height:1.5; }
   .mag-empty-hint{ font-size:12.5px; color: var(--text-faint); padding:6px 4px; }
+
+  /* ---- بازبینی ریسپانسیو موبایل (۵ مهر ۱۴۰۵) ---- */
+  /* فید «شبکه‌های اجتماعی»/«پست‌های منتشر شده»/«یادداشت‌ها» (social-tab) قانون
+     ۴ستونه‌ی اختصاصی داره که از قانون‌های موبایل عمومی grid-view قوی‌تره —
+     بدون این، روی گوشی ۴ ستون خیلی باریک نشون داده می‌شد */
+  @media (max-width:900px){ .news-feed.grid-view.social-tab{ grid-template-columns: repeat(2,1fr); } }
+  @media (max-width:560px){ .news-feed.grid-view.social-tab{ grid-template-columns: 1fr; } }
+  @media (max-width:640px){
+    .platform-total-row{ gap:16px; flex-wrap:wrap; }
+    /* پاپ‌آور «بازه‌ی زمانی» (چپ‌ترین دکمه‌ی ردیف زمان) از لبه‌ی چپ صفحه بیرون می‌زد */
+    .news-daterange-details .news-daterange-popover{ inset-inline-start:auto; inset-inline-end:auto; left:0; right:auto; }
+    /* فاصله‌های خیلی بزرگ دسکتاپ بین بلوک‌های صفحه‌ی نخست روی گوشی فضای خالی زیادی می‌ساخت */
+    .why-jarian-card{ margin-top:80px; }
+    .section-label{ margin-top:80px; }
+    .package-card{ margin-top:90px; }
+    .home-bottom-row{ margin-top:90px; }
+  }
+  @media (max-width:560px){
+    /* قاب تصویر خالی کارت‌های بدون رسانه روی گوشی فقط جا می‌گیره */
+    .news-card > .news-thumb.placeholder{ display:none; }
+    #archive-report-grid{ grid-template-columns: repeat(2,minmax(0,1fr)); gap:18px 12px; }
+  }
+  /* پنل آماری ۵تایی در ۲ ستون: کاشی آخر تنها نمونه، تمام‌عرض بشه */
+  @media (max-width:480px){ .dash-hero-stats > :last-child:nth-child(odd){ grid-column:1 / -1; } }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
