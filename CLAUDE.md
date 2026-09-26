@@ -311,6 +311,9 @@ supabase/functions/news-insights/index.ts  Edge Function تحلیل خودکار
 supabase/functions/extract-post-keywords/index.ts  Edge Function استخراج کلیدواژه‌ی هوش مصنوعی هر پست، پایه‌ی تب «پرونده‌های موضوعی» — بخش «هوش مصنوعی — کلیدواژه‌ی خودکار پست‌ها» رو ببین
 supabase/functions/_shared/auth.ts         اعتبارسنجی مشترک (توکن کاربر → کوئری واقعی PostgREST) برای همه‌ی Edge Functionهای این پروژه — شامل fetchPostForUser() (تک‌پستی، translate)، fetchRecentNewsPostsForUser() (دسته‌ای، news-insights) و fetchPostsMissingKeywords() (دسته‌ای resumable، extract-post-keywords)
 design/ita-monitoring-prototype.html       فرانت‌اند کامل (تک‌فایل HTML/CSS/JS)
+design/manifest.webmanifest                PWA: نام «سامانه هوشمند جریان»/«جریان»، standalone، رنگ #16202a — بخش «نسخه‌ی قابل نصب (PWA)» رو ببین
+design/sw.js                               service worker PWA (کش فایل‌های ثابت؛ سوپابیس/CDN رهگیری نمی‌شن)
+design/icons/                              آیکون‌های PWA (icon.svg منبع، icon-192/512، maskable-512، apple-touch-icon) — از نشان نمودار میله‌ای قدیمی توپ‌بار
 design/vendor/chart.min.js                 Chart.js v4.4.4 وندور محلی، نه CDN (اولین کتابخونه‌ی نموداری پروژه) — دلیل: ادبلاکرها اسکریپت‌های حاوی «chart» توی مسیر رو حتی از CDNهای معتبر بلاک می‌کنن؛ بخش «تب «در یک نگاه»» رو ببین
 design/vendor/jspdf.umd.min.js             jsPDF v2.5.2 وندور محلی — مونتاژ صفحات A4 خبرنامه؛ بخش «تب «خبرنامه مدارس»» رو ببین
 design/vendor/html2canvas.min.js           html2canvas v1.4.1 وندور محلی — رستر کردن DOM خبرنامه قبل از مونتاژ با jsPDF؛ همون بخش بالا رو ببین
@@ -525,6 +528,15 @@ design/images/basirat-logo.webp            لوگوی مدرسه مجازی بص
 - **مدیریت منابع**: ردیف شلوغ قدیمی (۹ کنترل در یک خط + دراپ‌داون‌های «بخش‌ها/گروه‌ها/پروفایل» + ذخیره‌ی بی‌صدا) حذف شد. الان فهرست ساده (`.chan-item`: عکس، نام، یوزرنیم·بستر·موضوع، برچسب بخش‌ها از `chanSectionsOf()`؛ کانال بله → «ادعاها و شایعات»؛ بدون بخش → برچسب قرمز) + چیپ‌های فیلتر بخش با تعداد (`#chan-section-chips`، state `chanDomainFilter`، شامل «بدون بخش») + دکمه‌ی «+ افزودن منبع جدید». کلیک روی ردیف → پنجره‌ی `#chan-editor-modal` (`openChanEditor(ch|null)`) با سه مرحله: ۱) مشخصات (نام، بستر — برای منبع ثبت‌شده غیرقابل‌تغییر، یوزرنیم/RSS، عکس)، ۲) موضوع، ۳) بخش‌ها از روی آرایه‌ی واحد `CHAN_SECTIONS`؛ جزئیات هر بخش فقط با تیک همون بخش ظاهر می‌شه (اخبار → منطقه + «خبرگزاری حوزوی» فقط برای وب‌سایت؛ کنشگری → صاحب کانال/مخاطب/طلبه؛ چهره‌ها/سازمان‌ها → گروه‌ها). دکمه‌ی «ذخیره» صریح (PATCH/POST یک‌جا + diff گروه‌ها) + toast. `CHAN_DOMAIN_FIELDS`، فرم `new-chan-*` و `chan-filter-domain` حذف شدن؛ `refreshCatOptions/refreshRegionOptions` فقط برای سازگاری خالی موندن.
 - **تغییر نام درجا** (`makeRenamable()`): موضوع/منطقه/گروه با کلیک روی نام؛ Enter ذخیره، Esc لغو. پیام حذف تعداد منابع تحت تأثیر رو می‌گه.
 - **تغییر رمز** در پنجره‌ی `#pw-modal` (نه `prompt()`): رمز پنهان + تکرار + حداقل ۶ نویسه + هشدار برای رمز مدیر؛ همون `rpc/change_password`.
+
+## نسخه‌ی قابل نصب (PWA) — ۴ مهر ۱۴۰۵
+
+طبق درخواست کاربر، سایت روی گوشی قابل نصبه (اندروید: «نصب برنامه» در کروم؛ آیفون: Share ← Add to Home Screen). بدون فروشگاه اپ و بدون ظاهر جدید — همون سایت، تمام‌صفحه.
+- `<head>` صفحه: `manifest`، `theme-color`، `apple-touch-icon` و متاهای `apple-mobile-web-app-*` (status bar = `black`). ثبت `sw.js` درست قبل از `// ---- boot ----` (فقط https/localhost؛ خطاش نادیده گرفته می‌شه).
+- **`sw.js`**: فایل‌های ثابت هم‌دامنه (`fonts/`, `images/`, `vendor/`, `icons/`) cache-first؛ خود HTML network-first (پس هر merge فوراً در اپ نصب‌شده دیده می‌شه، آفلاین نسخه‌ی کش‌شده). درخواست‌های سوپابیس/CDN (دامنه‌ی دیگه) **اصلاً رهگیری نمی‌شن** — داده همیشه زنده‌ست. ⚠️ اگه یه فایل ثابت (فونت/کتابخونه/عکس) با **همون اسم** عوض شد، ثابت `CACHE` رو یه شماره بالا ببر (`jarian-static-v2`…)، وگرنه گوشی‌ها نسخه‌ی قدیمی کش‌شده رو نگه می‌دارن.
+- تست: با `python3 -m http.server` روی localhost + Playwright `launchPersistentContext` (نه context معمولی — اون incognitoه و CDP خطای `in-incognito` می‌ده) → `Page.getInstallabilityErrors` باید خالی باشه.
+- **حذف احتمالی در آینده**: فقط حذف فایل‌ها کافی نیست — `sw.js` باید با نسخه‌ای جایگزین بشه که `self.registration.unregister()` + پاک‌کردن cacheها رو انجام بده (یا ثبتش از صفحه برداشته و `navigator.serviceWorker.getRegistrations()` unregister بشه)، وگرنه روی گوشی‌ها باقی می‌مونه. آیکون جدید روی آیفون نیاز به نصب دوباره داره.
+- ⚠️ اپ نصب‌شده به آدرس فعلی GitHub Pages وصله؛ اگه ریپو دوباره تغییر نام بده، کاربرها باید دوباره نصب کنن.
 
 ## جزئیات مهم طراحی (برای هماهنگی سشن‌های بعدی)
 
