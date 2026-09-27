@@ -1252,6 +1252,22 @@
   .sys-row-meta{ color: var(--text-dim); font-size:12px; white-space:nowrap; }
   .sys-row.warn .sys-status-dot{ background:#d99a1e; } .sys-row.bad .sys-status-dot{ background: var(--danger); } .sys-row.ok .sys-status-dot{ background: var(--ok); }
   .sys-note{ font-size:12.5px; color: var(--text-dim); line-height:1.8; }
+  .sys-login-sum{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px; }
+  .sys-login-stat{ flex:1; min-width:120px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background: var(--surface-2); }
+  .sys-login-stat b{ display:block; font-size:18px; color: var(--text); }
+  .sys-login-stat span{ font-size:11.5px; color: var(--text-dim); }
+  .sys-login-stat.warn{ border-color:#d99a1e; } .sys-login-stat.warn b{ color:#b7800f; }
+  .sys-login-stat.bad{ border-color: var(--danger); } .sys-login-stat.bad b{ color: var(--danger); }
+  .sys-login-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .sys-login-table th{ text-align:right; font-size:11.5px; color: var(--text-faint); font-weight:700; padding:6px 8px; border-bottom:1px solid var(--border); }
+  .sys-login-table td{ padding:8px; border-bottom:1px solid var(--border); color: var(--text); white-space:nowrap; }
+  .sys-login-table tr:last-child td{ border-bottom:none; }
+  .sys-login-table td[dir="ltr"]{ text-align:right; }
+  .sys-login-table .fail td{ background: rgba(220,60,60,0.06); }
+  .sys-login-badge{ display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; background: var(--ok-soft); color: var(--ok); }
+  .sys-login-badge.fail{ background: rgba(220,60,60,0.12); color: var(--danger); }
+  .sys-login-wrap{ overflow-x:auto; }
+  .sys-login-more{ margin-top:10px; }
   .sys-run-btn{ margin-top:8px; font-family:inherit; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius: var(--radius-pill); border:1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor:pointer; transition: border-color .15s ease, color .15s ease; }
   .sys-run-btn:hover:not(:disabled){ border-color: var(--accent-strong); color: var(--accent-strong); }
   .sys-run-btn:disabled{ opacity:.6; cursor:default; }
@@ -1439,7 +1455,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۴.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۵.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2395,6 +2411,10 @@
           <div class="panel-head"><span class="panel-pill">کارهای خودکار</span><span class="settings-sum-desc">زمان آخرین خروجی هر کار و نتیجه‌ی آخرین اجرای آن در گیت‌هاب. زرد یا قرمز یعنی باید بررسی بشه.</span></div>
           <div class="sys-status-list" id="sys-status-list"></div>
         </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-pill">ورودها</span><span class="settings-sum-desc">ورودهای ۳۰ روز اخیر به سایت. چون رمز مشترکه، فقط نقش (مدیر/بیننده)، دستگاه و IP معلومه، نه نام افراد. ورود خودکار کارهای گیت‌هاب نمایش داده نمی‌شه.</span></div>
+          <div id="sys-logins"></div>
+        </div>
         <div class="sys-page-row">
           <div class="panel">
             <div class="panel-head"><span class="panel-pill">منابع بی‌خبر</span><span class="settings-sum-desc">منابع فعالی که بیش از ۳ روز هیچ مطلبی ازشون نیومده (احتمال خرابی آدرس یا بسته‌شدن کانال).</span></div>
@@ -2420,7 +2440,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۴.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۵.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3096,6 +3116,48 @@
       el.innerHTML = '<div class="sys-note">خطا در بررسی منابع.</div>';
     }
   }
+  // ورودها (migration_035، جدول login_events — فقط مدیر select داره)
+  function sysDeviceLabel(ua){
+    ua = ua || '';
+    if(!ua) return 'نامشخص';
+    if(/^python/i.test(ua)) return 'اسکریپت خودکار';
+    const os = /iphone|ipad/i.test(ua) ? 'آیفون' : /android/i.test(ua) ? 'اندروید' : /windows/i.test(ua) ? 'ویندوز' : /mac os/i.test(ua) ? 'مک' : /linux/i.test(ua) ? 'لینوکس' : '';
+    const br = /edg\//i.test(ua) ? 'Edge' : /opr\//i.test(ua) ? 'Opera' : /firefox/i.test(ua) ? 'Firefox' : /chrome|crios/i.test(ua) ? 'Chrome' : /safari/i.test(ua) ? 'Safari' : '';
+    return [os, br].filter(Boolean).join('، ') || 'نامشخص';
+  }
+  let SYS_LOGINS_SHOW_ALL = false;
+  async function renderSysLogins(){
+    const el = document.getElementById('sys-logins');
+    el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
+    try{
+      const r = await api('/login_events?select=created_at,success,role,user_agent,ip&order=created_at.desc&limit=300');
+      if(r.status === 404 || r.status === 400){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_035_login_events.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا بشه.</div>'; return; }
+      if(!r.ok) throw new Error('login_events ' + r.status);
+      const rows = await r.json();
+      const dayAgo = Date.now() - 86400000;
+      const day = rows.filter(x=>new Date(x.created_at).getTime() > dayAgo);
+      const okAdmin = day.filter(x=>x.success && x.role==='app_admin').length;
+      const okViewer = day.filter(x=>x.success && x.role==='app_viewer').length;
+      const fails = day.filter(x=>!x.success);
+      const failCls = fails.length >= 20 ? 'bad' : fails.length >= 5 ? 'warn' : '';
+      const byIp = {};
+      fails.forEach(x=>{ const k = x.ip || 'نامشخص'; byIp[k] = (byIp[k]||0) + 1; });
+      const topIps = Object.entries(byIp).sort((a,b)=>b[1]-a[1]).slice(0,3);
+      const list = SYS_LOGINS_SHOW_ALL ? rows : rows.slice(0, 15);
+      el.innerHTML = `<div class="sys-login-sum">
+          <div class="sys-login-stat"><b>${faNum(okAdmin)}</b><span>ورود مدیر در ۲۴ ساعت اخیر</span></div>
+          <div class="sys-login-stat"><b>${faNum(okViewer)}</b><span>ورود بیننده در ۲۴ ساعت اخیر</span></div>
+          <div class="sys-login-stat ${failCls}"><b>${faNum(fails.length)}</b><span>تلاش ناموفق (رمز اشتباه) در ۲۴ ساعت اخیر${topIps.length ? '<br>بیشترین از: ' + topIps.map(([ip,n])=>escHtml(ip) + ' (' + faNum(n) + ')').join('، ') : ''}</span></div>
+        </div>` + (rows.length ? `<div class="sys-login-wrap"><table class="sys-login-table"><thead><tr><th>زمان</th><th>نتیجه</th><th>نقش</th><th>دستگاه</th><th>IP</th></tr></thead><tbody>${list.map(x=>{
+          const d = new Date(x.created_at);
+          const full = d.toLocaleString('fa-IR', { timeZone:'Asia/Tehran', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+          return `<tr class="${x.success ? '' : 'fail'}"><td title="${escAttr(full)}">${escHtml(full)}</td><td><span class="sys-login-badge ${x.success ? '' : 'fail'}">${x.success ? 'موفق' : 'رمز اشتباه'}</span></td><td>${x.role==='app_admin' ? 'مدیر' : x.role==='app_viewer' ? 'بیننده' : '—'}</td><td title="${escAttr(x.user_agent||'')}">${escHtml(sysDeviceLabel(x.user_agent))}</td><td dir="ltr">${escHtml(x.ip||'—')}</td></tr>`;
+        }).join('')}</tbody></table></div>${rows.length > 15 ? `<button type="button" class="btn sys-login-more" onclick="SYS_LOGINS_SHOW_ALL=!SYS_LOGINS_SHOW_ALL;renderSysLogins()">${SYS_LOGINS_SHOW_ALL ? 'نمایش کمتر' : 'نمایش همه (' + faNum(rows.length) + ')'}</button>` : ''}` : '<div class="sys-note">هنوز ورودی ثبت نشده.</div>');
+    }catch(e){
+      console.error(e);
+      el.innerHTML = '<div class="sys-note">خطا در دریافت فهرست ورودها.</div>';
+    }
+  }
   function renderSysTokens(){
     const el = document.getElementById('sys-tokens');
     el.innerHTML = '<div class="sys-rows">' + SYS_TOKENS.map(t=>{
@@ -3113,6 +3175,7 @@
     renderSysTokens();
     renderSysStorage();
     renderSysStale();
+    renderSysLogins();
     wrap.innerHTML = SYS_STATUS_JOBS.map(j=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">در حال بررسی…</div></div></div>`).join('');
     const ghPromise = sysFetchGithubRuns();
     const results = await Promise.all(SYS_STATUS_JOBS.map(async j=>{
@@ -6696,7 +6759,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.4.0';
+  const APP_VERSION = '5.5.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
