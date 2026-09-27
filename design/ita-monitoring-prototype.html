@@ -1231,6 +1231,10 @@
   .sys-status-when{ font-size:12px; color: var(--text-dim); margin-top:2px; }
   .sys-status-item.bad .sys-status-when{ color: var(--danger); font-weight:700; }
   .sys-status-exp{ font-size:11px; color: var(--text-faint); margin-top:2px; }
+  .sys-status-body{ flex:1; min-width:0; }
+  .sys-run-btn{ margin-top:8px; font-family:inherit; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius: var(--radius-pill); border:1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor:pointer; transition: border-color .15s ease, color .15s ease; }
+  .sys-run-btn:hover:not(:disabled){ border-color: var(--accent-strong); color: var(--accent-strong); }
+  .sys-run-btn:disabled{ opacity:.6; cursor:default; }
   #sec-settings .panel-head #sys-status-refresh{ padding:6px 14px; font-size:12px; }
   .settings-help{ font-size:12px; color: var(--text-dim); margin:0 0 12px; line-height:1.8; }
   .cat-card .name.renamable, .cat-card .pg-name.renamable{ cursor:text; border-bottom:1px dashed transparent; }
@@ -1415,7 +1419,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲.۳</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۳.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2374,7 +2378,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۲.۳</span></small>
+          <small>ویرایش <span class="app-version">۵.۳.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2938,13 +2942,13 @@
   // خونده‌شده از خودِ داده‌ها (نه API گیت‌هاب). آستانه‌ها با تأخیر معمول
   // کرون‌های گیت‌هاب (نکته‌ی عملیاتی ۲۰ CLAUDE.md) کمی دست‌بازتر گرفته شدن.
   const SYS_STATUS_JOBS = [
-    { name:'جمع‌آوری ایتا',        path:'/posts?platform=eq.eitaa&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
-    { name:'جمع‌آوری تلگرام',      path:'/posts?platform=eq.telegram&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
-    { name:'جمع‌آوری وب‌سایت‌ها',   path:'/posts?platform=eq.website&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
-    { name:'ادعاها و شایعات (بله)', path:'/posts?platform=eq.bale&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'چند بار در روز', warn:12, bad:36 },
-    { name:'روزنامه‌ها',            path:'/newspapers?select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'روزانه', warn:30, bad:54 },
-    { name:'تحلیل «در یک نگاه»',    path:'/news_ai_insights?select=computed_at&order=computed_at.desc&limit=1', col:'computed_at', exp:'هر ۶ ساعت', warn:10, bad:24 },
-    { name:'کلیدواژه‌ی هوش مصنوعی', path:'/posts?ai_keywords_extracted_at=not.is.null&select=ai_keywords_extracted_at&order=ai_keywords_extracted_at.desc&limit=1', col:'ai_keywords_extracted_at', exp:'هر ۲ ساعت', warn:8, bad:24 },
+    { job:'eitaa', name:'جمع‌آوری ایتا',        path:'/posts?platform=eq.eitaa&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
+    { job:'telegram', name:'جمع‌آوری تلگرام',      path:'/posts?platform=eq.telegram&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
+    { job:'website', name:'جمع‌آوری وب‌سایت‌ها',   path:'/posts?platform=eq.website&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
+    { job:'bale', name:'ادعاها و شایعات (بله)', path:'/posts?platform=eq.bale&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'چند بار در روز', warn:12, bad:36 },
+    { job:'newspapers', name:'روزنامه‌ها',            path:'/newspapers?select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'روزانه', warn:30, bad:54 },
+    { job:'insights', name:'تحلیل «در یک نگاه»',    path:'/news_ai_insights?select=computed_at&order=computed_at.desc&limit=1', col:'computed_at', exp:'هر ۶ ساعت', warn:10, bad:24 },
+    { job:'keywords', name:'کلیدواژه‌ی هوش مصنوعی', path:'/posts?ai_keywords_extracted_at=not.is.null&select=ai_keywords_extracted_at&order=ai_keywords_extracted_at.desc&limit=1', col:'ai_keywords_extracted_at', exp:'هر ۲ ساعت', warn:8, bad:24 },
   ];
   async function renderSystemStatus(){
     const wrap = document.getElementById('sys-status-list');
@@ -2961,6 +2965,10 @@
     wrap.innerHTML = SYS_STATUS_JOBS.map((j,i)=>{
       const res = results[i];
       let cls = '', when;
+      // درخواست اجرای دستی تا وقتی خروجی تازه‌تر از زمان درخواست نیومده «در حال اجرا»ست
+      const reqAt = JOB_REQUESTED_AT[j.job];
+      const pending = reqAt && (Date.now() - reqAt < 20*60000) && !(res.at && new Date(res.at).getTime() > reqAt);
+      if(!pending) delete JOB_REQUESTED_AT[j.job];
       if(res.err){ when = 'خطا در دریافت وضعیت'; }
       else if(!res.at){ cls = 'bad'; when = 'هنوز هیچ خروجی ثبت نشده'; }
       else{
@@ -2968,9 +2976,43 @@
         cls = hours >= j.bad ? 'bad' : hours >= j.warn ? 'warn' : 'ok';
         when = 'آخرین اجرا: ' + newsRelTime(res.at);
       }
-      return `<div class="sys-status-item ${cls}"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">${when}</div><div class="sys-status-exp">زمان‌بندی: ${j.exp}</div></div></div>`;
+      const runBtn = currentRole === 'app_admin'
+        ? `<button type="button" class="sys-run-btn" data-job="${j.job}" ${pending ? 'disabled' : ''}>${pending ? 'در حال اجرا…' : 'اجرای دستی'}</button>` : '';
+      return `<div class="sys-status-item ${cls}"><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${j.name}</div><div class="sys-status-when">${when}</div><div class="sys-status-exp">زمان‌بندی: ${j.exp}</div>${runBtn}</div></div>`;
     }).join('');
+    // تا وقتی اجرایی در جریانه، هر دقیقه (فقط اگه همچنان توی تنظیمات باشیم) دوباره چک کن
+    clearTimeout(SYS_STATUS_TIMER);
+    if(Object.keys(JOB_REQUESTED_AT).length){
+      SYS_STATUS_TIMER = setTimeout(()=>{
+        if(document.getElementById('sec-settings').classList.contains('active')) renderSystemStatus();
+      }, 60000);
+    }
   }
+  const JOB_REQUESTED_AT = {};
+  let SYS_STATUS_TIMER = null;
+  // از طریق Edge Function run-job (توکن گیت‌هاب فقط سمت سرور، فقط مدیر)
+  async function runJobManually(job, btn){
+    btn.disabled = true; btn.textContent = 'در حال ارسال…';
+    try{
+      const r = await fetch(SUPABASE_URL + '/functions/v1/run-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+        body: JSON.stringify({ job }),
+      });
+      if(!r.ok) throw new Error('run-job ' + r.status);
+      JOB_REQUESTED_AT[job] = Date.now();
+      showToast('درخواست اجرا ثبت شد؛ معمولاً ۱ تا ۵ دقیقه طول می‌کشه');
+      renderSystemStatus();
+    }catch(e){
+      console.error(e);
+      showToast('اجرای دستی ناموفق بود');
+      btn.disabled = false; btn.textContent = 'اجرای دستی';
+    }
+  }
+  document.addEventListener('click', e=>{
+    const b = e.target.closest('.sys-run-btn');
+    if(b && !b.disabled) runJobManually(b.dataset.job, b);
+  });
 
   function newsRelTime(dateStr){
     if(!dateStr) return '';
@@ -6484,7 +6526,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.2.3';
+  const APP_VERSION = '5.3.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
