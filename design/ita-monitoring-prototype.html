@@ -910,7 +910,7 @@
   .news-time{ font-size:11px; color: var(--text-faint); margin-inline-start:auto; }
   .news-title{ font-size:15px; font-weight:700; color: var(--text); line-height:1.55; margin:0 0 6px; }
   .news-feed.grid-view .news-title{ font-size:13.5px; }
-  .news-text{ font-size:13px; line-height:1.9; color: var(--text-dim); overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; white-space:pre-wrap; }
+  .news-text{ font-size:13px; line-height:1.9; color: var(--text-dim); overflow:hidden; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; white-space:pre-wrap; }
   .news-feed.grid-view .news-text{ font-size:12px; -webkit-line-clamp:3; }
   /* کارت‌های «ادعا یا شایعه» با تیتر «انتشار توسط:» شروع می‌شن — یه خط
      برای همون تیتر + ۳ خط برای متن بعدش، یعنی جمعاً ۴ خط نمایش اولیه */
@@ -1363,6 +1363,36 @@
   }
   /* پنل آماری ۵تایی در ۲ ستون: کاشی آخر تنها نمونه، تمام‌عرض بشه */
   @media (max-width:480px){ .dash-hero-stats > :last-child:nth-child(odd){ grid-column:1 / -1; } }
+  /* ===== کاهش شلوغی نمای گوشی ===== */
+  .m-filter-btn{ display:none; align-items:center; gap:6px; flex-shrink:0; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.85); padding:0 14px; border-radius: var(--radius-control); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .m-filter-btn svg{ width:16px; height:16px; }
+  .m-filter-btn.active{ border-color: var(--accent); color: var(--accent); }
+  .m-filter-count:not(:empty){ background: var(--accent); color: var(--primary); border-radius:999px; min-width:18px; height:18px; padding:0 5px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; }
+  @media (max-width:640px){
+    .m-filter-btn{ display:inline-flex; align-self:stretch; }
+    [data-mfilters]:not(.m-open) .m-collapse{ display:none !important; }
+    .news-search-box{ min-width:0; }
+    .news-view-toggle{ display:none; }
+    #posts-tab-feed{ display:flex; flex-direction:column; }
+    #posts-tab-feed > .toolbar{ order:-1; }
+    #posts-tab-feed .toolbar > #posts-search-box{ order:-2; flex:1; min-width:0; }
+    #posts-tab-feed .toolbar > .m-filter-btn{ order:-1; }
+    #posts-tab-feed .toolbar > select{ flex:1; }
+    .news-tab-subtitle{ margin-bottom:18px; }
+    .news-tab-subtitle span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+    .domain-shortcuts{ display:none; }
+    .app-footer{ margin-top:36px; padding-top:18px; }
+    .app-footer-top{ flex-direction:column; align-items:center; text-align:center; gap:10px; }
+    .app-footer-brand{ align-items:center; max-width:none; }
+    .app-footer-tagline{ display:none; }
+    .app-footer-org{ gap:4px; flex-direction:column; align-items:center; }
+    .afo-item{ display:block; max-width:none; font-size:11px; text-align:center; line-height:1.8; }
+    .afo-item b{ font-size:10.5px; margin-inline-end:5px; }
+    .afo-item b::after{ content:':'; }
+    .news-smart-toggle{ display:none !important; }
+    #news-time-seg{ gap:2px; }
+    #news-time-seg > button, #news-time-seg .news-daterange-details summary{ white-space:nowrap; padding-inline:9px; }
+  }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -1768,25 +1798,26 @@
       <p class="news-tab-subtitle" id="news-tab-subtitle"><span>خلاصه‌ی هوشمند اخبار مهم و موضوعات پرتکرار ۶ ساعت اخیر، تولیدشده با هوش مصنوعی.</span></p>
 
       <div id="news-study-panel" style="display:none;">
-        <div class="news-filters">
+        <div class="news-filters" data-mfilters>
           <div class="news-filter-row">
             <div class="news-search-box" id="news-search-box">
               <input type="text" id="news-search-input" placeholder="جستجو در عنوان و متن…" />
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
             </div>
-            <div class="news-smart-toggle" title="جستجوی هوشمند — به‌زودی">
+            <button type="button" class="m-filter-btn" onclick="toggleMobileFilters(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>فیلترها<span class="m-filter-count"></span></button>
+            <div class="news-smart-toggle m-collapse" title="جستجوی هوشمند — به‌زودی">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 4.6L18 9l-4.1 1.4L12 15l-1.9-4.6L6 9l4.1-1.4L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
               جستجوی هوشمند
               <span class="sw"></span>
             </div>
-            <div class="news-topic-group" id="news-topic-filter-row" style="display:none;">
+            <div class="news-topic-group m-collapse" id="news-topic-filter-row" style="display:none;">
               <span class="news-topic-label">موضوع:</span>
               <div class="news-topic-chips" id="news-topic-row">
                 <span class="news-topic-chip active" data-kw="">همه</span>
               </div>
             </div>
           </div>
-          <div class="news-filter-row news-toolbar-row">
+          <div class="news-filter-row news-toolbar-row m-collapse">
             <div class="news-seg" id="news-time-seg">
               <button class="active" data-t="all">همه</button>
               <button data-t="today">امروز</button>
@@ -2108,19 +2139,19 @@
       </div>
       <p class="news-tab-subtitle" id="posts-tab-subtitle"><span>پست‌های منتشرشده‌ی کانال‌های کنشگر فضای مجازی، قابل‌فیلتر بر اساس کانال، دسته و زمان.</span></p>
 
-      <div id="posts-tab-feed">
-        <div class="news-seg" id="posts-group-seg" style="margin-bottom:14px">
+      <div id="posts-tab-feed" data-mfilters>
+        <div class="news-seg m-collapse" id="posts-group-seg" style="margin-bottom:14px">
           <button class="active" data-g="">همه</button>
           <button data-g="khorasan">طلاب خراسان</button>
           <button data-g="other">سایر کنشگران</button>
         </div>
         <div class="toolbar">
-          <details class="news-source-details" id="posts-source-details">
+          <details class="news-source-details m-collapse" id="posts-source-details">
             <summary id="posts-source-summary">انتخاب کانال‌ها…</summary>
             <div class="news-source-list" id="posts-source-list"></div>
           </details>
-          <select id="posts-filter-cat"><option value="">همه‌ی دسته‌بندی‌ها</option></select>
-          <select id="posts-filter-time">
+          <select id="posts-filter-cat" class="m-collapse"><option value="">همه‌ی دسته‌بندی‌ها</option></select>
+          <select id="posts-filter-time" class="m-collapse">
             <option value="">همه‌ی زمان‌ها</option>
             <option value="today">امروز</option>
             <option value="yesterday">دیروز</option>
@@ -2130,7 +2161,8 @@
             <input type="text" id="posts-search" placeholder="جست‌وجو در متن پست‌ها…" />
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           </div>
-          <div class="news-smart-toggle" title="جستجوی هوشمند — به‌زودی">
+          <button type="button" class="m-filter-btn" onclick="toggleMobileFilters(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>فیلترها<span class="m-filter-count"></span></button>
+          <div class="news-smart-toggle m-collapse" title="جستجوی هوشمند — به‌زودی">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 4.6L18 9l-4.1 1.4L12 15l-1.9-4.6L6 9l4.1-1.4L12 3z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
             جستجوی هوشمند
             <span class="sw"></span>
@@ -2941,7 +2973,31 @@
     return (text||'').replace(/(انتشار توسط:<\/strong>)\n+/, '$1\n');
   }
 
+  // دکمه‌ی «فیلترها» در نمای گوشی: فیلترهای جانبی پشت یه دکمه جمع می‌شن
+  function toggleMobileFilters(btn){
+    const box = btn.closest('[data-mfilters]');
+    if(box) box.classList.toggle('m-open');
+    btn.classList.toggle('active', box && box.classList.contains('m-open'));
+  }
+  function setMobileFilterCount(boxSel, n){
+    const el = document.querySelector(boxSel+' .m-filter-count');
+    if(el) el.textContent = n ? toFaDigits(n) : '';
+  }
+  function updateMobileFilterBadges(){
+    const topic = document.querySelector('#news-topic-row .news-topic-chip.active');
+    setMobileFilterCount('#news-study-panel',
+      ((newsState.time !== 'all' || newsState.dateFrom || newsState.dateTo) ? 1 : 0)
+      + (newsState.region ? 1 : 0) + (newsState.sources.length ? 1 : 0)
+      + (topic && topic.dataset.kw ? 1 : 0));
+    const catEl = document.getElementById('posts-filter-cat');
+    const timeEl = document.getElementById('posts-filter-time');
+    setMobileFilterCount('#posts-tab-feed',
+      (postsGroupFilter ? 1 : 0) + (postsSelectedChannels.length ? 1 : 0)
+      + (catEl && catEl.value ? 1 : 0) + (timeEl && timeEl.value ? 1 : 0));
+  }
+
   function renderNewsFeed(){
+    updateMobileFilterBadges();
     const feed = document.getElementById('news-feed');
     const empty = document.getElementById('news-empty');
     if(!feed) return;
@@ -4386,6 +4442,7 @@
   // اخبار رسمی‌ه (همون کلاس‌های news-card/news-thumb/news-text و...) —
   // فقط منبع داده و فیلترها فرق داره (filteredPosts به‌جای filteredNewsPosts)
   function renderPosts(){
+    updateMobileFilterBadges();
     const filtered = filteredPosts();
     postsEmpty.style.display = filtered.length ? 'none' : 'block';
     const list = filtered.slice(0,150);
