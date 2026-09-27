@@ -1235,7 +1235,7 @@
   .sys-run-btn{ margin-top:8px; font-family:inherit; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius: var(--radius-pill); border:1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor:pointer; transition: border-color .15s ease, color .15s ease; }
   .sys-run-btn:hover:not(:disabled){ border-color: var(--accent-strong); color: var(--accent-strong); }
   .sys-run-btn:disabled{ opacity:.6; cursor:default; }
-  #sec-settings .panel-head #sys-status-refresh{ padding:6px 14px; font-size:12px; }
+  #sys-status-refresh{ padding:6px 14px; font-size:12px; }
   .settings-help{ font-size:12px; color: var(--text-dim); margin:0 0 12px; line-height:1.8; }
   .cat-card .name.renamable, .cat-card .pg-name.renamable{ cursor:text; border-bottom:1px dashed transparent; }
   .cat-card .name.renamable:hover, .cat-card .pg-name.renamable:hover{ border-bottom-color: var(--accent-strong); }
@@ -1419,7 +1419,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۳.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۳.۲</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1500,6 +1500,10 @@
             <button onclick="switchSection('export'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
               خروجی‌گیری
+            </button>
+            <button onclick="switchSection('status'); closeAdminMenu();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
+              وضعیت سامانه
             </button>
             <button onclick="switchSection('settings'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
@@ -2267,11 +2271,6 @@
     <!-- SETTINGS -->
     <section class="section" id="sec-settings">
       <div class="settings-grid">
-          <h3 class="settings-group-title">وضعیت سامانه</h3>
-          <div class="panel">
-            <div class="panel-head"><span class="panel-pill">آخرین اجرای کارهای خودکار</span><span class="settings-sum-desc">اگه یکی زرد یا قرمز شد، یعنی اون بخش مدتیه به‌روز نشده و باید بررسی بشه.</span><button type="button" class="btn" id="sys-status-refresh" onclick="renderSystemStatus()">به‌روزرسانی</button></div>
-            <div class="sys-status-list" id="sys-status-list"></div>
-          </div>
           <h3 class="settings-group-title">منابع</h3>
           <details class="panel settings-accordion" open>
             <summary class="panel-head"><span class="panel-pill">مدیریت منابع</span><span class="settings-sum-desc">کانال‌ها و سایت‌هایی که سامانه از آن‌ها مطلب جمع می‌کند، و محل نمایش هرکدام در سایت</span></summary>
@@ -2366,6 +2365,13 @@
     </section>
 
     <!-- نظرات کاربران — فقط مدیر، از کارت «ثبت نظر و پیشنهاد» صفحه‌ی نخست پر می‌شه -->
+    <section class="section" id="sec-status">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-pill">آخرین اجرای کارهای خودکار</span><span class="settings-sum-desc">اگه یکی زرد یا قرمز شد، یعنی اون بخش مدتیه به‌روز نشده و باید بررسی بشه.</span><button type="button" class="btn" id="sys-status-refresh" onclick="renderSystemStatus()">به‌روزرسانی</button></div>
+        <div class="sys-status-list" id="sys-status-list"></div>
+      </div>
+    </section>
+
     <section class="section" id="sec-feedback">
       <div class="panel">
         <div class="panel-head"><span class="panel-pill">نظرات و پیشنهادهای ثبت‌شده</span></div>
@@ -2378,7 +2384,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۳.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۳.۲</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2674,7 +2680,7 @@
     });
   });
 
-  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback'];
+  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback','status'];
 
   function applyRoleUI(){
     const isAdmin = currentRole === 'app_admin';
@@ -2767,6 +2773,7 @@
     export: 'خروجی‌گیری',
     settings: 'کاربران و تنظیمات',
     feedback: 'نظرات کاربران',
+    status: 'وضعیت سامانه',
   };
 
   function switchSection(key){
@@ -2786,7 +2793,7 @@
     if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
     if(key === 'feedback') loadFeedbackList().then(renderFeedbackList);
     if(key === 'export') loadNotifySubscribers().then(renderNotifySubscribers);
-    if(key === 'settings') renderSystemStatus();
+    if(key === 'status') renderSystemStatus();
   }
 
   // میان‌برهای کارت‌های صفحه‌ی نخست به زیربخش‌های خودِ همون صفحه
@@ -2984,7 +2991,7 @@
     clearTimeout(SYS_STATUS_TIMER);
     if(Object.keys(JOB_REQUESTED_AT).length){
       SYS_STATUS_TIMER = setTimeout(()=>{
-        if(document.getElementById('sec-settings').classList.contains('active')) renderSystemStatus();
+        if(document.getElementById('sec-status').classList.contains('active')) renderSystemStatus();
       }, 60000);
     }
   }
@@ -6526,7 +6533,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.3.1';
+  const APP_VERSION = '5.3.2';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
