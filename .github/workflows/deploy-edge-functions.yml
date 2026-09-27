@@ -32,3 +32,7 @@ jobs:
       - run: supabase functions deploy extract-post-keywords --no-verify-jwt --project-ref komqnapfqrtxxaytpcdt
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - run: supabase functions deploy run-job --no-verify-jwt --project-ref komqnapfqrtxxaytpcdt
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
