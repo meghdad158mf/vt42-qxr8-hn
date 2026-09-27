@@ -1232,6 +1232,26 @@
   .sys-status-item.bad .sys-status-when{ color: var(--danger); font-weight:700; }
   .sys-status-exp{ font-size:11px; color: var(--text-faint); margin-top:2px; }
   .sys-status-body{ flex:1; min-width:0; }
+  .sys-page{ display:flex; flex-direction:column; gap:16px; }
+  .sys-page-row{ display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:16px; }
+  @media (max-width:900px){ .sys-page-row{ grid-template-columns: minmax(0,1fr); } }
+  .sys-gh{ font-size:11.5px; margin-top:4px; color: var(--text-dim); }
+  .sys-gh.ok{ color: var(--ok); } .sys-gh.bad{ color: var(--danger); font-weight:700; }
+  .sys-extra{ font-size:11.5px; margin-top:4px; color: var(--text-dim); }
+  .sys-bar{ height:12px; border-radius:999px; background: var(--surface-2); border:1px solid var(--border); overflow:hidden; }
+  .sys-bar > span{ display:block; height:100%; border-radius:999px; background: var(--ok); transition: width .6s cubic-bezier(.22,1,.36,1); }
+  .sys-bar.warn > span{ background:#d99a1e; } .sys-bar.bad > span{ background: var(--danger); }
+  .sys-storage-head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:8px; font-size:13px; color: var(--text); }
+  .sys-storage-head b{ font-size:18px; }
+  .sys-storage-buckets{ display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:10px; font-size:12px; color: var(--text-dim); }
+  .sys-rows{ display:flex; flex-direction:column; }
+  .sys-row{ display:flex; align-items:center; gap:10px; padding:9px 2px; border-bottom:1px solid var(--border); font-size:12.5px; color: var(--text); }
+  .sys-row:last-child{ border-bottom:none; }
+  .sys-row .sys-status-dot{ margin-top:0; }
+  .sys-row-name{ flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sys-row-meta{ color: var(--text-dim); font-size:12px; white-space:nowrap; }
+  .sys-row.warn .sys-status-dot{ background:#d99a1e; } .sys-row.bad .sys-status-dot{ background: var(--danger); } .sys-row.ok .sys-status-dot{ background: var(--ok); }
+  .sys-note{ font-size:12.5px; color: var(--text-dim); line-height:1.8; }
   .sys-run-btn{ margin-top:8px; font-family:inherit; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius: var(--radius-pill); border:1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor:pointer; transition: border-color .15s ease, color .15s ease; }
   .sys-run-btn:hover:not(:disabled){ border-color: var(--accent-strong); color: var(--accent-strong); }
   .sys-run-btn:disabled{ opacity:.6; cursor:default; }
@@ -1419,7 +1439,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۳.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۴.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2366,9 +2386,25 @@
 
     <!-- نظرات کاربران — فقط مدیر، از کارت «ثبت نظر و پیشنهاد» صفحه‌ی نخست پر می‌شه -->
     <section class="section" id="sec-status">
-      <div class="panel">
-        <div class="panel-head"><span class="panel-pill">آخرین اجرای کارهای خودکار</span><span class="settings-sum-desc">اگه یکی زرد یا قرمز شد، یعنی اون بخش مدتیه به‌روز نشده و باید بررسی بشه.</span><button type="button" class="btn" id="sys-status-refresh" onclick="renderSystemStatus()">به‌روزرسانی</button></div>
-        <div class="sys-status-list" id="sys-status-list"></div>
+      <div class="sys-page">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-pill">فضای ذخیره‌سازی</span><span class="settings-sum-desc">سقف پلن رایگان سوپابیس ۱ گیگابایته؛ اگه پر بشه، سایت قفل می‌شه.</span><button type="button" class="btn" id="sys-status-refresh" onclick="renderSystemStatus()">به‌روزرسانی همه</button></div>
+          <div id="sys-storage"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-pill">کارهای خودکار</span><span class="settings-sum-desc">زمان آخرین خروجی هر کار و نتیجه‌ی آخرین اجرای آن در گیت‌هاب. زرد یا قرمز یعنی باید بررسی بشه.</span></div>
+          <div class="sys-status-list" id="sys-status-list"></div>
+        </div>
+        <div class="sys-page-row">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-pill">منابع بی‌خبر</span><span class="settings-sum-desc">منابع فعالی که بیش از ۳ روز هیچ مطلبی ازشون نیومده (احتمال خرابی آدرس یا بسته‌شدن کانال).</span></div>
+            <div id="sys-stale"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-pill">انقضای توکن‌ها</span><span class="settings-sum-desc">بعد از انقضا، کار مربوطه بی‌صدا از کار می‌افته؛ قبلش توکن جدید بساز.</span></div>
+            <div id="sys-tokens"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -2384,7 +2420,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۳.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۴.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2945,8 +2981,10 @@
     return POSTS_CACHE.filter(p=>newsChanIds.has(p.channel_id));
   }
 
-  // «وضعیت سامانه» (تنظیمات): زمان آخرین خروجی هر کار خودکار GitHub Actions،
-  // خونده‌شده از خودِ داده‌ها (نه API گیت‌هاب). آستانه‌ها با تأخیر معمول
+  // صفحه‌ی «وضعیت سامانه» (sec-status، فقط مدیر). همه‌ی بررسی‌ها فقط با باز
+  // کردن همین صفحه اجرا می‌شن، نه در بارگذاری عادی سایت.
+  // کارها: زمان آخرین خروجی هر کار از خودِ داده‌ها + نتیجه‌ی واقعی آخرین
+  // اجرای گیت‌هاب (run-job با action:'status'). آستانه‌ها با تأخیر معمول
   // کرون‌های گیت‌هاب (نکته‌ی عملیاتی ۲۰ CLAUDE.md) کمی دست‌بازتر گرفته شدن.
   const SYS_STATUS_JOBS = [
     { job:'eitaa', name:'جمع‌آوری ایتا',        path:'/posts?platform=eq.eitaa&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
@@ -2955,39 +2993,164 @@
     { job:'bale', name:'ادعاها و شایعات (بله)', path:'/posts?platform=eq.bale&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'چند بار در روز', warn:12, bad:36 },
     { job:'newspapers', name:'روزنامه‌ها',            path:'/newspapers?select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'روزانه', warn:30, bad:54 },
     { job:'insights', name:'تحلیل «در یک نگاه»',    path:'/news_ai_insights?select=computed_at&order=computed_at.desc&limit=1', col:'computed_at', exp:'هر ۶ ساعت', warn:10, bad:24 },
-    { job:'keywords', name:'کلیدواژه‌ی هوش مصنوعی', path:'/posts?ai_keywords_extracted_at=not.is.null&select=ai_keywords_extracted_at&order=ai_keywords_extracted_at.desc&limit=1', col:'ai_keywords_extracted_at', exp:'هر ۲ ساعت', warn:8, bad:24 },
+    { job:'keywords', name:'کلیدواژه‌ی هوش مصنوعی', path:'/posts?ai_keywords_extracted_at=not.is.null&select=ai_keywords_extracted_at&order=ai_keywords_extracted_at.desc&limit=1', col:'ai_keywords_extracted_at', exp:'هر ۲ ساعت', warn:8, bad:24, extra: sysKeywordQueue },
+    // پاک‌سازی خروجی داده‌ای نداره؛ به‌جاش شمار رسانه‌هایی که باید پاک می‌شدن و
+    // نشدن (قدیمی‌تر از ۳۰ ساعت، با RETENTION_DAYS=0.5 و اجرای روزی ۲ بار)
+    { job:'cleanup', name:'پاک‌سازی رسانه‌های قدیمی', exp:'روزی ۲ بار', custom: sysCleanupCheck },
   ];
+  // تاریخ انقضای توکن‌ها — با ساخت توکن جدید، همین‌جا به‌روز بشه (CLAUDE.md)
+  const SYS_TOKENS = [
+    { name:'نصب خودکار تابع‌های سوپابیس', key:'SUPABASE_ACCESS_TOKEN', where:'گیت‌هاب ← Settings ← Secrets', exp:'2026-12-04' },
+    { name:'اجرای دستی کارها', key:'GITHUB_DISPATCH_TOKEN', where:'سوپابیس ← Edge Functions ← Secrets', exp:'2026-12-26' },
+  ];
+  const SYS_BUCKET_NAMES = { 'post-media':'عکس/فیلم پست‌ها', 'newspaper-covers':'روزنامه‌ها', 'magazines':'مجلات', 'magazine-covers':'جلد مجلات', 'archive-reports':'بسته‌های تحلیلی', 'archive-report-covers':'جلد بسته‌ها', 'channel-avatars':'عکس منابع', 'school-reports':'گزارش مدارس', 'basirat-course-posters':'پوستر بصیرت' };
+  const STORAGE_LIMIT_MB = 1024;
+  const faNum = n => Number(n).toLocaleString('fa-IR');
+  const faMb = bytes => toFaDigits((bytes/1048576).toFixed(1));
+
+  async function sysKeywordQueue(){
+    const n = await fetchExactCount('/posts?ai_keywords=is.null&channels.show_in_news=eq.true&channels.platform=neq.bale', 'id,channels!inner(show_in_news,platform)');
+    // روند: مقایسه با آخرین شمارشی که حداقل ۱ ساعت قبل ذخیره شده (فقط همین مرورگر)
+    let prev = null;
+    try{ prev = JSON.parse(localStorage.getItem('jarian_kw_queue') || 'null'); }catch(e){}
+    let trend = '';
+    if(prev && typeof prev.n === 'number'){
+      const d = n - prev.n;
+      const since = newsRelTime(new Date(prev.at).toISOString());
+      trend = d === 0 ? '؛ بدون تغییر نسبت به ' + since
+        : '؛ ' + faNum(Math.abs(d)) + (d > 0 ? ' تا بیشتر' : ' تا کمتر') + ' از ' + since;
+    }
+    if(!prev || Date.now() - prev.at > 3600000){
+      try{ localStorage.setItem('jarian_kw_queue', JSON.stringify({ n, at: Date.now() })); }catch(e){}
+    }
+    return 'صف بررسی‌نشده: ' + faNum(n) + ' پست' + trend;
+  }
+  async function sysCleanupCheck(){
+    const cutoff = new Date(Date.now() - 30*3600000).toISOString();
+    const n = await fetchExactCount('/posts?media_storage_path=not.is.null&scraped_at=lt.' + encodeURIComponent(cutoff));
+    return { cls: n > 50 ? 'bad' : n > 0 ? 'warn' : 'ok', when: n ? 'رسانه‌ی قدیمیِ پاک‌نشده: ' + faNum(n) + ' فایل' : 'رسانه‌ی قدیمیِ پاک‌نشده: ندارد' };
+  }
+  async function sysFetchGithubRuns(){
+    try{
+      const r = await fetch(SUPABASE_URL + '/functions/v1/run-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+        body: JSON.stringify({ action: 'status' }),
+      });
+      if(!r.ok) return null;
+      return (await r.json()).runs || null;
+    }catch(e){ return null; }
+  }
+  function sysGithubLine(run){
+    if(!run) return { cls:'', text:'نتیجه‌ی گیت‌هاب: در دسترس نیست' };
+    const when = newsRelTime(run.created_at);
+    if(run.status !== 'completed'){
+      // وضعیت «در حال اجرا»ی API گیت‌هاب گاهی ساعت‌ها دیر به‌روز می‌شه (نکته‌ی ۲۵)
+      const fresh = Date.now() - new Date(run.created_at).getTime() < 3600000;
+      return { cls:'', text: fresh ? 'گیت‌هاب: در حال اجرا (' + when + ')' : 'گیت‌هاب: آخرین اجرا ' + when };
+    }
+    if(run.conclusion === 'success') return { cls:'ok', text:'✓ گیت‌هاب: موفق · ' + when };
+    if(run.conclusion === 'cancelled' || run.conclusion === 'skipped') return { cls:'', text:'گیت‌هاب: لغوشده · ' + when };
+    return { cls:'bad', text:'✗ گیت‌هاب: ناموفق · ' + when };
+  }
+
+  async function renderSysStorage(){
+    const el = document.getElementById('sys-storage');
+    el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
+    try{
+      const r = await api('/rpc/storage_usage', { method:'POST', body:'{}' });
+      if(r.status === 404){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_034_system_status.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا بشه.</div>'; return; }
+      if(!r.ok) throw new Error('storage_usage ' + r.status);
+      const rows = (await r.json()).sort((a,b)=>b.size_bytes - a.size_bytes);
+      const total = rows.reduce((t,x)=>t + Number(x.size_bytes||0), 0);
+      const pct = Math.min(100, total / (STORAGE_LIMIT_MB*1048576) * 100);
+      const cls = pct >= 85 ? 'bad' : pct >= 65 ? 'warn' : '';
+      el.innerHTML = `<div class="sys-storage-head"><span><b>${faMb(total)}</b> از ${faNum(STORAGE_LIMIT_MB)} مگابایت</span><span>${toFaDigits(pct.toFixed(0))}٪</span></div>
+        <div class="sys-bar ${cls}"><span style="width:${pct.toFixed(1)}%"></span></div>
+        <div class="sys-storage-buckets">${rows.filter(x=>Number(x.file_count)>0).map(x=>`<span>${escHtml(SYS_BUCKET_NAMES[x.bucket_id]||x.bucket_id)}: ${faMb(x.size_bytes)} مگ (${faNum(x.file_count)} فایل)</span>`).join('') || '<span>هیچ فایلی ذخیره نشده</span>'}</div>`;
+    }catch(e){
+      console.error(e);
+      el.innerHTML = '<div class="sys-note">خطا در دریافت حجم فضای ذخیره‌سازی.</div>';
+    }
+  }
+  async function renderSysStale(){
+    const el = document.getElementById('sys-stale');
+    el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
+    try{
+      const r = await api('/rpc/channel_last_post', { method:'POST', body:'{}' });
+      if(r.status === 404){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_034_system_status.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا بشه.</div>'; return; }
+      if(!r.ok) throw new Error('channel_last_post ' + r.status);
+      const last = {};
+      (await r.json()).forEach(x=>{ last[x.channel_id] = x.last_scraped_at; });
+      const LIMIT = 3*86400000;
+      const PLAT = { eitaa:'ایتا', telegram:'تلگرام', website:'وب‌سایت', bale:'بله' };
+      const stale = CHANNELS.filter(c=>c.active !== false)
+        .map(c=>({ c, at: last[c.id] ? new Date(last[c.id]).getTime() : 0 }))
+        .filter(x=>Date.now() - x.at > LIMIT)
+        .sort((a,b)=>a.at - b.at);
+      el.innerHTML = stale.length
+        ? '<div class="sys-rows">' + stale.map(x=>`<div class="sys-row ${x.at ? 'warn' : 'bad'}"><span class="sys-status-dot"></span><span class="sys-row-name">${escHtml(x.c.title||x.c.username)}</span><span class="sys-row-meta">${PLAT[x.c.platform]||''} · ${x.at ? 'آخرین مطلب ' + newsRelTime(new Date(x.at).toISOString()) : 'تا حالا مطلبی نیومده'}</span></div>`).join('') + '</div>'
+        : '<div class="sys-note">✓ همه‌ی منابع فعال در ۳ روز اخیر مطلب داشته‌اند.</div>';
+    }catch(e){
+      console.error(e);
+      el.innerHTML = '<div class="sys-note">خطا در بررسی منابع.</div>';
+    }
+  }
+  function renderSysTokens(){
+    const el = document.getElementById('sys-tokens');
+    el.innerHTML = '<div class="sys-rows">' + SYS_TOKENS.map(t=>{
+      const days = Math.ceil((new Date(t.exp + 'T00:00:00Z').getTime() - Date.now()) / 86400000);
+      const cls = days <= 7 ? 'bad' : days <= 21 ? 'warn' : 'ok';
+      const left = days < 0 ? 'منقضی شده!' : toFaDigits(days) + ' روز مانده';
+      const date = new Date(t.exp + 'T12:00:00Z').toLocaleDateString('fa-IR', { timeZone:'Asia/Tehran', day:'numeric', month:'long', year:'numeric' });
+      return `<div class="sys-row ${cls}" title="${escAttr(t.key + ' — ' + t.where)}"><span class="sys-status-dot"></span><span class="sys-row-name">${t.name}</span><span class="sys-row-meta">${date} · ${left}</span></div>`;
+    }).join('') + '</div>';
+  }
+
   async function renderSystemStatus(){
     const wrap = document.getElementById('sys-status-list');
     if(!wrap) return;
+    renderSysTokens();
+    renderSysStorage();
+    renderSysStale();
     wrap.innerHTML = SYS_STATUS_JOBS.map(j=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">در حال بررسی…</div></div></div>`).join('');
+    const ghPromise = sysFetchGithubRuns();
     const results = await Promise.all(SYS_STATUS_JOBS.map(async j=>{
       try{
+        const extra = j.extra ? j.extra().catch(()=>'') : Promise.resolve('');
+        if(j.custom) return Object.assign(await j.custom(), { extra: await extra });
         const r = await api(j.path);
         if(!r.ok) return { err:true };
         const rows = await r.json();
-        return { at: rows[0] ? rows[0][j.col] : null };
+        return { at: rows[0] ? rows[0][j.col] : null, extra: await extra };
       }catch(e){ return { err:true }; }
     }));
+    const ghRuns = await ghPromise;
     wrap.innerHTML = SYS_STATUS_JOBS.map((j,i)=>{
       const res = results[i];
       let cls = '', when;
       // درخواست اجرای دستی تا وقتی خروجی تازه‌تر از زمان درخواست نیومده «در حال اجرا»ست
+      // (برای پاک‌سازی که خروجی زمان‌دار نداره، از زمان آخرین اجرای گیت‌هاب)
       const reqAt = JOB_REQUESTED_AT[j.job];
-      const pending = reqAt && (Date.now() - reqAt < 20*60000) && !(res.at && new Date(res.at).getTime() > reqAt);
+      const run = ghRuns ? ghRuns[j.job] : null;
+      const doneAt = res.at || (j.custom && run && run.status === 'completed' ? run.created_at : null);
+      const pending = reqAt && (Date.now() - reqAt < 20*60000) && !(doneAt && new Date(doneAt).getTime() > reqAt);
       if(!pending) delete JOB_REQUESTED_AT[j.job];
       if(res.err){ when = 'خطا در دریافت وضعیت'; }
+      else if(j.custom){ cls = res.cls; when = res.when; }
       else if(!res.at){ cls = 'bad'; when = 'هنوز هیچ خروجی ثبت نشده'; }
       else{
         const hours = (Date.now() - new Date(res.at).getTime()) / 3600000;
         cls = hours >= j.bad ? 'bad' : hours >= j.warn ? 'warn' : 'ok';
-        when = 'آخرین اجرا: ' + newsRelTime(res.at);
+        when = 'آخرین خروجی: ' + newsRelTime(res.at);
       }
+      const gh = sysGithubLine(run);
+      if(gh.cls === 'bad') cls = 'bad';
       const runBtn = currentRole === 'app_admin'
         ? `<button type="button" class="sys-run-btn" data-job="${j.job}" ${pending ? 'disabled' : ''}>${pending ? 'در حال اجرا…' : 'اجرای دستی'}</button>` : '';
-      return `<div class="sys-status-item ${cls}"><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${j.name}</div><div class="sys-status-when">${when}</div><div class="sys-status-exp">زمان‌بندی: ${j.exp}</div>${runBtn}</div></div>`;
+      return `<div class="sys-status-item ${cls}"><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${j.name}</div><div class="sys-status-when">${when}</div>${res.extra ? `<div class="sys-extra">${res.extra}</div>` : ''}<div class="sys-gh ${gh.cls}">${gh.text}</div><div class="sys-status-exp">زمان‌بندی: ${j.exp}</div>${runBtn}</div></div>`;
     }).join('');
-    // تا وقتی اجرایی در جریانه، هر دقیقه (فقط اگه همچنان توی تنظیمات باشیم) دوباره چک کن
+    // تا وقتی اجرایی در جریانه، هر دقیقه (فقط اگه همچنان توی همین صفحه باشیم) دوباره چک کن
     clearTimeout(SYS_STATUS_TIMER);
     if(Object.keys(JOB_REQUESTED_AT).length){
       SYS_STATUS_TIMER = setTimeout(()=>{
@@ -6533,7 +6696,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.3.2';
+  const APP_VERSION = '5.4.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
