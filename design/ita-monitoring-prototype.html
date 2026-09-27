@@ -1221,6 +1221,17 @@
   .settings-accordion > summary.panel-head{ gap:12px; }
   .settings-sum-desc{ flex:1; font-size:12px; color: var(--text-faint); line-height:1.6; }
   @media (max-width:640px){ .settings-accordion > summary.panel-head{ flex-wrap:wrap; } .settings-sum-desc{ order:3; flex-basis:100%; } }
+  .sys-status-list{ display:grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap:10px; }
+  .sys-status-item{ display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border:1px solid var(--border); border-radius:12px; background: var(--surface-2); }
+  .sys-status-dot{ width:10px; height:10px; border-radius:50%; margin-top:5px; flex-shrink:0; background: var(--text-faint); }
+  .sys-status-item.ok .sys-status-dot{ background: var(--ok); box-shadow:0 0 0 4px var(--ok-soft); }
+  .sys-status-item.warn .sys-status-dot{ background:#d99a1e; box-shadow:0 0 0 4px rgba(217,154,30,0.15); }
+  .sys-status-item.bad .sys-status-dot{ background: var(--danger); box-shadow:0 0 0 4px rgba(220,60,60,0.14); }
+  .sys-status-name{ font-size:13px; font-weight:700; color: var(--text); }
+  .sys-status-when{ font-size:12px; color: var(--text-dim); margin-top:2px; }
+  .sys-status-item.bad .sys-status-when{ color: var(--danger); font-weight:700; }
+  .sys-status-exp{ font-size:11px; color: var(--text-faint); margin-top:2px; }
+  #sec-settings .panel-head #sys-status-refresh{ padding:6px 14px; font-size:12px; }
   .settings-help{ font-size:12px; color: var(--text-dim); margin:0 0 12px; line-height:1.8; }
   .cat-card .name.renamable, .cat-card .pg-name.renamable{ cursor:text; border-bottom:1px dashed transparent; }
   .cat-card .name.renamable:hover, .cat-card .pg-name.renamable:hover{ border-bottom-color: var(--accent-strong); }
@@ -1419,6 +1430,7 @@
           </div>
         </div>
         <p id="login-error" role="alert" style="display:none;color:var(--danger);font-size:12px;margin:-8px 0 14px;"></p>
+        <button type="button" id="login-retry-btn" class="btn" style="display:none;width:100%;margin:-4px 0 14px;" onclick="retryLoadAll()">تلاش دوباره</button>
         <button class="btn primary" id="login-btn" onclick="handleLogin()">
           <span class="login-btn-fill" aria-hidden="true"></span>
           <span class="login-btn-label">ورود</span>
@@ -2251,6 +2263,11 @@
     <!-- SETTINGS -->
     <section class="section" id="sec-settings">
       <div class="settings-grid">
+          <h3 class="settings-group-title">وضعیت سامانه</h3>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-pill">آخرین اجرای کارهای خودکار</span><span class="settings-sum-desc">اگه یکی زرد یا قرمز شد، یعنی اون بخش مدتیه به‌روز نشده و باید بررسی بشه.</span><button type="button" class="btn" id="sys-status-refresh" onclick="renderSystemStatus()">به‌روزرسانی</button></div>
+            <div class="sys-status-list" id="sys-status-list"></div>
+          </div>
           <h3 class="settings-group-title">منابع</h3>
           <details class="panel settings-accordion" open>
             <summary class="panel-head"><span class="panel-pill">مدیریت منابع</span><span class="settings-sum-desc">کانال‌ها و سایت‌هایی که سامانه از آن‌ها مطلب جمع می‌کند، و محل نمایش هرکدام در سایت</span></summary>
@@ -2395,12 +2412,25 @@
      هر اسکریپتی با کلمه‌ی «chart» توی آدرسش رو مسدود می‌کنن (فکر می‌کنن
      ردیابی/آنالیز تبلیغاتیه)، حتی اگه از یه CDN معتبر مثل cdnjs بیاد. فایل
      محلی از همون دامنه‌ی خودِ سایت لود می‌شه، پس این مشکل رو نداره. -->
-<script src="vendor/chart.min.js"></script>
-<!-- برای تولید واقعی فایل PDF «خبرنامه مدارس» (نه چاپ مرورگر) — رندر
-     صفحه به تصویر (html2canvas) + مونتاژ صفحات A4 (jsPDF). محلی وندور
-     شده، نه از CDN، هم‌الگو با chart.min.js بالا. -->
-<script src="vendor/html2canvas.min.js"></script>
-<script src="vendor/jspdf.umd.min.js"></script>
+<!-- ⚠️ chart.min.js و (برای PDF «خبرنامه مدارس») html2canvas.min.js/jspdf.umd.min.js
+     دیگه اینجا با تگ ثابت لود نمی‌شن — با loadScriptOnce() فقط وقتی لازم شدن
+     (تب «در یک نگاه» / دکمه‌ی دانلود خبرنامه) گرفته می‌شن تا ~۷۶۰KB از
+     بارگذاری اول سایت (به‌خصوص روی اینترنت موبایل) کم بشه. -->
+<script>
+  const SCRIPT_LOADS = {};
+  function loadScriptOnce(src){
+    if(!SCRIPT_LOADS[src]){
+      SCRIPT_LOADS[src] = new Promise(resolve=>{
+        const el = document.createElement('script');
+        el.src = src;
+        el.onload = ()=> resolve(true);
+        el.onerror = ()=> resolve(false);
+        document.head.appendChild(el);
+      });
+    }
+    return SCRIPT_LOADS[src];
+  }
+</script>
 <script>
   // ambient dot-field — quiet tactile backdrop, paused under reduced-motion
   (function(){
@@ -2465,7 +2495,49 @@
     opts = opts || {};
     const headers = Object.assign({ apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, opts.headers||{});
     if(authToken) headers.Authorization = 'Bearer ' + authToken;
-    return fetch(SUPABASE_URL + '/rest/v1' + path, Object.assign({}, opts, { headers }));
+    return fetch(SUPABASE_URL + '/rest/v1' + path, Object.assign({}, opts, { headers })).then(r=>{
+      // ۴۰۱ با توکن = نشست منقضی‌شده (توکن ۲۴ ساعت اعتبار داره)
+      if(r.status === 401 && authToken) SESSION_EXPIRED = true;
+      return r;
+    });
+  }
+  let SESSION_EXPIRED = false;
+
+  // خطای ورود/بارگذاری روی صفحه‌ی ورود؛ withRetry دکمه‌ی «تلاش دوباره» رو هم نشون می‌ده
+  function showLoginError(msg, withRetry){
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+    document.getElementById('login-retry-btn').style.display = withRetry ? '' : 'none';
+  }
+  // بارگذاری اطلاعات بعد از ورود؛ اگه شکست خورد، به‌جای ماندن بی‌صدا روی صفحه‌ی
+  // ورود، علتش (نشست منقضی / قطع اتصال) رو می‌گه
+  async function loadAllAndEnter(){
+    SESSION_EXPIRED = false;
+    try{
+      await loadAll();
+      if(SESSION_EXPIRED) throw new Error('session expired');
+      enterDash('dashboard');
+      return true;
+    }catch(e){
+      console.error('loadAll failed', e);
+      goLogin();
+      if(SESSION_EXPIRED){
+        authToken = null; currentRole = null;
+        sessionStorage.removeItem('jarian_token'); sessionStorage.removeItem('jarian_role');
+        showLoginError('نشست شما منقضی شده است؛ لطفاً دوباره وارد شوید.', false);
+      }else{
+        showLoginError('ورود انجام شد، ولی دریافت اطلاعات از سرور ناموفق بود. اتصال اینترنت را بررسی و دوباره تلاش کنید.', true);
+      }
+      return false;
+    }
+  }
+  async function retryLoadAll(){
+    const btn = document.getElementById('login-retry-btn');
+    btn.disabled = true; btn.textContent = 'در حال تلاش…';
+    document.getElementById('login-error').style.display = 'none';
+    await loadAllAndEnter();
+    btn.disabled = false; btn.textContent = 'تلاش دوباره';
   }
 
   // شمارش دقیق و تاریخی (نه محدود به limit صفحه‌بندی‌شده‌ی کش‌های محلی مثل POSTS_CACHE) —
@@ -2622,17 +2694,19 @@
     btnEl.disabled = true;
     btnEl.classList.add('is-loading');
     btnLabelEl.textContent = 'در حال ورود...';
+    document.getElementById('login-retry-btn').style.display = 'none';
     try{
-      await doLogin(pwEl.value);
-      pwEl.value = '';
+      try{
+        await doLogin(pwEl.value);
+      }catch(e){
+        // TypeError یعنی اصلاً به سرور نرسیدیم، نه رمز اشتباه
+        showLoginError(e instanceof TypeError ? 'اتصال به سرور برقرار نشد. اتصال اینترنت را بررسی کنید.' : 'رمز عبور اشتباه است.', false);
+        pwEl.focus();
+        pwEl.select();
+        return;
+      }
       applyRoleUI();
-      await loadAll();
-      enterDash('dashboard');
-    }catch(e){
-      errEl.textContent = 'رمز عبور اشتباه است.';
-      errEl.style.display = 'block';
-      pwEl.focus();
-      pwEl.select();
+      if(await loadAllAndEnter()) pwEl.value = '';
     }finally{
       btnEl.disabled = false;
       btnEl.classList.remove('is-loading');
@@ -2708,6 +2782,7 @@
     if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
     if(key === 'feedback') loadFeedbackList().then(renderFeedbackList);
     if(key === 'export') loadNotifySubscribers().then(renderNotifySubscribers);
+    if(key === 'settings') renderSystemStatus();
   }
 
   // میان‌برهای کارت‌های صفحه‌ی نخست به زیربخش‌های خودِ همون صفحه
@@ -2859,6 +2934,44 @@
     return POSTS_CACHE.filter(p=>newsChanIds.has(p.channel_id));
   }
 
+  // «وضعیت سامانه» (تنظیمات): زمان آخرین خروجی هر کار خودکار GitHub Actions،
+  // خونده‌شده از خودِ داده‌ها (نه API گیت‌هاب). آستانه‌ها با تأخیر معمول
+  // کرون‌های گیت‌هاب (نکته‌ی عملیاتی ۲۰ CLAUDE.md) کمی دست‌بازتر گرفته شدن.
+  const SYS_STATUS_JOBS = [
+    { name:'جمع‌آوری ایتا',        path:'/posts?platform=eq.eitaa&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
+    { name:'جمع‌آوری تلگرام',      path:'/posts?platform=eq.telegram&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
+    { name:'جمع‌آوری وب‌سایت‌ها',   path:'/posts?platform=eq.website&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
+    { name:'ادعاها و شایعات (بله)', path:'/posts?platform=eq.bale&select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'چند بار در روز', warn:12, bad:36 },
+    { name:'روزنامه‌ها',            path:'/newspapers?select=scraped_at&order=scraped_at.desc&limit=1', col:'scraped_at', exp:'روزانه', warn:30, bad:54 },
+    { name:'تحلیل «در یک نگاه»',    path:'/news_ai_insights?select=computed_at&order=computed_at.desc&limit=1', col:'computed_at', exp:'هر ۶ ساعت', warn:10, bad:24 },
+    { name:'کلیدواژه‌ی هوش مصنوعی', path:'/posts?ai_keywords_extracted_at=not.is.null&select=ai_keywords_extracted_at&order=ai_keywords_extracted_at.desc&limit=1', col:'ai_keywords_extracted_at', exp:'هر ۲ ساعت', warn:8, bad:24 },
+  ];
+  async function renderSystemStatus(){
+    const wrap = document.getElementById('sys-status-list');
+    if(!wrap) return;
+    wrap.innerHTML = SYS_STATUS_JOBS.map(j=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">در حال بررسی…</div></div></div>`).join('');
+    const results = await Promise.all(SYS_STATUS_JOBS.map(async j=>{
+      try{
+        const r = await api(j.path);
+        if(!r.ok) return { err:true };
+        const rows = await r.json();
+        return { at: rows[0] ? rows[0][j.col] : null };
+      }catch(e){ return { err:true }; }
+    }));
+    wrap.innerHTML = SYS_STATUS_JOBS.map((j,i)=>{
+      const res = results[i];
+      let cls = '', when;
+      if(res.err){ when = 'خطا در دریافت وضعیت'; }
+      else if(!res.at){ cls = 'bad'; when = 'هنوز هیچ خروجی ثبت نشده'; }
+      else{
+        const hours = (Date.now() - new Date(res.at).getTime()) / 3600000;
+        cls = hours >= j.bad ? 'bad' : hours >= j.warn ? 'warn' : 'ok';
+        when = 'آخرین اجرا: ' + newsRelTime(res.at);
+      }
+      return `<div class="sys-status-item ${cls}"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">${when}</div><div class="sys-status-exp">زمان‌بندی: ${j.exp}</div></div></div>`;
+    }).join('');
+  }
+
   function newsRelTime(dateStr){
     if(!dateStr) return '';
     const d = new Date(dateStr);
@@ -2878,7 +2991,7 @@
     const row = document.getElementById('news-region-row');
     if(!row) return;
     row.innerHTML = '<span class="news-region-chip active" data-r="">همه رسانه‌ها</span>' +
-      REGIONS.map(r=>`<span class="news-region-chip" data-r="${r.id}">${r.name}</span>`).join('');
+      REGIONS.map(r=>`<span class="news-region-chip" data-r="${r.id}">${escHtml(r.name)}</span>`).join('');
     newsState.region = '';
   }
 
@@ -2969,8 +3082,11 @@
   // خط خالی داشته باشن (از قبل توی posts.text ذخیره شده)؛ کالکتور جدید
   // دیگه این خط رو تولید نمی‌کنه، ولی برای پست‌های از قبل ذخیره‌شده هم
   // همینجا حذفش می‌کنیم تا نیازی به backfill دیتابیس نباشه.
+  // متن پست: همه‌چیز escape می‌شه، فقط تگ <strong> (که collect_bale.py عمداً
+  // برای تیترهای ادعاها می‌سازه) دوباره فعال می‌شه
   function claimsTextDisplay(text){
-    return (text||'').replace(/(انتشار توسط:<\/strong>)\n+/, '$1\n');
+    const t = (text||'').replace(/(انتشار توسط:<\/strong>)\n+/, '$1\n');
+    return escHtml(t).replace(/&lt;(\/?)strong&gt;/g, '<$1strong>');
   }
 
   // دکمه‌ی «فیلترها» در نمای گوشی: فیلترهای جانبی پشت یه دکمه جمع می‌شن
@@ -3031,12 +3147,12 @@
         ${thumbHtml}
         <div class="news-body">
           <div class="news-head">
-            <span class="news-source">${isClaims ? 'ادعا یا شایعه' : (ch.title||ch.username||'؟')}</span>
+            <span class="news-source">${isClaims ? 'ادعا یا شایعه' : escHtml(ch.title||ch.username||'؟')}</span>
             ${isClaims ? '' : `<span class="news-platform">${NEWS_PLATFORM_ICON[ch.platform]||''}${NEWS_PLATFORM_LABEL[ch.platform]||ch.platform}</span>`}
             ${ch.region_id ? `<span class="news-region">${regionNameOf(ch.region_id)}</span>` : ''}
             <span class="news-time">${newsRelTime(p.posted_at||p.scraped_at)}</span>
           </div>
-          ${p.title ? `<h3 class="news-title" id="news-title-${p.id}">${p.title}</h3>` : ''}
+          ${p.title ? `<h3 class="news-title" id="news-title-${p.id}">${escHtml(p.title)}</h3>` : ''}
           <p class="news-text${isClaims ? ' claims-text' : ''}" id="news-text-${p.id}">${claimsTextDisplay(p.text)}</p>
           <button class="news-more" onclick="toggleNewsText(${p.id})" id="news-more-${p.id}">
             نمایش بیشتر
@@ -3047,7 +3163,7 @@
             <div style="display:flex; gap:10px; align-items:center;">
               ${ch.platform === 'website' ? `<button type="button" class="news-translate-btn" id="news-translate-btn-${p.id}" onclick="translatePost(${p.id})">ترجمه به فارسی</button>` : ''}
               ${isRealVideo ? `<a class="news-link" href="${p.media_path}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}
-              ${(!isClaims && p.link) ? `<a class="news-link" href="${p.link}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
+              ${(!isClaims && p.link) ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
             </div>
           </div>
           ${isAdmin ? `
@@ -3148,7 +3264,7 @@
           ${ch.region_id ? `<span class="news-region">${regionNameOf(ch.region_id)}</span>` : ''}
           <span class="news-time">${newsRelTime(p.posted_at||p.scraped_at)}</span>
         </div>
-        ${p.title ? `<h3 class="news-title">${p.title}</h3>` : ''}
+        ${p.title ? `<h3 class="news-title">${escHtml(p.title)}</h3>` : ''}
         <p class="news-text" id="dossier-text-${uid}">${claimsTextDisplay(p.text)}</p>
         <button class="news-more" onclick="toggleDossierText('${uid}')" id="dossier-more-${uid}">
           نمایش بیشتر
@@ -3156,7 +3272,7 @@
         </button>
         <div class="news-foot">
           <div></div>
-          <div>${(!isRealVideo && p.link) ? `<a class="news-link" href="${p.link}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}${isRealVideo ? `<a class="news-link" href="${p.media_path}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}</div>
+          <div>${(!isRealVideo && p.link) ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}${isRealVideo ? `<a class="news-link" href="${p.media_path}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}</div>
         </div>
       </div>
     </div>`;
@@ -3371,6 +3487,8 @@
     const btn = document.getElementById('newsletter-download-btn');
     if(btn){ btn.disabled = true; btn.dataset.origText = btn.textContent; btn.textContent = 'در حال آماده‌سازی PDF...'; }
     try{
+      const libs = await Promise.all([loadScriptOnce('vendor/html2canvas.min.js'), loadScriptOnce('vendor/jspdf.umd.min.js')]);
+      if(!libs.every(Boolean)) throw new Error('pdf libraries failed to load');
       await buildNewsletterPdf();
     }catch(err){
       console.error(err);
@@ -3602,7 +3720,7 @@
     }
     const cached = NEWS_TRANSLATION_CACHE[id];
     if(cached){
-      textEl.innerHTML = cached.text;
+      textEl.innerHTML = escHtml(cached.text);
       textEl.classList.add('is-translated');
       if(titleEl && cached.title){ titleEl.textContent = cached.title; titleEl.classList.add('is-translated'); }
       btn.textContent = 'بازگشت به متن اصلی';
@@ -3616,7 +3734,7 @@
     try{
       const { title: titleFa, text: textFa } = await aiTranslate(id);
       NEWS_TRANSLATION_CACHE[id] = { title: titleFa, text: textFa };
-      textEl.innerHTML = textFa;
+      textEl.innerHTML = escHtml(textFa);
       textEl.classList.add('is-translated');
       if(titleEl && titleFa){ titleEl.textContent = titleFa; titleEl.classList.add('is-translated'); }
       btn.textContent = 'بازگشت به متن اصلی';
@@ -4134,10 +4252,10 @@
       const el=document.createElement('div'); el.className='channel-card';
       el.innerHTML = `<div class="cc-photo"><div class="cc-portrait">${ICONS.person}</div></div>
         <div class="cc-body">
-          <div class="cc-name">${ch.title || ch.username}</div>
-          <div class="cc-admin">${ch.platform==='telegram'?'تلگرام':'ایتا'} · <span class="mono">@${ch.username}</span></div>
+          <div class="cc-name">${escHtml(ch.title || ch.username)}</div>
+          <div class="cc-admin">${ch.platform==='telegram'?'تلگرام':'ایتا'} · <span class="mono">@${escHtml(ch.username)}</span></div>
           <div class="cc-activity ${act.level}"><span class="dot"></span>فعالیت ${act.label}</div>
-          <div class="cc-cats">${cat?`<span>${cat.name}</span>`:''}<span>${ch.type==='news_agency'?'خبرگزاری':'شخصیت'}</span></div>
+          <div class="cc-cats">${cat?`<span>${escHtml(cat.name)}</span>`:''}<span>${ch.type==='news_agency'?'خبرگزاری':'شخصیت'}</span></div>
         </div>`;
       wrap.appendChild(el);
     });
@@ -4254,7 +4372,7 @@
       const cat = CATEGORIES.find(c=>c.id===ch.category_id);
       const el=document.createElement('div'); el.className='cpt-row';
       el.title = 'مشاهده‌ی پست‌های ' + (ch.title || ch.username);
-      const channelUrl = ch.platform==='telegram' ? `https://t.me/${ch.username}` : `https://eitaa.com/${ch.username}`;
+      const channelUrl = ch.platform==='telegram' ? `https://t.me/${encodeURIComponent(ch.username||'')}` : `https://eitaa.com/${encodeURIComponent(ch.username||'')}`;
       el.innerHTML = `<div class="cpt-who">
           <div class="cpt-avatar-wrap">
             <div class="cpt-avatar">${ch.avatar_url ? `<img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" />` : ICONS.person}</div>
@@ -4333,7 +4451,7 @@
   function populatePostFilters(){
     populatePostSourceOptions();
     filterCatEl.innerHTML = '<option value="">همه‌ی دسته‌بندی‌ها</option>' +
-      CATEGORIES.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      CATEGORIES.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
   }
 
   function matchesTime(dateStr, val){
@@ -4375,14 +4493,22 @@
     });
   }
 
+  // هر متنی که از بیرون میاد (پست کانال‌ها، RSS، هوش مصنوعی، ورودی مدیر) قبل
+  // از نشستن توی innerHTML باید از این دو رد بشه — وگرنه یه منبع می‌تونه کد
+  // (مثل <img onerror>) بفرسته که روی مرورگر مدیر اجرا بشه و توکنش رو بدزده
   function escAttr(s){
-    return String(s==null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    return String(s==null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  // فقط لینک http/https مجازه — نه javascript: و مشابه
+  function safeUrl(u){
+    u = String(u==null ? '' : u).trim();
+    return /^https?:\/\//i.test(u) ? escAttr(u) : '#';
   }
   // بر خلاف escAttr (مخصوص داخل «attribute)، این یکی برای متنی که مستقیم
   // داخل یه تگ HTML (نه attribute) می‌شینه — چون reason توی news_ai_insights
   // خروجی هوش مصنوعیه (نه متن دستی مدیر)، احتیاطاً escape می‌شه
   function escHtml(s){
-    return String(s==null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return escAttr(s);
   }
 
   function wireMediaViewerClicks(root){
@@ -4462,12 +4588,12 @@
         ${thumbHtml}
         <div class="news-body">
           <div class="news-head">
-            <span class="news-source">${ch.title||ch.username||'؟'}</span>
+            <span class="news-source">${escHtml(ch.title||ch.username||'؟')}</span>
             <span class="news-platform">${NEWS_PLATFORM_ICON[ch.platform]||''}${NEWS_PLATFORM_LABEL[ch.platform]||ch.platform}</span>
             ${ch.region_id ? `<span class="news-region">${regionNameOf(ch.region_id)}</span>` : ''}
             <span class="news-time">${newsRelTime(p.posted_at||p.scraped_at)}</span>
           </div>
-          <p class="news-text" id="post-text-${p.id}">${p.text||''}</p>
+          <p class="news-text" id="post-text-${p.id}">${claimsTextDisplay(p.text)}</p>
           <button class="news-more" onclick="togglePostText(${p.id})" id="post-more-${p.id}">
             نمایش بیشتر
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
@@ -4476,7 +4602,7 @@
             <div>${topic ? `<span class="news-topic">${topic}</span>` : ''}</div>
             <div style="display:flex; gap:10px; align-items:center;">
               ${isRealVideo ? `<a class="news-link" href="${p.media_path}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}
-              ${p.link ? `<a class="news-link" href="${p.link}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
+              ${p.link ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
             </div>
           </div>
         </div>
@@ -4715,12 +4841,12 @@
         ${thumbHtml}
         <div class="news-body">
           <div class="news-head">
-            <span class="news-source">${ch.title||ch.username||'؟'}</span>
+            <span class="news-source">${escHtml(ch.title||ch.username||'؟')}</span>
             <span class="news-platform">${NEWS_PLATFORM_ICON[ch.platform]||''}${NEWS_PLATFORM_LABEL[ch.platform]||ch.platform}</span>
             ${ch.region_id ? `<span class="news-region">${regionNameOf(ch.region_id)}</span>` : ''}
             <span class="news-time">${newsRelTime(p.posted_at||p.scraped_at)}</span>
           </div>
-          <p class="news-text" id="pf-post-text-${p.id}">${p.text||''}</p>
+          <p class="news-text" id="pf-post-text-${p.id}">${claimsTextDisplay(p.text)}</p>
           <button class="news-more" onclick="togglePoliticalFigureText(${p.id})" id="pf-post-more-${p.id}">
             نمایش بیشتر
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
@@ -4729,7 +4855,7 @@
             <div>${topic ? `<span class="news-topic">${topic}</span>` : ''}</div>
             <div style="display:flex; gap:10px; align-items:center;">
               ${isRealVideo ? `<a class="news-link" href="${p.media_path}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}
-              ${p.link ? `<a class="news-link" href="${p.link}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
+              ${p.link ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
             </div>
           </div>
         </div>
@@ -4845,6 +4971,11 @@
     const posts = newsAnalyticsPosts(24);
     const hasChart = typeof Chart !== 'undefined';
     if(hasChart) applyChartDefaultsOnce();
+    // Chart.js تنبل‌لود می‌شه؛ بار اول بقیه‌ی ویجت‌ها رندر می‌شن و بعد از
+    // رسیدن کتابخونه، کل تب یه‌بار دیگه (این‌بار با نمودارها) رندر می‌شه
+    else if(!SCRIPT_LOADS['vendor/chart.min.js']){
+      loadScriptOnce('vendor/chart.min.js').then(ok=>{ if(ok) renderNewsAnalytics(); });
+    }
 
     // اخبار منتخب — تشخیص هوش مصنوعی (نه صرفاً جدیدترین). این خودِ
     // renderNewsAnalytics() هیچی محاسبه نمی‌کنه — فقط آخرین ردیف
@@ -5628,7 +5759,7 @@
       ].filter(Boolean).join(' · ');
       const el = document.createElement('div'); el.className = 'magazine-card';
       el.innerHTML = `<div class="mag-icon">${m.file_type==='images' ? ICONS.photo : ICONS.doc}</div>
-        <div class="mag-title">${m.title}</div>
+        <div class="mag-title">${escHtml(m.title)}</div>
         <div class="mag-meta">${meta}</div>
         <div class="mag-actions"></div>`;
       const actions = el.querySelector('.mag-actions');
@@ -5671,8 +5802,8 @@
     MAGAZINES.forEach(m=>{
       const files = Array.isArray(m.files) ? m.files : [];
       const tile = document.createElement('div'); tile.className = 'mag-tile';
-      tile.innerHTML = `<div class="mag-tile-cover">${m.cover_url ? `<img src="${m.cover_url}" alt="${m.title}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
-        <div class="mag-tile-title">${m.title}</div>`;
+      tile.innerHTML = `<div class="mag-tile-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
+        <div class="mag-tile-title">${escHtml(m.title)}</div>`;
       tile.addEventListener('click', () => { if(files.length) openMagazineFile(m, files[0]); });
       wrap.appendChild(tile);
     });
@@ -5947,8 +6078,8 @@
         (MAG_TYPE_LABEL[m.file_type] || m.file_type) + ' · ' + files.length + ' فایل',
       ].filter(Boolean).join(' · ');
       const el = document.createElement('div'); el.className = 'magazine-card archive-report-card';
-      el.innerHTML = `<div class="archive-report-poster">${m.cover_url ? `<img src="${m.cover_url}" alt="${m.title}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
-        <div class="mag-title">${m.title}</div>
+      el.innerHTML = `<div class="archive-report-poster">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
+        <div class="mag-title">${escHtml(m.title)}</div>
         <div class="mag-meta">${meta}</div>
         <div class="mag-actions"></div>`;
       const poster = el.querySelector('.archive-report-poster');
@@ -6207,8 +6338,8 @@
 
   // ---- export ----
   function populateExportFilters(){
-    const chOpts = '<option value="">همه‌ی کانال‌ها</option>' + CHANNELS.map(c=>`<option value="${c.id}">${c.title||c.username}</option>`).join('');
-    const catOpts = '<option value="">همه‌ی دسته‌بندی‌ها</option>' + CATEGORIES.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    const chOpts = '<option value="">همه‌ی کانال‌ها</option>' + CHANNELS.map(c=>`<option value="${c.id}">${escHtml(c.title||c.username)}</option>`).join('');
+    const catOpts = '<option value="">همه‌ی دسته‌بندی‌ها</option>' + CATEGORIES.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
     document.getElementById('export-posts-channel').innerHTML = chOpts;
     document.getElementById('export-posts-cat').innerHTML = catOpts;
   }
@@ -6354,7 +6485,7 @@
   // ---- boot ----
   if(authToken){
     applyRoleUI();
-    loadAll().then(()=> enterDash('dashboard'));
+    loadAllAndEnter();
   }
 </script>
 </body>
