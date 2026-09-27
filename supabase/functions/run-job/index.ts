@@ -5,6 +5,10 @@
 // fine-grained token که فقط به همین ریپو و فقط دسترسی «Actions: Read and
 // write» داره (نه کد، نه تنظیمات).
 //
+// دو حالت: { job } → اجرای دستی یه ورک‌فلو؛ { action: "status" } → نتیجه‌ی
+// آخرین اجرای واقعی هر ورک‌فلوی JOBS از خودِ گیت‌هاب (موفق/ناموفق) برای
+// صفحه‌ی «وضعیت سامانه».
+//
 // ورودی فقط یه کلید از فهرست ثابت JOBS‌ه، نه اسم دلخواه ورک‌فلو — پس حتی با
 // یه توکن مدیر هم نمی‌شه هر ورک‌فلویی (مثلاً پاک‌سازی/purge) رو اجرا کرد.
 //
@@ -25,6 +29,7 @@ const JOBS: Record<string, string> = {
   newspapers: "collect-newspapers.yml",
   insights: "analyze-news-insights.yml",
   keywords: "extract-keywords.yml",
+  cleanup: "cleanup-media.yml",
 };
 
 const corsHeaders = {
@@ -56,25 +61,51 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { job } = await req.json();
-    const workflow = JOBS[job];
-    if (!workflow) return jsonResponse({ error: "unknown job" }, 400);
+    const { job, action } = await req.json();
+    if (action !== "status" && !JOBS[job]) return jsonResponse({ error: "unknown job" }, 400);
 
     if (!(await isAdmin(req))) return jsonResponse({ error: "admin only" }, 403);
 
     const ghToken = Deno.env.get("GITHUB_DISPATCH_TOKEN");
     if (!ghToken) return jsonResponse({ error: "GITHUB_DISPATCH_TOKEN is not set" }, 500);
+    const ghHeaders = {
+      Authorization: `Bearer ${ghToken}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "jarian-run-job",
+    };
+
+    if (action === "status") {
+      const entries = await Promise.all(Object.entries(JOBS).map(async ([key, file]) => {
+        try {
+          const r = await fetch(
+            `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${file}/runs?per_page=1&branch=${GITHUB_REF}`,
+            { headers: ghHeaders },
+          );
+          if (!r.ok) return [key, null];
+          const run = (await r.json())?.workflow_runs?.[0];
+          if (!run) return [key, null];
+          return [key, {
+            status: run.status,
+            conclusion: run.conclusion,
+            event: run.event,
+            created_at: run.run_started_at || run.created_at,
+            updated_at: run.updated_at,
+          }];
+        } catch {
+          return [key, null];
+        }
+      }));
+      return jsonResponse({ runs: Object.fromEntries(entries) });
+    }
+
+    const workflow = JOBS[job];
 
     const ghRes = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${workflow}/dispatches`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${ghToken}`,
-          Accept: "application/vnd.github+json",
-          "X-GitHub-Api-Version": "2022-11-28",
-          "User-Agent": "jarian-run-job",
-        },
+        headers: ghHeaders,
         body: JSON.stringify({ ref: GITHUB_REF }),
       },
     );
