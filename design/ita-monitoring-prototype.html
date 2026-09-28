@@ -208,7 +208,7 @@
 
   /* ---------- DASHBOARD SHELL (unified dark canvas, topbar + content float as light cards) ---------- */
   #view-dash{
-    display:none; min-height:100vh;
+    display:none; min-height:100vh; overflow-x:clip;
     background:
       radial-gradient(120% 60% at 25% 0%, rgba(234,179,147,0.07), transparent 55%),
       radial-gradient(90% 50% at 100% 0%, rgba(142,163,184,0.1), transparent 55%),
@@ -492,6 +492,30 @@
      dark canvas, separated purely by grid spacing (no border/background/shadow). */
   .section-label{ font-size:15px; font-weight:800; color: #fff; margin: 160px 2px 26px; text-align:center; letter-spacing:0.01em; scroll-margin-top: 140px; }
   .domain-grid{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; margin-bottom:26px; }
+  /* طرح «شبکه» (گره + یال، images/network-bg.svg) فقط در جاهای خلوت صفحه‌ی نخست:
+     پشت عرصه‌های رصد (محو قبل از پاراگراف توضیح) و دو فاصله‌ی خالی بین بخش‌ها.
+     تمام‌عرض (100vw) پشت محتوا؛ #view-dash با overflow-x:clip جلوی اسکرول افقی رو
+     می‌گیره (clip نه hidden، تا تب‌های sticky خراب نشن). روی گوشی نیست. */
+  #sec-dashboard{ position:relative; z-index:0; }
+  .why-jarian-card, .domain-grid, .domain-shortcuts{ position:relative; }
+  .net-deco{
+    position:absolute; left:50%; width:100vw; margin-left:-50vw; z-index:-1; pointer-events:none;
+    background: url('images/network-bg.svg') center / 1400px auto no-repeat;
+    -webkit-mask-composite: source-in; mask-composite: intersect;
+  }
+  .net-deco-domains{
+    top:-150px; height:370px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent), radial-gradient(55% 90% at 50% 50%, #000 35%, transparent 80%);
+            mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent), radial-gradient(55% 90% at 50% 50%, #000 35%, transparent 80%);
+  }
+  .net-deco-gap{
+    height:150px; background-size: 1400px 520px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent), radial-gradient(60% 100% at 50% 50%, #000 30%, transparent 80%);
+            mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent), radial-gradient(60% 100% at 50% 50%, #000 30%, transparent 80%);
+  }
+  .why-jarian-card > .net-deco-gap{ bottom:calc(100% + 5px); background-position: 30% 20%; }
+  .domain-shortcuts > .net-deco-gap{ top:calc(100% + 25px); background-position: 70% 80%; }
+  @media (max-width:640px){ .net-deco{ display:none; } }
   .domain-grid > .domain-card{ width:170px; }
   .domain-caption{ text-align:center; color: rgba(255,255,255,0.55); font-size:13.5px; line-height:2; max-width:620px; margin:0 auto 28px; }
   @media (max-width:900px){ .domain-grid > .domain-card{ width:calc(50% - 8px); } }
@@ -1515,7 +1539,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۳</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1744,6 +1768,7 @@
       <div class="dash-hero-stats" id="dash-hero-stats"></div>
 
       <div class="why-jarian-card">
+        <div class="net-deco net-deco-gap" aria-hidden="true"></div>
         <div class="why-jarian-grid">
           <div class="why-jarian-item">
             <div class="why-jarian-tag">رصد لحظه‌ای</div>
@@ -1765,6 +1790,7 @@
 
       <div class="section-label">عرصه‌های رصد و پایش</div>
       <div class="domain-grid">
+        <div class="net-deco net-deco-domains" aria-hidden="true"></div>
         <div class="domain-card" onclick="switchSection('overview')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-news.webp" alt="" /></div>
           <h3>اخبار و رویدادها</h3>
@@ -1789,6 +1815,7 @@
       <p class="domain-caption">جریان این پنج عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، یادداشت‌های مربوط به افراد و مجموعه‌های تأثیرگذار، اخبار سیاسی‌اجتماعی پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود، کنشگری فضای مجازی و برنامه‌های آموزشی مدارس. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
 
       <div class="domain-shortcuts">
+        <div class="net-deco net-deco-gap" aria-hidden="true"></div>
         <a onclick="goToNewsTab('analytics')">در یک نگاه</a>
         <a onclick="goToNewsTab('claims')">ادعاها و شایعات</a>
         <a onclick="goToNewsTab('study')">شبکه‌های اجتماعی</a>
@@ -2525,7 +2552,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۸.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۸.۳</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -7133,7 +7160,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.8.2';
+  const APP_VERSION = '5.8.3';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
