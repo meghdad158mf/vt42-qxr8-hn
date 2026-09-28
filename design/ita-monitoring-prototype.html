@@ -1268,6 +1268,11 @@
   .sys-login-badge.fail{ background: rgba(220,60,60,0.12); color: var(--danger); }
   .sys-login-wrap{ overflow-x:auto; }
   .sys-login-more{ margin-top:10px; }
+  .sys-svc-use{ font-size:11.5px; color: var(--text-faint); margin-top:2px; line-height:1.6; }
+  .sys-svc-state{ font-size:12px; margin-top:4px; color: var(--text-dim); }
+  .sys-status-item.ok .sys-svc-state{ color: var(--ok); }
+  .sys-status-item.warn .sys-svc-state{ color:#b7800f; font-weight:700; }
+  .sys-status-item.bad .sys-svc-state{ color: var(--danger); font-weight:700; }
   .sys-run-btn{ margin-top:8px; font-family:inherit; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius: var(--radius-pill); border:1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor:pointer; transition: border-color .15s ease, color .15s ease; }
   .sys-run-btn:hover:not(:disabled){ border-color: var(--accent-strong); color: var(--accent-strong); }
   .sys-run-btn:disabled{ opacity:.6; cursor:default; }
@@ -1455,7 +1460,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۵.۸</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۶.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2408,6 +2413,10 @@
           <div id="sys-storage"></div>
         </div>
         <div class="panel">
+          <div class="panel-head"><span class="panel-pill">سرویس‌های مرتبط</span><span class="settings-sum-desc">سایت‌ها و سرویس‌هایی که «جریان» برای کار کردن بهشون وابسته‌ست. سبز یعنی در دسترس، زرد یعنی کُند، قرمز یعنی قطع یا خطا.</span></div>
+          <div class="sys-status-list" id="sys-services"></div>
+        </div>
+        <div class="panel">
           <div class="panel-head"><span class="panel-pill">کارهای خودکار</span><span class="settings-sum-desc">زمان آخرین خروجی هر کار و نتیجه‌ی آخرین اجرای آن در گیت‌هاب. زرد یا قرمز یعنی باید بررسی بشه.</span></div>
           <div class="sys-status-list" id="sys-status-list"></div>
         </div>
@@ -2440,7 +2449,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۵.۸</span></small>
+          <small>ویرایش <span class="app-version">۵.۶.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3071,9 +3080,66 @@
       const fresh = Date.now() - new Date(run.created_at).getTime() < 3600000;
       return { cls:'', text: fresh ? 'گیت‌هاب: در حال اجرا (' + when + ')' : 'گیت‌هاب: آخرین اجرا ' + when };
     }
-    if(run.conclusion === 'success') return { cls:'ok', text:'✓ گیت‌هاب: موفق · ' + when };
-    if(run.conclusion === 'cancelled' || run.conclusion === 'skipped') return { cls:'', text:'گیت‌هاب: لغوشده · ' + when };
-    return { cls:'bad', text:'✗ گیت‌هاب: ناموفق · ' + when };
+    if(run.conclusion === 'success') return { cls:'ok', text:'✓ گیت‌هاب: موفق، ' + when };
+    if(run.conclusion === 'cancelled' || run.conclusion === 'skipped') return { cls:'', text:'گیت‌هاب: لغوشده، ' + when };
+    return { cls:'bad', text:'✗ گیت‌هاب: ناموفق، ' + when };
+  }
+
+  // «سرویس‌های مرتبط»: سه‌تای اول از همین مرورگر چک می‌شن، بقیه از سمت سرور
+  // (run-job با action:'health') — چون کلید لیارا و توکن گیت‌هاب فقط اونجان و
+  // مرورگر به‌خاطر CORS نمی‌تونه سایت‌های منبع رو مستقیم چک کنه.
+  const SYS_SERVICES = [
+    { key:'db',       name:'پایگاه داده (سوپابیس)',   use:'همه‌ی مطالب، منابع و تنظیمات سایت', slow:3000 },
+    { key:'storage',  name:'فضای فایل (سوپابیس)',     use:'عکس‌ها، روزنامه‌ها، مجلات و فایل‌ها', slow:3000 },
+    { key:'functions',name:'تابع‌های سرور (سوپابیس)',  use:'ترجمه، هوش مصنوعی و اجرای دستی کارها', slow:8000 },
+    { key:'liara',    name:'هوش مصنوعی لیارا',        use:'ترجمه، کلیدواژه‌ها و تحلیل «در یک نگاه»', slow:8000 },
+    { key:'github',   name:'گیت‌هاب (کارهای خودکار)', use:'اجرای زمان‌بندی‌شده‌ی جمع‌آوری و تحلیل‌ها', slow:5000 },
+    { key:'eitaa',    name:'ایتا',                    use:'جمع‌آوری پست‌های کانال‌های ایتا', slow:6000 },
+    { key:'telegram', name:'تلگرام',                  use:'جمع‌آوری پست‌های کانال‌های تلگرام', slow:6000 },
+    { key:'bale',     name:'بله',                     use:'ادعاها و شایعات (کانال رصد شایعات)', slow:6000 },
+    { key:'jaaar',    name:'جار (کیوسک روزنامه)',      use:'صفحه‌ی اول روزنامه‌ها', slow:6000 },
+  ];
+  function sysSvcTime(ms){
+    return ms < 1000 ? toFaDigits(String(ms)) + ' میلی‌ثانیه' : toFaDigits((ms/1000).toFixed(1)) + ' ثانیه';
+  }
+  async function sysTimed(fn){
+    const t0 = performance.now();
+    try{
+      const r = await fn();
+      return { ok: r.ok, status: r.status, ms: Math.round(performance.now() - t0) };
+    }catch(e){ return { ok:false, status:0, ms: Math.round(performance.now() - t0), detail: String(e) }; }
+  }
+  async function renderSysServices(){
+    const el = document.getElementById('sys-services');
+    if(!el) return;
+    el.innerHTML = SYS_SERVICES.map(s=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${s.name}</div><div class="sys-svc-use">${s.use}</div><div class="sys-svc-state">در حال بررسی…</div></div></div>`).join('');
+    let healthData = null;
+    const healthP = sysTimed(()=>fetch(SUPABASE_URL + '/functions/v1/run-job', {
+      method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + authToken },
+      body: JSON.stringify({ action:'health' }),
+    }).then(async r=>{ if(r.ok){ try{ healthData = (await r.json()).services; }catch(e){} } return r; }));
+    const [db, storage, fnRes] = await Promise.all([
+      sysTimed(()=>api('/categories?select=id&limit=1')),
+      // شیء ناموجود: ۴۰۰/۴۰۴ یعنی سرویس فایل جواب داده؛ فقط ۵xx یا قطعی ارتباط خطاست
+      sysTimed(()=>fetch(SUPABASE_URL + '/storage/v1/object/public/channel-avatars/__jarian_ping__').then(r=>({ ok: r.status < 500, status: r.status }))),
+      healthP,
+    ]);
+    const results = { db, storage, functions: fnRes };
+    if(healthData) Object.assign(results, healthData);
+    el.innerHTML = SYS_SERVICES.map(s=>{
+      const r = results[s.key];
+      let cls, state;
+      if(!r){ cls = ''; state = 'نامعلوم (تابع‌های سرور جواب ندادن)'; }
+      else if(!r.ok){
+        cls = 'bad';
+        state = r.detail === 'timeout' ? 'بدون پاسخ (بیش از ۱۲ ثانیه)'
+          : r.status ? 'خطا (کد ' + toFaDigits(String(r.status)) + ')' : 'قطع ارتباط';
+      }else if(r.ms >= s.slow){ cls = 'warn'; state = 'کُند، ' + sysSvcTime(r.ms); }
+      else{ cls = 'ok'; state = 'در دسترس، ' + sysSvcTime(r.ms); }
+      if(s.key === 'github' && r && r.ok && typeof r.remaining === 'number') state += '، سهمیه‌ی باقی‌مانده: ' + faNum(r.remaining);
+      const tip = r && r.detail && r.detail !== 'timeout' ? ` title="${escAttr(r.detail)}"` : '';
+      return `<div class="sys-status-item ${cls}"${tip}><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${s.name}</div><div class="sys-svc-use">${s.use}</div><div class="sys-svc-state">${state}</div></div></div>`;
+    }).join('');
   }
 
   async function renderSysStorage(){
@@ -3111,7 +3177,7 @@
         .filter(x=>Date.now() - x.at > LIMIT)
         .sort((a,b)=>a.at - b.at);
       el.innerHTML = stale.length
-        ? '<div class="sys-rows">' + stale.map(x=>`<div class="sys-row ${x.at ? 'warn' : 'bad'}"><span class="sys-status-dot"></span><span class="sys-row-name">${escHtml(x.c.title||x.c.username)}</span><span class="sys-row-meta">${PLAT[x.c.platform]||''} · ${x.at ? 'آخرین مطلب ' + newsRelTime(new Date(x.at).toISOString()) : 'تا حالا مطلبی نیومده'}</span></div>`).join('') + '</div>'
+        ? '<div class="sys-rows">' + stale.map(x=>`<div class="sys-row ${x.at ? 'warn' : 'bad'}"><span class="sys-status-dot"></span><span class="sys-row-name">${escHtml(x.c.title||x.c.username)}</span><span class="sys-row-meta">${PLAT[x.c.platform]||''}، ${x.at ? 'آخرین مطلب ' + newsRelTime(new Date(x.at).toISOString()) : 'تا حالا مطلبی نیومده'}</span></div>`).join('') + '</div>'
         : '<div class="sys-note">✓ همه‌ی منابع فعال در ۳ روز اخیر مطلب داشته‌اند.</div>';
     }catch(e){
       console.error(e);
@@ -3167,7 +3233,7 @@
       const cls = days <= 7 ? 'bad' : days <= 21 ? 'warn' : 'ok';
       const left = days < 0 ? 'منقضی شده!' : toFaDigits(days) + ' روز مانده';
       const date = new Date(t.exp + 'T12:00:00Z').toLocaleDateString('fa-IR', { timeZone:'Asia/Tehran', day:'numeric', month:'long', year:'numeric' });
-      return `<div class="sys-row ${cls}" title="${escAttr(t.key + ' — ' + t.where)}"><span class="sys-status-dot"></span><span class="sys-row-name">${t.name}</span><span class="sys-row-meta">${date} · ${left}</span></div>`;
+      return `<div class="sys-row ${cls}" title="${escAttr(t.key + ' — ' + t.where)}"><span class="sys-status-dot"></span><span class="sys-row-name">${t.name}</span><span class="sys-row-meta">${date}، ${left}</span></div>`;
     }).join('') + '</div>';
   }
 
@@ -3178,6 +3244,7 @@
     renderSysStorage();
     renderSysStale();
     renderSysLogins();
+    renderSysServices();
     wrap.innerHTML = SYS_STATUS_JOBS.map(j=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">در حال بررسی…</div></div></div>`).join('');
     const ghPromise = sysFetchGithubRuns();
     const results = await Promise.all(SYS_STATUS_JOBS.map(async j=>{
@@ -6764,7 +6831,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.5.8';
+  const APP_VERSION = '5.6.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
