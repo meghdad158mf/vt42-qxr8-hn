@@ -503,13 +503,14 @@
     background: url('images/network-bg.svg') center / 1400px auto no-repeat;
     -webkit-mask-composite: source-in; mask-composite: intersect;
   }
-  /* پشت خودِ آیکون‌ها شلوغ می‌شد (بازخورد کاربر) — فقط دو طرف ردیف عرصه‌ها،
-     وسط (عرض ردیف کارت‌ها ~۹۲۰px) کاملاً خالی */
-  .net-deco-domains{
-    top:-150px; height:370px; opacity:.8;
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent), linear-gradient(to right, transparent, #000 12%, #000 calc(50% - 560px), transparent calc(50% - 440px), transparent calc(50% + 440px), #000 calc(50% + 560px), #000 88%, transparent);
-            mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent), linear-gradient(to right, transparent, #000 12%, #000 calc(50% - 560px), transparent calc(50% - 440px), transparent calc(50% + 440px), #000 calc(50% + 560px), #000 88%, transparent);
-  }
+  /* «مدار» عرصه‌ها: قوس هلویی که از میان پنج عرصه رد می‌شه (پشت خودِ آیکون‌ها با
+     mask محو) + ذره‌های «جریان» که آروم از راست به چپ روی قوس حرکت می‌کنن (SVG
+     animateMotion، بدون JS). مختصات ثابت نسبت به مرکز ردیف (کارت ۱۷۰ + فاصله‌ی ۱۶ =
+     ۱۸۶px بین مرکز آیکون‌ها، مرکز آیکون ۷۴px از بالای ردیف). زیر ۹۰۰px ردیف دوستونه
+     می‌شه → مخفی. با prefers-reduced-motion فقط حرکت حذف می‌شه. */
+  .dom-orbit{ position:absolute; left:50%; top:-100px; width:1200px; height:360px; margin-left:-600px; z-index:-1; pointer-events:none; overflow:visible; }
+  @media (max-width:900px){ .dom-orbit{ display:none; } }
+  @media (prefers-reduced-motion: reduce){ .dom-orbit .flow{ display:none; } }
   .net-deco-gap{
     height:150px; background-size: 1400px 520px;
     -webkit-mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent), radial-gradient(60% 100% at 50% 50%, #000 30%, transparent 80%);
@@ -1792,7 +1793,37 @@
 
       <div class="section-label">عرصه‌های رصد و پایش</div>
       <div class="domain-grid">
-        <div class="net-deco net-deco-domains" aria-hidden="true"></div>
+        <svg class="dom-orbit" viewBox="-600 -100 1200 360" aria-hidden="true">
+          <defs>
+            <radialGradient id="dom-orbit-hole"><stop offset=".55" stop-color="#000"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+            <mask id="dom-orbit-mask" maskUnits="userSpaceOnUse" x="-600" y="-100" width="1200" height="360">
+              <rect x="-600" y="-100" width="1200" height="360" fill="#fff"/>
+              <circle cx="-372" cy="74" r="58" fill="url(#dom-orbit-hole)"/><circle cx="-186" cy="74" r="58" fill="url(#dom-orbit-hole)"/><circle cx="0" cy="74" r="58" fill="url(#dom-orbit-hole)"/><circle cx="186" cy="74" r="58" fill="url(#dom-orbit-hole)"/><circle cx="372" cy="74" r="58" fill="url(#dom-orbit-hole)"/>
+            </mask>
+            <path id="dom-orbit-path" d="M -562 124 Q 0 -36, 562 124"/>
+            <path id="dom-orbit-path2" d="M -512 146 Q 0 26, 512 146"/>
+          </defs>
+          <g mask="url(#dom-orbit-mask)">
+            <use href="#dom-orbit-path" fill="none" stroke="#EAB393" stroke-opacity=".32" stroke-width="1.3"/>
+            <use href="#dom-orbit-path2" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="1"/>
+            <g class="flow" fill="#EAB393">
+              <g><circle r="7" fill-opacity=".14"/><circle r="2.4"/>
+                <animateMotion dur="11s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#dom-orbit-path"/></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.92;1" dur="11s" repeatCount="indefinite"/></g>
+              <g><circle r="6" fill-opacity=".12"/><circle r="2"/>
+                <animateMotion dur="11s" begin="-3.7s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#dom-orbit-path"/></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.92;1" dur="11s" begin="-3.7s" repeatCount="indefinite"/></g>
+              <g><circle r="6" fill-opacity=".12"/><circle r="2"/>
+                <animateMotion dur="11s" begin="-7.4s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#dom-orbit-path"/></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.92;1" dur="11s" begin="-7.4s" repeatCount="indefinite"/></g>
+              <g fill="#fff"><circle r="1.6" fill-opacity=".5"/>
+                <animateMotion dur="16s" begin="-5s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#dom-orbit-path2"/></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.9;1" dur="16s" begin="-5s" repeatCount="indefinite"/></g>
+            </g>
+          </g>
+          <circle cx="-562" cy="124" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="-562" cy="124" r="2.2" fill="#EAB393" fill-opacity=".5"/>
+          <circle cx="562" cy="124" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="562" cy="124" r="2.2" fill="#EAB393" fill-opacity=".5"/>
+        </svg>
         <div class="domain-card" onclick="switchSection('overview')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-news.webp" alt="" /></div>
           <h3>اخبار و رویدادها</h3>
