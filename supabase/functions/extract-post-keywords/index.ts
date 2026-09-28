@@ -37,9 +37,8 @@
 // news-insights تنظیم شدن، نیازی به تنظیم دوباره نیست.
 
 import { fetchPostsMissingKeywords } from "../_shared/auth.ts";
+import { liaraChat, mapLimit } from "../_shared/liara.ts";
 
-const LIARA_BASE_URL = "https://ai.liara.ir/api/6a9271a1d6564b043acdefe1/v1";
-const LIARA_MODEL = "openai/gpt-4o-mini";
 const DEFAULT_LIMIT = 80; // هم‌راستا با BATCH_LIMIT در scripts/extract_keywords.py — کالر همیشه صریح limit می‌فرسته، این فقط fallbacke
 const TEXT_TRUNCATE = 400;
 
@@ -93,7 +92,6 @@ Deno.serve(async (req) => {
       text: (p.text || "").slice(0, TEXT_TRUNCATE),
     }));
 
-    const liaraKey = Deno.env.get("LIARA_API_KEY");
     const SYSTEM_PROMPT =
               "You extract keywords from a batch of Persian/English news posts (each with an id, title, text). " +
               "For EVERY post in the batch, without exception, return exactly one entry — never skip a post, " +
@@ -126,77 +124,53 @@ Deno.serve(async (req) => {
               "nothing else — no markdown fences, no extra commentary. The results array MUST have exactly one " +
               "entry per input post id, using only ids from the given list.";
 
+    type KwResult = { id: number; keywords?: string[]; hawza_relevant?: boolean };
     // یه فراخوانی هوش مصنوعی برای یه تیکه از دسته — در صورت خطا throw می‌کنه
-    async function callAi(items: typeof compact): Promise<Array<{ id: number; keywords?: string[]; hawza_relevant?: boolean }>> {
-      const aiRes = await fetch(`${LIARA_BASE_URL}/chat/completions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${liaraKey}` },
-        body: JSON.stringify({
-          model: LIARA_MODEL,
-          temperature: 0.1,
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: JSON.stringify(items) },
-          ],
-        }),
-      });
-      if (!aiRes.ok) throw new Error(`ai ${aiRes.status}: ${(await aiRes.text()).slice(0, 300)}`);
-      const aiData = await aiRes.json();
-      let content: string = aiData?.choices?.[0]?.message?.content || "{}";
-      content = content.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```\s*$/, "");
+    async function callAi(items: typeof compact): Promise<KwResult[]> {
+      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.1);
       try {
         return JSON.parse(content).results || [];
       } catch {
-        return [];
+        throw new Error(`ai returned invalid json: ${content.slice(0, 200)}`);
       }
     }
 
-    // ⚠️ مهر ۱۴۰۵: لیارا روی دسته‌ی کامل ۸۰تایی با خطای ۵۰۰ جواب می‌داد
-    // (درخواست تک‌پستی ترجمه همون موقع سالم بود). برای همین دسته به
-    // تیکه‌های CHUNK_SIZE تایی موازی شکسته می‌شه و هر تیکه‌ی ناموفق دوباره
-    // نصف می‌شه تا به تک‌پست برسه — اگه مشکل از یه پست خاص باشه، فقط همون
-    // جدا می‌شه و بقیه‌ی صف جلو می‌ره.
-    const CHUNK_SIZE = 20;
+    // ⚠️ مهر ۱۴۰۵: لیارا درخواست‌های چندپستی رو بعد از ~۱۸ ثانیه با ۵۰۰ رد
+    // می‌کرد (ترجمه‌ی تک‌پستی سالم بود) — حتی تیکه‌های ۲۰تایی. حالا جواب
+    // stream می‌شه (_shared/liara.ts)، تیکه‌ها ۵تایی‌ان و حداکثر CONCURRENCY
+    // تا هم‌زمان می‌رن. تیکه‌ی ناموفق به تک‌پست شکسته می‌شه تا اگه مشکل از
+    // یه پست خاص باشه، فقط همون جدا بشه.
+    const CHUNK_SIZE = 5;
+    const CONCURRENCY = 4;
     const failedIds: number[] = [];
     let aiSuccesses = 0;
     let lastError = "";
-    // هر تیکه‌ی ناموفق به ۴ قسمت شکسته می‌شه (۲۰ → ۵ → ۱)، موازی — تا زمان کل
-    // از سقف Edge Function (~۱۵۰ ثانیه) رد نشه
-    async function processChunk(items: typeof compact): Promise<Array<{ id: number; keywords?: string[]; hawza_relevant?: boolean }>> {
+    async function tryChunk(items: typeof compact): Promise<KwResult[] | null> {
       try {
         const r = await callAi(items);
         aiSuccesses++;
         return r;
       } catch (e) {
         lastError = String(e);
-        if (items.length === 1) {
-          failedIds.push(items[0].id);
-          return [];
-        }
-        const size = Math.ceil(items.length / 4);
-        const parts: Array<typeof compact> = [];
-        for (let i = 0; i < items.length; i += size) parts.push(items.slice(i, i + size));
-        return (await Promise.all(parts.map(processChunk))).flat();
+        return null;
       }
     }
     const chunks: Array<typeof compact> = [];
     for (let i = 0; i < compact.length; i += CHUNK_SIZE) chunks.push(compact.slice(i, i + CHUNK_SIZE));
-    // دور اول: همه‌ی تیکه‌ها یه‌بار. اگه هیچ‌کدوم موفق نشد، سرویس کلاً از دسترس
-    // خارجه — دیگه شکستن فایده نداره، مستقیم ۵۰۲
-    const firstRound = await Promise.all(chunks.map(async (c) => {
-      try {
-        const r = await callAi(c);
-        aiSuccesses++;
-        return { ok: true, r, c };
-      } catch (e) {
-        lastError = String(e);
-        return { ok: false, r: [] as Array<{ id: number; keywords?: string[]; hawza_relevant?: boolean }>, c };
-      }
-    }));
-    let parsedResults: Array<{ id: number; keywords?: string[]; hawza_relevant?: boolean }> = [];
+    // موج اول: CONCURRENCY تیکه‌ی اول. اگه هیچ‌کدوم موفق نشد، سرویس کلاً از
+    // دسترس خارجه — ادامه بی‌فایده‌ست، مستقیم ۵۰۲
+    const firstWave = await Promise.all(chunks.slice(0, CONCURRENCY).map(tryChunk));
+    const firstRound: Array<KwResult[] | null> = [...firstWave];
     if (aiSuccesses > 0) {
-      const retried = await Promise.all(firstRound.map((f) => (f.ok ? Promise.resolve(f.r) : processChunk(f.c))));
-      parsedResults = retried.flat();
+      firstRound.push(...(await mapLimit(chunks.slice(CONCURRENCY), CONCURRENCY, tryChunk)));
+    }
+    let parsedResults: KwResult[] = [];
+    if (aiSuccesses > 0) {
+      // تیکه‌های ناموفق: هر پست تنها یه‌بار دیگه امتحان می‌شه
+      const retryPosts: typeof compact = [];
+      firstRound.forEach((r, i) => (r ? parsedResults.push(...r) : retryPosts.push(...chunks[i])));
+      const singles = await mapLimit(retryPosts, CONCURRENCY, (p) => tryChunk([p]));
+      singles.forEach((r, i) => (r ? parsedResults.push(...r) : failedIds.push(retryPosts[i].id)));
     }
 
     // اگه هیچ فراخوانی موفق نشد، مشکل از خودِ سرویسه نه یه پست خاص — هیچ
