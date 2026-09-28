@@ -1455,7 +1455,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۵.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۵.۷</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2440,7 +2440,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۵.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۵.۷</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3195,11 +3195,14 @@
       const res = results[i];
       let cls = '', when;
       // درخواست اجرای دستی تا وقتی خروجی تازه‌تر از زمان درخواست نیومده «در حال اجرا»ست
-      // (برای پاک‌سازی که خروجی زمان‌دار نداره، از زمان آخرین اجرای گیت‌هاب)
+      // (برای پاک‌سازی که خروجی زمان‌دار نداره، از زمان آخرین اجرای گیت‌هاب)؛ یا تا وقتی
+      // گیت‌هاب اجرای بعد از درخواست رو «تموم‌شده» (موفق یا ناموفق) گزارش نده — وگرنه
+      // اجرای ناموفق که خروجی نمی‌ده دکمه رو ۲۰ دقیقه قفل نگه می‌داشت
       const reqAt = JOB_REQUESTED_AT[j.job];
       const run = ghRuns ? ghRuns[j.job] : null;
       const doneAt = res.at || (j.custom && run && run.status === 'completed' ? run.created_at : null);
-      const pending = reqAt && (Date.now() - reqAt < 20*60000) && !(doneAt && new Date(doneAt).getTime() > reqAt);
+      const runFinishedAfterReq = run && run.status === 'completed' && new Date(run.created_at).getTime() > reqAt - 60000;
+      const pending = reqAt && (Date.now() - reqAt < 20*60000) && !runFinishedAfterReq && !(doneAt && new Date(doneAt).getTime() > reqAt);
       if(!pending) delete JOB_REQUESTED_AT[j.job];
       if(res.err){ when = 'خطا در دریافت وضعیت'; }
       else if(j.custom){ cls = res.cls; when = res.when; }
@@ -6761,7 +6764,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.5.2';
+  const APP_VERSION = '5.5.7';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----

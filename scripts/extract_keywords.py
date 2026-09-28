@@ -41,6 +41,10 @@ REQUEST_TIMEOUT = 120  # پاسخ هوش مصنوعی روی دسته‌ای ا�
 # اجرا ~۲۲ ثانیه طول می‌کشید، پس ۸۰ تا هم باید به‌راحتی زیر REQUEST_TIMEOUT
 # بمونه.
 BATCH_LIMIT = 80
+# ⚠️ مهر ۱۴۰۵: لیارا کُند شد و Edge Function حالا بودجه‌ی زمانی ~۷۵ ثانیه‌ای
+# داره (هر فراخوانی فقط ~۳۰ پست رو تموم می‌کنه، بقیه برای بعد می‌مونن) —
+# برای همین هر اجرا چند دور پشت‌سرهم تابع رو صدا می‌زنه (به درخواست کاربر: ۲ دور).
+ROUNDS = 2
 
 
 def login() -> str:
@@ -54,8 +58,7 @@ def login() -> str:
     return r.json()["token"]
 
 
-def main() -> None:
-    token = login()
+def run_round(token: str) -> dict | None:
     r = requests.post(
         f"{SUPABASE_URL}/functions/v1/extract-post-keywords",
         headers={
@@ -68,9 +71,32 @@ def main() -> None:
     )
     if not r.ok:
         print(f"[!] extract-post-keywords failed: {r.status_code} {r.text[:500]}", file=sys.stderr)
+        return None
+    return r.json()
+
+
+def main() -> None:
+    token = login()
+    ok_rounds = 0
+    total = 0
+    for i in range(1, ROUNDS + 1):
+        try:
+            data = run_round(token)
+        except requests.RequestException as e:
+            print(f"[!] round {i}: {e}", file=sys.stderr)
+            data = None
+        if data is None:
+            continue
+        ok_rounds += 1
+        total += data.get("processed", 0)
+        print(f"[round {i}] {data.get('processed', 0)} post(s) keyworded, {data.get('matched', 0)} dossier match(es)")
+        # صف خالیه — دور بعدی لازم نیست
+        if not data.get("processed") and not data.get("left_for_next_run"):
+            break
+    # فقط اگه هیچ دوری موفق نشد ناموفق حساب می‌شه (کارت «وضعیت سامانه» قرمز)
+    if ok_rounds == 0:
         sys.exit(1)
-    data = r.json()
-    print(f"[done] {data.get('processed', 0)} post(s) keyworded, {data.get('matched', 0)} dossier match(es)")
+    print(f"[done] {total} post(s) keyworded in {ok_rounds} round(s)")
 
 
 if __name__ == "__main__":

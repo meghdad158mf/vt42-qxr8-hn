@@ -20,9 +20,8 @@
 // شدن، نیازی به تنظیم دوباره نیست.
 
 import { fetchRecentNewsPostsForUser } from "../_shared/auth.ts";
+import { liaraChat, mapLimit } from "../_shared/liara.ts";
 
-const LIARA_BASE_URL = "https://ai.liara.ir/api/6a9271a1d6564b043acdefe1/v1";
-const LIARA_MODEL = "openai/gpt-4o-mini";
 const DEFAULT_WINDOW_HOURS = 6;
 const MAX_POSTS_TO_MODEL = 150;
 const TEXT_TRUNCATE = 220;
@@ -66,17 +65,7 @@ Deno.serve(async (req) => {
       text: (p.text || "").slice(0, TEXT_TRUNCATE),
     }));
 
-    const liaraKey = Deno.env.get("LIARA_API_KEY");
-    const aiRes = await fetch(`${LIARA_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${liaraKey}` },
-      body: JSON.stringify({
-        model: LIARA_MODEL,
-        temperature: 0.2,
-        messages: [
-          {
-            role: "system",
-            content:
+    const SYSTEM_PROMPT =
               "You analyze a batch of Persian/English news posts (each with an id, source, title, text) from the " +
               `last ${windowHours} hours and produce two things:\n` +
               "1) selected_posts: up to 10 of the MOST IMPORTANT posts (importance = the same story repeated " +
@@ -89,28 +78,70 @@ Deno.serve(async (req) => {
               "topic label, 1-3 words>\", \"weight\": <integer count of posts about it>}. Do NOT include dates, " +
               "weekday/month names, or generic website boilerplate as topics.\n" +
               'Respond with ONLY a raw JSON object like {"selected_posts":[...],"topics":[...]} and nothing else ' +
-              "— no markdown fences, no extra commentary. ids in selected_posts MUST be from the given list only.",
-          },
-          { role: "user", content: JSON.stringify(compact) },
-        ],
-      }),
-    });
+              "— no markdown fences, no extra commentary. ids in selected_posts MUST be from the given list only.";
+    type Insight = { selected_posts?: Array<{ id: number; headline?: string }>; topics?: Array<{ name: string; weight?: number }> };
 
-    if (!aiRes.ok) {
-      const detail = await aiRes.text();
-      return jsonResponse({ error: "ai request failed", detail }, 502);
+    async function callAi(items: typeof compact): Promise<Insight> {
+      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.2, Math.min(CALL_TIMEOUT_MS, deadline - Date.now()));
+      try {
+        return JSON.parse(content);
+      } catch {
+        throw new Error(`ai returned invalid json: ${content.slice(0, 200)}`);
+      }
     }
 
-    const aiData = await aiRes.json();
-    let content: string = aiData?.choices?.[0]?.message?.content || "{}";
-    content = content.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```\s*$/, "");
-
-    let parsed: { selected_posts?: Array<{ id: number; headline?: string }>; topics?: Array<{ name: string; weight?: number }> };
-    try {
-      parsed = JSON.parse(content);
-    } catch {
-      parsed = {};
+    // ⚠️ مهر ۱۴۰۵: لیارا درخواست‌هایی که جوابشون طول می‌کشید رو بعد از ~۱۸
+    // ثانیه با ۵۰۰ رد می‌کرد (ترجمه‌ی تک‌پستی سالم بود). حالا جواب stream
+    // می‌شه (_shared/liara.ts) و اگه کل دسته باز هم خطا داد، دسته پله‌پله
+    // کوچیک‌تر می‌شه (۲۰تایی، بعد ۵تایی؛ حداکثر ۴ درخواست هم‌زمان) و نتیجه‌ها
+    // ادغام می‌شن. هر پله با یه موج ۴تایی امتحان می‌شه؛ اگه هیچ‌کدوم موفق نشد
+    // پله‌ی بعدی. تکه‌ی ناموفق در پله‌ی موفق کنار گذاشته می‌شه (برای خلاصه‌ی
+    // دوره‌ای چند پست کمتر مهم نیست). اگه هیچ فراخوانی موفق نشد → ۵۰۲.
+    // بودجه‌ی زمانی: هر درخواست حداکثر CALL_TIMEOUT_MS و کل کار تا
+    // TIME_BUDGET_MS — تا از سقف ۱۲۰ ثانیه‌ای اسکریپت کالر رد نشه.
+    const CONCURRENCY = 4;
+    const TIME_BUDGET_MS = 90_000;
+    const CALL_TIMEOUT_MS = 40_000;
+    const deadline = Date.now() + TIME_BUDGET_MS;
+    let aiSuccesses = 0;
+    let lastError = "";
+    async function tryAi(items: typeof compact): Promise<Insight | null> {
+      if (Date.now() >= deadline) return null;
+      try {
+        const r = await callAi(items);
+        aiSuccesses++;
+        return r;
+      } catch (e) {
+        lastError = String(e);
+        return null;
+      }
     }
+    let parts: Insight[] = [];
+    for (const size of [...new Set([compact.length, 20, 5])].filter((n) => n <= compact.length)) {
+      const chunks: (typeof compact)[] = [];
+      for (let i = 0; i < compact.length; i += size) chunks.push(compact.slice(i, i + size));
+      const wave = await Promise.all(chunks.slice(0, CONCURRENCY).map(tryAi));
+      if (!wave.some(Boolean)) continue;
+      const rest = await mapLimit(chunks.slice(CONCURRENCY), CONCURRENCY, tryAi);
+      parts = [...wave, ...rest].filter((r): r is Insight => r !== null);
+      break;
+    }
+    if (aiSuccesses === 0) {
+      return jsonResponse({ error: "ai request failed", detail: lastError }, 502);
+    }
+    // ادغام: اخبار منتخب به ترتیب از همه‌ی بخش‌ها، موضوعات هم‌نام با جمع وزن
+    const topicMap = new Map<string, number>();
+    for (const part of parts) {
+      for (const t of part.topics || []) {
+        if (!t || !t.name) continue;
+        const k = String(t.name).trim();
+        topicMap.set(k, (topicMap.get(k) || 0) + Math.max(1, Number(t.weight) || 1));
+      }
+    }
+    const parsed: Insight = {
+      selected_posts: parts.flatMap((p) => p.selected_posts || []),
+      topics: [...topicMap.entries()].sort((a, b) => b[1] - a[1]).map(([name, weight]) => ({ name, weight })),
+    };
 
     // اعتبارسنجی: idهای هذیان‌گفته‌شده (که توی دسته‌ی واقعی نبودن) رو حذف کن
     const validIds = new Set(posts.map((p) => p.id));
