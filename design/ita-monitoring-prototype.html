@@ -3237,14 +3237,16 @@
     }).join('') + '</div>';
   }
 
-  async function renderSystemStatus(){
+  // auto=true: رفرش دقیقه‌ای یا بعد از «اجرای دستی» — سرویس‌های مرتبط (که لیارا و
+  // سایت‌های بیرونی رو صدا می‌زنن) فقط با باز کردن صفحه یا «به‌روزرسانی همه» بررسی می‌شن
+  async function renderSystemStatus(auto){
     const wrap = document.getElementById('sys-status-list');
     if(!wrap) return;
     renderSysTokens();
     renderSysStorage();
     renderSysStale();
     renderSysLogins();
-    renderSysServices();
+    if(auto !== true) renderSysServices();
     wrap.innerHTML = SYS_STATUS_JOBS.map(j=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">در حال بررسی…</div></div></div>`).join('');
     const ghPromise = sysFetchGithubRuns();
     const results = await Promise.all(SYS_STATUS_JOBS.map(async j=>{
@@ -3289,7 +3291,7 @@
     clearTimeout(SYS_STATUS_TIMER);
     if(Object.keys(JOB_REQUESTED_AT).length){
       SYS_STATUS_TIMER = setTimeout(()=>{
-        if(document.getElementById('sec-status').classList.contains('active')) renderSystemStatus();
+        if(document.getElementById('sec-status').classList.contains('active')) renderSystemStatus(true);
       }, 60000);
     }
   }
@@ -3307,7 +3309,7 @@
       if(!r.ok) throw new Error('run-job ' + r.status);
       JOB_REQUESTED_AT[job] = Date.now();
       showToast('درخواست اجرا ثبت شد؛ معمولاً ۱ تا ۵ دقیقه طول می‌کشه');
-      renderSystemStatus();
+      renderSystemStatus(true);
     }catch(e){
       console.error(e);
       showToast('اجرای دستی ناموفق بود');
