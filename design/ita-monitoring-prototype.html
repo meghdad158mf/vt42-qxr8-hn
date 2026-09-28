@@ -1299,6 +1299,7 @@
   .sys-run-btn:hover:not(:disabled){ border-color: var(--accent-strong); color: var(--accent-strong); }
   .sys-run-btn:disabled{ opacity:.6; cursor:default; }
   #sys-status-refresh{ padding:6px 14px; font-size:12px; }
+  .ce-section.blocked{ opacity:.55; }
   .settings-help{ font-size:12px; color: var(--text-dim); margin:0 0 12px; line-height:1.8; }
   .cat-card .name.renamable, .cat-card .pg-name.renamable{ cursor:text; border-bottom:1px dashed transparent; }
   .cat-card .name.renamable:hover, .cat-card .pg-name.renamable:hover{ border-bottom-color: var(--accent-strong); }
@@ -1482,7 +1483,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۷.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۷.۲</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2491,7 +2492,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۷.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۷.۲</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -5604,7 +5605,7 @@
     return CHANNELS.filter(ch=>{
       if(platform && ch.platform !== platform) return false;
       if(domain === '__none'){ if(chanSectionsOf(ch).length) return false; }
-      else if(domain && !ch[domain]) return false;
+      else if(domain && !chanSecOn(ch, domain)) return false;
       if(q && !((ch.title||'').toLowerCase().includes(q) || (ch.username||'').toLowerCase().includes(q))) return false;
       return true;
     });
@@ -5697,23 +5698,31 @@
 
   // هر بخش سایت که یه منبع می‌تونه توش نمایش داده بشه — منبع واحد برای
   // برچسب‌های فهرست، چیپ‌های فیلتر و مرحله‌ی ۳ پنجره‌ی ویرایش
+  // ترتیب هم‌راستا با کارت‌های «عرصه‌های رصد» صفحه‌ی نخست (برنامه مدارس منبع نداره).
+  // «درباره حوزه» توی دیتابیس = show_in_hawza (+ show_in_news که برای کلیدواژه/
+  // تشخیص سیاسی‌اجتماعی لازمه)، فقط برای وب‌سایت؛ منبعِ حوزوی در «وب‌سایت‌ها»ی
+  // «اخبار و رویدادها» نمیاد، پس اینجا هم برچسب «اخبار» نمی‌گیره (chanSecOn)
   const CHAN_SECTIONS = [
     { field:'show_in_news', label:'اخبار و رویدادها', short:'اخبار',
       hint:'پست‌ها در تب «شبکه‌های اجتماعی» (ایتا/تلگرام) یا «وب‌سایت‌ها» می‌آیند و در تحلیل «در یک نگاه» حساب می‌شوند.' },
-    { field:'show_in_cyberspace', label:'کنشگری مجازی', short:'کنشگری',
-      hint:'پست‌ها در «پست‌های منتشر شده» می‌آیند و منبع در جدول «افراد و مجموعه‌ها» معرفی می‌شود.' },
     { field:'show_in_people', label:'چهره‌ها و فعالان سیاسی', short:'چهره‌ها',
       hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری چهره‌ها نمایش داده می‌شود.' },
     { field:'show_in_orgs', label:'تحلیل سازمان‌ها', short:'سازمان‌ها',
       hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری سازمان‌ها نمایش داده می‌شود.' },
+    { field:'show_in_hawza', label:'درباره حوزه', short:'درباره حوزه', webOnly:true,
+      hint:'تب «اخبار حوزه»: فقط برای خبرگزاری‌های حوزوی (وب‌سایت)؛ اخبار سیاسی‌اجتماعی‌شان به تشخیص هوش مصنوعی نمایش داده می‌شود.' },
+    { field:'show_in_cyberspace', label:'کنشگری مجازی', short:'کنشگری',
+      hint:'پست‌ها در «پست‌های منتشر شده» می‌آیند و منبع در جدول «افراد و مجموعه‌ها» معرفی می‌شود.' },
   ];
   const CHAN_PLATFORM_LABEL = { eitaa:'ایتا', telegram:'تلگرام', website:'وب‌سایت', bale:'بله' };
+  function chanSecOn(ch, field){
+    if(field === 'show_in_news') return !!ch.show_in_news && !ch.show_in_hawza;
+    return !!ch[field];
+  }
   function chanSectionsOf(ch){
-    const out = CHAN_SECTIONS.filter(sec=>ch[sec.field]).map(sec=>sec.short);
-    // کانال بله فقط تب «ادعاها و شایعات» رو تغذیه می‌کنه، نه فید عمومی اخبار
-    if(ch.show_in_news && ch.platform === 'bale') out[0] = 'ادعاها و شایعات';
-    if(ch.show_in_news && ch.show_in_hawza) out.splice(1, 0, 'اخبار حوزه');
-    return out;
+    return CHAN_SECTIONS.filter(sec=>chanSecOn(ch, sec.field)).map(sec=>
+      // کانال بله فقط تب «ادعاها و شایعات» رو تغذیه می‌کنه، نه فید عمومی اخبار
+      sec.field === 'show_in_news' && ch.platform === 'bale' ? 'ادعاها و شایعات' : sec.short);
   }
   function chanAvatarHtml(ch){
     if(ch.avatar_url) return `<img src="${escAttr(ch.avatar_url)}" alt="" />`;
@@ -5724,9 +5733,8 @@
     const wrap = document.getElementById('chan-section-chips');
     if(!wrap) return;
     const opts = [{key:'', label:'همه', n:CHANNELS.length}]
-      .concat(CHAN_SECTIONS.map(sec=>({key:sec.field, label:sec.label, n:CHANNELS.filter(c=>c[sec.field]).length})))
-      .concat([{key:'show_in_hawza', label:'اخبار حوزه', n:CHANNELS.filter(c=>c.show_in_hawza).length},
-               {key:'__none', label:'بدون بخش', n:CHANNELS.filter(c=>!chanSectionsOf(c).length).length}]);
+      .concat(CHAN_SECTIONS.map(sec=>({key:sec.field, label:sec.label, n:CHANNELS.filter(c=>chanSecOn(c, sec.field)).length})))
+      .concat([{key:'__none', label:'بدون بخش', n:CHANNELS.filter(c=>!chanSectionsOf(c).length).length}]);
     wrap.innerHTML = opts.map(o=>`<button type="button" class="news-topic-chip${chanDomainFilter===o.key?' active':''}" data-domain="${o.key}">${o.label}<b>${toFaDigits(o.n)}</b></button>`).join('');
   }
 
@@ -5796,8 +5804,11 @@
       show_in_news: `
         <div class="field"><label>منطقه‌ی جغرافیایی</label><select data-ce="region_id">
           <option value="">بدون منطقه</option>${REGIONS.map(r=>`<option value="${r.id}" ${String(val('region_id', ch.region_id||''))===String(r.id)?'selected':''}>${escAttr(r.name)}</option>`).join('')}
-        </select></div>
-        ${isWeb ? `<label class="ce-check ce-full"><input type="checkbox" data-ce="show_in_hawza" ${val('show_in_hawza', !!ch.show_in_hawza)?'checked':''}/>این سایت، خبرگزاری حوزوی است (مطالبش در «درباره حوزه ← اخبار حوزه» می‌آید، نه «وب‌سایت‌ها»)</label>` : ''}`,
+        </select></div>`,
+      show_in_hawza: `
+        <div class="field"><label>منطقه‌ی جغرافیایی</label><select data-ce="hawza_region_id">
+          <option value="">بدون منطقه</option>${REGIONS.map(r=>`<option value="${r.id}" ${String(val('hawza_region_id', ch.region_id||''))===String(r.id)?'selected':''}>${escAttr(r.name)}</option>`).join('')}
+        </select></div>`,
       show_in_cyberspace: `
         <div class="field"><label>صاحب کانال</label><input type="text" data-ce="owner_name" value="${escAttr(val('owner_name', ch.owner_name||''))}" placeholder="نام صاحب کانال" /></div>
         <div class="field"><label>تعداد مخاطب</label><input type="number" min="0" data-ce="subscriber_count" value="${escAttr(val('subscriber_count', ch.subscriber_count==null?'':ch.subscriber_count))}" placeholder="مثلاً ۱۲۰۰۰" /></div>
@@ -5806,10 +5817,11 @@
       show_in_orgs: groupsHtml('orgs'),
     };
     wrap.innerHTML = CHAN_SECTIONS.map(sec=>{
-      const on = val(sec.field, !!ch[sec.field]);
-      return `<div class="ce-section${on?' on':''}">
-        <label class="ce-section-toggle"><input type="checkbox" data-ce="${sec.field}" ${on?'checked':''}/>
-          <div><b>${sec.label}</b><span>${sec.hint}</span></div></label>
+      const blocked = sec.webOnly && !isWeb;
+      const on = !blocked && val(sec.field, chanSecOn(ch, sec.field));
+      return `<div class="ce-section${on?' on':''}${blocked?' blocked':''}">
+        <label class="ce-section-toggle"><input type="checkbox" data-ce="${sec.field}" ${on?'checked':''} ${blocked?'disabled':''}/>
+          <div><b>${sec.label}</b><span>${blocked ? 'فقط برای منابع «وب‌سایت» (خبرگزاری‌های حوزوی) قابل انتخاب است.' : sec.hint}</span></div></label>
         <div class="ce-section-extra">${extras[sec.field]}</div>
       </div>`;
     }).join('');
@@ -5865,11 +5877,14 @@
     const catVal = ceEl('ce-cat').value;
     const body = { title:name, username:handle, category_id: catVal ? Number(catVal) : null };
     CHAN_SECTIONS.forEach(sec=>{ body[sec.field] = !!get(sec.field); });
-    if(body.show_in_news){
-      const reg = get('region_id'); body.region_id = reg ? Number(reg) : null;
-      body.show_in_hawza = platform === 'website' ? !!get('show_in_hawza') : false;
-    }else{
-      body.show_in_hawza = false;
+    if(platform !== 'website') body.show_in_hawza = false;
+    // «درباره حوزه» توی دیتابیس show_in_news رو هم لازم داره (کلیدواژه و تشخیص
+    // سیاسی‌اجتماعی فقط روی منابع show_in_news اجرا می‌شن)
+    const newsTicked = body.show_in_news;
+    if(body.show_in_hawza) body.show_in_news = true;
+    if(newsTicked || body.show_in_hawza){
+      const reg = newsTicked ? get('region_id') : get('hawza_region_id');
+      body.region_id = reg ? Number(reg) : null;
     }
     if(body.show_in_cyberspace){
       body.owner_name = (get('owner_name')||'').trim() || null;
@@ -6936,7 +6951,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.7.1';
+  const APP_VERSION = '5.7.2';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
