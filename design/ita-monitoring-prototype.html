@@ -380,6 +380,30 @@
 
   /* ---- shared bits ---- */
   .panel{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:24px; margin-bottom:16px; }
+  /* «اطلاعیه برای کاربران» — نوار زیر توپ‌بار */
+  .ann-bar{ display:flex; flex-direction:column; gap:8px; }
+  .ann-bar:not(:empty){ margin:-4px 0 18px; }
+  .ann-item{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; font-size:13px; line-height:1.9; }
+  .ann-item.info{ background: rgba(234,179,147,0.08); border:1px solid rgba(234,179,147,0.38); color:#fff; }
+  .ann-item.important{ background: linear-gradient(135deg, #f1c4a8, #e3a47f); border:1px solid #EAB393; color: var(--primary); font-weight:700; box-shadow: 0 10px 24px -14px rgba(234,179,147,0.7); }
+  .ann-ic{ flex-shrink:0; width:30px; height:30px; border-radius:9px; display:grid; place-items:center; }
+  .ann-item.info .ann-ic{ background: rgba(234,179,147,0.16); color: var(--accent); }
+  .ann-item.important .ann-ic{ background: rgba(22,32,42,0.12); color: var(--primary); }
+  .ann-ic svg{ width:17px; height:17px; }
+  .ann-text{ flex:1; min-width:0; white-space:pre-line; overflow-wrap:anywhere; }
+  .ann-close{ flex-shrink:0; width:26px; height:26px; border-radius:50%; border:0; cursor:pointer; font-size:12px; background: rgba(255,255,255,0.08); color:inherit; }
+  .ann-item.important .ann-close{ background: rgba(22,32,42,0.12); }
+  .ann-close:hover{ background: rgba(255,255,255,0.18); }
+  .ann-preview{ background: var(--primary); padding:12px; border-radius:12px; }
+  .ann-counter{ margin-inline-start:6px; font-size:11px; font-weight:600; color: var(--text-faint); }
+  #ann-msg{ width:100%; resize:vertical; font:inherit; font-size:14px; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius: var(--radius-control); box-sizing:border-box; line-height:1.9; }
+  #ann-msg:focus{ border-color: var(--primary-strong); outline:none; }
+  .ann-missing{ font-size:13px; color: rgba(255,255,255,0.75); background: rgba(234,179,147,0.08); border:1px dashed rgba(234,179,147,0.5); border-radius:12px; padding:14px; }
+  .ann-row .upl-meta b{ white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .ann-dot{ flex-shrink:0; width:9px; height:9px; border-radius:50%; background: rgba(255,255,255,0.25); }
+  .ann-row.live .ann-dot{ background:#3fb97a; box-shadow:0 0 0 3px rgba(63,185,122,0.2); }
+  .upl-del.ann-stop{ color: var(--accent); border-color: rgba(234,179,147,0.45); }
+  .upl-del.ann-stop:hover{ background: rgba(234,179,147,0.12); }
   /* «بارگذاری محتوا» */
   .upl-intro{ font-size:14px; font-weight:800; color:#fff; margin:4px 2px 12px; }
   .upl-choices{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; margin-bottom:22px; }
@@ -1609,7 +1633,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۰.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۱.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1699,6 +1723,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0l-4 4m4-4l4 4M5 20h14"/></svg>
               بارگذاری محتوا
             </button>
+            <button onclick="switchSection('announce'); closeAdminMenu();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>
+              اطلاعیه برای کاربران
+            </button>
             <button onclick="switchSection('settings'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
               تنظیمات
@@ -1718,6 +1746,7 @@
         <button class="chip-btn ghost" onclick="logout()">خروج</button>
       </div>
     </div>
+    <div class="ann-bar" id="ann-bar" aria-live="polite"></div>
 
     <div class="modal-overlay" id="intro-modal" onclick="if(event.target===this) closeIntro()">
       <div class="modal-card">
@@ -2419,6 +2448,42 @@
       </div>
     </section>
 
+    <!-- «اطلاعیه برای کاربران» (فقط مدیر، migration_036) — پیام کوتاهی که بالای همه‌ی
+         صفحه‌ها برای همه نمایش داده می‌شه (#ann-bar) -->
+    <section class="section" id="sec-announce">
+      <p class="ann-missing" id="ann-missing" style="display:none;">برای فعال شدن این بخش، فایل <b>db/migration_036_announcements.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا بشه.</p>
+      <div class="panel" id="ann-form">
+        <div class="panel-head"><span class="panel-pill">اطلاعیه‌ی جدید</span></div>
+        <div class="field">
+          <label for="ann-msg">متن اطلاعیه <span class="ann-counter" id="ann-counter">۰ / ۳۰۰</span></label>
+          <textarea id="ann-msg" maxlength="300" rows="3" placeholder="مثلاً: شماره‌ی ۵ «بسته تحلیلی جریان» منتشر شد."></textarea>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="ann-level">اهمیت</label>
+            <select id="ann-level">
+              <option value="info">عادی — کاربر می‌تونه ببنده</option>
+              <option value="important">مهم — با هر ورود دوباره نمایش داده می‌شه</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ann-exp">مدت نمایش</label>
+            <select id="ann-exp">
+              <option value="1">۱ روز</option>
+              <option value="3" selected>۳ روز</option>
+              <option value="7">۱ هفته</option>
+              <option value="30">۱ ماه</option>
+              <option value="0">تا وقتی خودم متوقفش کنم</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>پیش‌نمایش</label><div class="ann-preview" id="ann-preview"></div></div>
+        <button class="btn primary" id="ann-publish" style="margin-top:8px" onclick="publishAnnouncement()">انتشار اطلاعیه</button>
+      </div>
+      <div class="upl-list-head">اطلاعیه‌ها</div>
+      <div class="upl-list" id="ann-list"></div>
+    </section>
+
     <!-- CHANNELS & PEOPLE (full monitored-channel directory) -->
     <section class="section" id="sec-channels">
       <div class="panel-head"><span class="panel-pill">همه‌ی کانال‌ها و مدیران آن‌ها</span></div>
@@ -2684,7 +2749,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۰.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۱.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3015,7 +3080,7 @@
     });
   });
 
-  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback','status','uploads'];
+  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback','status','uploads','announce'];
 
   function applyRoleUI(){
     const isAdmin = currentRole === 'app_admin';
@@ -3112,6 +3177,7 @@
     feedback: 'نظرات کاربران',
     status: 'وضعیت سامانه',
     uploads: 'بارگذاری محتوا',
+    announce: 'اطلاعیه برای کاربران',
   };
 
   function switchSection(key){
@@ -3137,6 +3203,7 @@
     if(key === 'export') loadNotifySubscribers().then(renderNotifySubscribers);
     if(key === 'status'){ renderSystemStatus(); ackAdminAlerts(); }
     if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
+    if(key === 'announce') renderAnnAdmin();
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
     if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
     // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
@@ -5001,7 +5068,8 @@
     // کوئری اضافه‌ی پشت‌سرهم داخل خودِ loadPosts (loadHawzaPosts/
     // loadClaimsPosts) این تأخیر برای زمان ورود به سایت محسوس شده بود
     // (بخش «سرعت ورود» CLAUDE.md رو ببین).
-    await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadProfileGroups(), loadChannelProfileGroups(), loadPosts()]);
+    await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadProfileGroups(), loadChannelProfileGroups(), loadPosts(), loadAnnouncements()]);
+    renderAnnBar();
     renderDashHeroStats();
     renderChannelCards();
     populatePostFilters();
@@ -5029,6 +5097,97 @@
   }
 
   // ---- schools page: گزارش‌های تحلیل Power BI — هر عکس تمام‌عرض، پشت‌سرهم ----
+
+  // ---- «اطلاعیه برای کاربران» (migration_036) ----
+  // نوار بالای همه‌ی صفحه‌ها (#ann-bar). «عادی»: کاربر می‌بنده و دیگه نمی‌بینه
+  // (localStorage)؛ «مهم»: بستن فقط تا ورود بعدی (sessionStorage). بیننده با RLS فقط
+  // فعالِ منقضی‌نشده رو می‌گیره؛ مدیر همه رو (فهرست مدیریت) و فیلتر همین‌جا انجام می‌شه.
+  // جدول هنوز ساخته نشده (۴۰۴/۴۰۰) → بی‌صدا هیچی نشون نده؛ صفحه‌ی مدیر راهنمای migration.
+  let ANNOUNCEMENTS = [];
+  let ANN_TABLE_MISSING = false;
+  async function loadAnnouncements(){
+    try{
+      const r = await api('/announcements?select=*&order=created_at.desc&limit=50');
+      ANN_TABLE_MISSING = r.status === 404 || r.status === 400;
+      ANNOUNCEMENTS = r.ok ? await r.json() : [];
+    }catch(e){ ANNOUNCEMENTS = []; }
+  }
+  const annIsLive = a => a.active && (!a.expires_at || new Date(a.expires_at).getTime() > Date.now());
+  const ANN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>';
+  function annItemHtml(a, closable){
+    return `<div class="ann-item ${a.level === 'important' ? 'important' : 'info'}" data-ann="${a.id || ''}"><span class="ann-ic">${ANN_ICON}</span><span class="ann-text">${escHtml(a.message)}</span>${closable ? '<button type="button" class="ann-close" aria-label="بستن اطلاعیه">✕</button>' : ''}</div>`;
+  }
+  function annDismissed(){
+    let a = [], b = [];
+    try{ a = JSON.parse(localStorage.getItem('jarian_ann_dismissed') || '[]'); }catch(e){}
+    try{ b = JSON.parse(sessionStorage.getItem('jarian_ann_dismissed_s') || '[]'); }catch(e){}
+    return new Set([...a, ...b]);
+  }
+  function renderAnnBar(){
+    const bar = document.getElementById('ann-bar');
+    if(!bar) return;
+    const hidden = annDismissed();
+    const list = ANNOUNCEMENTS.filter(a => annIsLive(a) && !hidden.has(a.id)).slice(0, 2);
+    bar.innerHTML = list.map(a => annItemHtml(a, true)).join('');
+    bar.querySelectorAll('.ann-close').forEach(btn => btn.addEventListener('click', () => {
+      const item = btn.closest('.ann-item'); const id = Number(item.dataset.ann);
+      const a = ANNOUNCEMENTS.find(x => x.id === id);
+      const key = a && a.level === 'important' ? 'jarian_ann_dismissed_s' : 'jarian_ann_dismissed';
+      const store = key.endsWith('_s') ? sessionStorage : localStorage;
+      try{ const arr = JSON.parse(store.getItem(key) || '[]'); arr.push(id); store.setItem(key, JSON.stringify(arr.slice(-50))); }catch(e){}
+      renderAnnBar();
+    }));
+  }
+  function updateAnnPreview(){
+    const msg = document.getElementById('ann-msg').value.trim();
+    document.getElementById('ann-counter').textContent = toFaDigits(document.getElementById('ann-msg').value.length) + ' / ۳۰۰';
+    document.getElementById('ann-preview').innerHTML = annItemHtml({ message: msg || 'متن اطلاعیه اینجا نمایش داده می‌شه.', level: document.getElementById('ann-level').value }, false);
+  }
+  function renderAnnAdmin(){
+    document.getElementById('ann-missing').style.display = ANN_TABLE_MISSING ? '' : 'none';
+    document.getElementById('ann-form').style.display = ANN_TABLE_MISSING ? 'none' : '';
+    updateAnnPreview();
+    const el = document.getElementById('ann-list');
+    if(!ANNOUNCEMENTS.length){ el.innerHTML = '<div class="upl-empty">هنوز اطلاعیه‌ای منتشر نشده.</div>'; return; }
+    const fmt = d => new Date(d).toLocaleDateString('fa-IR', { timeZone:'Asia/Tehran', day:'numeric', month:'long' });
+    el.innerHTML = '';
+    ANNOUNCEMENTS.forEach(a => {
+      const live = annIsLive(a);
+      const status = !a.active ? 'متوقف‌شده' : live ? (a.expires_at ? 'فعال تا ' + fmt(a.expires_at) : 'فعال، بدون انقضا') : 'منقضی‌شده';
+      const row = document.createElement('div'); row.className = 'upl-item ann-row' + (live ? ' live' : '');
+      row.innerHTML = `<span class="ann-dot"></span><span class="upl-meta"><b title="${escAttr(a.message)}">${escHtml(a.message)}</b><span>${a.level === 'important' ? 'مهم، ' : ''}${fmt(a.created_at)}، ${status}</span></span>
+        ${live ? '<button type="button" class="upl-del ann-stop">توقف</button>' : ''}<button type="button" class="upl-del ann-del">حذف</button>`;
+      const stop = row.querySelector('.ann-stop');
+      if(stop) stop.addEventListener('click', () => updateAnnouncement(a.id, { active:false }, 'اطلاعیه متوقف شد'));
+      row.querySelector('.ann-del').addEventListener('click', () => { if(confirm('این اطلاعیه حذف شود؟')) updateAnnouncement(a.id, null, 'اطلاعیه حذف شد'); });
+      el.appendChild(row);
+    });
+  }
+  async function updateAnnouncement(id, patch, okMsg){
+    try{
+      const r = await api('/announcements?id=eq.' + id, patch ? { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify(patch) } : { method:'DELETE' });
+      if(!r.ok) throw new Error('ann ' + r.status);
+      await loadAnnouncements(); renderAnnAdmin(); renderAnnBar(); showToast(okMsg);
+    }catch(e){ console.error(e); showToast('انجام نشد'); }
+  }
+  async function publishAnnouncement(){
+    const msg = document.getElementById('ann-msg').value.trim();
+    if(!msg){ showToast('متن اطلاعیه را بنویسید'); return; }
+    const days = Number(document.getElementById('ann-exp').value);
+    const btn = document.getElementById('ann-publish');
+    btn.disabled = true; btn.textContent = 'در حال انتشار…';
+    try{
+      const body = { message: msg, level: document.getElementById('ann-level').value, expires_at: days ? new Date(Date.now() + days*86400000).toISOString() : null };
+      const r = await api('/announcements', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify(body) });
+      if(!r.ok) throw new Error('ann ' + r.status);
+      document.getElementById('ann-msg').value = '';
+      await loadAnnouncements(); renderAnnAdmin(); renderAnnBar(); showToast('اطلاعیه منتشر شد');
+    }catch(e){ console.error(e); showToast('انتشار ناموفق بود'); }
+    finally{ btn.disabled = false; btn.textContent = 'انتشار اطلاعیه'; }
+  }
+  document.getElementById('ann-msg').addEventListener('input', updateAnnPreview);
+  document.getElementById('ann-level').addEventListener('change', updateAnnPreview);
+
   // ---- «بارگذاری محتوا» ----
   let UPLOADS_TAB = 'magazines';
   function setUploadsTab(tab){
@@ -7494,7 +7653,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.10.0';
+  const APP_VERSION = '5.11.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
