@@ -1569,7 +1569,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۹.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۹.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2601,7 +2601,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۹.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۹.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3050,7 +3050,7 @@
     if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
     if(key === 'feedback') loadFeedbackList().then(()=>{ renderFeedbackList(); markFeedbackSeen(); });
     if(key === 'export') loadNotifySubscribers().then(renderNotifySubscribers);
-    if(key === 'status') renderSystemStatus();
+    if(key === 'status'){ renderSystemStatus(); ackAdminAlerts(); }
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
     if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
     // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
@@ -3646,8 +3646,14 @@
   // «سرویس‌های مرتبط» و نتیجه‌ی گیت‌هاب (که لیارا/سهمیه‌ی API رو مصرف می‌کنن).
   // «نظرات خونده‌نشده» نسبت به آخرین باری که همین مرورگر بخش نظرات رو باز کرده
   // (localStorage) — بار اول از همون لحظه شمرده می‌شه.
+  // «دیده شد» (خواست کاربر، تا هشدار زردِ طولانی چشم رو عادت نده): با باز کردن صفحه‌ی
+  // وضعیت، موارد فعلی با سطحشون در jarian_status_ack ذخیره می‌شن و دیگه شمرده نمی‌شن —
+  // مگر مورد جدید باشه یا سطحش بالاتر بره. مورد قرمز همیشه شمرده می‌شه. موردی که
+  // برطرف شد از ack پاک می‌شه تا اگه برگشت، دوباره «جدید» باشه.
   const FEEDBACK_SEEN_KEY = 'jarian_feedback_seen';
+  const STATUS_ACK_KEY = 'jarian_status_ack';
   let ADMIN_ALERT_TIMER = null;
+  let ADMIN_ISSUES = []; // [{key, cls, msg}]
   async function refreshAdminAlerts(){
     clearTimeout(ADMIN_ALERT_TIMER);
     if(currentRole !== 'app_admin' || !authToken) return;
@@ -3655,15 +3661,15 @@
     const rank = { '':0, ok:0, warn:1, bad:2 };
     let level = '';
     const issues = [];
-    const note = (cls, msg) => { if(rank[cls] > 0){ issues.push(msg); if(rank[cls] > rank[level]) level = cls; } };
+    const note = (cls, msg, key) => { if(rank[cls] > 0) issues.push({ key, cls, msg }); };
     const jobChecks = SYS_STATUS_JOBS.map(async j=>{
       try{
-        if(j.custom){ const r = await j.custom(); note(r.cls, j.name + ': ' + r.when); return; }
+        if(j.custom){ const r = await j.custom(); note(r.cls, j.name + ': ' + r.when, 'job:' + j.job); return; }
         const r = await api(j.path); if(!r.ok) return;
         const rows = await r.json(); const at = rows[0] ? rows[0][j.col] : null;
-        if(!at){ note('bad', j.name + ': هنوز خروجی ندارد'); return; }
+        if(!at){ note('bad', j.name + ': هنوز خروجی ندارد', 'job:' + j.job); return; }
         const hours = (Date.now() - new Date(at).getTime()) / 3600000;
-        note(hours >= j.bad ? 'bad' : hours >= j.warn ? 'warn' : 'ok', j.name + ': آخرین خروجی ' + newsRelTime(at));
+        note(hours >= j.bad ? 'bad' : hours >= j.warn ? 'warn' : 'ok', j.name + ': آخرین خروجی ' + newsRelTime(at), 'job:' + j.job);
       }catch(e){}
     });
     const storageCheck = (async()=>{
@@ -3671,19 +3677,19 @@
         const r = await api('/rpc/storage_usage', { method:'POST', body:'{}' }); if(!r.ok) return;
         const total = (await r.json()).reduce((t,x)=>t + Number(x.size_bytes||0), 0);
         const pct = total / (STORAGE_LIMIT_MB*1048576) * 100;
-        note(pct >= 85 ? 'bad' : pct >= 65 ? 'warn' : 'ok', 'فضای ذخیره‌سازی: ' + toFaDigits(pct.toFixed(0)) + '٪ پر');
+        note(pct >= 85 ? 'bad' : pct >= 65 ? 'warn' : 'ok', 'فضای ذخیره‌سازی: ' + toFaDigits(pct.toFixed(0)) + '٪ پر', 'storage');
       }catch(e){}
     })();
     const loginCheck = (async()=>{
       try{
         const since = new Date(Date.now() - 86400000).toISOString();
         const n = await fetchExactCount('/login_events?success=is.false&created_at=gt.' + since);
-        note(n >= 20 ? 'bad' : n >= 5 ? 'warn' : 'ok', 'تلاش ناموفق ورود در ۲۴ ساعت: ' + faNum(n));
+        note(n >= 20 ? 'bad' : n >= 5 ? 'warn' : 'ok', 'تلاش ناموفق ورود در ۲۴ ساعت: ' + faNum(n), 'logins');
       }catch(e){}
     })();
     SYS_TOKENS.forEach(t=>{
       const days = Math.ceil((new Date(t.exp + 'T00:00:00Z').getTime() - Date.now()) / 86400000);
-      note(days <= 7 ? 'bad' : days <= 21 ? 'warn' : 'ok', 'توکن «' + t.name + '»: ' + (days < 0 ? 'منقضی شده' : toFaDigits(days) + ' روز مانده'));
+      note(days <= 7 ? 'bad' : days <= 21 ? 'warn' : 'ok', 'توکن «' + t.name + '»: ' + (days < 0 ? 'منقضی شده' : toFaDigits(days) + ' روز مانده'), 'token:' + t.key);
     });
     const feedbackCheck = (async()=>{
       let seen = null;
@@ -3693,13 +3699,39 @@
     })();
     await Promise.all([...jobChecks, storageCheck, loginCheck]);
     const unread = await feedbackCheck;
-    const dot = document.getElementById('am-status-dot');
-    dot.className = 'am-dot' + (level ? ' ' + level : '');
-    dot.textContent = issues.length ? toFaDigits(issues.length) : '';
-    const statusBtn = dot.closest('button');
-    statusBtn.title = issues.length ? 'نیاز به توجه:\n' + issues.join('\n') : '';
+    ADMIN_ISSUES = issues;
+    // موارد برطرف‌شده از «دیده شد» پاک بشن
+    const ack = statusAckGet();
+    Object.keys(ack).forEach(k=>{ if(!issues.some(x=>x.key === k)) delete ack[k]; });
+    statusAckSet(ack);
+    // اگه همین الان توی صفحه‌ی وضعیت هستیم (مثلاً رفرش روی همین صفحه)، همه دیده‌شده‌ان
+    if(document.getElementById('sec-status').classList.contains('active')) ackAdminAlerts(); else renderAdminStatusDot();
     setFeedbackBadge(unread);
     updateAdminBtnDot();
+  }
+  function statusAckGet(){ try{ return JSON.parse(localStorage.getItem(STATUS_ACK_KEY) || '{}') || {}; }catch(e){ return {}; } }
+  function statusAckSet(o){ try{ localStorage.setItem(STATUS_ACK_KEY, JSON.stringify(o)); }catch(e){} }
+  function renderAdminStatusDot(){
+    const rank = { warn:1, bad:2 };
+    const ack = statusAckGet();
+    // قرمز همیشه؛ زرد فقط اگه دیده‌نشده یا سطحش از زمان دیدن بالاتر رفته
+    const fresh = ADMIN_ISSUES.filter(x => x.cls === 'bad' || !ack[x.key] || rank[x.cls] > (rank[ack[x.key]] || 0));
+    const level = fresh.some(x=>x.cls === 'bad') ? 'bad' : fresh.length ? 'warn' : '';
+    const dot = document.getElementById('am-status-dot');
+    dot.className = 'am-dot' + (level ? ' ' + level : '');
+    dot.textContent = fresh.length ? toFaDigits(fresh.length) : '';
+    const statusBtn = dot.closest('button');
+    const seen = ADMIN_ISSUES.filter(x=>!fresh.includes(x));
+    statusBtn.title = (fresh.length ? 'نیاز به توجه:\n' + fresh.map(x=>x.msg).join('\n') : '') +
+      (seen.length ? (fresh.length ? '\n\n' : '') + 'دیده‌شده (هنوز برقرار):\n' + seen.map(x=>x.msg).join('\n') : '');
+    updateAdminBtnDot();
+  }
+  // با باز کردن صفحه‌ی «وضعیت سامانه»
+  function ackAdminAlerts(){
+    const ack = statusAckGet();
+    ADMIN_ISSUES.forEach(x=>{ ack[x.key] = x.cls; });
+    statusAckSet(ack);
+    renderAdminStatusDot();
   }
   function setFeedbackBadge(n){
     const b = document.getElementById('am-feedback-badge');
@@ -7296,7 +7328,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.9.0';
+  const APP_VERSION = '5.9.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
