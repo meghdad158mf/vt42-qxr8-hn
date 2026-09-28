@@ -442,26 +442,35 @@
   .dash-hero-stat-bar{ width:16px; height:2px; border-radius:2px; background: rgba(234,179,147,0.4); margin:7px 0; transition: width .25s ease, background .25s ease; }
   .dash-hero-stat span{ font-size:10.5px; color: rgba(255,255,255,0.62); }
 
-  /* دو کارت راهنمای سریع — حالا داخل ستون متن هرو، کنار تیتر (جای پنل
-     آماری قدیم)، فشرده و بدون توضیح تا کوچک بمونن */
-  .quicknav-grid{ display:flex; justify-content:center; gap:10px; margin-top:22px; }
-  @media (max-width:520px){ .quicknav-grid{ flex-direction:column; align-items:center; } }
-  .quicknav-card{
-    width:fit-content; display:flex; align-items:center; gap:7px;
-    background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-card);
-    padding:8px 14px 8px 20px; box-shadow: var(--shadow); cursor:pointer;
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  /* دسترسی سریع هرو — «کپسول» دوتکه‌ی شیشه‌ای با حاشیه و هاله‌ی هلویی (شکل گرد تا
+     با کارت‌های مربعی آمار زیرش فرق داشته باشه) + برق نرمی که هر ۶ ثانیه از روش رد
+     می‌شه تا دیده بشه (انتخاب کاربر از ۸ مدل). نیمه‌ی زیر ماوس هلویی پر می‌شه. */
+  .quicknav{ display:flex; justify-content:center; margin-top:26px; }
+  .qn-capsule{
+    position:relative; overflow:hidden; display:inline-flex; align-items:center; padding:5px; border-radius:999px;
+    background: rgba(234,179,147,0.07); border:1px solid rgba(234,179,147,0.55);
+    box-shadow: 0 0 0 4px rgba(234,179,147,0.06), 0 10px 26px -14px rgba(234,179,147,0.55);
+    backdrop-filter: blur(6px);
   }
-  .quicknav-card:hover{ transform:translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--accent); }
-  .quicknav-card:active{ transform:translateY(-1px); }
-  .quicknav-card h3{ font-size:11px; font-weight:800; color: var(--navy); margin:0; text-align:center; }
-  .quicknav-arrow{ /* نشونه‌ی بصری کلیک‌پذیر بودن کارت — یه دایره‌ی هلویی‌رنگ با فلش رو به پایین (چون کلیک، توی همون صفحه اسکرول می‌کنه) */
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
-    width:17px; height:17px; border-radius:50%; background: var(--accent); color:#fff; font-size:9px; line-height:1;
-    box-shadow: 0 0 9px 1px rgba(234,179,147,0.55);
-    transition: transform .2s ease, box-shadow .2s ease;
+  .qn-capsule::before{
+    content:''; position:absolute; top:0; bottom:0; width:40%; left:-45%; pointer-events:none;
+    background: linear-gradient(100deg, transparent, rgba(255,236,222,0.28), transparent);
+    animation: qnShine 6s ease-in-out 1.2s infinite;
   }
-  .quicknav-card:hover .quicknav-arrow{ transform: translateY(2px); box-shadow: 0 0 13px 2px rgba(234,179,147,0.75); }
+  @keyframes qnShine{ 0%{ left:-45%; } 22%{ left:105%; } 100%{ left:105%; } }
+  @media (prefers-reduced-motion: reduce){ .qn-capsule::before{ animation:none; display:none; } }
+  .qn-sep{ width:1px; height:22px; background: rgba(234,179,147,0.35); margin:0 2px; }
+  .qn-btn{
+    position:relative; z-index:1; display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+    font: 800 13.5px 'IRANSansX',Tahoma,sans-serif; color:#fff; background:none; border:0;
+    padding:10px 18px; border-radius:999px; cursor:pointer; transition: background .2s ease, color .2s ease;
+  }
+  .qn-btn svg{ width:17px; height:17px; color: var(--accent); transition: color .2s ease, transform .2s ease; }
+  .qn-btn svg.qn-down{ width:14px; height:14px; opacity:.8; }
+  .qn-btn:hover, .qn-btn:focus-visible{ background: var(--accent); color: var(--primary); outline:none; }
+  .qn-btn:hover svg, .qn-btn:focus-visible svg{ color: var(--primary); }
+  .qn-btn:hover svg.qn-down{ transform: translateY(2px); }
+  @media (max-width:520px){ .qn-btn{ padding:9px 11px; font-size:12px; gap:5px; } .qn-btn svg.qn-down{ display:none; } }
 
   /* «چرا جریان» — سه ستون معرفی مزیت اصلی، این‌بار داخل یه کادر یکپارچه‌ی
      تمام‌عرض با زمینه‌ی رنگی (عیناً همون ته‌رنگ هلویی .package-card)، نه
@@ -1538,7 +1547,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۶</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۷</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1750,14 +1759,11 @@
       <div class="dash-hero-grid">
         <div class="dash-hero-text">
           <h2>نبض <span class="hl">فضای سیاسی اجتماعی</span><br><span class="hero-subline">به روایت حوزه علمیه خراسان</span></h2>
-          <div class="quicknav-grid">
-            <div class="quicknav-card" onclick="scrollToDomainGrid()">
-              <h3>عرصه‌های رصد</h3>
-              <span class="quicknav-arrow">↓</span>
-            </div>
-            <div class="quicknav-card" onclick="scrollToPackageCard()">
-              <h3>بسته‌های تحلیلی</h3>
-              <span class="quicknav-arrow">↓</span>
+          <div class="quicknav">
+            <div class="qn-capsule">
+              <button type="button" class="qn-btn" onclick="scrollToDomainGrid()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.4-6.4"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="15.6" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg><span>عرصه‌های رصد</span><svg class="qn-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+              <span class="qn-sep" aria-hidden="true"></span>
+              <button type="button" class="qn-btn" onclick="scrollToPackageCard()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h4"/></svg><span>بسته‌های تحلیلی</span><svg class="qn-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
             </div>
           </div>
         </div>
@@ -2570,7 +2576,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۸.۶</span></small>
+          <small>ویرایش <span class="app-version">۵.۸.۷</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -7178,7 +7184,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.8.6';
+  const APP_VERSION = '5.8.7';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
