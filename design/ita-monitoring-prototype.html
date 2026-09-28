@@ -698,7 +698,7 @@
 
   /* اخبار رسمی — بخش مطالعه (فاز ۱، بدون فیلتر/ترجمه‌ی هوشمند) */
   /* تب‌بار همه‌ی بخش‌ها (بدون خط پایه — زیر هدر خودش خط هست، به خواست کاربر): خط هلویی لغزان (.tab-ink، با setupTabBars/updateTabInk)
-     + آیکون کنار هر تب (data-ic → TAB_ICONS) + نقطه‌ی «جدید» (.tab-dot) + چسبان هنگام اسکرول */
+     + آیکون کنار هر تب (data-ic → TAB_ICONS) + چسبان هنگام اسکرول */
   .news-page-tabs{ display:flex; gap:4px; margin-bottom:16px; position:sticky; top:0; z-index:30;
     transition: background .2s ease, box-shadow .2s ease; }
   /* فقط وقتی به بالای صفحه چسبیده (روی محتوا) پس‌زمینه می‌گیره — updateStuckTabBars */
@@ -710,7 +710,6 @@
   .news-page-tabs button:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
   .news-page-tabs .tab-ic{ width:16px; height:16px; flex-shrink:0; opacity:.75; }
   .news-page-tabs button.active .tab-ic{ opacity:1; color: var(--accent); }
-  .news-page-tabs .tab-dot{ width:7px; height:7px; border-radius:50%; background: var(--accent); box-shadow:0 0 0 3px rgba(234,179,147,0.18); flex-shrink:0; }
   .tab-ink{ position:absolute; bottom:0; left:0; height:3px; width:0; border-radius:3px; background: var(--accent); pointer-events:none; transition: transform .32s cubic-bezier(.22,1,.36,1), width .32s cubic-bezier(.22,1,.36,1); }
   .tab-ink.no-anim{ transition:none; }
   @media (prefers-reduced-motion: reduce){ .tab-ink{ transition:none; } }
@@ -1893,11 +1892,11 @@
     <section class="section" id="sec-overview">
 
       <div class="news-page-tabs">
-        <button class="active" id="news-tab-analytics" data-ic="analytics" data-dot="" onclick="setNewsPageTab('analytics')">در یک نگاه</button>
-        <button id="news-tab-claims" data-ic="claims" data-dot="claims" onclick="setNewsPageTab('claims')">ادعاها و شایعات</button>
-        <button id="news-tab-study" data-ic="study" data-dot="study" onclick="setNewsPageTab('study')">شبکه‌های اجتماعی</button>
-        <button id="news-tab-website" data-ic="website" data-dot="website" onclick="setNewsPageTab('website')">وب‌سایت‌ها</button>
-        <button id="news-tab-newspapers" data-ic="newspapers" data-dot="newspapers" onclick="setNewsPageTab('newspapers')">روزنامه‌ها</button>
+        <button class="active" id="news-tab-analytics" data-ic="analytics" onclick="setNewsPageTab('analytics')">در یک نگاه</button>
+        <button id="news-tab-claims" data-ic="claims" onclick="setNewsPageTab('claims')">ادعاها و شایعات</button>
+        <button id="news-tab-study" data-ic="study" onclick="setNewsPageTab('study')">شبکه‌های اجتماعی</button>
+        <button id="news-tab-website" data-ic="website" onclick="setNewsPageTab('website')">وب‌سایت‌ها</button>
+        <button id="news-tab-newspapers" data-ic="newspapers" onclick="setNewsPageTab('newspapers')">روزنامه‌ها</button>
         <button id="news-tab-dossier" data-ic="dossier" onclick="setNewsPageTab('dossier')">پرونده‌های موضوعی</button>
         <button id="news-tab-newsletter" data-ic="newsletter" onclick="setNewsPageTab('newsletter')">خبرنامه مدارس</button>
       </div>
@@ -2202,7 +2201,7 @@
          (placeNewsStudyPanel) — نه کپی، تا idها تکراری نشن -->
     <section class="section" id="sec-hawza">
       <div class="news-page-tabs" id="hawza-page-tabs">
-        <button class="active" id="hawza-tab-news" data-ic="hawza" data-dot="hawza" onclick="setHawzaTab('news')">اخبار حوزه</button>
+        <button class="active" id="hawza-tab-news" data-ic="hawza" onclick="setHawzaTab('news')">اخبار حوزه</button>
         <button disabled data-ic="about">درباره حوزه<span class="news-soon">به‌زودی</span></button>
       </div>
       <p class="news-tab-subtitle" id="hawza-tab-subtitle"><span>اخبار سیاسی و اجتماعی منتشرشده در پایگاه‌های خبری حوزوی.</span></p>
@@ -2970,8 +2969,8 @@
     archive: 'تولیدات تحلیلی سایر نهادها، جدا از بسته‌های تحلیلی خودِ جریان.'
   };
 
-  // ---- تب‌بارها (همه‌ی بخش‌ها): آیکون، خط هلویی لغزان، نقطه‌ی «جدید»، سایه‌ی لبه‌ی
-  // گوشی، رفتن تب فعال به دید و یادآوری آخرین تب. آیکون از data-ic، نقطه از data-dot.
+  // ---- تب‌بارها (همه‌ی بخش‌ها): آیکون، خط هلویی لغزان، سایه‌ی لبه‌ی گوشی، رفتن
+  // تب فعال به دید و یادآوری آخرین تب. آیکون از data-ic.
   const TAB_ICONS = {
     analytics: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
     claims: '<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/>',
@@ -3036,7 +3035,6 @@
       bar.querySelectorAll('button').forEach(b=>{
         const ic = TAB_ICONS[b.dataset.ic];
         if(ic) b.insertAdjacentHTML('afterbegin', `<svg class="tab-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>`);
-        if(b.dataset.dot) b.insertAdjacentHTML('beforeend', '<span class="tab-dot" hidden title="مطلب تازه از آخرین بازدید"></span>');
         // تغییر کلاس active (از هر هندلری) → خط هلویی به تب جدید سُر می‌خوره
         new MutationObserver(()=>updateTabInk(bar)).observe(b, { attributes:true, attributeFilter:['class'] });
       });
@@ -3048,44 +3046,6 @@
     if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>refreshAllTabBars(true));
   }
 
-  // نقطه‌ی «جدید»: جدیدترین مطلب هر تب (زمان جمع‌آوری) نسبت به آخرین بازدید همون تب
-  // در همین مرورگر (localStorage، کلید jarian_tab_seen). بار اول بدون نقطه شروع می‌شه.
-  const TAB_SEEN_KEY = 'jarian_tab_seen';
-  function tabLatestMs(key){
-    if(key === 'newspapers') return NEWSPAPERS.reduce((m,n)=>Math.max(m, n.scraped_at ? Date.parse(n.scraped_at) : 0), 0);
-    const chMap = new Map(CHANNELS.map(c=>[c.id, c]));
-    const ok = p=>{
-      const c = chMap.get(p.channel_id);
-      if(key === 'hawza') return p.hawza_relevant === true && c && c.show_in_hawza;
-      if(!c || !c.show_in_news) return false;
-      if(key === 'claims') return c.platform === 'bale';
-      if(key === 'website') return c.platform === 'website' && !c.show_in_hawza;
-      if(key === 'study') return c.platform !== 'website' && c.platform !== 'bale';
-      return false;
-    };
-    let m = 0;
-    for(const p of POSTS_CACHE){ if(p.scraped_at && ok(p)){ const t = Date.parse(p.scraped_at); if(t > m) m = t; } }
-    return m;
-  }
-  function refreshTabDots(){
-    const seen = lsGet(TAB_SEEN_KEY, {});
-    let changed = false;
-    document.querySelectorAll('.news-page-tabs button[data-dot]').forEach(b=>{
-      const k = b.dataset.dot, dot = b.querySelector('.tab-dot');
-      if(!k || !dot) return;
-      if(seen[k] == null){ seen[k] = Date.now(); changed = true; }
-      const latest = tabLatestMs(k);
-      dot.hidden = !(latest > seen[k]);
-    });
-    if(changed) lsSet(TAB_SEEN_KEY, seen);
-  }
-  function markTabSeen(key){
-    if(!key) return;
-    const seen = lsGet(TAB_SEEN_KEY, {});
-    seen[key] = Date.now();
-    lsSet(TAB_SEEN_KEY, seen);
-    document.querySelectorAll(`.news-page-tabs button[data-dot="${key}"] .tab-dot`).forEach(d=>{ d.hidden = true; });
-  }
   // «کنشگری مجازی» و «یادداشت‌ها»: آخرین تب باز‌شده با ورود ساده به بخش برمی‌گرده
   function restoreLastTab(barId, dataKey, storeKey){
     const want = lsGet(storeKey, null);
@@ -3131,7 +3091,6 @@
   function setHawzaTab(tab){
     // فعلاً فقط «اخبار حوزه»؛ «درباره حوزه» به‌زودی
     placeNewsStudyPanel('hawza');
-    markTabSeen('hawza');
     document.getElementById('news-study-panel').style.display = '';
     document.getElementById('news-feed').classList.remove('social-tab');
     activateNewsStudy('hawza');
@@ -3140,7 +3099,6 @@
   function setNewsPageTab(tab){
     NEWS_CURRENT_TAB = tab;
     lsSet('jarian_last_news_tab', tab);
-    markTabSeen(tab);
     placeNewsStudyPanel('overview');
     const subEl = document.getElementById('news-tab-subtitle');
     if(subEl) subEl.querySelector('span').textContent = NEWS_TAB_INFO[tab] || '';
@@ -4731,7 +4689,6 @@
     renderNewspapers();
     populateNewsSourceOptions();
     renderNewsFeed();
-    refreshTabDots();
     renderSchoolReports();
   }
 
