@@ -1515,7 +1515,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۲</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2306,6 +2306,7 @@
         </div>
         <p class="posts-empty" id="posts-empty" style="display:none;">پستی با این فیلتر پیدا نشد.</p>
         <div class="news-feed grid-view social-tab" id="posts-list"></div>
+        <div class="news-pagination" id="posts-pagination"></div>
       </div>
 
       <div id="posts-tab-people" style="display:none;">
@@ -2524,7 +2525,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۸.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۸.۲</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -4361,19 +4362,22 @@
   }
 
   function renderNewsPagination(totalPages){
-    const wrap = document.getElementById('news-pagination');
+    renderPagination('news-pagination', newsState.page, totalPages, 'goNewsPage');
+  }
+  // دکمه‌های صفحه‌بندی مشترک (اخبار و رویدادها، پست‌های کنشگری مجازی)
+  function renderPagination(wrapId, cur, totalPages, goFn){
+    const wrap = document.getElementById(wrapId);
     if(!wrap) return;
     if(totalPages <= 1){ wrap.innerHTML = ''; return; }
-    const cur = newsState.page;
     const pages = [...new Set([1, totalPages, cur-1, cur, cur+1].filter(p=>p>=1 && p<=totalPages))].sort((a,b)=>a-b);
-    let html = `<button ${cur===1?'disabled':''} onclick="goNewsPage(${cur-1})">قبلی</button>`;
+    let html = `<button ${cur===1?'disabled':''} onclick="${goFn}(${cur-1})">قبلی</button>`;
     let prev = 0;
     pages.forEach(p=>{
       if(prev && p - prev > 1) html += `<span class="dots">…</span>`;
-      html += `<button class="${p===cur?'active':''}" onclick="goNewsPage(${p})">${toFaDigits(p)}</button>`;
+      html += `<button class="${p===cur?'active':''}" onclick="${goFn}(${p})">${toFaDigits(p)}</button>`;
       prev = p;
     });
-    html += `<button ${cur===totalPages?'disabled':''} onclick="goNewsPage(${cur+1})">بعدی</button>`;
+    html += `<button ${cur===totalPages?'disabled':''} onclick="${goFn}(${cur+1})">بعدی</button>`;
     wrap.innerHTML = html;
   }
 
@@ -5181,11 +5185,28 @@
   // ظاهر کارت‌های این صفحه دقیقاً همون کارت‌های تب «شبکه‌های اجتماعی» توی
   // اخبار رسمی‌ه (همون کلاس‌های news-card/news-thumb/news-text و...) —
   // فقط منبع داده و فیلترها فرق داره (filteredPosts به‌جای filteredNewsPosts)
+  // صفحه‌بندی فید پست‌ها (همون اندازه‌ی صفحه‌ی اخبار). با عوض شدن هر فیلتر
+  // (امضای postsFilterKey) به صفحه‌ی ۱ برمی‌گرده؛ رفرش داده صفحه رو نگه می‌داره
+  let postsPage = 1, postsFilterSig = '';
+  function postsFilterKey(){
+    return JSON.stringify([filterCatEl.value, filterTimeEl.value, searchEl.value.trim(), postsGroupFilter, postsSelectedChannels]);
+  }
+  function goPostsPage(p){
+    postsPage = p;
+    renderPosts();
+    const anchor = document.getElementById('posts-page-tabs');
+    if(anchor) anchor.scrollIntoView({behavior:'smooth', block:'start'});
+  }
   function renderPosts(){
     updateMobileFilterBadges();
     const filtered = filteredPosts();
     postsEmpty.style.display = filtered.length ? 'none' : 'block';
-    const list = filtered.slice(0,150);
+    const sig = postsFilterKey();
+    if(sig !== postsFilterSig){ postsFilterSig = sig; postsPage = 1; }
+    const totalPages = Math.max(1, Math.ceil(filtered.length / NEWS_PAGE_SIZE));
+    postsPage = Math.min(Math.max(1, postsPage), totalPages);
+    const list = filtered.slice((postsPage - 1) * NEWS_PAGE_SIZE, postsPage * NEWS_PAGE_SIZE);
+    renderPagination('posts-pagination', postsPage, totalPages, 'goPostsPage');
     postsList.innerHTML = list.map(p=>{
       const ch = chById(p.channel_id) || {};
       const topic = catNameOf(p.channel_id);
@@ -7112,7 +7133,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.8.1';
+  const APP_VERSION = '5.8.2';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
