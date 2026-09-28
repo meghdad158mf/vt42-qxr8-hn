@@ -20,9 +20,8 @@
 // شدن، نیازی به تنظیم دوباره نیست.
 
 import { fetchRecentNewsPostsForUser } from "../_shared/auth.ts";
+import { liaraChat, mapLimit } from "../_shared/liara.ts";
 
-const LIARA_BASE_URL = "https://ai.liara.ir/api/6a9271a1d6564b043acdefe1/v1";
-const LIARA_MODEL = "openai/gpt-4o-mini";
 const DEFAULT_WINDOW_HOURS = 6;
 const MAX_POSTS_TO_MODEL = 150;
 const TEXT_TRUNCATE = 220;
@@ -66,7 +65,6 @@ Deno.serve(async (req) => {
       text: (p.text || "").slice(0, TEXT_TRUNCATE),
     }));
 
-    const liaraKey = Deno.env.get("LIARA_API_KEY");
     const SYSTEM_PROMPT =
               "You analyze a batch of Persian/English news posts (each with an id, source, title, text) from the " +
               `last ${windowHours} hours and produce two things:\n` +
@@ -84,36 +82,22 @@ Deno.serve(async (req) => {
     type Insight = { selected_posts?: Array<{ id: number; headline?: string }>; topics?: Array<{ name: string; weight?: number }> };
 
     async function callAi(items: typeof compact): Promise<Insight> {
-      const aiRes = await fetch(`${LIARA_BASE_URL}/chat/completions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${liaraKey}` },
-        body: JSON.stringify({
-          model: LIARA_MODEL,
-          temperature: 0.2,
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: JSON.stringify(items) },
-          ],
-        }),
-      });
-      if (!aiRes.ok) throw new Error(`ai ${aiRes.status}: ${(await aiRes.text()).slice(0, 300)}`);
-      const aiData = await aiRes.json();
-      let content: string = aiData?.choices?.[0]?.message?.content || "{}";
-      content = content.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```\s*$/, "");
+      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.2);
       try {
         return JSON.parse(content);
       } catch {
-        return {};
+        throw new Error(`ai returned invalid json: ${content.slice(0, 200)}`);
       }
     }
 
-    // ⚠️ مهر ۱۴۰۵: لیارا روی دسته‌ی کامل با خطای ۵۰۰ جواب می‌داد (درخواست
-    // تک‌پستی ترجمه سالم بود). اول کل دسته امتحان می‌شه؛ اگه خطا داد، دسته
-    // به تکه‌های CHUNK_SIZE تایی (موازی) تقسیم می‌شه؛ اگه هیچ تکه‌ای موفق
-    // نشد یعنی مشکل از خودِ لیاراست و ۵۰۲ برمی‌گرده؛ وگرنه تکه‌های ناموفق
-    // نصف‌نصف می‌شن (تا MIN_SPLIT) تا پست مشکل‌دار کنار بره و نتیجه‌ها ادغام می‌شن.
-    const CHUNK_SIZE = 20;
-    const MIN_SPLIT = 5;
+    // ⚠️ مهر ۱۴۰۵: لیارا درخواست‌هایی که جوابشون طول می‌کشید رو بعد از ~۱۸
+    // ثانیه با ۵۰۰ رد می‌کرد (ترجمه‌ی تک‌پستی سالم بود). حالا جواب stream
+    // می‌شه (_shared/liara.ts) و اگه کل دسته باز هم خطا داد، دسته پله‌پله
+    // کوچیک‌تر می‌شه (۲۰تایی، بعد ۵تایی؛ حداکثر ۴ درخواست هم‌زمان) و نتیجه‌ها
+    // ادغام می‌شن. هر پله با یه موج ۴تایی امتحان می‌شه؛ اگه هیچ‌کدوم موفق نشد
+    // پله‌ی بعدی. تکه‌ی ناموفق در پله‌ی موفق کنار گذاشته می‌شه (برای خلاصه‌ی
+    // دوره‌ای چند پست کمتر مهم نیست). اگه هیچ فراخوانی موفق نشد → ۵۰۲.
+    const CONCURRENCY = 4;
     let aiSuccesses = 0;
     let lastError = "";
     async function tryAi(items: typeof compact): Promise<Insight | null> {
@@ -126,28 +110,15 @@ Deno.serve(async (req) => {
         return null;
       }
     }
-    async function bisect(items: typeof compact): Promise<Insight[]> {
-      if (items.length <= MIN_SPLIT) return [];
-      const mid = Math.ceil(items.length / 2);
-      const halves = [items.slice(0, mid), items.slice(mid)];
-      const res = await Promise.all(halves.map(tryAi));
-      const out: Insight[] = [];
-      for (let i = 0; i < 2; i++) out.push(...(res[i] ? [res[i] as Insight] : await bisect(halves[i])));
-      return out;
-    }
     let parts: Insight[] = [];
-    const full = await tryAi(compact);
-    if (full) {
-      parts = [full];
-    } else if (compact.length > CHUNK_SIZE) {
+    for (const size of [...new Set([compact.length, 20, 5])].filter((n) => n <= compact.length)) {
       const chunks: (typeof compact)[] = [];
-      for (let i = 0; i < compact.length; i += CHUNK_SIZE) chunks.push(compact.slice(i, i + CHUNK_SIZE));
-      const res = await Promise.all(chunks.map(tryAi));
-      if (aiSuccesses > 0) {
-        for (let i = 0; i < chunks.length; i++) parts.push(...(res[i] ? [res[i] as Insight] : await bisect(chunks[i])));
-      }
-    } else {
-      parts = await bisect(compact);
+      for (let i = 0; i < compact.length; i += size) chunks.push(compact.slice(i, i + size));
+      const wave = await Promise.all(chunks.slice(0, CONCURRENCY).map(tryAi));
+      if (!wave.some(Boolean)) continue;
+      const rest = await mapLimit(chunks.slice(CONCURRENCY), CONCURRENCY, tryAi);
+      parts = [...wave, ...rest].filter((r): r is Insight => r !== null);
+      break;
     }
     if (aiSuccesses === 0) {
       return jsonResponse({ error: "ai request failed", detail: lastError }, 502);
