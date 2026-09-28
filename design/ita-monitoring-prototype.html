@@ -127,6 +127,12 @@
 
   .login-panel{ display:flex; align-items:center; justify-content:center; padding:40px 36px; background: var(--surface); border-radius: var(--radius-card); box-shadow: 0 30px 70px -24px rgba(0,0,0,0.5); }
   .login-form-wrap{ width:100%; max-width:340px; }
+  /* رفرش با نشست معتبر: به‌جای فرم رمز، فقط «در حال بارگذاری» تا loadAll تموم بشه */
+  .login-booting{ display:none; align-items:center; gap:10px; font-size:13px; color: var(--text-faint); }
+  .login-booting::before{ content:''; width:16px; height:16px; border-radius:50%; border:2px solid rgba(234,179,147,0.25); border-top-color: var(--accent); animation: login-spin .8s linear infinite; }
+  @keyframes login-spin{ to{ transform: rotate(360deg); } }
+  #view-login.is-booting .login-form-wrap{ display:none; }
+  #view-login.is-booting .login-booting{ display:flex; }
   .login-form-wrap .back{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color: var(--text-faint); background:none; border:none; cursor:pointer; padding:0; margin-bottom:28px; }
   .login-form-wrap .back:hover{ color: var(--primary-strong); }
   .login-form-wrap h2{ font-size:21px; font-weight:700; margin-bottom:6px; }
@@ -1498,10 +1504,11 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
+      <div class="login-booting" role="status">در حال بارگذاری…</div>
       <div class="login-form-wrap">
         <div class="field">
           <label for="login-password">رمز عبور</label>
@@ -2507,7 +2514,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۸.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۸.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2650,10 +2657,12 @@
     try{
       await loadAll();
       if(SESSION_EXPIRED) throw new Error('session expired');
-      enterDash('dashboard');
+      enterDash(lastSectionKey());
+      document.getElementById('view-login').classList.remove('is-booting');
       return true;
     }catch(e){
       console.error('loadAll failed', e);
+      document.getElementById('view-login').classList.remove('is-booting');
       goLogin();
       if(SESSION_EXPIRED){
         authToken = null; currentRole = null;
@@ -2717,9 +2726,20 @@
     sessionStorage.setItem('jarian_role', currentRole);
   }
 
+  // بخشی که کاربر آخرین بار در این زبانه دیده — تا رفرش صفحه به همون‌جا برگرده
+  // (نه صفحه‌ی نخست). بخش مدیریتی برای بیننده نادیده گرفته می‌شه.
+  function lastSectionKey(){
+    let k = null;
+    try{ k = sessionStorage.getItem('jarian_last_section'); }catch(e){}
+    if(!k || !document.getElementById('sec-'+k)) return 'dashboard';
+    if(ADMIN_ONLY_SECTIONS.includes(k) && currentRole !== 'app_admin') return 'dashboard';
+    return k;
+  }
+
   function logout(){
     authToken = null; currentRole = null;
     sessionStorage.removeItem('jarian_token'); sessionStorage.removeItem('jarian_role');
+    try{ sessionStorage.removeItem('jarian_last_section'); }catch(e){}
     goLogin();
   }
 
@@ -2904,6 +2924,7 @@
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     document.getElementById('sec-'+key).classList.add('active');
     document.getElementById('sec-title').textContent = TITLES[key];
+    try{ sessionStorage.setItem('jarian_last_section', key); }catch(e){}
     // چون بخش‌ها با toggle کلاس روی همون صفحه‌ی بلندِ اسکرول‌شونده عوض
     // می‌شن (نه ناوبری واقعی)، بدون این خط اسکرول قبلی (مثلاً از وسط
     // صفحه‌ی نخست، جایی که کارت‌های عرصه‌های رصد هستن) روی بخش جدید هم
@@ -7061,11 +7082,12 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.8.0';
+  const APP_VERSION = '5.8.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
   if(authToken){
+    document.getElementById('view-login').classList.add('is-booting');
     applyRoleUI();
     loadAllAndEnter();
   }
