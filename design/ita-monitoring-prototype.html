@@ -340,6 +340,21 @@
   }
   .admin-menu-list button:hover{ background: var(--surface-2); color: var(--text); }
   .admin-menu-list svg{ width:14px; height:14px; flex-shrink:0; }
+  /* نشانگرهای هشدار منوی «مدیریت» (refreshAdminAlerts): نقطه‌ی زرد/قرمز کنار «وضعیت
+     سامانه»، شمار نظرهای خونده‌نشده کنار «نظرات کاربران»، و یه نقطه روی خودِ دکمه */
+  /* تعداد مواردی که نیاز به توجه دارن؛ رنگ = بدترین سطح (زرد/قرمز)؛ ریز موارد در title */
+  .am-dot{ margin-inline-start:auto; min-width:18px; height:18px; padding:0 5px; border-radius:9px; display:none; align-items:center; justify-content:center; flex-shrink:0; font-size:10.5px; font-weight:800; color:#fff; line-height:1; }
+  .am-dot.warn{ display:inline-flex; background:#d9a23a; }
+  .am-dot.bad{ display:inline-flex; background:#e05a4f; }
+  .am-badge{ margin-inline-start:auto; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background: var(--accent); color: var(--primary); font-size:10.5px; font-weight:800; display:none; align-items:center; justify-content:center; line-height:1; }
+  .am-badge.show{ display:inline-flex; }
+  #admin-menu-btn{ position:relative; }
+  .am-btn-dot{ position:absolute; top:-3px; inset-inline-start:-3px; width:11px; height:11px; border-radius:50%; border:2px solid var(--primary); display:none; }
+  .am-btn-dot.info{ display:block; background: var(--accent); }
+  .am-btn-dot.warn{ display:block; background:#e0b04a; }
+  .am-btn-dot.bad{ display:block; background:#e05a4f; animation: amPulse 2s ease-in-out infinite; }
+  @keyframes amPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(224,90,79,0.5); } 50%{ box-shadow:0 0 0 5px rgba(224,90,79,0); } }
+  @media (prefers-reduced-motion: reduce){ .am-btn-dot.bad{ animation:none; } }
   .topbar-divider{ width:1px; height:18px; background: rgba(255,255,255,0.34); }
   @media (max-width:640px){
     .topbar{ flex-wrap:nowrap; gap:8px; }
@@ -1554,7 +1569,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۸</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۹.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1631,12 +1646,14 @@
           <button class="chip-btn" id="admin-menu-btn" onclick="toggleAdminMenu()" aria-haspopup="true" aria-expanded="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
             مدیریت
+            <span class="am-btn-dot" id="am-btn-dot" aria-hidden="true"></span>
             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="admin-menu-list" id="admin-menu-list">
             <button onclick="switchSection('status'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
               وضعیت سامانه
+              <span class="am-dot" id="am-status-dot"></span>
             </button>
             <button onclick="switchSection('settings'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
@@ -1649,6 +1666,7 @@
             <button onclick="switchSection('feedback'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-1.2 4.4L21 20l-4.3-1.1a8.5 8.5 0 114.3-7.4z"/></svg>
               نظرات کاربران
+              <span class="am-badge" id="am-feedback-badge"></span>
             </button>
           </div>
         </div>
@@ -2583,7 +2601,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۸.۸</span></small>
+          <small>ویرایش <span class="app-version">۵.۹.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2727,6 +2745,7 @@
       await loadAll();
       if(SESSION_EXPIRED) throw new Error('session expired');
       enterDash(lastSectionKey());
+      setTimeout(refreshAdminAlerts, 2000);
       if(document.body.classList.contains('app-loading')){
         // رفرش: اسکرول همون جایی که کاربر بود (بعد از رسیدن محتوا، تا ارتفاع صفحه درست باشه)
         let y = 0;
@@ -2829,6 +2848,7 @@
     authToken = null; currentRole = null;
     sessionStorage.removeItem('jarian_token'); sessionStorage.removeItem('jarian_role');
     try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); }catch(e){}
+    clearTimeout(ADMIN_ALERT_TIMER);
     goLogin();
   }
 
@@ -3028,7 +3048,7 @@
     if(key === 'overview'){ setNewsPageTab(NEWS_CURRENT_TAB); renderNewsFeed(); renderNewsAnalytics(); }
     if(key === 'hawza') setHawzaTab('news');
     if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
-    if(key === 'feedback') loadFeedbackList().then(renderFeedbackList);
+    if(key === 'feedback') loadFeedbackList().then(()=>{ renderFeedbackList(); markFeedbackSeen(); });
     if(key === 'export') loadNotifySubscribers().then(renderNotifySubscribers);
     if(key === 'status') renderSystemStatus();
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
@@ -3618,6 +3638,88 @@
     }
   }
   const JOB_REQUESTED_AT = {};
+
+  // ---- نشانگرهای هشدار منوی «مدیریت» ----
+  // فقط برای مدیر، ۲ ثانیه بعد از ورود و بعد هر ۱۵ دقیقه. عمداً سبک: همون
+  // بررسی‌های صفحه‌ی «وضعیت سامانه» که فقط یه ردیف/یه عدد می‌خونن (زمان آخرین خروجی
+  // کارها، رسانه‌ی پاک‌نشده، حجم فضا، تلاش ناموفق ورود، انقضای توکن‌ها) — بدون
+  // «سرویس‌های مرتبط» و نتیجه‌ی گیت‌هاب (که لیارا/سهمیه‌ی API رو مصرف می‌کنن).
+  // «نظرات خونده‌نشده» نسبت به آخرین باری که همین مرورگر بخش نظرات رو باز کرده
+  // (localStorage) — بار اول از همون لحظه شمرده می‌شه.
+  const FEEDBACK_SEEN_KEY = 'jarian_feedback_seen';
+  let ADMIN_ALERT_TIMER = null;
+  async function refreshAdminAlerts(){
+    clearTimeout(ADMIN_ALERT_TIMER);
+    if(currentRole !== 'app_admin' || !authToken) return;
+    ADMIN_ALERT_TIMER = setTimeout(refreshAdminAlerts, 15*60000);
+    const rank = { '':0, ok:0, warn:1, bad:2 };
+    let level = '';
+    const issues = [];
+    const note = (cls, msg) => { if(rank[cls] > 0){ issues.push(msg); if(rank[cls] > rank[level]) level = cls; } };
+    const jobChecks = SYS_STATUS_JOBS.map(async j=>{
+      try{
+        if(j.custom){ const r = await j.custom(); note(r.cls, j.name + ': ' + r.when); return; }
+        const r = await api(j.path); if(!r.ok) return;
+        const rows = await r.json(); const at = rows[0] ? rows[0][j.col] : null;
+        if(!at){ note('bad', j.name + ': هنوز خروجی ندارد'); return; }
+        const hours = (Date.now() - new Date(at).getTime()) / 3600000;
+        note(hours >= j.bad ? 'bad' : hours >= j.warn ? 'warn' : 'ok', j.name + ': آخرین خروجی ' + newsRelTime(at));
+      }catch(e){}
+    });
+    const storageCheck = (async()=>{
+      try{
+        const r = await api('/rpc/storage_usage', { method:'POST', body:'{}' }); if(!r.ok) return;
+        const total = (await r.json()).reduce((t,x)=>t + Number(x.size_bytes||0), 0);
+        const pct = total / (STORAGE_LIMIT_MB*1048576) * 100;
+        note(pct >= 85 ? 'bad' : pct >= 65 ? 'warn' : 'ok', 'فضای ذخیره‌سازی: ' + toFaDigits(pct.toFixed(0)) + '٪ پر');
+      }catch(e){}
+    })();
+    const loginCheck = (async()=>{
+      try{
+        const since = new Date(Date.now() - 86400000).toISOString();
+        const n = await fetchExactCount('/login_events?success=is.false&created_at=gt.' + since);
+        note(n >= 20 ? 'bad' : n >= 5 ? 'warn' : 'ok', 'تلاش ناموفق ورود در ۲۴ ساعت: ' + faNum(n));
+      }catch(e){}
+    })();
+    SYS_TOKENS.forEach(t=>{
+      const days = Math.ceil((new Date(t.exp + 'T00:00:00Z').getTime() - Date.now()) / 86400000);
+      note(days <= 7 ? 'bad' : days <= 21 ? 'warn' : 'ok', 'توکن «' + t.name + '»: ' + (days < 0 ? 'منقضی شده' : toFaDigits(days) + ' روز مانده'));
+    });
+    const feedbackCheck = (async()=>{
+      let seen = null;
+      try{ seen = localStorage.getItem(FEEDBACK_SEEN_KEY); }catch(e){}
+      if(!seen){ seen = new Date().toISOString(); try{ localStorage.setItem(FEEDBACK_SEEN_KEY, seen); }catch(e){} }
+      try{ return await fetchExactCount('/feedback?created_at=gt.' + encodeURIComponent(seen)); }catch(e){ return 0; }
+    })();
+    await Promise.all([...jobChecks, storageCheck, loginCheck]);
+    const unread = await feedbackCheck;
+    const dot = document.getElementById('am-status-dot');
+    dot.className = 'am-dot' + (level ? ' ' + level : '');
+    dot.textContent = issues.length ? toFaDigits(issues.length) : '';
+    const statusBtn = dot.closest('button');
+    statusBtn.title = issues.length ? 'نیاز به توجه:\n' + issues.join('\n') : '';
+    setFeedbackBadge(unread);
+    updateAdminBtnDot();
+  }
+  function setFeedbackBadge(n){
+    const b = document.getElementById('am-feedback-badge');
+    b.textContent = n > 99 ? '۹۹+' : toFaDigits(n);
+    b.classList.toggle('show', n > 0);
+    updateAdminBtnDot();
+  }
+  function updateAdminBtnDot(){
+    const st = document.getElementById('am-status-dot').className;
+    const lvl = /\bbad\b/.test(st) ? 'bad' : /\bwarn\b/.test(st) ? 'warn' : document.getElementById('am-feedback-badge').classList.contains('show') ? 'info' : '';
+    const d = document.getElementById('am-btn-dot');
+    d.className = 'am-btn-dot' + (lvl ? ' ' + lvl : '');
+    const btn = document.getElementById('admin-menu-btn');
+    btn.title = lvl === 'bad' || lvl === 'warn' ? 'وضعیت سامانه نیاز به توجه دارد' : lvl === 'info' ? 'نظر جدید کاربران' : '';
+  }
+  function markFeedbackSeen(){
+    const newest = FEEDBACK_LIST && FEEDBACK_LIST[0] && FEEDBACK_LIST[0].created_at;
+    try{ localStorage.setItem(FEEDBACK_SEEN_KEY, newest || new Date().toISOString()); }catch(e){}
+    setFeedbackBadge(0);
+  }
   let SYS_STATUS_TIMER = null;
   // از طریق Edge Function run-job (توکن گیت‌هاب فقط سمت سرور، فقط مدیر)
   async function runJobManually(job, btn){
@@ -7194,7 +7296,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.8.8';
+  const APP_VERSION = '5.9.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
