@@ -1482,7 +1482,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۷.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۷.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1736,14 +1736,6 @@
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-news.webp" alt="" /></div>
           <h3>اخبار و رویدادها</h3>
         </div>
-        <div class="domain-card" onclick="switchSection('posts')">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-cyberspace.webp" alt="" /></div>
-          <h3>کنشگری مجازی</h3>
-        </div>
-        <div class="domain-card" onclick="switchSection('schools')">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-schools.webp" alt="" /></div>
-          <h3>برنامه مدارس</h3>
-        </div>
         <div class="domain-card" onclick="switchSection('people')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-people.webp" alt="" /></div>
           <h3>یادداشت‌ها</h3>
@@ -1752,8 +1744,16 @@
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-hawza.webp" alt="" /></div>
           <h3>درباره حوزه</h3>
         </div>
+        <div class="domain-card" onclick="switchSection('posts')">
+          <div class="domain-icon is-illustrated"><img src="images/domain-icon-cyberspace.webp" alt="" /></div>
+          <h3>کنشگری مجازی</h3>
+        </div>
+        <div class="domain-card" onclick="switchSection('schools')">
+          <div class="domain-icon is-illustrated"><img src="images/domain-icon-schools.webp" alt="" /></div>
+          <h3>برنامه مدارس</h3>
+        </div>
       </div>
-      <p class="domain-caption">جریان این پنج عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، کنشگری فضای مجازی، برنامه‌های آموزشی مدارس، یادداشت‌های مربوط به افراد و مجموعه‌های تأثیرگذار، و اخبار سیاسی‌اجتماعی پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
+      <p class="domain-caption">جریان این پنج عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، یادداشت‌های مربوط به افراد و مجموعه‌های تأثیرگذار، اخبار سیاسی‌اجتماعی پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود، کنشگری فضای مجازی و برنامه‌های آموزشی مدارس. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
 
       <div class="domain-shortcuts">
         <a onclick="goToNewsTab('analytics')">در یک نگاه</a>
@@ -2491,7 +2491,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۷.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۷.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -6936,7 +6936,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.7.0';
+  const APP_VERSION = '5.7.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
