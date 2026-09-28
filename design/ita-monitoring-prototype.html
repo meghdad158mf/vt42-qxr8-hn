@@ -697,18 +697,34 @@
   .post-foot .cat{ color: var(--accent-strong); font-weight:600; }
 
   /* اخبار رسمی — بخش مطالعه (فاز ۱، بدون فیلتر/ترجمه‌ی هوشمند) */
-  .news-page-tabs{ display:flex; gap:26px; margin-bottom:16px; }
-  .news-page-tabs button{ border:none; background:none; color:rgba(255,255,255,0.5); font-size:14px; font-weight:700; padding:11px 2px; cursor:pointer; position:relative; font-family:inherit; white-space:nowrap; }
+  /* تب‌بار همه‌ی بخش‌ها: خط پایه + خط هلویی لغزان (.tab-ink، با setupTabBars/updateTabInk)
+     + آیکون کنار هر تب (data-ic → TAB_ICONS) + نقطه‌ی «جدید» (.tab-dot) + چسبان هنگام اسکرول */
+  .news-page-tabs{ display:flex; gap:4px; margin-bottom:16px; position:sticky; top:0; z-index:30; border-bottom:1px solid rgba(255,255,255,0.10);
+    transition: background .2s ease, box-shadow .2s ease; }
+  /* فقط وقتی به بالای صفحه چسبیده (روی محتوا) پس‌زمینه می‌گیره — updateStuckTabBars */
+  .news-page-tabs.is-stuck{ background: rgba(22,32,42,0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 10px 24px -14px rgba(0,0,0,0.6); }
+  .news-page-tabs button{ border:none; background:none; color:rgba(255,255,255,0.5); font-size:14px; font-weight:700; padding:12px 14px; border-radius:10px 10px 0 0; cursor:pointer; position:relative; font-family:inherit; white-space:nowrap; display:inline-flex; align-items:center; gap:7px; transition: color .15s ease, background .15s ease; }
+  .news-page-tabs button:hover:not(:disabled):not(.active){ color:rgba(255,255,255,0.85); background:rgba(255,255,255,0.04); }
   .news-page-tabs button.active{ color:#fff; }
-  .news-page-tabs button.active::after{ content:''; position:absolute; inset-inline:0; bottom:-1px; height:2px; background:var(--accent); border-radius:2px; }
   .news-page-tabs button:disabled{ cursor:default; opacity:.6; }
+  .news-page-tabs button:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+  .news-page-tabs .tab-ic{ width:16px; height:16px; flex-shrink:0; opacity:.75; }
+  .news-page-tabs button.active .tab-ic{ opacity:1; color: var(--accent); }
+  .news-page-tabs .tab-dot{ width:7px; height:7px; border-radius:50%; background: var(--accent); box-shadow:0 0 0 3px rgba(234,179,147,0.18); flex-shrink:0; }
+  .tab-ink{ position:absolute; bottom:-1px; left:0; height:3px; width:0; border-radius:3px; background: var(--accent); pointer-events:none; transition: transform .32s cubic-bezier(.22,1,.36,1), width .32s cubic-bezier(.22,1,.36,1); }
+  .tab-ink.no-anim{ transition:none; }
+  @media (prefers-reduced-motion: reduce){ .tab-ink{ transition:none; } }
   .news-soon{ font-size:9.5px; font-weight:600; color: var(--accent); background: rgba(234,179,147,0.14); border-radius:100px; padding:2px 7px; margin-inline-start:6px; }
   /* ردیف تب‌ها با تعداد زیاد (مثلاً ۷ تای «اخبار و رویدادها» یا ۵ تای
      «یادداشت‌ها») از عرض موبایل رد می‌شه و باعث اسکرول افقی کل صفحه
      می‌شد — روی موبایل به‌جای شکستن/جمع‌شدن، خودِ ردیف تب‌ها اسکرول
      افقی می‌گیره (الگوی معمول تب‌بار موبایل)، بقیه‌ی صفحه دست‌نخورده می‌مونه */
   @media (max-width:700px){
-    .news-page-tabs{ overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; gap:20px; }
+    .news-page-tabs{ overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; gap:2px;
+      /* سایه‌ی محو لبه‌ها وقتی تب بیشتری بیرون صفحه هست (--fs سمت راست/شروع، --fe سمت چپ/پایان؛ updateTabFade) */
+      -webkit-mask-image: linear-gradient(to left, transparent 0, #000 var(--fs,0px), #000 calc(100% - var(--fe,0px)), transparent 100%);
+              mask-image: linear-gradient(to left, transparent 0, #000 var(--fs,0px), #000 calc(100% - var(--fe,0px)), transparent 100%); }
+    .news-page-tabs button{ padding:11px 11px; }
     .news-page-tabs::-webkit-scrollbar{ display:none; }
   }
 
@@ -1483,7 +1499,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۷.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1877,13 +1893,13 @@
     <section class="section" id="sec-overview">
 
       <div class="news-page-tabs">
-        <button class="active" id="news-tab-analytics" onclick="setNewsPageTab('analytics')">در یک نگاه</button>
-        <button id="news-tab-claims" onclick="setNewsPageTab('claims')">ادعاها و شایعات</button>
-        <button id="news-tab-study" onclick="setNewsPageTab('study')">شبکه‌های اجتماعی</button>
-        <button id="news-tab-website" onclick="setNewsPageTab('website')">وب‌سایت‌ها</button>
-        <button id="news-tab-newspapers" onclick="setNewsPageTab('newspapers')">روزنامه‌ها</button>
-        <button id="news-tab-dossier" onclick="setNewsPageTab('dossier')">پرونده‌های موضوعی</button>
-        <button id="news-tab-newsletter" onclick="setNewsPageTab('newsletter')">خبرنامه مدارس</button>
+        <button class="active" id="news-tab-analytics" data-ic="analytics" data-dot="" onclick="setNewsPageTab('analytics')">در یک نگاه</button>
+        <button id="news-tab-claims" data-ic="claims" data-dot="claims" onclick="setNewsPageTab('claims')">ادعاها و شایعات</button>
+        <button id="news-tab-study" data-ic="study" data-dot="study" onclick="setNewsPageTab('study')">شبکه‌های اجتماعی</button>
+        <button id="news-tab-website" data-ic="website" data-dot="website" onclick="setNewsPageTab('website')">وب‌سایت‌ها</button>
+        <button id="news-tab-newspapers" data-ic="newspapers" data-dot="newspapers" onclick="setNewsPageTab('newspapers')">روزنامه‌ها</button>
+        <button id="news-tab-dossier" data-ic="dossier" onclick="setNewsPageTab('dossier')">پرونده‌های موضوعی</button>
+        <button id="news-tab-newsletter" data-ic="newsletter" onclick="setNewsPageTab('newsletter')">خبرنامه مدارس</button>
       </div>
       <p class="news-tab-subtitle" id="news-tab-subtitle"><span>خلاصه‌ی هوشمند اخبار مهم و موضوعات پرتکرار ۶ ساعت اخیر، تولیدشده با هوش مصنوعی.</span></p>
 
@@ -2099,9 +2115,9 @@
          صریح کاربر به‌عنوان زیرتب همین بخش منتقل شدن ===== -->
     <section class="section" id="sec-people">
       <div class="news-page-tabs" id="people-page-tabs">
-        <button data-people-tab="orgs">تحلیل سازمان‌ها</button>
-        <button class="active" data-people-tab="figures">چهره‌ها و فعالان سیاسی</button>
-        <button data-people-tab="archive">بسته‌های تحلیلی</button>
+        <button data-people-tab="orgs" data-ic="orgs">تحلیل سازمان‌ها</button>
+        <button class="active" data-people-tab="figures" data-ic="figures">چهره‌ها و فعالان سیاسی</button>
+        <button data-people-tab="archive" data-ic="archive">بسته‌های تحلیلی</button>
       </div>
       <p class="news-tab-subtitle" id="people-tab-subtitle"><span>یادداشت‌ها و مطالب کانال‌های معرفی‌شده به‌عنوان چهره‌ی سیاسی.</span></p>
 
@@ -2186,8 +2202,8 @@
          (placeNewsStudyPanel) — نه کپی، تا idها تکراری نشن -->
     <section class="section" id="sec-hawza">
       <div class="news-page-tabs" id="hawza-page-tabs">
-        <button class="active" id="hawza-tab-news" onclick="setHawzaTab('news')">اخبار حوزه</button>
-        <button disabled>درباره حوزه<span class="news-soon">به‌زودی</span></button>
+        <button class="active" id="hawza-tab-news" data-ic="hawza" data-dot="hawza" onclick="setHawzaTab('news')">اخبار حوزه</button>
+        <button disabled data-ic="about">درباره حوزه<span class="news-soon">به‌زودی</span></button>
       </div>
       <p class="news-tab-subtitle" id="hawza-tab-subtitle"><span>اخبار سیاسی و اجتماعی منتشرشده در پایگاه‌های خبری حوزوی.</span></p>
       <div id="hawza-news-slot"></div>
@@ -2237,9 +2253,9 @@
     <!-- POSTS (dedicated reading page) -->
     <section class="section" id="sec-posts">
       <div class="news-page-tabs" id="posts-page-tabs">
-        <button class="active" data-posts-tab="feed">پست‌های منتشر شده</button>
-        <button data-posts-tab="people">افراد و مجموعه‌ها</button>
-        <button disabled>آنالیز<span class="news-soon">به‌زودی</span></button>
+        <button class="active" data-posts-tab="feed" data-ic="feed">پست‌های منتشر شده</button>
+        <button data-posts-tab="people" data-ic="users">افراد و مجموعه‌ها</button>
+        <button disabled data-ic="analytics">آنالیز<span class="news-soon">به‌زودی</span></button>
       </div>
       <p class="news-tab-subtitle" id="posts-tab-subtitle"><span>پست‌های منتشرشده‌ی کانال‌های کنشگر فضای مجازی، قابل‌فیلتر بر اساس کانال، دسته و زمان.</span></p>
 
@@ -2492,7 +2508,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۷.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۸.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2906,6 +2922,10 @@
     if(key === 'feedback') loadFeedbackList().then(renderFeedbackList);
     if(key === 'export') loadNotifySubscribers().then(renderNotifySubscribers);
     if(key === 'status') renderSystemStatus();
+    if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
+    if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
+    // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
+    requestAnimationFrame(()=>document.querySelectorAll('#sec-'+key+' .news-page-tabs').forEach(bar=>updateTabInk(bar, true)));
   }
 
   // میان‌برهای کارت‌های صفحه‌ی نخست به زیربخش‌های خودِ همون صفحه
@@ -2950,9 +2970,136 @@
     archive: 'تولیدات تحلیلی سایر نهادها، جدا از بسته‌های تحلیلی خودِ جریان.'
   };
 
+  // ---- تب‌بارها (همه‌ی بخش‌ها): آیکون، خط هلویی لغزان، نقطه‌ی «جدید»، سایه‌ی لبه‌ی
+  // گوشی، رفتن تب فعال به دید و یادآوری آخرین تب. آیکون از data-ic، نقطه از data-dot.
+  const TAB_ICONS = {
+    analytics: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    claims: '<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/>',
+    study: '<path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/>',
+    website: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18 14 14 0 010-18z"/>',
+    newspapers: '<path d="M4 5h13v14H6a2 2 0 01-2-2V5z"/><path d="M17 9h3v8a2 2 0 01-2 2M8 9h5M8 13h5"/>',
+    dossier: '<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>',
+    newsletter: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+    feed: '<path d="M4 6h16M4 12h16M4 18h10"/>',
+    users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.5a3.5 3.5 0 010 7M21.5 20a6.5 6.5 0 00-4-6"/>',
+    orgs: '<path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6M9 11h.01M15 11h.01"/>',
+    figures: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/>',
+    archive: '<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9M10 13h4"/>',
+    hawza: '<path d="M4 21V11a8 8 0 0116 0v10M4 21h16M12 3v2M9 21v-5a3 3 0 016 0v5"/>',
+    about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>',
+  };
+  function lsGet(k, def){ try{ const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; }catch(e){ return def; } }
+  function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+  function updateTabInk(bar, noAnim){
+    const ink = bar.querySelector('.tab-ink'), origin = bar.querySelector('.tab-ink-origin');
+    const act = bar.querySelector('button.active');
+    if(!ink || !origin || !bar.offsetParent) return;          // بخش مخفیه — با switchSection دوباره
+    if(!act){ ink.style.width = '0'; return; }
+    const first = ink.dataset.placed !== '1';
+    if(first || noAnim) ink.classList.add('no-anim');
+    const a = act.getBoundingClientRect(), o = origin.getBoundingClientRect();
+    const inset = 10;
+    ink.style.width = Math.max(0, a.width - inset*2) + 'px';
+    ink.style.transform = `translateX(${a.left - o.left + inset}px)`;
+    ink.dataset.placed = '1';
+    if(ink.classList.contains('no-anim')) requestAnimationFrame(()=>requestAnimationFrame(()=>ink.classList.remove('no-anim')));
+    // گوشی: اگه تب فعال بیرون نوار باشه، نوار خودش اسکرول می‌کنه تا دیده بشه
+    if(bar.scrollWidth > bar.clientWidth + 2){
+      const b = bar.getBoundingClientRect();
+      if(a.left < b.left + 8 || a.right > b.right - 8){
+        const cur = bar.scrollLeft, delta = (a.left + a.width/2) - (b.left + b.width/2);
+        bar.scrollTo({ left: cur + delta, behavior: (first || noAnim) ? 'auto' : 'smooth' });
+      }
+    }
+    updateTabFade(bar);
+  }
+  // سایه‌ی محو لبه‌های نوار روی گوشی، فقط سمتی که تب دیگه‌ای پشتش هست (RTL: شروع = راست)
+  function updateTabFade(bar){
+    const max = bar.scrollWidth - bar.clientWidth;
+    const pos = Math.abs(bar.scrollLeft);
+    bar.style.setProperty('--fs', max > 2 && pos > 2 ? '32px' : '0px');
+    bar.style.setProperty('--fe', max > 2 && pos < max - 2 ? '32px' : '0px');
+  }
+  function updateStuckTabBars(){
+    document.querySelectorAll('.section.active .news-page-tabs').forEach(bar=>{
+      bar.classList.toggle('is-stuck', window.scrollY > 0 && bar.getBoundingClientRect().top <= 0.5);
+    });
+  }
+  function refreshAllTabBars(noAnim){
+    document.querySelectorAll('.news-page-tabs').forEach(bar=>updateTabInk(bar, noAnim));
+  }
+  function setupTabBars(){
+    document.querySelectorAll('.news-page-tabs').forEach(bar=>{
+      if(bar.dataset.tabsReady) return;
+      bar.dataset.tabsReady = '1';
+      bar.querySelectorAll('button').forEach(b=>{
+        const ic = TAB_ICONS[b.dataset.ic];
+        if(ic) b.insertAdjacentHTML('afterbegin', `<svg class="tab-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>`);
+        if(b.dataset.dot) b.insertAdjacentHTML('beforeend', '<span class="tab-dot" hidden title="مطلب تازه از آخرین بازدید"></span>');
+        // تغییر کلاس active (از هر هندلری) → خط هلویی به تب جدید سُر می‌خوره
+        new MutationObserver(()=>updateTabInk(bar)).observe(b, { attributes:true, attributeFilter:['class'] });
+      });
+      bar.insertAdjacentHTML('beforeend', '<span class="tab-ink" aria-hidden="true"></span><span class="tab-ink-origin" aria-hidden="true" style="position:absolute;left:0;top:0;width:0;height:0"></span>');
+      bar.addEventListener('scroll', ()=>updateTabFade(bar), { passive:true });
+    });
+    window.addEventListener('resize', ()=>refreshAllTabBars(true));
+    window.addEventListener('scroll', updateStuckTabBars, { passive:true });
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>refreshAllTabBars(true));
+  }
+
+  // نقطه‌ی «جدید»: جدیدترین مطلب هر تب (زمان جمع‌آوری) نسبت به آخرین بازدید همون تب
+  // در همین مرورگر (localStorage، کلید jarian_tab_seen). بار اول بدون نقطه شروع می‌شه.
+  const TAB_SEEN_KEY = 'jarian_tab_seen';
+  function tabLatestMs(key){
+    if(key === 'newspapers') return NEWSPAPERS.reduce((m,n)=>Math.max(m, n.scraped_at ? Date.parse(n.scraped_at) : 0), 0);
+    const chMap = new Map(CHANNELS.map(c=>[c.id, c]));
+    const ok = p=>{
+      const c = chMap.get(p.channel_id);
+      if(key === 'hawza') return p.hawza_relevant === true && c && c.show_in_hawza;
+      if(!c || !c.show_in_news) return false;
+      if(key === 'claims') return c.platform === 'bale';
+      if(key === 'website') return c.platform === 'website' && !c.show_in_hawza;
+      if(key === 'study') return c.platform !== 'website' && c.platform !== 'bale';
+      return false;
+    };
+    let m = 0;
+    for(const p of POSTS_CACHE){ if(p.scraped_at && ok(p)){ const t = Date.parse(p.scraped_at); if(t > m) m = t; } }
+    return m;
+  }
+  function refreshTabDots(){
+    const seen = lsGet(TAB_SEEN_KEY, {});
+    let changed = false;
+    document.querySelectorAll('.news-page-tabs button[data-dot]').forEach(b=>{
+      const k = b.dataset.dot, dot = b.querySelector('.tab-dot');
+      if(!k || !dot) return;
+      if(seen[k] == null){ seen[k] = Date.now(); changed = true; }
+      const latest = tabLatestMs(k);
+      dot.hidden = !(latest > seen[k]);
+    });
+    if(changed) lsSet(TAB_SEEN_KEY, seen);
+  }
+  function markTabSeen(key){
+    if(!key) return;
+    const seen = lsGet(TAB_SEEN_KEY, {});
+    seen[key] = Date.now();
+    lsSet(TAB_SEEN_KEY, seen);
+    document.querySelectorAll(`.news-page-tabs button[data-dot="${key}"] .tab-dot`).forEach(d=>{ d.hidden = true; });
+  }
+  // «کنشگری مجازی» و «یادداشت‌ها»: آخرین تب باز‌شده با ورود ساده به بخش برمی‌گرده
+  function restoreLastTab(barId, dataKey, storeKey){
+    const want = lsGet(storeKey, null);
+    const bar = document.getElementById(barId);
+    if(!want || !bar) return;
+    const btn = bar.querySelector(`button[data-${dataKey}="${want}"]`);
+    if(btn && !btn.disabled && !btn.classList.contains('active')) btn.click();
+  }
+  setupTabBars();
+
   // پنل مشترک «شبکه‌های اجتماعی/وب‌سایت‌ها/ادعاها» که «اخبار حوزه» (بخش «درباره
   // حوزه») هم ازش استفاده می‌کنه — جابه‌جایی خودِ عنصر، نه کپی
-  let NEWS_CURRENT_TAB = 'analytics';
+  const NEWS_TABS = ['analytics','claims','study','website','newspapers','dossier','newsletter'];
+  let NEWS_CURRENT_TAB = (t=>NEWS_TABS.includes(t) ? t : 'analytics')(lsGet('jarian_last_news_tab', 'analytics'));
   let NEWS_STUDY_HOME = null;
   function placeNewsStudyPanel(where){
     const panel = document.getElementById('news-study-panel');
@@ -2984,6 +3131,7 @@
   function setHawzaTab(tab){
     // فعلاً فقط «اخبار حوزه»؛ «درباره حوزه» به‌زودی
     placeNewsStudyPanel('hawza');
+    markTabSeen('hawza');
     document.getElementById('news-study-panel').style.display = '';
     document.getElementById('news-feed').classList.remove('social-tab');
     activateNewsStudy('hawza');
@@ -2991,6 +3139,8 @@
 
   function setNewsPageTab(tab){
     NEWS_CURRENT_TAB = tab;
+    lsSet('jarian_last_news_tab', tab);
+    markTabSeen(tab);
     placeNewsStudyPanel('overview');
     const subEl = document.getElementById('news-tab-subtitle');
     if(subEl) subEl.querySelector('span').textContent = NEWS_TAB_INFO[tab] || '';
@@ -4581,6 +4731,7 @@
     renderNewspapers();
     populateNewsSourceOptions();
     renderNewsFeed();
+    refreshTabDots();
     renderSchoolReports();
   }
 
@@ -4719,6 +4870,7 @@
   const postsPageTabsEl = document.getElementById('posts-page-tabs');
   if(postsPageTabsEl) postsPageTabsEl.addEventListener('click', e=>{
     const b = e.target.closest('button'); if(!b || !b.dataset.postsTab) return;
+    lsSet('jarian_last_posts_tab', b.dataset.postsTab);
     postsPageTabsEl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     const postsSubEl = document.getElementById('posts-tab-subtitle');
@@ -4735,6 +4887,7 @@
   const peoplePageTabsEl = document.getElementById('people-page-tabs');
   if(peoplePageTabsEl) peoplePageTabsEl.addEventListener('click', e=>{
     const b = e.target.closest('button'); if(!b || !b.dataset.peopleTab) return;
+    lsSet('jarian_last_people_tab', b.dataset.peopleTab);
     peoplePageTabsEl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     const peopleSubEl = document.getElementById('people-tab-subtitle');
@@ -6951,7 +7104,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.7.2';
+  const APP_VERSION = '5.8.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
