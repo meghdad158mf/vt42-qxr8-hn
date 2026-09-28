@@ -10,10 +10,29 @@
 export const LIARA_BASE_URL = "https://ai.liara.ir/api/6a9271a1d6564b043acdefe1/v1";
 export const LIARA_MODEL = "openai/gpt-4o-mini";
 
-// متن جواب مدل رو برمی‌گردونه؛ هر خطا (HTTP، خطای وسط stream، جواب خالی) throw می‌شه
-export async function liaraChat(system: string, user: string, temperature: number): Promise<string> {
+// خطای «وقت تموم شد» — مقصر پست نیست، پس کالر نباید پست رو «بررسی‌شده» علامت بزنه
+export class AiTimeoutError extends Error {}
+
+// متن جواب مدل رو برمی‌گردونه؛ هر خطا (HTTP، خطای وسط stream، جواب خالی) throw می‌شه.
+// timeoutMs: سقف کل درخواست (اتصال + خوندن stream) — بعدش AiTimeoutError
+export async function liaraChat(system: string, user: string, temperature: number, timeoutMs: number): Promise<string> {
+  if (timeoutMs <= 0) throw new AiTimeoutError("no time left");
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    return await liaraChatInner(system, user, temperature, ctrl.signal);
+  } catch (e) {
+    if (ctrl.signal.aborted) throw new AiTimeoutError(`ai timeout after ${timeoutMs}ms`);
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function liaraChatInner(system: string, user: string, temperature: number, signal: AbortSignal): Promise<string> {
   const res = await fetch(`${LIARA_BASE_URL}/chat/completions`, {
     method: "POST",
+    signal,
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${Deno.env.get("LIARA_API_KEY")}` },
     body: JSON.stringify({
       model: LIARA_MODEL,
