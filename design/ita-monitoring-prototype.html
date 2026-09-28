@@ -509,7 +509,16 @@
      مسیر ≈ ۱۱۳۹px). مختصات ثابت نسبت به مرکز ردیف (کارت ۱۷۰ + فاصله‌ی ۱۶ =
      ۱۸۶px بین مرکز آیکون‌ها، مرکز آیکون ۷۴px از بالای ردیف). زیر ۹۰۰px ردیف دوستونه
      می‌شه → مخفی. با prefers-reduced-motion فقط حرکت حذف می‌شه. */
-  .dom-orbit{ position:absolute; left:50%; top:-100px; width:1200px; height:360px; margin-left:-600px; z-index:-1; pointer-events:none; overflow:visible; }
+  /* max-width:none — قانون سراسری img,svg{max-width:100%} عرض رو به عرض ردیف کم می‌کرد و
+     مدار (با margin-left ثابت) از وسط به چپ می‌رفت */
+  .dom-orbit{ position:absolute; left:50%; top:-100px; width:1200px; max-width:none; height:360px; margin-left:-600px; z-index:-1; pointer-events:none; overflow:visible; }
+  /* صفحه‌های باریک‌تر از ~۱۲۵۰px: دو سرِ مدار به لبه‌ی صفحه می‌رسید و بریده دیده می‌شد —
+     نزدیک لبه‌ی صفحه نرم محو می‌شه (مختصات نسبت به جعبه‌ی ۱۲۰۰px که وسط صفحه‌ست؛ روی
+     صفحه‌ی عریض این نقاط بیرون جعبه‌ان و اثری ندارن) */
+  .dom-orbit{
+    -webkit-mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px));
+            mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px));
+  }
   @media (max-width:900px){ .dom-orbit{ display:none; } }
   @media (prefers-reduced-motion: reduce){ .dom-orbit .flow{ display:none; } }
   .net-deco-gap{
@@ -1543,7 +1552,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۴</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۵</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2577,7 +2586,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۸.۴</span></small>
+          <small>ویرایش <span class="app-version">۵.۸.۵</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -7185,7 +7194,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.8.4';
+  const APP_VERSION = '5.8.5';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
