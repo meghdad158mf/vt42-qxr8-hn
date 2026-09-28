@@ -380,21 +380,27 @@
 
   /* ---- shared bits ---- */
   .panel{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:24px; margin-bottom:16px; }
-  /* «اطلاعیه برای کاربران» — نوار زیر توپ‌بار */
-  .ann-bar{ display:flex; flex-direction:column; gap:8px; }
-  .ann-bar:not(:empty){ margin:-4px 0 18px; }
-  .ann-item{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; font-size:13px; line-height:1.9; }
-  .ann-item.info{ background: rgba(234,179,147,0.08); border:1px solid rgba(234,179,147,0.38); color:#fff; }
-  .ann-item.important{ background: linear-gradient(135deg, #f1c4a8, #e3a47f); border:1px solid #EAB393; color: var(--primary); font-weight:700; box-shadow: 0 10px 24px -14px rgba(234,179,147,0.7); }
-  .ann-ic{ flex-shrink:0; width:30px; height:30px; border-radius:9px; display:grid; place-items:center; }
-  .ann-item.info .ann-ic{ background: rgba(234,179,147,0.16); color: var(--accent); }
-  .ann-item.important .ann-ic{ background: rgba(22,32,42,0.12); color: var(--primary); }
+  /* «اطلاعیه برای کاربران» — کارت‌های شناور گوشه‌ی پایین صفحه (انتخاب کاربر از ۵ مدل:
+     نوار زیر هدر / زنگوله / کارت شناور / پنجره‌ی وسط / نوار متحرک) */
+  .ann-bar{ position:fixed; bottom:22px; left:22px; z-index:60; display:flex; flex-direction:column; gap:10px; width:350px; max-width:calc(100vw - 32px); }
+  @media (max-width:640px){ .ann-bar{ left:16px; right:16px; bottom:16px; width:auto; } }
+  .ann-item{ display:flex; align-items:flex-start; gap:10px; padding:12px 12px 12px 10px; border-radius:14px; background: var(--surface); color: var(--text);
+    border-inline-start:4px solid var(--accent); box-shadow: 0 22px 44px -14px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.04); animation: annIn .45s cubic-bezier(.16,1,.3,1) both; }
+  .ann-item + .ann-item{ animation-delay:.12s; }
+  .ann-item.important{ border-inline-start-color:#e05a4f; }
+  @keyframes annIn{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){ .ann-item{ animation:none; } }
+  .ann-ic{ flex-shrink:0; width:32px; height:32px; border-radius:9px; display:grid; place-items:center; background: rgba(234,179,147,0.22); color:#b5651d; }
+  .ann-item.important .ann-ic{ background: rgba(224,90,79,0.14); color:#c9483e; }
   .ann-ic svg{ width:17px; height:17px; }
-  .ann-text{ flex:1; min-width:0; white-space:pre-line; overflow-wrap:anywhere; }
-  .ann-close{ flex-shrink:0; width:26px; height:26px; border-radius:50%; border:0; cursor:pointer; font-size:12px; background: rgba(255,255,255,0.08); color:inherit; }
-  .ann-item.important .ann-close{ background: rgba(22,32,42,0.12); }
-  .ann-close:hover{ background: rgba(255,255,255,0.18); }
-  .ann-preview{ background: var(--primary); padding:12px; border-radius:12px; }
+  .ann-body{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .ann-body b{ font-size:12px; font-weight:800; color: var(--text); }
+  .ann-item.important .ann-body b{ color:#c9483e; }
+  .ann-text{ font-size:12.5px; line-height:1.85; color: var(--text-dim); white-space:pre-line; overflow-wrap:anywhere; }
+  .ann-close{ flex-shrink:0; width:24px; height:24px; border-radius:50%; border:0; cursor:pointer; font-size:11px; background:none; color: var(--text-faint); }
+  .ann-close:hover{ background: var(--surface-2); color: var(--text); }
+  .ann-preview{ background: var(--primary); padding:16px; border-radius:12px; display:flex; justify-content:flex-end; }
+  .ann-preview .ann-item{ width:350px; max-width:100%; animation:none; }
   .ann-counter{ margin-inline-start:6px; font-size:11px; font-weight:600; color: var(--text-faint); }
   #ann-msg{ width:100%; resize:vertical; font:inherit; font-size:14px; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius: var(--radius-control); box-sizing:border-box; line-height:1.9; }
   #ann-msg:focus{ border-color: var(--primary-strong); outline:none; }
@@ -1360,7 +1366,7 @@
   .fmt-row{ display:flex; gap:8px; margin-top:6px; }
   .fmt{ border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text-dim); padding:8px 16px; border-radius: var(--radius-control); font-size:12.5px; cursor:pointer; font-weight:600; }
   .fmt.sel{ border-color: var(--primary); color: var(--primary-strong); background: var(--primary-soft); }
-  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background: var(--navy); border:1px solid var(--navy-2); color:#fff; padding:11px 20px; border-radius: var(--radius-pill); font-size:13px; opacity:0; pointer-events:none; transition: all .25s ease; z-index:50; }
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background: var(--navy); border:1px solid var(--navy-2); color:#fff; padding:11px 20px; border-radius: var(--radius-pill); font-size:13px; opacity:0; pointer-events:none; transition: all .25s ease; z-index:95; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
   /* settings */
@@ -5115,7 +5121,8 @@
   const annIsLive = a => a.active && (!a.expires_at || new Date(a.expires_at).getTime() > Date.now());
   const ANN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>';
   function annItemHtml(a, closable){
-    return `<div class="ann-item ${a.level === 'important' ? 'important' : 'info'}" data-ann="${a.id || ''}"><span class="ann-ic">${ANN_ICON}</span><span class="ann-text">${escHtml(a.message)}</span>${closable ? '<button type="button" class="ann-close" aria-label="بستن اطلاعیه">✕</button>' : ''}</div>`;
+    const imp = a.level === 'important';
+    return `<div class="ann-item ${imp ? 'important' : 'info'}" data-ann="${a.id || ''}" role="status"><span class="ann-ic">${ANN_ICON}</span><span class="ann-body"><b>${imp ? 'اطلاعیه‌ی مهم' : 'اطلاعیه'}</b><span class="ann-text">${escHtml(a.message)}</span></span>${closable ? '<button type="button" class="ann-close" aria-label="بستن اطلاعیه">✕</button>' : ''}</div>`;
   }
   function annDismissed(){
     let a = [], b = [];
@@ -5127,7 +5134,7 @@
     const bar = document.getElementById('ann-bar');
     if(!bar) return;
     const hidden = annDismissed();
-    const list = ANNOUNCEMENTS.filter(a => annIsLive(a) && !hidden.has(a.id)).slice(0, 2);
+    const list = ANNOUNCEMENTS.filter(a => annIsLive(a) && !hidden.has(a.id)).slice(0, 3);
     bar.innerHTML = list.map(a => annItemHtml(a, true)).join('');
     bar.querySelectorAll('.ann-close').forEach(btn => btn.addEventListener('click', () => {
       const item = btn.closest('.ann-item'); const id = Number(item.dataset.ann);
