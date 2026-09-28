@@ -67,16 +67,7 @@ Deno.serve(async (req) => {
     }));
 
     const liaraKey = Deno.env.get("LIARA_API_KEY");
-    const aiRes = await fetch(`${LIARA_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${liaraKey}` },
-      body: JSON.stringify({
-        model: LIARA_MODEL,
-        temperature: 0.2,
-        messages: [
-          {
-            role: "system",
-            content:
+    const SYSTEM_PROMPT =
               "You analyze a batch of Persian/English news posts (each with an id, source, title, text) from the " +
               `last ${windowHours} hours and produce two things:\n` +
               "1) selected_posts: up to 10 of the MOST IMPORTANT posts (importance = the same story repeated " +
@@ -89,28 +80,91 @@ Deno.serve(async (req) => {
               "topic label, 1-3 words>\", \"weight\": <integer count of posts about it>}. Do NOT include dates, " +
               "weekday/month names, or generic website boilerplate as topics.\n" +
               'Respond with ONLY a raw JSON object like {"selected_posts":[...],"topics":[...]} and nothing else ' +
-              "— no markdown fences, no extra commentary. ids in selected_posts MUST be from the given list only.",
-          },
-          { role: "user", content: JSON.stringify(compact) },
-        ],
-      }),
-    });
+              "— no markdown fences, no extra commentary. ids in selected_posts MUST be from the given list only.";
+    type Insight = { selected_posts?: Array<{ id: number; headline?: string }>; topics?: Array<{ name: string; weight?: number }> };
 
-    if (!aiRes.ok) {
-      const detail = await aiRes.text();
-      return jsonResponse({ error: "ai request failed", detail }, 502);
+    async function callAi(items: typeof compact): Promise<Insight> {
+      const aiRes = await fetch(`${LIARA_BASE_URL}/chat/completions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${liaraKey}` },
+        body: JSON.stringify({
+          model: LIARA_MODEL,
+          temperature: 0.2,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: JSON.stringify(items) },
+          ],
+        }),
+      });
+      if (!aiRes.ok) throw new Error(`ai ${aiRes.status}: ${(await aiRes.text()).slice(0, 300)}`);
+      const aiData = await aiRes.json();
+      let content: string = aiData?.choices?.[0]?.message?.content || "{}";
+      content = content.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```\s*$/, "");
+      try {
+        return JSON.parse(content);
+      } catch {
+        return {};
+      }
     }
 
-    const aiData = await aiRes.json();
-    let content: string = aiData?.choices?.[0]?.message?.content || "{}";
-    content = content.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```\s*$/, "");
-
-    let parsed: { selected_posts?: Array<{ id: number; headline?: string }>; topics?: Array<{ name: string; weight?: number }> };
-    try {
-      parsed = JSON.parse(content);
-    } catch {
-      parsed = {};
+    // ⚠️ مهر ۱۴۰۵: لیارا روی دسته‌ی کامل با خطای ۵۰۰ جواب می‌داد (درخواست
+    // تک‌پستی ترجمه سالم بود). اول کل دسته امتحان می‌شه؛ اگه خطا داد، دسته
+    // به تکه‌های CHUNK_SIZE تایی (موازی) تقسیم می‌شه؛ اگه هیچ تکه‌ای موفق
+    // نشد یعنی مشکل از خودِ لیاراست و ۵۰۲ برمی‌گرده؛ وگرنه تکه‌های ناموفق
+    // نصف‌نصف می‌شن (تا MIN_SPLIT) تا پست مشکل‌دار کنار بره و نتیجه‌ها ادغام می‌شن.
+    const CHUNK_SIZE = 20;
+    const MIN_SPLIT = 5;
+    let aiSuccesses = 0;
+    let lastError = "";
+    async function tryAi(items: typeof compact): Promise<Insight | null> {
+      try {
+        const r = await callAi(items);
+        aiSuccesses++;
+        return r;
+      } catch (e) {
+        lastError = String(e);
+        return null;
+      }
     }
+    async function bisect(items: typeof compact): Promise<Insight[]> {
+      if (items.length <= MIN_SPLIT) return [];
+      const mid = Math.ceil(items.length / 2);
+      const halves = [items.slice(0, mid), items.slice(mid)];
+      const res = await Promise.all(halves.map(tryAi));
+      const out: Insight[] = [];
+      for (let i = 0; i < 2; i++) out.push(...(res[i] ? [res[i] as Insight] : await bisect(halves[i])));
+      return out;
+    }
+    let parts: Insight[] = [];
+    const full = await tryAi(compact);
+    if (full) {
+      parts = [full];
+    } else if (compact.length > CHUNK_SIZE) {
+      const chunks: (typeof compact)[] = [];
+      for (let i = 0; i < compact.length; i += CHUNK_SIZE) chunks.push(compact.slice(i, i + CHUNK_SIZE));
+      const res = await Promise.all(chunks.map(tryAi));
+      if (aiSuccesses > 0) {
+        for (let i = 0; i < chunks.length; i++) parts.push(...(res[i] ? [res[i] as Insight] : await bisect(chunks[i])));
+      }
+    } else {
+      parts = await bisect(compact);
+    }
+    if (aiSuccesses === 0) {
+      return jsonResponse({ error: "ai request failed", detail: lastError }, 502);
+    }
+    // ادغام: اخبار منتخب به ترتیب از همه‌ی بخش‌ها، موضوعات هم‌نام با جمع وزن
+    const topicMap = new Map<string, number>();
+    for (const part of parts) {
+      for (const t of part.topics || []) {
+        if (!t || !t.name) continue;
+        const k = String(t.name).trim();
+        topicMap.set(k, (topicMap.get(k) || 0) + Math.max(1, Number(t.weight) || 1));
+      }
+    }
+    const parsed: Insight = {
+      selected_posts: parts.flatMap((p) => p.selected_posts || []),
+      topics: [...topicMap.entries()].sort((a, b) => b[1] - a[1]).map(([name, weight]) => ({ name, weight })),
+    };
 
     // اعتبارسنجی: idهای هذیان‌گفته‌شده (که توی دسته‌ی واقعی نبودن) رو حذف کن
     const validIds = new Set(posts.map((p) => p.id));

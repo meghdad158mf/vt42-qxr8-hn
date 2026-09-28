@@ -94,16 +94,7 @@ Deno.serve(async (req) => {
     }));
 
     const liaraKey = Deno.env.get("LIARA_API_KEY");
-    const aiRes = await fetch(`${LIARA_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${liaraKey}` },
-      body: JSON.stringify({
-        model: LIARA_MODEL,
-        temperature: 0.1,
-        messages: [
-          {
-            role: "system",
-            content:
+    const SYSTEM_PROMPT =
               "You extract keywords from a batch of Persian/English news posts (each with an id, title, text). " +
               "For EVERY post in the batch, without exception, return exactly one entry — never skip a post, " +
               "even if it has no meaningful content (in that case return an empty keywords array for it).\n" +
@@ -133,28 +124,90 @@ Deno.serve(async (req) => {
               "not clearly political or social.\n" +
               'Respond with ONLY a raw JSON object like {"results":[{"id":1,"keywords":["..."]}, ...]} and ' +
               "nothing else — no markdown fences, no extra commentary. The results array MUST have exactly one " +
-              "entry per input post id, using only ids from the given list.",
-          },
-          { role: "user", content: JSON.stringify(compact) },
-        ],
-      }),
-    });
+              "entry per input post id, using only ids from the given list.";
 
-    if (!aiRes.ok) {
-      const detail = await aiRes.text();
-      return jsonResponse({ error: "ai request failed", detail }, 502);
+    // یه فراخوانی هوش مصنوعی برای یه تیکه از دسته — در صورت خطا throw می‌کنه
+    async function callAi(items: typeof compact): Promise<Array<{ id: number; keywords?: string[]; hawza_relevant?: boolean }>> {
+      const aiRes = await fetch(`${LIARA_BASE_URL}/chat/completions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${liaraKey}` },
+        body: JSON.stringify({
+          model: LIARA_MODEL,
+          temperature: 0.1,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: JSON.stringify(items) },
+          ],
+        }),
+      });
+      if (!aiRes.ok) throw new Error(`ai ${aiRes.status}: ${(await aiRes.text()).slice(0, 300)}`);
+      const aiData = await aiRes.json();
+      let content: string = aiData?.choices?.[0]?.message?.content || "{}";
+      content = content.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```\s*$/, "");
+      try {
+        return JSON.parse(content).results || [];
+      } catch {
+        return [];
+      }
     }
 
-    const aiData = await aiRes.json();
-    let content: string = aiData?.choices?.[0]?.message?.content || "{}";
-    content = content.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/```\s*$/, "");
-
-    let parsed: { results?: Array<{ id: number; keywords?: string[]; hawza_relevant?: boolean }> };
-    try {
-      parsed = JSON.parse(content);
-    } catch {
-      parsed = {};
+    // ⚠️ مهر ۱۴۰۵: لیارا روی دسته‌ی کامل ۸۰تایی با خطای ۵۰۰ جواب می‌داد
+    // (درخواست تک‌پستی ترجمه همون موقع سالم بود). برای همین دسته به
+    // تیکه‌های CHUNK_SIZE تایی موازی شکسته می‌شه و هر تیکه‌ی ناموفق دوباره
+    // نصف می‌شه تا به تک‌پست برسه — اگه مشکل از یه پست خاص باشه، فقط همون
+    // جدا می‌شه و بقیه‌ی صف جلو می‌ره.
+    const CHUNK_SIZE = 20;
+    const failedIds: number[] = [];
+    let aiSuccesses = 0;
+    let lastError = "";
+    // هر تیکه‌ی ناموفق به ۴ قسمت شکسته می‌شه (۲۰ → ۵ → ۱)، موازی — تا زمان کل
+    // از سقف Edge Function (~۱۵۰ ثانیه) رد نشه
+    async function processChunk(items: typeof compact): Promise<Array<{ id: number; keywords?: string[]; hawza_relevant?: boolean }>> {
+      try {
+        const r = await callAi(items);
+        aiSuccesses++;
+        return r;
+      } catch (e) {
+        lastError = String(e);
+        if (items.length === 1) {
+          failedIds.push(items[0].id);
+          return [];
+        }
+        const size = Math.ceil(items.length / 4);
+        const parts: Array<typeof compact> = [];
+        for (let i = 0; i < items.length; i += size) parts.push(items.slice(i, i + size));
+        return (await Promise.all(parts.map(processChunk))).flat();
+      }
     }
+    const chunks: Array<typeof compact> = [];
+    for (let i = 0; i < compact.length; i += CHUNK_SIZE) chunks.push(compact.slice(i, i + CHUNK_SIZE));
+    // دور اول: همه‌ی تیکه‌ها یه‌بار. اگه هیچ‌کدوم موفق نشد، سرویس کلاً از دسترس
+    // خارجه — دیگه شکستن فایده نداره، مستقیم ۵۰۲
+    const firstRound = await Promise.all(chunks.map(async (c) => {
+      try {
+        const r = await callAi(c);
+        aiSuccesses++;
+        return { ok: true, r, c };
+      } catch (e) {
+        lastError = String(e);
+        return { ok: false, r: [] as Array<{ id: number; keywords?: string[]; hawza_relevant?: boolean }>, c };
+      }
+    }));
+    let parsedResults: Array<{ id: number; keywords?: string[]; hawza_relevant?: boolean }> = [];
+    if (aiSuccesses > 0) {
+      const retried = await Promise.all(firstRound.map((f) => (f.ok ? Promise.resolve(f.r) : processChunk(f.c))));
+      parsedResults = retried.flat();
+    }
+
+    // اگه هیچ فراخوانی موفق نشد، مشکل از خودِ سرویسه نه یه پست خاص — هیچ
+    // پستی علامت نخوره (NULL بمونه) تا اجرای بعدی دوباره امتحان کنه
+    if (aiSuccesses === 0) {
+      return jsonResponse({ error: "ai request failed", detail: lastError }, 502);
+    }
+    // پست‌هایی که حتی تنها هم خطا دادن (failedIds) توی نتایج نیستن، پس پایین‌تر
+    // مثل پست‌های جاافتاده صریح با [] علامت می‌خورن — تا یه پست مشکل‌دار صف رو
+    // برای همیشه گیر نندازه (هر بار جدیدترین‌ها اول انتخاب می‌شن)
+    const parsed = { results: parsedResults };
 
     // اعتبارسنجی: idهای هذیان‌گفته‌شده حذف می‌شن؛ هر id فقط یک‌بار اعمال می‌شه
     const validIds = new Set(posts.map((p) => p.id));
@@ -249,7 +302,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return jsonResponse({ processed: updated, matched });
+    return jsonResponse({ processed: updated, matched, ai_calls_ok: aiSuccesses, skipped_post_ids: failedIds });
   } catch (e) {
     return jsonResponse({ error: String(e) }, 500);
   }
