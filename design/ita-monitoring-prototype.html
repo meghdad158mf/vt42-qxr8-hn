@@ -13,6 +13,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="جریان">
+<script>
+  // رفرش با نشست معتبر: صفحه‌ی ورود حتی لحظه‌ای (تا اجرای اسکریپت اصلی ته صفحه) دیده نشه
+  try{ if(sessionStorage.getItem('jarian_token')) document.documentElement.classList.add('has-session'); }catch(e){}
+  try{ history.scrollRestoration = 'manual'; }catch(e){}
+</script>
+<style>html.has-session #view-login{ display:none !important; }</style>
 </head>
 <body>
 <style>
@@ -127,6 +133,16 @@
 
   .login-panel{ display:flex; align-items:center; justify-content:center; padding:40px 36px; background: var(--surface); border-radius: var(--radius-card); box-shadow: 0 30px 70px -24px rgba(0,0,0,0.5); }
   .login-form-wrap{ width:100%; max-width:340px; }
+  /* رفرش با نشست معتبر: همون بخش فوراً نشون داده می‌شه و تا پایان loadAll یه نوار
+     باریک هلویی بالای صفحه حرکت می‌کنه (نه صفحه‌ی ورود) */
+  .app-loading-bar{ display:none; position:fixed; top:0; left:0; right:0; height:3px; z-index:9999; overflow:hidden; background: rgba(234,179,147,0.15); }
+  .app-loading-bar::before{ content:''; position:absolute; top:0; bottom:0; width:35%; background: var(--accent); animation: app-loading-slide 1.1s ease-in-out infinite; }
+  @keyframes app-loading-slide{ from{ right:-35%; } to{ right:100%; } }
+  body.app-loading .app-loading-bar{ display:block; }
+  /* تا رسیدن داده‌ها محتوای بخش (با پیام‌های «هنوز چیزی نیست» گمراه‌کننده) پنهانه؛ فقط تب‌ها دیده می‌شن */
+  body.app-loading .section.active{ visibility:hidden; }
+  body.app-loading .section.active .news-page-tabs,
+  body.app-loading .section.active .news-tab-subtitle{ visibility:visible; }
   .login-form-wrap .back{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color: var(--text-faint); background:none; border:none; cursor:pointer; padding:0; margin-bottom:28px; }
   .login-form-wrap .back:hover{ color: var(--primary-strong); }
   .login-form-wrap h2{ font-size:21px; font-weight:700; margin-bottom:6px; }
@@ -1492,13 +1508,14 @@
 <canvas id="ambient" aria-hidden="true"></canvas>
 
 <!-- =================== LOGIN (unified dark canvas, floating form card) =================== -->
+<div class="app-loading-bar" role="progressbar" aria-label="در حال بارگذاری"></div>
 <div id="view-login" class="view active">
   <div class="login-inner">
     <div class="login-visual">
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2507,7 +2524,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۸.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۸.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2650,10 +2667,18 @@
     try{
       await loadAll();
       if(SESSION_EXPIRED) throw new Error('session expired');
-      enterDash('dashboard');
+      enterDash(lastSectionKey());
+      if(document.body.classList.contains('app-loading')){
+        // رفرش: اسکرول همون جایی که کاربر بود (بعد از رسیدن محتوا، تا ارتفاع صفحه درست باشه)
+        let y = 0;
+        try{ y = parseInt(sessionStorage.getItem('jarian_last_scroll'), 10) || 0; }catch(e){}
+        if(y) restoreScrollY(y);
+        document.body.classList.remove('app-loading');
+      }
       return true;
     }catch(e){
       console.error('loadAll failed', e);
+      document.body.classList.remove('app-loading');
       goLogin();
       if(SESSION_EXPIRED){
         authToken = null; currentRole = null;
@@ -2664,6 +2689,20 @@
       }
       return false;
     }
+  }
+  // برگشت به جای اسکرول قبل از رفرش. عکس‌ها/کاروسل‌ها تا چند ثانیه بعد ارتفاع
+  // صفحه رو عوض می‌کنن و مرورگر اسکرول رو جابه‌جا می‌کنه؛ پس تا ۳ ثانیه با هر
+  // تغییر ارتفاع دوباره همون y اعمال می‌شه — مگر کاربر خودش اسکرول کرده باشه
+  function restoreScrollY(y){
+    let userMoved = false;
+    const stop = ()=>{ userMoved = true; };
+    const evs = ['wheel','touchstart','keydown','mousedown'];
+    evs.forEach(e=>window.addEventListener(e, stop, { once:true, passive:true }));
+    const apply = ()=>{ if(!userMoved) window.scrollTo(0, y); };
+    requestAnimationFrame(apply);
+    const ro = new ResizeObserver(apply);
+    ro.observe(document.body);
+    setTimeout(()=>{ ro.disconnect(); evs.forEach(e=>window.removeEventListener(e, stop)); }, 3000);
   }
   async function retryLoadAll(){
     const btn = document.getElementById('login-retry-btn');
@@ -2717,9 +2756,20 @@
     sessionStorage.setItem('jarian_role', currentRole);
   }
 
+  // بخشی که کاربر آخرین بار در این زبانه دیده — تا رفرش صفحه به همون‌جا برگرده
+  // (نه صفحه‌ی نخست). بخش مدیریتی برای بیننده نادیده گرفته می‌شه.
+  function lastSectionKey(){
+    let k = null;
+    try{ k = sessionStorage.getItem('jarian_last_section'); }catch(e){}
+    if(!k || !document.getElementById('sec-'+k)) return 'dashboard';
+    if(ADMIN_ONLY_SECTIONS.includes(k) && currentRole !== 'app_admin') return 'dashboard';
+    return k;
+  }
+
   function logout(){
     authToken = null; currentRole = null;
     sessionStorage.removeItem('jarian_token'); sessionStorage.removeItem('jarian_role');
+    try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); }catch(e){}
     goLogin();
   }
 
@@ -2878,7 +2928,7 @@
   });
 
   function show(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-  function goLogin(){ show('view-login'); }
+  function goLogin(){ document.documentElement.classList.remove('has-session'); show('view-login'); }
   function enterDash(sectionKey){
     if(!authToken){ goLogin(); return; }
     show('view-dash'); document.getElementById('view-dash').classList.add('active'); switchSection(sectionKey);
@@ -2904,6 +2954,7 @@
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     document.getElementById('sec-'+key).classList.add('active');
     document.getElementById('sec-title').textContent = TITLES[key];
+    try{ sessionStorage.setItem('jarian_last_section', key); }catch(e){}
     // چون بخش‌ها با toggle کلاس روی همون صفحه‌ی بلندِ اسکرول‌شونده عوض
     // می‌شن (نه ناوبری واقعی)، بدون این خط اسکرول قبلی (مثلاً از وسط
     // صفحه‌ی نخست، جایی که کارت‌های عرصه‌های رصد هستن) روی بخش جدید هم
@@ -7061,12 +7112,21 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.8.0';
+  const APP_VERSION = '5.8.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
+  // جای اسکرول برای برگشت بعد از رفرش (فقط همین زبانه)
+  window.addEventListener('pagehide', ()=>{
+    try{ if(authToken && document.getElementById('view-dash').classList.contains('active')) sessionStorage.setItem('jarian_last_scroll', String(Math.round(window.scrollY))); }catch(e){}
+  });
   if(authToken){
+    // رفرش با نشست معتبر: بدون عبور از صفحه‌ی ورود، همون بخش فوراً نشون داده
+    // می‌شه و داده‌ها پشت‌صحنه می‌رسن (loadAllAndEnter دوباره رندرش می‌کنه)
+    document.body.classList.add('app-loading');
     applyRoleUI();
+    try{ show('view-dash'); switchSection(lastSectionKey()); }catch(e){ console.error(e); }
+    document.documentElement.classList.remove('has-session');
     loadAllAndEnter();
   }
 </script>
