@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     type Insight = { selected_posts?: Array<{ id: number; headline?: string }>; topics?: Array<{ name: string; weight?: number }> };
 
     async function callAi(items: typeof compact): Promise<Insight> {
-      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.2);
+      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.2, Math.min(CALL_TIMEOUT_MS, deadline - Date.now()));
       try {
         return JSON.parse(content);
       } catch {
@@ -97,10 +97,16 @@ Deno.serve(async (req) => {
     // ادغام می‌شن. هر پله با یه موج ۴تایی امتحان می‌شه؛ اگه هیچ‌کدوم موفق نشد
     // پله‌ی بعدی. تکه‌ی ناموفق در پله‌ی موفق کنار گذاشته می‌شه (برای خلاصه‌ی
     // دوره‌ای چند پست کمتر مهم نیست). اگه هیچ فراخوانی موفق نشد → ۵۰۲.
+    // بودجه‌ی زمانی: هر درخواست حداکثر CALL_TIMEOUT_MS و کل کار تا
+    // TIME_BUDGET_MS — تا از سقف ۱۲۰ ثانیه‌ای اسکریپت کالر رد نشه.
     const CONCURRENCY = 4;
+    const TIME_BUDGET_MS = 90_000;
+    const CALL_TIMEOUT_MS = 40_000;
+    const deadline = Date.now() + TIME_BUDGET_MS;
     let aiSuccesses = 0;
     let lastError = "";
     async function tryAi(items: typeof compact): Promise<Insight | null> {
+      if (Date.now() >= deadline) return null;
       try {
         const r = await callAi(items);
         aiSuccesses++;

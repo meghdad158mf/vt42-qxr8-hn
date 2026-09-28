@@ -37,7 +37,7 @@
 // news-insights تنظیم شدن، نیازی به تنظیم دوباره نیست.
 
 import { fetchPostsMissingKeywords } from "../_shared/auth.ts";
-import { liaraChat, mapLimit } from "../_shared/liara.ts";
+import { AiTimeoutError, liaraChat, mapLimit } from "../_shared/liara.ts";
 
 const DEFAULT_LIMIT = 80; // هم‌راستا با BATCH_LIMIT در scripts/extract_keywords.py — کالر همیشه صریح limit می‌فرسته، این فقط fallbacke
 const TEXT_TRUNCATE = 400;
@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
     type KwResult = { id: number; keywords?: string[]; hawza_relevant?: boolean };
     // یه فراخوانی هوش مصنوعی برای یه تیکه از دسته — در صورت خطا throw می‌کنه
     async function callAi(items: typeof compact): Promise<KwResult[]> {
-      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.1);
+      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.1, Math.min(CALL_TIMEOUT_MS, deadline - Date.now()));
       try {
         return JSON.parse(content).results || [];
       } catch {
@@ -140,19 +140,31 @@ Deno.serve(async (req) => {
     // stream می‌شه (_shared/liara.ts)، تیکه‌ها ۵تایی‌ان و حداکثر CONCURRENCY
     // تا هم‌زمان می‌رن. تیکه‌ی ناموفق به تک‌پست شکسته می‌شه تا اگه مشکل از
     // یه پست خاص باشه، فقط همون جدا بشه.
+    // بعد از اون جواب‌ها کُند شدن و کل تابع از سقف ۱۲۰ ثانیه‌ای اسکریپت رد شد و
+    // هیچی ذخیره نشد — برای همین بودجه‌ی زمانی داره: بعد از TIME_BUDGET_MS
+    // درخواست جدیدی شروع نمی‌شه، هر چی تموم شده ذخیره می‌شه و پست‌های
+    // نرسیده/timeout‌شده NULL می‌مونن تا اجرای بعدی.
     const CHUNK_SIZE = 5;
     const CONCURRENCY = 4;
+    const TIME_BUDGET_MS = 75_000; // + زمان PATCHهای پایین، باید زیر ۱۲۰ ثانیه‌ی اسکریپت بمونه
+    const CALL_TIMEOUT_MS = 45_000;
+    const deadline = Date.now() + TIME_BUDGET_MS;
     const failedIds: number[] = [];
+    // پست‌هایی که واقعاً جواب گرفتن یا به‌تنهایی خطای غیرزمانی دادن — فقط این‌ها علامت می‌خورن
+    const doneIds = new Set<number>();
     let aiSuccesses = 0;
     let lastError = "";
-    async function tryChunk(items: typeof compact): Promise<KwResult[] | null> {
+    // null = خطا (قابل تکرار تک‌پستی)؛ "timeout" = وقت نبود، پست‌ها دست‌نخورده می‌مونن
+    async function tryChunk(items: typeof compact): Promise<KwResult[] | null | "timeout"> {
+      if (Date.now() >= deadline) return "timeout";
       try {
         const r = await callAi(items);
         aiSuccesses++;
+        items.forEach((p) => doneIds.add(p.id));
         return r;
       } catch (e) {
         lastError = String(e);
-        return null;
+        return e instanceof AiTimeoutError ? "timeout" : null;
       }
     }
     const chunks: Array<typeof compact> = [];
@@ -160,17 +172,26 @@ Deno.serve(async (req) => {
     // موج اول: CONCURRENCY تیکه‌ی اول. اگه هیچ‌کدوم موفق نشد، سرویس کلاً از
     // دسترس خارجه — ادامه بی‌فایده‌ست، مستقیم ۵۰۲
     const firstWave = await Promise.all(chunks.slice(0, CONCURRENCY).map(tryChunk));
-    const firstRound: Array<KwResult[] | null> = [...firstWave];
+    const firstRound: Array<KwResult[] | null | "timeout"> = [...firstWave];
     if (aiSuccesses > 0) {
       firstRound.push(...(await mapLimit(chunks.slice(CONCURRENCY), CONCURRENCY, tryChunk)));
     }
-    let parsedResults: KwResult[] = [];
+    const parsedResults: KwResult[] = [];
     if (aiSuccesses > 0) {
-      // تیکه‌های ناموفق: هر پست تنها یه‌بار دیگه امتحان می‌شه
+      // تیکه‌های خطادار (نه timeout): هر پست تنها یه‌بار دیگه امتحان می‌شه
       const retryPosts: typeof compact = [];
-      firstRound.forEach((r, i) => (r ? parsedResults.push(...r) : retryPosts.push(...chunks[i])));
+      firstRound.forEach((r, i) => {
+        if (Array.isArray(r)) parsedResults.push(...r);
+        else if (r === null) retryPosts.push(...chunks[i]);
+      });
       const singles = await mapLimit(retryPosts, CONCURRENCY, (p) => tryChunk([p]));
-      singles.forEach((r, i) => (r ? parsedResults.push(...r) : failedIds.push(retryPosts[i].id)));
+      singles.forEach((r, i) => {
+        if (Array.isArray(r)) parsedResults.push(...r);
+        else if (r === null) {
+          failedIds.push(retryPosts[i].id);
+          doneIds.add(retryPosts[i].id);
+        }
+      });
     }
 
     // اگه هیچ فراخوانی موفق نشد، مشکل از خودِ سرویسه نه یه پست خاص — هیچ
@@ -190,7 +211,7 @@ Deno.serve(async (req) => {
     const hawzaResults = new Map<number, boolean>();
     for (const r of parsed.results || []) {
       const id = Number(r.id);
-      if (!validIds.has(id) || results.has(id)) continue;
+      if (!validIds.has(id) || !doneIds.has(id) || results.has(id)) continue;
       const keywords = Array.isArray(r.keywords)
         ? r.keywords.map((k) => String(k).slice(0, 80)).filter(Boolean).slice(0, 20)
         : [];
@@ -206,7 +227,10 @@ Deno.serve(async (req) => {
     // پست‌هایی که هوش مصنوعی جا انداخته (پاسخ ناقص) رو هم صریح با آرایه‌ی
     // خالی علامت می‌زنیم — طبق طراحی، هیچ پستی نباید بدون رد بمونه، وگرنه
     // NULL می‌مونه و هر اجرا دوباره براش فرستاده می‌شه
+    // فقط پست‌هایی که واقعاً پردازش شدن (doneIds) — پست‌هایی که وقت بهشون
+    // نرسید NULL می‌مونن تا اجرای بعدی
     for (const p of posts) {
+      if (!doneIds.has(p.id)) continue;
       if (!results.has(p.id)) results.set(p.id, []);
       // همین‌طور hawza_relevant — اگه جا افتاده باشه، false (نه NULL) تا
       // دوباره پردازش نشه؛ امن‌تره که پست نامشخص از تب مخفی بمونه تا اینکه اشتباهی نشون داده بشه
@@ -276,7 +300,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    return jsonResponse({ processed: updated, matched, ai_calls_ok: aiSuccesses, skipped_post_ids: failedIds });
+    return jsonResponse({
+      processed: updated,
+      matched,
+      ai_calls_ok: aiSuccesses,
+      skipped_post_ids: failedIds,
+      left_for_next_run: posts.length - doneIds.size,
+    });
   } catch (e) {
     return jsonResponse({ error: String(e) }, 500);
   }
