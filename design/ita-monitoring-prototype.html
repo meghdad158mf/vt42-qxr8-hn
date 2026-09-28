@@ -503,10 +503,12 @@
     background: url('images/network-bg.svg') center / 1400px auto no-repeat;
     -webkit-mask-composite: source-in; mask-composite: intersect;
   }
+  /* پشت خودِ آیکون‌ها شلوغ می‌شد (بازخورد کاربر) — فقط دو طرف ردیف عرصه‌ها،
+     وسط (عرض ردیف کارت‌ها ~۹۲۰px) کاملاً خالی */
   .net-deco-domains{
-    top:-150px; height:370px;
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent), radial-gradient(55% 90% at 50% 50%, #000 35%, transparent 80%);
-            mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent), radial-gradient(55% 90% at 50% 50%, #000 35%, transparent 80%);
+    top:-150px; height:370px; opacity:.8;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent), linear-gradient(to right, transparent, #000 12%, #000 calc(50% - 560px), transparent calc(50% - 440px), transparent calc(50% + 440px), #000 calc(50% + 560px), #000 88%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 72%, transparent), linear-gradient(to right, transparent, #000 12%, #000 calc(50% - 560px), transparent calc(50% - 440px), transparent calc(50% + 440px), #000 calc(50% + 560px), #000 88%, transparent);
   }
   .net-deco-gap{
     height:150px; background-size: 1400px 520px;
@@ -1539,7 +1541,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۳</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۴</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2552,7 +2554,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۸.۳</span></small>
+          <small>ویرایش <span class="app-version">۵.۸.۴</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -7160,7 +7162,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.8.3';
+  const APP_VERSION = '5.8.4';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
