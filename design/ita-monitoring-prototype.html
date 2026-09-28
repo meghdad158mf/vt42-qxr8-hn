@@ -492,17 +492,11 @@
      dark canvas, separated purely by grid spacing (no border/background/shadow). */
   .section-label{ font-size:15px; font-weight:800; color: #fff; margin: 160px 2px 26px; text-align:center; letter-spacing:0.01em; scroll-margin-top: 140px; }
   .domain-grid{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; margin-bottom:26px; }
-  /* طرح «شبکه» (گره + یال، images/network-bg.svg) فقط در جاهای خلوت صفحه‌ی نخست:
-     پشت عرصه‌های رصد (محو قبل از پاراگراف توضیح) و دو فاصله‌ی خالی بین بخش‌ها.
-     تمام‌عرض (100vw) پشت محتوا؛ #view-dash با overflow-x:clip جلوی اسکرول افقی رو
-     می‌گیره (clip نه hidden، تا تب‌های sticky خراب نشن). روی گوشی نیست. */
+  /* «مدار» عرصه‌ها (پایین‌تر) پشت محتوا: #sec-dashboard stacking context + z-index:-1؛
+     #view-dash با overflow-x:clip جلوی اسکرول افقی مدار ۱۲۰۰px رو می‌گیره (clip نه
+     hidden، تا تب‌های sticky خراب نشن) */
   #sec-dashboard{ position:relative; z-index:0; }
-  .why-jarian-card, .domain-grid, .domain-shortcuts{ position:relative; }
-  .net-deco{
-    position:absolute; left:50%; width:100vw; margin-left:-50vw; z-index:-1; pointer-events:none;
-    background: url('images/network-bg.svg') center / 1400px auto no-repeat;
-    -webkit-mask-composite: source-in; mask-composite: intersect;
-  }
+  .domain-grid{ position:relative; }
   /* «مدار» عرصه‌ها: قوس هلویی که از میان پنج عرصه رد می‌شه (پشت خودِ آیکون‌ها با
      mask محو) + «شهاب جریان»: هر ۹ ثانیه یه نوار نور با دنباله‌ی محو از راست به چپ
      روی قوس می‌گذره (سه خط‌چین روی هم با stroke-dashoffset متحرک، بدون JS؛ طول
@@ -521,14 +515,6 @@
   }
   @media (max-width:900px){ .dom-orbit{ display:none; } }
   @media (prefers-reduced-motion: reduce){ .dom-orbit .flow{ display:none; } }
-  .net-deco-gap{
-    height:150px; background-size: 1400px 520px;
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent), radial-gradient(60% 100% at 50% 50%, #000 30%, transparent 80%);
-            mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 65%, transparent), radial-gradient(60% 100% at 50% 50%, #000 30%, transparent 80%);
-  }
-  .why-jarian-card > .net-deco-gap{ bottom:calc(100% + 5px); background-position: 30% 20%; }
-  .domain-shortcuts > .net-deco-gap{ top:calc(100% + 25px); background-position: 70% 80%; }
-  @media (max-width:640px){ .net-deco{ display:none; } }
   .domain-grid > .domain-card{ width:170px; }
   .domain-caption{ text-align:center; color: rgba(255,255,255,0.55); font-size:13.5px; line-height:2; max-width:620px; margin:0 auto 28px; }
   @media (max-width:900px){ .domain-grid > .domain-card{ width:calc(50% - 8px); } }
@@ -1552,7 +1538,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۵</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۸.۶</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1781,7 +1767,6 @@
       <div class="dash-hero-stats" id="dash-hero-stats"></div>
 
       <div class="why-jarian-card">
-        <div class="net-deco net-deco-gap" aria-hidden="true"></div>
         <div class="why-jarian-grid">
           <div class="why-jarian-item">
             <div class="why-jarian-tag">رصد لحظه‌ای</div>
@@ -1849,7 +1834,6 @@
       <p class="domain-caption">جریان این پنج عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، یادداشت‌های مربوط به افراد و مجموعه‌های تأثیرگذار، اخبار سیاسی‌اجتماعی پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود، کنشگری فضای مجازی و برنامه‌های آموزشی مدارس. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
 
       <div class="domain-shortcuts">
-        <div class="net-deco net-deco-gap" aria-hidden="true"></div>
         <a onclick="goToNewsTab('analytics')">در یک نگاه</a>
         <a onclick="goToNewsTab('claims')">ادعاها و شایعات</a>
         <a onclick="goToNewsTab('study')">شبکه‌های اجتماعی</a>
@@ -2586,7 +2570,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۸.۵</span></small>
+          <small>ویرایش <span class="app-version">۵.۸.۶</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -7194,7 +7178,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.8.5';
+  const APP_VERSION = '5.8.6';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
