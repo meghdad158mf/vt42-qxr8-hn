@@ -1268,11 +1268,32 @@
   .sys-login-badge.fail{ background: rgba(220,60,60,0.12); color: var(--danger); }
   .sys-login-wrap{ overflow-x:auto; }
   .sys-login-more{ margin-top:10px; }
-  .sys-svc-use{ font-size:11.5px; color: var(--text-faint); margin-top:2px; line-height:1.6; }
-  .sys-svc-state{ font-size:12px; margin-top:4px; color: var(--text-dim); }
-  .sys-status-item.ok .sys-svc-state{ color: var(--ok); }
-  .sys-status-item.warn .sys-svc-state{ color:#b7800f; font-weight:700; }
-  .sys-status-item.bad .sys-svc-state{ color: var(--danger); font-weight:700; }
+  /* «سرویس‌های مرتبط» — نمای فهرستی گروه‌بندی‌شده (متفاوت از کارت‌های کارهای خودکار) */
+  .svc-summary{ display:flex; align-items:center; gap:14px; padding:4px 2px 14px; margin-bottom:14px; border-bottom:1px dashed var(--border); }
+  .svc-summary-num{ font-size:30px; font-weight:800; line-height:1; color: var(--text-dim); }
+  .svc-summary-num small{ font-size:15px; font-weight:700; color: var(--text-faint); }
+  .svc-summary-text{ font-size:13.5px; font-weight:700; color: var(--text); }
+  .svc-summary.ok .svc-summary-num{ color: var(--ok); }
+  .svc-summary.warn .svc-summary-num{ color:#d99a1e; } .svc-summary.warn .svc-summary-text{ color:#b7800f; }
+  .svc-summary.bad .svc-summary-num, .svc-summary.bad .svc-summary-text{ color: var(--danger); }
+  .svc-groups{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px 28px; }
+  @media (max-width:1000px){ .svc-groups{ grid-template-columns: minmax(0,1fr); } }
+  .svc-group-title{ font-size:11.5px; font-weight:800; color: var(--accent-strong); padding-bottom:6px; margin-bottom:2px; border-bottom:2px solid var(--accent); }
+  .svc-row{ display:flex; align-items:flex-start; gap:10px; padding:10px 2px; border-bottom:1px solid var(--border); }
+  .svc-row:last-child{ border-bottom:none; }
+  .svc-dot{ width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0; background: var(--text-faint); }
+  .svc-row.ok .svc-dot{ background: var(--ok); } .svc-row.warn .svc-dot{ background:#d99a1e; } .svc-row.bad .svc-dot{ background: var(--danger); }
+  .svc-main{ flex:1; min-width:0; }
+  .svc-name{ font-size:13px; font-weight:700; color: var(--text); }
+  .svc-note{ font-size:11.5px; color: var(--text-faint); margin-top:1px; line-height:1.6; }
+  .svc-row.bad .svc-note{ color: var(--danger); }
+  .svc-meter{ height:4px; border-radius:999px; background: var(--surface-2); margin-top:7px; overflow:hidden; }
+  .svc-meter > span{ display:block; height:100%; border-radius:999px; background: var(--text-faint); transition: width .6s cubic-bezier(.22,1,.36,1); }
+  .svc-row.ok .svc-meter > span{ background: var(--ok); } .svc-row.warn .svc-meter > span{ background:#d99a1e; } .svc-row.bad .svc-meter > span{ background: var(--danger); }
+  .svc-pill{ flex-shrink:0; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px; background: var(--surface-2); color: var(--text-dim); white-space:nowrap; }
+  .svc-row.ok .svc-pill{ background: var(--ok-soft); color: var(--ok); }
+  .svc-row.warn .svc-pill{ background: rgba(217,154,30,0.15); color:#b7800f; }
+  .svc-row.bad .svc-pill{ background: rgba(220,60,60,0.12); color: var(--danger); }
   .sys-run-btn{ margin-top:8px; font-family:inherit; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius: var(--radius-pill); border:1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor:pointer; transition: border-color .15s ease, color .15s ease; }
   .sys-run-btn:hover:not(:disabled){ border-color: var(--accent-strong); color: var(--accent-strong); }
   .sys-run-btn:disabled{ opacity:.6; cursor:default; }
@@ -1460,7 +1481,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۶.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۶.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2414,7 +2435,7 @@
         </div>
         <div class="panel">
           <div class="panel-head"><span class="panel-pill">سرویس‌های مرتبط</span><span class="settings-sum-desc">سایت‌ها و سرویس‌هایی که «جریان» برای کار کردن بهشون وابسته‌ست. سبز یعنی در دسترس، زرد یعنی کُند، قرمز یعنی قطع یا خطا.</span></div>
-          <div class="sys-status-list" id="sys-services"></div>
+          <div id="sys-services"></div>
         </div>
         <div class="panel">
           <div class="panel-head"><span class="panel-pill">کارهای خودکار</span><span class="settings-sum-desc">زمان آخرین خروجی هر کار و نتیجه‌ی آخرین اجرای آن در گیت‌هاب. زرد یا قرمز یعنی باید بررسی بشه.</span></div>
@@ -2449,7 +2470,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۶.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۶.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3089,15 +3110,20 @@
   // (run-job با action:'health') — چون کلید لیارا و توکن گیت‌هاب فقط اونجان و
   // مرورگر به‌خاطر CORS نمی‌تونه سایت‌های منبع رو مستقیم چک کنه.
   const SYS_SERVICES = [
-    { key:'db',       name:'پایگاه داده (سوپابیس)',   use:'همه‌ی مطالب، منابع و تنظیمات سایت', slow:3000 },
-    { key:'storage',  name:'فضای فایل (سوپابیس)',     use:'عکس‌ها، روزنامه‌ها، مجلات و فایل‌ها', slow:3000 },
-    { key:'functions',name:'تابع‌های سرور (سوپابیس)',  use:'ترجمه، هوش مصنوعی و اجرای دستی کارها', slow:8000 },
-    { key:'liara',    name:'هوش مصنوعی لیارا',        use:'ترجمه، کلیدواژه‌ها و تحلیل «در یک نگاه»', slow:8000 },
-    { key:'github',   name:'گیت‌هاب (کارهای خودکار)', use:'اجرای زمان‌بندی‌شده‌ی جمع‌آوری و تحلیل‌ها', slow:5000 },
-    { key:'eitaa',    name:'ایتا',                    use:'جمع‌آوری پست‌های کانال‌های ایتا', slow:6000 },
-    { key:'telegram', name:'تلگرام',                  use:'جمع‌آوری پست‌های کانال‌های تلگرام', slow:6000 },
-    { key:'bale',     name:'بله',                     use:'ادعاها و شایعات (کانال رصد شایعات)', slow:6000 },
-    { key:'jaaar',    name:'جار (کیوسک روزنامه)',      use:'صفحه‌ی اول روزنامه‌ها', slow:6000 },
+    { key:'db',       name:'پایگاه داده (سوپابیس)',   use:'همه‌ی مطالب، منابع و تنظیمات سایت', slow:3000, group:'infra' },
+    { key:'storage',  name:'فضای فایل (سوپابیس)',     use:'عکس‌ها، روزنامه‌ها، مجلات و فایل‌ها', slow:3000, group:'infra' },
+    { key:'functions',name:'تابع‌های سرور (سوپابیس)',  use:'ترجمه، هوش مصنوعی و اجرای دستی کارها', slow:8000, group:'infra' },
+    { key:'liara',    name:'هوش مصنوعی لیارا',        use:'ترجمه، کلیدواژه‌ها و تحلیل «در یک نگاه»', slow:8000, group:'proc' },
+    { key:'github',   name:'گیت‌هاب (کارهای خودکار)', use:'اجرای زمان‌بندی‌شده‌ی جمع‌آوری و تحلیل‌ها', slow:5000, group:'proc' },
+    { key:'eitaa',    name:'ایتا',                    use:'جمع‌آوری پست‌های کانال‌های ایتا', slow:6000, group:'src' },
+    { key:'telegram', name:'تلگرام',                  use:'جمع‌آوری پست‌های کانال‌های تلگرام', slow:6000, group:'src' },
+    { key:'bale',     name:'بله',                     use:'ادعاها و شایعات (کانال رصد شایعات)', slow:6000, group:'src' },
+    { key:'jaaar',    name:'جار (کیوسک روزنامه)',      use:'صفحه‌ی اول روزنامه‌ها', slow:6000, group:'src' },
+  ];
+  const SYS_SERVICE_GROUPS = [
+    { key:'infra', name:'زیرساخت سایت' },
+    { key:'proc',  name:'پردازش و کارهای خودکار' },
+    { key:'src',   name:'منابع جمع‌آوری' },
   ];
   function sysSvcTime(ms){
     return ms < 1000 ? toFaDigits(String(ms)) + ' میلی‌ثانیه' : toFaDigits((ms/1000).toFixed(1)) + ' ثانیه';
@@ -3112,7 +3138,7 @@
   async function renderSysServices(){
     const el = document.getElementById('sys-services');
     if(!el) return;
-    el.innerHTML = SYS_SERVICES.map(s=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${s.name}</div><div class="sys-svc-use">${s.use}</div><div class="sys-svc-state">در حال بررسی…</div></div></div>`).join('');
+    el.innerHTML = sysServicesHtml(null);
     let healthData = null;
     const healthP = sysTimed(()=>fetch(SUPABASE_URL + '/functions/v1/run-job', {
       method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + authToken },
@@ -3126,20 +3152,40 @@
     ]);
     const results = { db, storage, functions: fnRes };
     if(healthData) Object.assign(results, healthData);
-    el.innerHTML = SYS_SERVICES.map(s=>{
+    el.innerHTML = sysServicesHtml(results);
+  }
+  // نمای «سرویس‌های مرتبط»: خلاصه‌ی بالا + سه گروه با ردیف‌های فشرده و نوار زمان پاسخ
+  // (عمداً متفاوت از کارت‌های «کارهای خودکار»). results=null یعنی «در حال بررسی».
+  function sysServicesHtml(results){
+    const rows = SYS_SERVICES.map(s=>{
+      if(!results) return { s, cls:'', pill:'…', note:'در حال بررسی', pct:0 };
       const r = results[s.key];
-      let cls, state;
-      if(!r){ cls = ''; state = 'نامعلوم (تابع‌های سرور جواب ندادن)'; }
+      let cls, pill, note = s.use;
+      if(!r){ cls = ''; pill = 'نامعلوم'; note = 'تابع‌های سرور جواب ندادن'; }
       else if(!r.ok){
         cls = 'bad';
-        state = r.detail === 'timeout' ? 'بدون پاسخ (بیش از ۱۲ ثانیه)'
-          : r.status ? 'خطا (کد ' + toFaDigits(String(r.status)) + ')' : 'قطع ارتباط';
-      }else if(r.ms >= s.slow){ cls = 'warn'; state = 'کُند، ' + sysSvcTime(r.ms); }
-      else{ cls = 'ok'; state = 'در دسترس، ' + sysSvcTime(r.ms); }
-      if(s.key === 'github' && r && r.ok && typeof r.remaining === 'number') state += '، سهمیه‌ی باقی‌مانده: ' + faNum(r.remaining);
-      const tip = r && r.detail && r.detail !== 'timeout' ? ` title="${escAttr(r.detail)}"` : '';
-      return `<div class="sys-status-item ${cls}"${tip}><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${s.name}</div><div class="sys-svc-use">${s.use}</div><div class="sys-svc-state">${state}</div></div></div>`;
-    }).join('');
+        pill = r.detail === 'timeout' ? 'بی‌پاسخ' : r.status ? 'خطای ' + toFaDigits(String(r.status)) : 'قطع';
+        if(r.detail === 'timeout') note = 'بیش از ۱۲ ثانیه جواب نداد';
+      }else{
+        cls = r.ms >= s.slow ? 'warn' : 'ok';
+        pill = sysSvcTime(r.ms);
+      }
+      if(s.key === 'github' && r && r.ok && typeof r.remaining === 'number') note += '، سهمیه‌ی باقی‌مانده: ' + faNum(r.remaining);
+      // نوار: زمان پاسخ نسبت به ۱.۵ برابر آستانه‌ی کُندی؛ خطا = پر و قرمز
+      const pct = !r ? 0 : !r.ok ? 100 : Math.max(4, Math.min(100, r.ms / (s.slow * 1.5) * 100));
+      const tip = r && r.detail && r.detail !== 'timeout' ? r.detail : '';
+      return { s, cls, pill, note, pct, tip };
+    });
+    let head;
+    if(!results){
+      head = '<div class="svc-summary"><span class="svc-summary-num">…</span><span class="svc-summary-text">در حال بررسی سرویس‌ها</span></div>';
+    }else{
+      const ok = rows.filter(x=>x.cls === 'ok').length, warn = rows.filter(x=>x.cls === 'warn').length, bad = rows.filter(x=>x.cls === 'bad').length;
+      const cls = bad ? 'bad' : warn ? 'warn' : ok === rows.length ? 'ok' : '';
+      const text = bad ? faNum(bad) + ' سرویس قطع یا دچار خطاست' : warn ? faNum(warn) + ' سرویس کُند جواب می‌ده' : ok === rows.length ? 'همه‌ی سرویس‌ها در دسترس‌اند' : 'وضعیت برخی سرویس‌ها نامعلومه';
+      head = `<div class="svc-summary ${cls}"><span class="svc-summary-num">${faNum(ok)}<small> از ${faNum(rows.length)}</small></span><span class="svc-summary-text">${text}</span></div>`;
+    }
+    return head + '<div class="svc-groups">' + SYS_SERVICE_GROUPS.map(g=>`<div class="svc-group"><div class="svc-group-title">${g.name}</div>${rows.filter(x=>x.s.group === g.key).map(x=>`<div class="svc-row ${x.cls}"${x.tip ? ` title="${escAttr(x.tip)}"` : ''}><span class="svc-dot"></span><div class="svc-main"><div class="svc-name">${x.s.name}</div><div class="svc-note">${x.note}</div><div class="svc-meter"><span style="width:${x.pct.toFixed(0)}%"></span></div></div><span class="svc-pill">${x.pill}</span></div>`).join('')}</div>`).join('') + '</div>';
   }
 
   async function renderSysStorage(){
@@ -6833,7 +6879,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.6.0';
+  const APP_VERSION = '5.6.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
