@@ -380,6 +380,46 @@
 
   /* ---- shared bits ---- */
   .panel{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:24px; margin-bottom:16px; }
+  /* «بارگذاری محتوا» */
+  .upl-intro{ font-size:14px; font-weight:800; color:#fff; margin:4px 2px 12px; }
+  .upl-choices{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; margin-bottom:22px; }
+  @media (max-width:900px){ .upl-choices{ grid-template-columns:1fr; } }
+  .upl-choice{ position:relative; display:flex; align-items:flex-start; gap:12px; text-align:right; font:inherit; cursor:pointer; padding:14px; border-radius:14px;
+    background: linear-gradient(165deg, #29343f, #1a222b); border:1px solid rgba(255,255,255,0.1); color:#fff; transition: border-color .2s ease, transform .15s ease; }
+  .upl-choice:hover{ border-color: rgba(234,179,147,0.45); }
+  .upl-choice.active{ border-color: var(--accent); box-shadow: 0 0 0 3px rgba(234,179,147,0.15), 0 14px 28px -18px rgba(234,179,147,0.5); }
+  .upl-choice-ic{ flex-shrink:0; width:40px; height:40px; border-radius:11px; display:grid; place-items:center; background: rgba(234,179,147,0.14); color: var(--accent); }
+  .upl-choice.active .upl-choice-ic{ background: linear-gradient(145deg, #f1c4a8, #d99a76); color: var(--primary); }
+  .upl-choice-ic svg{ width:21px; height:21px; }
+  .upl-choice-t{ display:flex; flex-direction:column; gap:3px; min-width:0; flex:1; }
+  .upl-choice-t b{ font-size:13.5px; }
+  .upl-choice-t small{ font-size:11.5px; color: rgba(255,255,255,0.62); }
+  .upl-choice-t em{ font-style:normal; font-size:10.5px; color: rgba(234,179,147,0.85); }
+  .upl-choice .upl-count{ position:absolute; top:10px; inset-inline-end:10px; }
+  .upl-file{ position:relative; display:flex; align-items:center; gap:10px; padding:8px; border-radius:10px; border:1px dashed var(--border-strong, #c9d2dd); background: var(--surface-2, #f4f6f9); cursor:pointer; }
+  .upl-file input[type=file]{ position:absolute; width:1px; height:1px; opacity:0; }
+  .upl-file:focus-within{ outline:2px solid var(--accent); outline-offset:2px; }
+  .upl-file-btn{ flex-shrink:0; font-size:12px; font-weight:700; color:#fff; background: var(--navy); padding:7px 14px; border-radius:8px; }
+  .upl-file-name{ font-size:12px; color: var(--text-faint); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .upl-file-name.has{ color: var(--text); font-weight:600; }
+  .upl-jdate{ display:inline-block; margin-top:6px; font-size:11.5px; font-weight:700; color: var(--accent-strong, #b5651d); }
+  .upl-count{ margin-inline-start:6px; font-size:10.5px; font-weight:800; padding:1px 7px; border-radius:9px; background: rgba(234,179,147,0.16); color: var(--accent); }
+  .upl-count:empty{ display:none; }
+  .upl-list-head{ font-size:13px; font-weight:800; color:#fff; margin:22px 2px 10px; }
+  .upl-list{ display:flex; flex-direction:column; gap:8px; }
+  .upl-item{ display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:12px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); }
+  .upl-thumb{ flex-shrink:0; width:40px; height:52px; border-radius:6px; overflow:hidden; background: rgba(255,255,255,0.06); display:grid; place-items:center; color: rgba(255,255,255,0.4); }
+  .upl-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .upl-thumb svg{ width:20px; height:20px; }
+  .upl-meta{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .upl-meta b{ font-size:13px; color:#fff; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .upl-meta span{ font-size:11px; color: rgba(255,255,255,0.55); }
+  .upl-del{ flex-shrink:0; font:inherit; font-size:11.5px; font-weight:700; color:#f0948b; background:none; border:1px solid rgba(224,90,79,0.4); border-radius:8px; padding:6px 11px; cursor:pointer; transition: background .15s ease; }
+  .upl-del:hover{ background: rgba(224,90,79,0.14); }
+  .upl-empty{ font-size:12.5px; color: rgba(255,255,255,0.5); padding:14px 2px; }
+  .upl-goto{ display:none; margin:14px auto 0; font:inherit; font-size:12px; font-weight:700; color: var(--accent); background: rgba(234,179,147,0.07); border:1px dashed rgba(234,179,147,0.5); border-radius:10px; padding:9px 16px; cursor:pointer; }
+  body.is-admin .upl-goto{ display:block; }
+  .upl-goto:hover{ background: rgba(234,179,147,0.14); }
   .panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
   /* قبلاً پیش‌فرض مونواسپیس (JetBrains Mono) بود — چون همه‌ی متن‌های
      panel-pill سایت جمله‌ی کامل فارسی‌ان (نه کد/عدد)، مونواسپیس حرف فارسی
@@ -1569,7 +1609,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۹.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۰.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1654,6 +1694,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
               وضعیت سامانه
               <span class="am-dot" id="am-status-dot"></span>
+            </button>
+            <button onclick="switchSection('uploads'); closeAdminMenu();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0l-4 4m4-4l4 4M5 20h14"/></svg>
+              بارگذاری محتوا
             </button>
             <button onclick="switchSection('settings'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
@@ -2188,16 +2232,8 @@
     <section class="section" id="sec-schools">
       <p class="school-reports-empty" id="school-reports-empty" style="display:none;color:rgba(255,255,255,0.55);font-size:13px;text-align:center;padding:40px 0;">هنوز گزارشی بارگذاری نشده.</p>
       <div class="school-report-list" id="school-report-list"></div>
+      <button type="button" class="upl-goto" data-upl="schools" onclick="goToUploadsTab('schools')">＋ بارگذاری گزارش جدید</button>
 
-      <div class="panel" id="school-report-upload-panel" style="display:none;">
-        <div class="panel-head"><span class="panel-pill">بارگذاری گزارش جدید</span></div>
-        <div class="field"><label>عنوان (اختیاری)</label><input type="text" id="school-report-title" /></div>
-        <div class="field">
-          <label>فایل (تصویر، PDF یا اکسل)</label>
-          <input type="file" id="school-report-file" accept="image/*,.pdf,.xlsx,.xls,.csv" />
-        </div>
-        <button class="btn primary" id="school-report-upload-btn" style="margin-top:8px">بارگذاری گزارش</button>
-      </div>
     </section>
 
     <!-- ===== یادداشت‌ها: «چهره‌های سیاسی» (فید یادداشت‌های کانال‌های تگ‌شده،
@@ -2257,31 +2293,8 @@
       <div id="people-tab-archive" style="display:none;">
         <p class="magazines-empty" id="archive-reports-empty" style="display:none;color:rgba(255,255,255,0.55);font-size:13px;text-align:center;padding:40px 0;">هنوز موردی در آرشیو بارگذاری نشده.</p>
         <div class="magazine-grid" id="archive-report-grid"></div>
+        <button type="button" class="upl-goto" data-upl="archive" onclick="goToUploadsTab('archive')">＋ بارگذاری تولید تحلیلی جدید</button>
 
-        <div class="panel" id="archive-report-upload-panel" style="display:none;">
-          <div class="panel-head"><span class="panel-pill">بارگذاری تولید تحلیلی جدید</span></div>
-          <div class="form-grid">
-            <div class="field"><label>عنوان</label><input type="text" id="arc-title" /></div>
-            <div class="field"><label>نهاد تولیدکننده</label><input type="text" id="arc-source-org" /></div>
-            <div class="field"><label>تاریخ انتشار</label><input type="date" id="arc-date" /></div>
-            <div class="field">
-              <label>نوع فایل</label>
-              <select id="arc-file-type">
-                <option value="pdf">PDF</option>
-                <option value="images">چند عکس</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label>فایل(ها)</label>
-            <input type="file" id="arc-files" multiple accept=".pdf,image/*" />
-          </div>
-          <div class="field">
-            <label>تصویر جلد (اختیاری)</label>
-            <input type="file" id="arc-cover" accept="image/*" />
-          </div>
-          <button class="btn primary" id="arc-upload-btn" style="margin-top:8px">بارگذاری</button>
-        </div>
       </div>
 
     </section>
@@ -2307,9 +2320,37 @@
       <div id="reports-tab-own">
         <p class="magazines-empty" id="magazines-empty" style="display:none;color:rgba(255,255,255,0.55);font-size:13px;text-align:center;padding:40px 0;">هنوز مجله‌ای بارگذاری نشده.</p>
         <div class="magazine-grid" id="magazine-grid"></div>
+        <button type="button" class="upl-goto" data-upl="magazines" onclick="goToUploadsTab('magazines')">＋ بارگذاری مجله‌ی جدید</button>
 
-        <div class="panel" id="magazine-upload-panel" style="display:none;">
-          <div class="panel-head"><span class="panel-pill">بارگذاری مجله‌ی جدید</span></div>
+      </div>
+
+    </section>
+
+    <!-- «بارگذاری محتوا» (فقط مدیر) — همه‌ی فرم‌های بارگذاری یه‌جا (قبلاً هر کدوم ته
+         بخش خودش بود؛ خودِ پنل‌ها با همون idها منتقل شدن، پس هندلرها دست‌نخورده‌ان) +
+         فهرست موارد بارگذاری‌شده‌ی هر نوع با امکان حذف (همون deleteX موجود) -->
+    <section class="section" id="sec-uploads">
+      <p class="upl-intro">چه چیزی می‌خواهید بارگذاری کنید؟</p>
+      <div class="upl-choices">
+        <button type="button" class="upl-choice active" data-upl-tab="magazines" onclick="setUploadsTab('magazines')">
+          <span class="upl-choice-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11l5 5v11H4z"/><path d="M15 4v5h5M8 13h8M8 17h5"/></svg></span>
+          <span class="upl-choice-t"><b>بسته تحلیلی جریان</b><small>شماره‌های تولید خودِ جریان</small><em>نمایش در: صفحه‌ی نخست و بخش «بسته تحلیلی جریان»</em></span>
+          <span class="upl-count" id="upl-count-magazines"></span>
+        </button>
+        <button type="button" class="upl-choice" data-upl-tab="archive" onclick="setUploadsTab('archive')">
+          <span class="upl-choice-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9M10 13h4"/></svg></span>
+          <span class="upl-choice-t"><b>بسته‌های تحلیلی سایر نهادها</b><small>تولیدات نهادها و اندیشکده‌های دیگر</small><em>نمایش در: یادداشت‌ها ← بسته‌های تحلیلی</em></span>
+          <span class="upl-count" id="upl-count-archive"></span>
+        </button>
+        <button type="button" class="upl-choice" data-upl-tab="schools" onclick="setUploadsTab('schools')">
+          <span class="upl-choice-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-5 9 5-9 5z"/><path d="M7 12v5c3 2 7 2 10 0v-5"/></svg></span>
+          <span class="upl-choice-t"><b>گزارش‌های برنامه مدارس</b><small>خروجی Power BI (عکس، PDF یا اکسل)</small><em>نمایش در: بخش «برنامه مدارس»</em></span>
+          <span class="upl-count" id="upl-count-schools"></span>
+        </button>
+      </div>
+      <div class="upl-pane" id="upl-pane-magazines">
+        <div class="panel" id="magazine-upload-panel">
+          <div class="panel-head"><span class="panel-pill">بارگذاری شماره‌ی جدید «بسته تحلیلی جریان»</span></div>
           <div class="form-grid">
             <div class="field"><label>عنوان</label><input type="text" id="mag-title" /></div>
             <div class="field"><label>شماره</label><input type="text" id="mag-issue" /></div>
@@ -2323,17 +2364,59 @@
             </div>
           </div>
           <div class="field">
-            <label>فایل(ها)</label>
+            <label>فایل(ها) — یک PDF یا چند عکس صفحه‌ها</label>
             <input type="file" id="mag-files" multiple accept=".pdf,image/*" />
           </div>
           <div class="field">
-            <label>تصویر جلد (اختیاری — برای نمایش در ردیف کاروسل صفحه‌ی نخست)</label>
+            <label>تصویر جلد (اختیاری — در کاروسل صفحه‌ی نخست نمایش داده می‌شه)</label>
             <input type="file" id="mag-cover" accept="image/*" />
           </div>
           <button class="btn primary" id="mag-upload-btn" style="margin-top:8px">بارگذاری مجله</button>
         </div>
+        <div class="upl-list-head">موارد بارگذاری‌شده</div>
+        <div class="upl-list" id="upl-list-magazines"></div>
       </div>
-
+      <div class="upl-pane" id="upl-pane-archive" style="display:none;">
+        <div class="panel" id="archive-report-upload-panel">
+          <div class="panel-head"><span class="panel-pill">بارگذاری بسته‌ی تحلیلی یک نهاد</span></div>
+          <div class="form-grid">
+            <div class="field"><label>عنوان</label><input type="text" id="arc-title" /></div>
+            <div class="field"><label>نهاد تولیدکننده</label><input type="text" id="arc-source-org" /></div>
+            <div class="field"><label>تاریخ انتشار</label><input type="date" id="arc-date" /></div>
+            <div class="field">
+              <label>نوع فایل</label>
+              <select id="arc-file-type">
+                <option value="pdf">PDF</option>
+                <option value="images">چند عکس</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>فایل(ها) — یک PDF یا چند عکس صفحه‌ها</label>
+            <input type="file" id="arc-files" multiple accept=".pdf,image/*" />
+          </div>
+          <div class="field">
+            <label>تصویر جلد (اختیاری)</label>
+            <input type="file" id="arc-cover" accept="image/*" />
+          </div>
+          <button class="btn primary" id="arc-upload-btn" style="margin-top:8px">بارگذاری</button>
+        </div>
+        <div class="upl-list-head">موارد بارگذاری‌شده</div>
+        <div class="upl-list" id="upl-list-archive"></div>
+      </div>
+      <div class="upl-pane" id="upl-pane-schools" style="display:none;">
+        <div class="panel" id="school-report-upload-panel">
+          <div class="panel-head"><span class="panel-pill">بارگذاری گزارش جدید مدارس</span></div>
+          <div class="field"><label>عنوان (اختیاری)</label><input type="text" id="school-report-title" /></div>
+          <div class="field">
+            <label>فایل (تصویر، PDF یا اکسل)</label>
+            <input type="file" id="school-report-file" accept="image/*,.pdf,.xlsx,.xls,.csv" />
+          </div>
+          <button class="btn primary" id="school-report-upload-btn" style="margin-top:8px">بارگذاری گزارش</button>
+        </div>
+        <div class="upl-list-head">موارد بارگذاری‌شده</div>
+        <div class="upl-list" id="upl-list-schools"></div>
+      </div>
     </section>
 
     <!-- CHANNELS & PEOPLE (full monitored-channel directory) -->
@@ -2601,7 +2684,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۹.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۰.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2932,11 +3015,12 @@
     });
   });
 
-  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback','status'];
+  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback','status','uploads'];
 
   function applyRoleUI(){
     const isAdmin = currentRole === 'app_admin';
     adminLinks.style.display = isAdmin ? '' : 'none';
+    document.body.classList.toggle('is-admin', isAdmin);
     document.getElementById('magazine-upload-panel').style.display = isAdmin ? '' : 'none';
     document.getElementById('archive-report-upload-panel').style.display = isAdmin ? '' : 'none';
     document.getElementById('school-report-upload-panel').style.display = isAdmin ? '' : 'none';
@@ -3027,6 +3111,7 @@
     settings: 'کاربران و تنظیمات',
     feedback: 'نظرات کاربران',
     status: 'وضعیت سامانه',
+    uploads: 'بارگذاری محتوا',
   };
 
   function switchSection(key){
@@ -3051,6 +3136,7 @@
     if(key === 'feedback') loadFeedbackList().then(()=>{ renderFeedbackList(); markFeedbackSeen(); });
     if(key === 'export') loadNotifySubscribers().then(renderNotifySubscribers);
     if(key === 'status'){ renderSystemStatus(); ackAdminAlerts(); }
+    if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
     if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
     // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
@@ -4943,7 +5029,85 @@
   }
 
   // ---- schools page: گزارش‌های تحلیل Power BI — هر عکس تمام‌عرض، پشت‌سرهم ----
+  // ---- «بارگذاری محتوا» ----
+  let UPLOADS_TAB = 'magazines';
+  function setUploadsTab(tab){
+    UPLOADS_TAB = tab;
+    document.querySelectorAll('.upl-choice').forEach(b=>b.classList.toggle('active', b.dataset.uplTab === tab));
+    ['magazines','archive','schools'].forEach(t=>{ document.getElementById('upl-pane-'+t).style.display = t === tab ? '' : 'none'; });
+    setupUploadForms();
+    renderUploadLists();
+  }
+  function goToUploadsTab(tab){ switchSection('uploads'); setUploadsTab(tab); }
+  // بهبودهای فرم (فقط داخل همین بخش): دکمه‌ی انتخاب فایل فارسی به‌جای «Choose Files»
+  // مرورگر (خودِ input پنهان ولی فعال می‌مونه تا هندلرهای موجود دست‌نخورده بمونن)،
+  // تشخیص خودکار «نوع فایل» از فایل‌های انتخاب‌شده، تاریخ پیش‌فرض امروز + معادل شمسی
+  // کنار انتخاب‌گر تاریخ میلادی مرورگر
+  let UPLOAD_FORMS_READY = false;
+  function setupUploadForms(){
+    if(!UPLOAD_FORMS_READY){
+      UPLOAD_FORMS_READY = true;
+      document.querySelectorAll('#sec-uploads input[type=file]').forEach(inp=>{
+        const wrap = document.createElement('label'); wrap.className = 'upl-file';
+        inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+        wrap.insertAdjacentHTML('beforeend', `<span class="upl-file-btn">${inp.multiple ? 'انتخاب فایل‌ها' : 'انتخاب فایل'}</span><span class="upl-file-name"></span>`);
+        inp.addEventListener('change', ()=>{ updateUploadFileLabel(inp); autoUploadFileType(inp); });
+      });
+      ['mag-date','arc-date'].forEach(id=>{
+        const el = document.getElementById(id);
+        el.insertAdjacentHTML('afterend', '<span class="upl-jdate"></span>');
+        el.addEventListener('input', ()=>updateUploadJDate(el));
+      });
+    }
+    ['mag-date','arc-date'].forEach(id=>{ const el = document.getElementById(id); if(!el.value) el.value = new Date().toLocaleDateString('en-CA', { timeZone:'Asia/Tehran' }); updateUploadJDate(el); });
+    document.querySelectorAll('#sec-uploads input[type=file]').forEach(updateUploadFileLabel);
+  }
+  function updateUploadFileLabel(inp){
+    const name = inp.closest('.upl-file') && inp.closest('.upl-file').querySelector('.upl-file-name');
+    if(!name) return;
+    const fs = Array.from(inp.files || []);
+    name.textContent = !fs.length ? 'فایلی انتخاب نشده' : fs.length === 1 ? fs[0].name : toFaDigits(fs.length) + ' فایل انتخاب شد';
+    name.classList.toggle('has', fs.length > 0);
+  }
+  function autoUploadFileType(inp){
+    const sel = { 'mag-files':'mag-file-type', 'arc-files':'arc-file-type' }[inp.id];
+    const fs = Array.from(inp.files || []);
+    if(!sel || !fs.length) return;
+    document.getElementById(sel).value = fs.every(f=>/^image\//.test(f.type)) ? 'images' : 'pdf';
+  }
+  function updateUploadJDate(el){
+    const j = el.nextElementSibling;
+    if(!j || !j.classList.contains('upl-jdate')) return;
+    j.textContent = el.value ? new Date(el.value + 'T12:00:00Z').toLocaleDateString('fa-IR', { day:'numeric', month:'long', year:'numeric' }) : '';
+  }
+  function renderUploadLists(){
+    if(UPLOAD_FORMS_READY) setupUploadForms();
+    const lists = {
+      magazines: { rows: MAGAZINES, del: deleteMagazine, meta: m => [m.issue_no ? 'شماره ' + toFaDigits(m.issue_no) : '', m.publish_date ? new Date(m.publish_date).toLocaleDateString('fa-IR') : '', m.file_type === 'images' ? 'چند عکس' : 'PDF'] },
+      archive:   { rows: ARCHIVE_REPORTS, del: deleteArchiveReport, meta: m => [m.source_org || '', m.publish_date ? new Date(m.publish_date).toLocaleDateString('fa-IR') : '', m.file_type === 'images' ? 'چند عکس' : 'PDF'] },
+      schools:   { rows: SCHOOL_REPORTS, del: deleteSchoolReport, meta: m => [m.uploaded_at ? new Date(m.uploaded_at).toLocaleDateString('fa-IR') : '', ({ image:'تصویر', pdf:'PDF', excel:'اکسل' })[m.file_type || 'image'] || ''] },
+    };
+    Object.entries(lists).forEach(([k, cfg])=>{
+      const el = document.getElementById('upl-list-'+k);
+      const cnt = document.getElementById('upl-count-'+k);
+      if(cnt) cnt.textContent = cfg.rows.length ? toFaDigits(cfg.rows.length) : '';
+      if(!el) return;
+      if(!cfg.rows.length){ el.innerHTML = '<div class="upl-empty">هنوز موردی بارگذاری نشده.</div>'; return; }
+      el.innerHTML = '';
+      cfg.rows.forEach(m=>{
+        const thumbSrc = k === 'schools' ? ((m.file_type || 'image') === 'image' ? m.image_url : '') : m.cover_url;
+        const row = document.createElement('div'); row.className = 'upl-item';
+        row.innerHTML = `<span class="upl-thumb">${thumbSrc ? `<img src="${escAttr(thumbSrc)}" alt="" loading="lazy">` : ICONS.doc}</span>
+          <span class="upl-meta"><b>${escHtml(m.title || 'بدون عنوان')}</b><span>${cfg.meta(m).filter(Boolean).map(escHtml).join('، ')}</span></span>
+          <button type="button" class="upl-del">حذف</button>`;
+        row.querySelector('.upl-del').addEventListener('click', () => cfg.del(m));
+        el.appendChild(row);
+      });
+    });
+  }
+
   function renderSchoolReports(){
+    renderUploadLists();
     const list = document.getElementById('school-report-list');
     const empty = document.getElementById('school-reports-empty');
     if(!list) return;
@@ -6589,6 +6753,7 @@
   const MAG_TYPE_LABEL = { pdf:'PDF', images:'چند عکس' };
 
   function renderMagazines(){
+    renderUploadLists();
     const grid = document.getElementById('magazine-grid');
     const empty = document.getElementById('magazines-empty');
     const isAdmin = currentRole === 'app_admin';
@@ -6908,6 +7073,7 @@
   // که فقط بایگانی می‌کنیم — همون الگوی داده/Storage مجلات (bucket خصوصی برای
   // فایل + bucket عمومی برای جلد)، فقط با یه ستون اضافه‌ی source_org.
   function renderArchiveReports(){
+    renderUploadLists();
     const grid = document.getElementById('archive-report-grid');
     const empty = document.getElementById('archive-reports-empty');
     if(!grid) return;
@@ -7328,7 +7494,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.9.1';
+  const APP_VERSION = '5.10.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
