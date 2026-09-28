@@ -475,9 +475,10 @@
   /* domain cards: no card box at all — just a big icon + title + tags floating on the
      dark canvas, separated purely by grid spacing (no border/background/shadow). */
   .section-label{ font-size:15px; font-weight:800; color: #fff; margin: 160px 2px 26px; text-align:center; letter-spacing:0.01em; scroll-margin-top: 140px; }
-  .domain-grid{ display:grid; grid-template-columns: repeat(4, minmax(0,170px)); justify-content:center; gap:16px; margin-bottom:26px; }
+  .domain-grid{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; margin-bottom:26px; }
+  .domain-grid > .domain-card{ width:170px; }
   .domain-caption{ text-align:center; color: rgba(255,255,255,0.55); font-size:13.5px; line-height:2; max-width:620px; margin:0 auto 28px; }
-  @media (max-width:900px){ .domain-grid{ grid-template-columns: repeat(2,1fr); } }
+  @media (max-width:900px){ .domain-grid > .domain-card{ width:calc(50% - 8px); } }
   .domain-card{
     display:flex; flex-direction:column; align-items:center; text-align:center; padding:6px 12px; cursor:pointer;
     background:none; border:none; box-shadow:none;
@@ -1481,7 +1482,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۶.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۷.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1525,7 +1526,6 @@
               <button class="nav-menu-sub" onclick="goToNewsTab('study'); closeNavMenu();">شبکه‌های اجتماعی</button>
               <button class="nav-menu-sub" onclick="goToNewsTab('website'); closeNavMenu();">وب‌سایت‌ها</button>
               <button class="nav-menu-sub" onclick="goToNewsTab('newspapers'); closeNavMenu();">روزنامه‌ها</button>
-              <button class="nav-menu-sub" onclick="goToNewsTab('hawza'); closeNavMenu();">اخبار حوزه</button>
               <button class="nav-menu-sub" onclick="goToNewsTab('dossier'); closeNavMenu();">پرونده‌های موضوعی</button>
               <button class="nav-menu-sub" onclick="goToNewsTab('newsletter'); closeNavMenu();">خبرنامه مدارس</button>
 
@@ -1538,6 +1538,9 @@
               <button class="nav-menu-sub" onclick="goToPeopleTab('orgs'); closeNavMenu();">تحلیل سازمان‌ها</button>
               <button class="nav-menu-sub" onclick="goToPeopleTab('figures'); closeNavMenu();">چهره‌ها و فعالان سیاسی</button>
               <button class="nav-menu-sub" onclick="goToPeopleTab('archive'); closeNavMenu();">بسته‌های تحلیلی</button>
+
+              <button class="nav-menu-group-title-btn" onclick="goToHawzaTab('news'); closeNavMenu();">درباره حوزه</button>
+              <button class="nav-menu-sub" onclick="goToHawzaTab('news'); closeNavMenu();">اخبار حوزه</button>
             </div>
             <div class="nav-menu-col">
               <button class="nav-menu-toplevel-btn" onclick="switchSection('reports'); closeNavMenu();">بسته تحلیلی جریان</button>
@@ -1745,8 +1748,12 @@
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-people.webp" alt="" /></div>
           <h3>یادداشت‌ها</h3>
         </div>
+        <div class="domain-card" onclick="switchSection('hawza')">
+          <div class="domain-icon is-illustrated"><img src="images/domain-icon-hawza.webp" alt="" /></div>
+          <h3>درباره حوزه</h3>
+        </div>
       </div>
-      <p class="domain-caption">جریان این چهار عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، کنشگری فضای مجازی، برنامه‌های آموزشی مدارس و یادداشت‌های مربوط به افراد و مجموعه‌های تأثیرگذار. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
+      <p class="domain-caption">جریان این پنج عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، کنشگری فضای مجازی، برنامه‌های آموزشی مدارس، یادداشت‌های مربوط به افراد و مجموعه‌های تأثیرگذار، و اخبار سیاسی‌اجتماعی پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
 
       <div class="domain-shortcuts">
         <a onclick="goToNewsTab('analytics')">در یک نگاه</a>
@@ -1754,14 +1761,15 @@
         <a onclick="goToNewsTab('study')">شبکه‌های اجتماعی</a>
         <a onclick="goToNewsTab('website')">وب‌سایت‌ها</a>
         <a onclick="goToNewsTab('newspapers')">روزنامه‌ها</a>
-        <a onclick="goToNewsTab('hawza')">اخبار حوزه</a>
         <a onclick="goToNewsTab('dossier')">پرونده‌های موضوعی</a>
         <a onclick="goToNewsTab('newsletter')">خبرنامه مدارس</a>
         <a onclick="goToPeopleTab('orgs')">تحلیل سازمان‌ها</a>
         <a onclick="goToPeopleTab('figures')">چهره‌ها و فعالان سیاسی</a>
         <a onclick="goToPeopleTab('archive')">بسته‌های تحلیلی</a>
+        <a onclick="goToHawzaTab('news')">اخبار حوزه</a>
         <span class="domain-shortcut-disabled">شرکت‌کننده در برنامه‌ها<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled">جامعه مخاطب<span class="news-soon">به‌زودی</span></span>
+        <span class="domain-shortcut-disabled">درباره حوزه<span class="news-soon">به‌زودی</span></span>
         <a onclick="goToPostsTab('feed')">پست‌های منتشر شده</a>
         <a onclick="goToPostsTab('people')">افراد و مجموعه‌ها</a>
         <span class="domain-shortcut-disabled">آنالیز کنشگری<span class="news-soon">به‌زودی</span></span>
@@ -1873,7 +1881,6 @@
         <button id="news-tab-study" onclick="setNewsPageTab('study')">شبکه‌های اجتماعی</button>
         <button id="news-tab-website" onclick="setNewsPageTab('website')">وب‌سایت‌ها</button>
         <button id="news-tab-newspapers" onclick="setNewsPageTab('newspapers')">روزنامه‌ها</button>
-        <button id="news-tab-hawza" onclick="setNewsPageTab('hawza')">اخبار حوزه</button>
         <button id="news-tab-dossier" onclick="setNewsPageTab('dossier')">پرونده‌های موضوعی</button>
         <button id="news-tab-newsletter" onclick="setNewsPageTab('newsletter')">خبرنامه مدارس</button>
       </div>
@@ -2171,6 +2178,20 @@
     </section>
 
     <!-- REPORTS → بخش تحلیلی: کتابخانه‌ی مجلات (متصل به Supabase Storage) -->
+    <!-- «درباره حوزه» — عرصه‌ی پنجم. تب «اخبار حوزه» (قبلاً زیرتب «اخبار و
+         رویدادها») از همون پنل مشترک news-study-panel استفاده می‌کنه: موقع
+         باز شدن، خودِ پنل (با فیلترها و رویدادهاش) به hawza-news-slot منتقل
+         می‌شه و با برگشت به «اخبار و رویدادها» سر جای خودش برمی‌گرده
+         (placeNewsStudyPanel) — نه کپی، تا idها تکراری نشن -->
+    <section class="section" id="sec-hawza">
+      <div class="news-page-tabs" id="hawza-page-tabs">
+        <button class="active" id="hawza-tab-news" onclick="setHawzaTab('news')">اخبار حوزه</button>
+        <button disabled>درباره حوزه<span class="news-soon">به‌زودی</span></button>
+      </div>
+      <p class="news-tab-subtitle" id="hawza-tab-subtitle"><span>اخبار سیاسی و اجتماعی منتشرشده در پایگاه‌های خبری حوزوی.</span></p>
+      <div id="hawza-news-slot"></div>
+    </section>
+
     <section class="section" id="sec-reports">
       <div class="panel-head"><span class="panel-pill">بخش تحلیلی</span></div>
 
@@ -2470,7 +2491,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۶.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۷.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2855,6 +2876,7 @@
     overview: 'اخبار و رویدادها',
     schools: 'برنامه مدارس',
     people: 'یادداشت‌ها',
+    hawza: 'درباره حوزه',
     reports: 'بخش تحلیلی',
     export: 'خروجی‌گیری',
     settings: 'کاربران و تنظیمات',
@@ -2875,7 +2897,10 @@
     // display:none‌ه — یعنی clientHeight/scrollHeight برای همه صفر حساب
     // می‌شه و دکمه‌ی «نمایش بیشتر» غلط مخفی می‌مونه. با ری‌رندر همین‌جا (که
     // بخش دیگه واقعاً دیده می‌شه) اندازه‌گیری سرریز درست انجام می‌شه.
-    if(key === 'overview'){ renderNewsFeed(); renderNewsAnalytics(); }
+    // پنل مشترک ممکنه الان توی «درباره حوزه» باشه — تب فعلی دوباره اعمال می‌شه تا
+    // پنل و newsState.platform به «اخبار و رویدادها» برگردن
+    if(key === 'overview'){ setNewsPageTab(NEWS_CURRENT_TAB); renderNewsFeed(); renderNewsAnalytics(); }
+    if(key === 'hawza') setHawzaTab('news');
     if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
     if(key === 'feedback') loadFeedbackList().then(renderFeedbackList);
     if(key === 'export') loadNotifySubscribers().then(renderNotifySubscribers);
@@ -2884,8 +2909,13 @@
 
   // میان‌برهای کارت‌های صفحه‌ی نخست به زیربخش‌های خودِ همون صفحه
   function goToNewsTab(tab){
+    if(tab === 'hawza'){ goToHawzaTab('news'); return; } // تب قدیمی، حالا بخش «درباره حوزه»
     switchSection('overview');
     setNewsPageTab(tab);
+  }
+  function goToHawzaTab(tab){
+    switchSection('hawza'); // خودش تب پیش‌فرض («اخبار حوزه») رو باز می‌کنه
+    if(tab !== 'news') setHawzaTab(tab);
   }
   function goToPostsTab(tab){
     switchSection('posts');
@@ -2905,7 +2935,6 @@
     claims: 'ادعاها و شایعات منتشرشده در اخبار رسانه ها همراه با توضیحات',
     study: 'پست‌های منتشر شده در صفحات شبکه‌های اجتماعی',
     website: 'مقالات سایت‌های خبری رسمی، با امکان جست‌وجوی موضوعی و ترجمه‌ی خودکار.',
-    hawza: 'مقالات سایت‌های خبری اختصاصی حوزه‌ی علمیه.',
     newspapers: 'صفحه‌ی اول روزنامه‌های کشور، جمع‌آوری‌شده‌ی روزانه از کیوسک مطبوعات.',
     dossier: 'اخبار مرتبط با چند موضوع خاص و گروه‌بندی‌شده.',
     newsletter: 'خبرنامه‌ی روزانه‌ی قابل‌دانلود، متشکل از اخبار منتخب.'
@@ -2920,42 +2949,70 @@
     archive: 'تولیدات تحلیلی سایر نهادها، جدا از بسته‌های تحلیلی خودِ جریان.'
   };
 
+  // پنل مشترک «شبکه‌های اجتماعی/وب‌سایت‌ها/ادعاها» که «اخبار حوزه» (بخش «درباره
+  // حوزه») هم ازش استفاده می‌کنه — جابه‌جایی خودِ عنصر، نه کپی
+  let NEWS_CURRENT_TAB = 'analytics';
+  let NEWS_STUDY_HOME = null;
+  function placeNewsStudyPanel(where){
+    const panel = document.getElementById('news-study-panel');
+    if(!NEWS_STUDY_HOME){
+      NEWS_STUDY_HOME = document.createComment('news-study-panel-home');
+      panel.parentNode.insertBefore(NEWS_STUDY_HOME, panel);
+    }
+    if(where === 'hawza'){
+      const slot = document.getElementById('hawza-news-slot');
+      if(panel.parentNode !== slot) slot.appendChild(panel);
+    }else if(NEWS_STUDY_HOME.nextSibling !== panel){
+      NEWS_STUDY_HOME.parentNode.insertBefore(panel, NEWS_STUDY_HOME.nextSibling);
+    }
+  }
+  // تنظیم پنل مشترک برای یه منبع (social/website/hawza/claims) و رندر فید
+  function activateNewsStudy(platform){
+    newsState.platform = platform;
+    newsState.page = 1;
+    // تب «ادعاها و شایعات» فقط یه منبع (کانال بله) داره — فیلتر منطقه و
+    // دراپ‌داون چندانتخابی رسانه‌ها بی‌معنیه، پس مخفی می‌شن
+    const isClaims = platform === 'claims';
+    document.getElementById('news-region-row').style.display = isClaims ? 'none' : '';
+    document.getElementById('news-source-details').style.display = isClaims ? 'none' : '';
+    document.getElementById('news-filter-divider-1').style.display = isClaims ? 'none' : '';
+    updateNewsTopicVisibility();
+    populateNewsSourceOptions();
+    renderNewsFeed();
+  }
+  function setHawzaTab(tab){
+    // فعلاً فقط «اخبار حوزه»؛ «درباره حوزه» به‌زودی
+    placeNewsStudyPanel('hawza');
+    document.getElementById('news-study-panel').style.display = '';
+    document.getElementById('news-feed').classList.remove('social-tab');
+    activateNewsStudy('hawza');
+  }
+
   function setNewsPageTab(tab){
+    NEWS_CURRENT_TAB = tab;
+    placeNewsStudyPanel('overview');
     const subEl = document.getElementById('news-tab-subtitle');
     if(subEl) subEl.querySelector('span').textContent = NEWS_TAB_INFO[tab] || '';
     document.getElementById('news-tab-study').classList.toggle('active', tab==='study');
     document.getElementById('news-tab-website').classList.toggle('active', tab==='website');
-    document.getElementById('news-tab-hawza').classList.toggle('active', tab==='hawza');
     document.getElementById('news-tab-claims').classList.toggle('active', tab==='claims');
     document.getElementById('news-tab-newspapers').classList.toggle('active', tab==='newspapers');
     document.getElementById('news-tab-analytics').classList.toggle('active', tab==='analytics');
     document.getElementById('news-tab-dossier').classList.toggle('active', tab==='dossier');
     document.getElementById('news-tab-newsletter').classList.toggle('active', tab==='newsletter');
     document.getElementById('news-feed').classList.toggle('social-tab', tab==='study');
-    // «شبکه‌های اجتماعی»، «وب‌سایت‌ها»، «اخبار حوزه» و «ادعاها و شایعات»
+    // «شبکه‌های اجتماعی»، «وب‌سایت‌ها» و «ادعاها و شایعات» (+ «اخبار حوزه» در بخش «درباره حوزه»)
     // یه پنل مشترک (news-study-panel) رو با فیلترها/جست‌وجو/صفحه‌بندی
     // یکسان به اشتراک می‌ذارن — فقط newsState.platform عوض می‌شه که
     // newsChannels() بر اساسش کانال‌های پیام‌رسان/وب‌سایت/حوزه/بله رو
     // برمی‌گردونه
-    const showStudy = tab==='study' || tab==='website' || tab==='hawza' || tab==='claims';
+    const showStudy = tab==='study' || tab==='website' || tab==='claims';
     document.getElementById('news-study-panel').style.display = showStudy ? '' : 'none';
     document.getElementById('news-newspapers-panel').style.display = tab==='newspapers' ? '' : 'none';
     document.getElementById('news-analytics-panel').style.display = tab==='analytics' ? '' : 'none';
     document.getElementById('news-dossier-panel').style.display = tab==='dossier' ? '' : 'none';
     document.getElementById('news-newsletter-panel').style.display = tab==='newsletter' ? '' : 'none';
-    if(showStudy){
-      newsState.platform = tab==='website' ? 'website' : tab==='hawza' ? 'hawza' : tab==='claims' ? 'claims' : 'social';
-      newsState.page = 1;
-      // تب «ادعاها و شایعات» فقط یه منبع (کانال بله) داره — فیلتر منطقه و
-      // دراپ‌داون چندانتخابی رسانه‌ها بی‌معنیه، پس مخفی می‌شن
-      const isClaims = tab === 'claims';
-      document.getElementById('news-region-row').style.display = isClaims ? 'none' : '';
-      document.getElementById('news-source-details').style.display = isClaims ? 'none' : '';
-      document.getElementById('news-filter-divider-1').style.display = isClaims ? 'none' : '';
-      updateNewsTopicVisibility();
-      populateNewsSourceOptions();
-      renderNewsFeed();
-    }
+    if(showStudy) activateNewsStudy(tab==='website' ? 'website' : tab==='claims' ? 'claims' : 'social');
     if(tab==='newspapers') renderNewspapers();
     if(tab==='analytics') renderNewsAnalytics();
     if(tab==='dossier') renderDossierTab();
@@ -5740,7 +5797,7 @@
         <div class="field"><label>منطقه‌ی جغرافیایی</label><select data-ce="region_id">
           <option value="">بدون منطقه</option>${REGIONS.map(r=>`<option value="${r.id}" ${String(val('region_id', ch.region_id||''))===String(r.id)?'selected':''}>${escAttr(r.name)}</option>`).join('')}
         </select></div>
-        ${isWeb ? `<label class="ce-check ce-full"><input type="checkbox" data-ce="show_in_hawza" ${val('show_in_hawza', !!ch.show_in_hawza)?'checked':''}/>این سایت، خبرگزاری حوزوی است (مطالبش در تب «اخبار حوزه» می‌آید، نه «وب‌سایت‌ها»)</label>` : ''}`,
+        ${isWeb ? `<label class="ce-check ce-full"><input type="checkbox" data-ce="show_in_hawza" ${val('show_in_hawza', !!ch.show_in_hawza)?'checked':''}/>این سایت، خبرگزاری حوزوی است (مطالبش در «درباره حوزه ← اخبار حوزه» می‌آید، نه «وب‌سایت‌ها»)</label>` : ''}`,
       show_in_cyberspace: `
         <div class="field"><label>صاحب کانال</label><input type="text" data-ce="owner_name" value="${escAttr(val('owner_name', ch.owner_name||''))}" placeholder="نام صاحب کانال" /></div>
         <div class="field"><label>تعداد مخاطب</label><input type="number" min="0" data-ce="subscriber_count" value="${escAttr(val('subscriber_count', ch.subscriber_count==null?'':ch.subscriber_count))}" placeholder="مثلاً ۱۲۰۰۰" /></div>
@@ -6879,7 +6936,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.6.1';
+  const APP_VERSION = '5.7.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
