@@ -211,6 +211,36 @@ def extract_posts(html: str, channel_id: int) -> list[dict]:
     return posts
 
 
+def fetch_existing_post_ids(token: str, channel_id: int, post_ids: list[str]) -> set[str]:
+    """شناسه‌ی پست‌هایی از این صفحه که قبلاً توی دیتابیس ثبت شدن.
+
+    چون هر اجرا کل صفحه‌ی کانال رو دوباره اسکن می‌کنه (نه فقط پست‌های تازه)،
+    بدون این بررسی عکس پست‌های قدیمی هر ۲ ساعت دوباره دانلود می‌شد — حتی
+    بعد از اینکه cleanup_media.py پاکش کرده بود — و media_fetched_at «الان»
+    می‌شد، یعنی نگه‌داری ۱۲ ساعته (RETENTION_DAYS) برای ایتا عملاً کار
+    نمی‌کرد و Storage بی‌دلیل پر می‌شد. اگه این کوئری خطا بده، set خالی
+    برمی‌گرده (رفتار قبلی: همه‌چیز جدید حساب می‌شه) تا جمع‌آوری متوقف نشه.
+    """
+    if not post_ids:
+        return set()
+    try:
+        r = requests.get(
+            f"{SUPABASE_URL}/rest/v1/posts",
+            headers=auth_headers(token),
+            params={
+                "channel_id": f"eq.{channel_id}",
+                "platform_post_id": "in.(" + ",".join(f'"{pid}"' for pid in post_ids) + ")",
+                "select": "platform_post_id",
+            },
+            timeout=REQUEST_TIMEOUT,
+        )
+        r.raise_for_status()
+        return {row["platform_post_id"] for row in r.json()}
+    except Exception as e:
+        print(f"    [!] existing-post check failed: {e}", file=sys.stderr)
+        return set()
+
+
 def upsert_posts(token: str, posts: list[dict]) -> None:
     if not posts:
         return
@@ -239,7 +269,17 @@ def main() -> None:
             resp = requests.get(f"https://eitaa.com/{username}", timeout=REQUEST_TIMEOUT)
             resp.raise_for_status()
             posts = extract_posts(resp.text, channel_id)
-            for p in posts:
+            existing = fetch_existing_post_ids(token, channel_id, [p["platform_post_id"] for p in posts])
+            new_posts = [p for p in posts if p["platform_post_id"] not in existing]
+            # پست‌های قبلاً ثبت‌شده: فقط متن/لینک/نوع به‌روز می‌شه — فیلدهای
+            # رسانه اصلاً فرستاده نمی‌شن تا نه دوباره دانلود بشن، نه مقدار
+            # فعلی دیتابیس (یا پاک‌شده‌ی cleanup) بازنویسی بشه. (دو upsert
+            # جدا چون همه‌ی ردیف‌های یه batch باید کلیدهای یکسان داشته باشن.)
+            old_posts = [
+                {k: v for k, v in p.items() if k not in ("media_path", "media_storage_path", "media_fetched_at", "media_source_url")}
+                for p in posts if p["platform_post_id"] in existing
+            ]
+            for p in new_posts:
                 if p.get("media_source_url"):
                     stored = download_and_store_media(token, p["media_source_url"], channel_id, p["platform_post_id"])
                     if stored:
@@ -253,9 +293,10 @@ def main() -> None:
                         # تکرار می‌کنه، بدون فایده‌ی «لینک منبع برای دانلود بعدی» که
                         # media_source_url در بقیه‌ی موارد داره.
                         p["media_source_url"] = None
-            upsert_posts(token, posts)
+            upsert_posts(token, new_posts)
+            upsert_posts(token, old_posts)
             total_saved += len(posts)
-            print(f"[+] @{username}: {len(posts)} post(s)")
+            print(f"[+] @{username}: {len(posts)} post(s) ({len(new_posts)} new)")
         except Exception as e:
             print(f"[!] @{username}: {e}", file=sys.stderr)
 
