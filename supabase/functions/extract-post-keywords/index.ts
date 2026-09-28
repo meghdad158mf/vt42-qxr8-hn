@@ -126,8 +126,8 @@ Deno.serve(async (req) => {
 
     type KwResult = { id: number; keywords?: string[]; hawza_relevant?: boolean };
     // یه فراخوانی هوش مصنوعی برای یه تیکه از دسته — در صورت خطا throw می‌کنه
-    async function callAi(items: typeof compact): Promise<KwResult[]> {
-      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.1, Math.min(CALL_TIMEOUT_MS, deadline - Date.now()));
+    async function callAi(items: typeof compact, timeoutMs: number): Promise<KwResult[]> {
+      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.1, timeoutMs);
       try {
         return JSON.parse(content).results || [];
       } catch {
@@ -144,52 +144,66 @@ Deno.serve(async (req) => {
     // هیچی ذخیره نشد — برای همین بودجه‌ی زمانی داره: بعد از TIME_BUDGET_MS
     // درخواست جدیدی شروع نمی‌شه، هر چی تموم شده ذخیره می‌شه و پست‌های
     // نرسیده/timeout‌شده NULL می‌مونن تا اجرای بعدی.
+    // ⚠️ به درخواست کاربر: پستی که تنها فرستاده بشه و با فرصت کامل (≥ FULL_TIMEOUT_MS)
+    // هم جواب نگیره، «یک خطا» می‌خوره (فقط ai_keywords_extracted_at پر می‌شه و
+    // ai_keywords همون NULL می‌مونه)؛ دفعه‌ی دوم که همین اتفاق بیفته، با {} کنار
+    // گذاشته می‌شه تا یه پست کُند برای همیشه توی صف نچرخه.
     const CHUNK_SIZE = 5;
     const CONCURRENCY = 4;
     const TIME_BUDGET_MS = 75_000; // + زمان PATCHهای پایین، باید زیر ۱۲۰ ثانیه‌ی اسکریپت بمونه
     const CALL_TIMEOUT_MS = 45_000;
+    const FULL_TIMEOUT_MS = 20_000; // timeout کمتر از این = تقصیر ته‌مونده‌ی بودجه‌ست، نه پست
     const deadline = Date.now() + TIME_BUDGET_MS;
     const failedIds: number[] = [];
     // پست‌هایی که واقعاً جواب گرفتن یا به‌تنهایی خطای غیرزمانی دادن — فقط این‌ها علامت می‌خورن
     const doneIds = new Set<number>();
     let aiSuccesses = 0;
     let lastError = "";
-    // null = خطا (قابل تکرار تک‌پستی)؛ "timeout" = وقت نبود، پست‌ها دست‌نخورده می‌مونن
-    async function tryChunk(items: typeof compact): Promise<KwResult[] | null | "timeout"> {
-      if (Date.now() >= deadline) return "timeout";
+    // null = خطا (قابل تکرار تک‌پستی)؛ "timeout" = با فرصت کامل جواب نیومد؛
+    // "skipped" = وقت کافی نبود، پست‌ها دست‌نخورده می‌مونن
+    type ChunkOutcome = KwResult[] | null | "timeout" | "skipped";
+    async function tryChunk(items: typeof compact): Promise<ChunkOutcome> {
+      const allotted = Math.min(CALL_TIMEOUT_MS, deadline - Date.now());
+      if (allotted <= 0) return "skipped";
       try {
-        const r = await callAi(items);
+        const r = await callAi(items, allotted);
         aiSuccesses++;
         items.forEach((p) => doneIds.add(p.id));
         return r;
       } catch (e) {
         lastError = String(e);
-        return e instanceof AiTimeoutError ? "timeout" : null;
+        if (e instanceof AiTimeoutError) return allotted >= FULL_TIMEOUT_MS ? "timeout" : "skipped";
+        return null;
       }
     }
+    const prevStrike = new Set(posts.filter((p) => p.ai_keywords === null && p.ai_keywords_extracted_at).map((p) => p.id));
+    const strikeIds: number[] = [];
     const chunks: Array<typeof compact> = [];
     for (let i = 0; i < compact.length; i += CHUNK_SIZE) chunks.push(compact.slice(i, i + CHUNK_SIZE));
     // موج اول: CONCURRENCY تیکه‌ی اول. اگه هیچ‌کدوم موفق نشد، سرویس کلاً از
     // دسترس خارجه — ادامه بی‌فایده‌ست، مستقیم ۵۰۲
     const firstWave = await Promise.all(chunks.slice(0, CONCURRENCY).map(tryChunk));
-    const firstRound: Array<KwResult[] | null | "timeout"> = [...firstWave];
+    const firstRound: ChunkOutcome[] = [...firstWave];
     if (aiSuccesses > 0) {
       firstRound.push(...(await mapLimit(chunks.slice(CONCURRENCY), CONCURRENCY, tryChunk)));
     }
     const parsedResults: KwResult[] = [];
     if (aiSuccesses > 0) {
-      // تیکه‌های خطادار (نه timeout): هر پست تنها یه‌بار دیگه امتحان می‌شه
+      // تیکه‌های خطادار یا timeout‌شده: هر پست تنها یه‌بار دیگه امتحان می‌شه
       const retryPosts: typeof compact = [];
       firstRound.forEach((r, i) => {
         if (Array.isArray(r)) parsedResults.push(...r);
-        else if (r === null) retryPosts.push(...chunks[i]);
+        else if (r === null || r === "timeout") retryPosts.push(...chunks[i]);
       });
       const singles = await mapLimit(retryPosts, CONCURRENCY, (p) => tryChunk([p]));
       singles.forEach((r, i) => {
+        const id = retryPosts[i].id;
         if (Array.isArray(r)) parsedResults.push(...r);
-        else if (r === null) {
-          failedIds.push(retryPosts[i].id);
-          doneIds.add(retryPosts[i].id);
+        else if (r === null || (r === "timeout" && prevStrike.has(id))) {
+          failedIds.push(id);
+          doneIds.add(id);
+        } else if (r === "timeout") {
+          strikeIds.push(id);
         }
       });
     }
@@ -263,6 +277,14 @@ Deno.serve(async (req) => {
       });
       if (patchRes.ok) updated++;
     }
+    // «خطای اول» پست‌هایی که تنها هم جواب نگرفتن: فقط زمان ثبت می‌شه، ai_keywords همون NULL
+    if (strikeIds.length) {
+      await fetch(`${supabaseUrl}/rest/v1/posts?id=in.(${strikeIds.join(",")})&ai_keywords=is.null`, {
+        method: "PATCH",
+        headers: writeHeaders,
+        body: JSON.stringify({ ai_keywords_extracted_at: nowIso }),
+      });
+    }
 
     // تطبیق خودکار موضوعات فعال «پرونده‌های موضوعی» با کلیدواژه‌های تازه —
     // مقایسه‌ی متنی ساده (نه هوش مصنوعی)، برای همین دسته‌ی تازه‌پردازش‌شده
@@ -306,6 +328,7 @@ Deno.serve(async (req) => {
       ai_calls_ok: aiSuccesses,
       skipped_post_ids: failedIds,
       left_for_next_run: posts.length - doneIds.size,
+      timeout_strikes: strikeIds,
     });
   } catch (e) {
     return jsonResponse({ error: String(e) }, 500);

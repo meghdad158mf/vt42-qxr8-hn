@@ -83,7 +83,7 @@ export async function fetchPostsMissingKeywords(
   req: Request,
   limit = 30,
 ): Promise<{
-  posts: Array<{ id: number; channel_id: number; title: string | null; text: string | null }>;
+  posts: Array<{ id: number; channel_id: number; title: string | null; text: string | null; ai_keywords: string[] | null; ai_keywords_extracted_at: string | null }>;
   hawzaChannelIds: Set<number>;
 } | null> {
   const authHeader = req.headers.get("Authorization") || "";
@@ -119,10 +119,10 @@ export async function fetchPostsMissingKeywords(
   // با جدیدترین‌های کل سایت پر می‌کنیم (با حذف idهای قبلاً انتخاب‌شده تا
   // تکراری نشه).
   const hawzaReserve = Math.min(10, limit);
-  let hawzaPosts: Array<{ id: number; channel_id: number; title: string | null; text: string | null }> = [];
+  let hawzaPosts: Array<{ id: number; channel_id: number; title: string | null; text: string | null; ai_keywords: string[] | null; ai_keywords_extracted_at: string | null }> = [];
   if (hawzaIds) {
     const hawzaRes = await fetch(
-      `${supabaseUrl}/rest/v1/posts?select=id,channel_id,title,text&channel_id=in.(${hawzaIds})` +
+      `${supabaseUrl}/rest/v1/posts?select=id,channel_id,title,text,ai_keywords,ai_keywords_extracted_at&channel_id=in.(${hawzaIds})` +
         `&or=(ai_keywords.is.null,hawza_relevant.is.null)&order=posted_at.desc&limit=${hawzaReserve}`,
       { headers },
     );
@@ -130,12 +130,12 @@ export async function fetchPostsMissingKeywords(
   }
 
   const remaining = limit - hawzaPosts.length;
-  let generalPosts: Array<{ id: number; channel_id: number; title: string | null; text: string | null }> = [];
+  let generalPosts: Array<{ id: number; channel_id: number; title: string | null; text: string | null; ai_keywords: string[] | null; ai_keywords_extracted_at: string | null }> = [];
   if (remaining > 0) {
     const excludeIds = hawzaPosts.map((p) => p.id);
     const notInFilter = excludeIds.length ? `&id=not.in.(${excludeIds.join(",")})` : "";
     const generalRes = await fetch(
-      `${supabaseUrl}/rest/v1/posts?select=id,channel_id,title,text&channel_id=in.(${ids})&ai_keywords=is.null` +
+      `${supabaseUrl}/rest/v1/posts?select=id,channel_id,title,text,ai_keywords,ai_keywords_extracted_at&channel_id=in.(${ids})&ai_keywords=is.null` +
         `${notInFilter}&order=posted_at.desc&limit=${remaining}`,
       { headers },
     );
