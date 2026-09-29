@@ -412,7 +412,8 @@
   .upl-del.ann-stop:hover{ background: rgba(234,179,147,0.12); }
   /* «کاربران» */
   .usr-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
-  .usr-add{ padding:8px 16px; }
+  .usr-add, .usr-dl{ padding:8px 16px; }
+  .usr-head-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
   .usr-note{ font-size:12px; color: var(--text-faint); margin:0 0 12px; }
   .usr-editor{ border:1px solid var(--border); background: var(--surface-2); border-radius:12px; padding:14px; margin-bottom:14px; }
   .usr-editor-title{ font-size:13px; font-weight:800; color: var(--text); margin-bottom:8px; }
@@ -1775,26 +1776,26 @@
               وضعیت سامانه
               <span class="am-dot" id="am-status-dot"></span>
             </button>
-            <button onclick="switchSection('uploads'); closeAdminMenu();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0l-4 4m4-4l4 4M5 20h14"/></svg>
-              بارگذاری محتوا
+            <button onclick="switchSection('settings'); closeAdminMenu();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
+              تنظیمات
             </button>
             <button onclick="switchSection('announce'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>
-              اطلاعیه برای کاربران
+              درج اطلاعیه
             </button>
             <button onclick="openUsersSection(); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.5a3.5 3.5 0 010 7M21.5 20a6.5 6.5 0 00-4-6"/></svg>
               کاربران
               <span class="am-badge" id="am-feedback-badge"></span>
             </button>
-            <button onclick="switchSection('settings'); closeAdminMenu();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
-              تنظیمات
+            <button onclick="switchSection('uploads'); closeAdminMenu();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0l-4 4m4-4l4 4M5 20h14"/></svg>
+              بارگذاری محتوا
             </button>
             <button onclick="switchSection('export'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
-              خروجی‌گیری
+              خروجی محتوا
             </button>
           </div>
         </div>
@@ -2792,7 +2793,7 @@
       <div class="panel" id="usr-panel">
         <div class="usr-head">
           <span class="panel-pill">فهرست کاربران</span>
-          <button type="button" class="btn primary usr-add" onclick="openUserEditor(null)">＋ افزودن کاربر</button>
+          <span class="usr-head-actions"><button type="button" class="btn usr-dl" onclick="usrDownload()" title="فهرست همان کاربرانی که الان در جدول دیده می‌شوند (با فیلتر و جست‌وجوی فعلی)">دانلود فهرست</button><button type="button" class="btn primary usr-add" onclick="openUserEditor(null)">＋ افزودن کاربر</button></span>
         </div>
         <p class="usr-note">سطح دسترسی فعلاً فقط ثبت و نمایش می‌شود؛ ورود هنوز با رمز مشترک مدیر/بیننده است.</p>
         <p class="ann-missing" id="usr-missing" style="display:none;">برای ثبت کاربران، فایل <b>db/migration_037_app_users.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود. (مشترکین فرم اطلاع‌رسانی همین حالا هم پایین دیده می‌شوند.)</p>
@@ -3272,12 +3273,12 @@
     people: 'یادداشت‌ها',
     hawza: 'درباره حوزه',
     reports: 'بخش تحلیلی',
-    export: 'خروجی‌گیری',
+    export: 'خروجی محتوا',
     settings: 'کاربران و تنظیمات',
     feedback: 'نظرات کاربران',
     status: 'وضعیت سامانه',
     uploads: 'بارگذاری محتوا',
-    announce: 'اطلاعیه برای کاربران',
+    announce: 'درج اطلاعیه',
     users: 'کاربران',
   };
 
@@ -5364,6 +5365,21 @@
     document.getElementById('usr-sel-count').textContent = toFaDigits(USR_SELECTED.size) + ' نفر انتخاب شده';
   }
   function usrSelectedRows(){ return usrRows().filter(r=>USR_SELECTED.has(r.key)); }
+  // خروجی CSV همون ردیف‌هایی که الان در جدول دیده می‌شن (فیلتر سطح + جست‌وجو)
+  function usrDownload(){
+    const rows = usrVisible();
+    if(!rows.length){ showToast('موردی برای خروجی نیست'); return; }
+    // شماره با قالب ="09…" تا اکسل صفر اولش را حذف نکند
+    const out = rows.map(r=>({
+      'نام': r.name || '(مشترک فرم اطلاع‌رسانی)', 'موبایل': r.phone ? '="' + r.phone + '"' : '','ایتا': r.eitaa, 'سمت': r.title,
+      'سطح دسترسی': r.kind === 'sub' ? 'مشترک فرم' : (USER_LEVELS[r.level] || r.level),
+      'وضعیت': r.kind === 'sub' ? (r.s.notified_at ? 'اطلاع‌رسانی‌شده' : 'در انتظار') : (r.active ? 'فعال' : 'غیرفعال'),
+    }));
+    const cols = ['نام','موبایل','ایتا','سمت','سطح دسترسی','وضعیت'];
+    const tag = USR_FILTER === 'all' ? '' : '-' + USR_FILTER;
+    downloadBlob('jarian-users' + tag + '.csv', '\ufeff' + toCSV(out, cols), 'text/csv;charset=utf-8');
+    showToast('فهرست ' + toFaDigits(rows.length) + ' نفر دانلود شد');
+  }
   function openUserEditor(u){
     USR_EDIT_ID = u ? u.id : null;
     document.getElementById('usr-editor-title').textContent = u ? 'ویرایش کاربر' : 'افزودن کاربر';
