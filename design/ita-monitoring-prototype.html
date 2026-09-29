@@ -412,7 +412,8 @@
   .upl-del.ann-stop:hover{ background: rgba(234,179,147,0.12); }
   /* «کاربران» */
   .usr-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
-  .usr-add{ padding:8px 16px; }
+  .usr-add, .usr-dl{ padding:8px 16px; }
+  .usr-head-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
   .usr-note{ font-size:12px; color: var(--text-faint); margin:0 0 12px; }
   .usr-editor{ border:1px solid var(--border); background: var(--surface-2); border-radius:12px; padding:14px; margin-bottom:14px; }
   .usr-editor-title{ font-size:13px; font-weight:800; color: var(--text); margin-bottom:8px; }
@@ -426,6 +427,8 @@
   .usr-chip.active span{ color: rgba(255,255,255,0.7); }
   .usr-search{ font:inherit; font-size:13px; padding:8px 12px; border-radius:10px; border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); min-width:220px; }
   .usr-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .usr-table th, .usr-table td{ text-align:right; vertical-align:middle; }
+  .usr-table th:first-child, .usr-table td:first-child{ width:32px; }
   .usr-table th{ text-align:right; font-size:11.5px; color: var(--text-faint); font-weight:700; padding:8px; border-bottom:1px solid var(--border); white-space:nowrap; }
   .usr-table td{ padding:9px 8px; border-bottom:1px solid var(--border); color: var(--text); white-space:nowrap; }
   .usr-table tr.inactive td{ opacity:.55; }
@@ -456,8 +459,8 @@
   .usr-ch{ font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; display:inline-flex; gap:6px; align-items:center; }
   .usr-ch.on{ background: var(--navy); color:#fff; }
   .usr-ch.off{ background: var(--surface-2); color: var(--text-faint); border:1px solid var(--border); }
-  .usr-send-actions{ display:flex; gap:8px; flex-wrap:wrap; }
-  @media (max-width:640px){ .usr-search{ min-width:0; width:100%; } .usr-send-actions .btn{ flex:1 1 45%; } }
+  .usr-hint{ font-size:11.5px; line-height:1.9; color: var(--text-faint); margin:10px 0 0; }
+  @media (max-width:640px){ .usr-search{ min-width:0; width:100%; } }
   /* «بارگذاری محتوا» */
   .upl-intro{ font-size:14px; font-weight:800; color:#fff; margin:4px 2px 12px; }
   .upl-choices{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; margin-bottom:22px; }
@@ -1687,7 +1690,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۲.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۲.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1773,26 +1776,26 @@
               وضعیت سامانه
               <span class="am-dot" id="am-status-dot"></span>
             </button>
-            <button onclick="switchSection('uploads'); closeAdminMenu();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0l-4 4m4-4l4 4M5 20h14"/></svg>
-              بارگذاری محتوا
+            <button onclick="switchSection('settings'); closeAdminMenu();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
+              تنظیمات بخش‌ها
             </button>
             <button onclick="switchSection('announce'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>
-              اطلاعیه برای کاربران
+              درج اطلاعیه
             </button>
             <button onclick="openUsersSection(); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.5a3.5 3.5 0 010 7M21.5 20a6.5 6.5 0 00-4-6"/></svg>
               کاربران
               <span class="am-badge" id="am-feedback-badge"></span>
             </button>
-            <button onclick="switchSection('settings'); closeAdminMenu();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
-              تنظیمات
+            <button onclick="switchSection('uploads'); closeAdminMenu();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0l-4 4m4-4l4 4M5 20h14"/></svg>
+              بارگذاری محتوا
             </button>
             <button onclick="switchSection('export'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
-              خروجی‌گیری
+              خروجی محتوا
             </button>
           </div>
         </div>
@@ -2790,7 +2793,7 @@
       <div class="panel" id="usr-panel">
         <div class="usr-head">
           <span class="panel-pill">فهرست کاربران</span>
-          <button type="button" class="btn primary usr-add" onclick="openUserEditor(null)">＋ افزودن کاربر</button>
+          <span class="usr-head-actions"><button type="button" class="btn usr-dl" onclick="usrDownload()" title="فهرست همان کاربرانی که الان در جدول دیده می‌شوند (با فیلتر و جست‌وجوی فعلی)">دانلود فهرست</button><button type="button" class="btn primary usr-add" onclick="openUserEditor(null)">＋ افزودن کاربر</button></span>
         </div>
         <p class="usr-note">سطح دسترسی فعلاً فقط ثبت و نمایش می‌شود؛ ورود هنوز با رمز مشترک مدیر/بیننده است.</p>
         <p class="ann-missing" id="usr-missing" style="display:none;">برای ثبت کاربران، فایل <b>db/migration_037_app_users.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود. (مشترکین فرم اطلاع‌رسانی همین حالا هم پایین دیده می‌شوند.)</p>
@@ -2826,17 +2829,10 @@
           <div class="usr-send-quick" id="usr-send-quick"></div>
           <textarea id="usr-msg" rows="3" maxlength="600" placeholder="متن پیام…"></textarea>
           <div class="usr-channels">
-            <span class="usr-ch on">آماده‌سازی دستی</span>
             <span class="usr-ch off" title="بعد از تهیه‌ی حساب سامانه‌ی پیامکی">ارسال پیامک<span class="news-soon">به‌زودی</span></span>
             <span class="usr-ch off" title="بعد از تصمیم درباره‌ی کانال ایتا">ارسال در ایتا<span class="news-soon">به‌زودی</span></span>
           </div>
-          <div class="usr-send-actions">
-            <button type="button" class="btn primary" onclick="usrCopy('msg')">کپی متن پیام</button>
-            <button type="button" class="btn" onclick="usrCopy('phones')">کپی شماره‌ها</button>
-            <button type="button" class="btn" onclick="usrCopy('eitaa')">کپی شناسه‌های ایتا</button>
-            <button type="button" class="btn" onclick="usrExportSelected()">دانلود فهرست (CSV)</button>
-            <button type="button" class="btn" id="usr-mark-subs" onclick="markNotifySubscribersNotified()">علامت «اطلاع‌رسانی‌شده» برای مشترکین فرم</button>
-          </div>
+          <p class="usr-hint">ارسال مستقیم از همین‌جا بعد از اتصال سامانه‌ی پیامکی (و در صورت تصمیم، کانال ایتا) فعال می‌شود.</p>
         </div>
       </div>
 
@@ -2852,7 +2848,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۲.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۲.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3277,12 +3273,12 @@
     people: 'یادداشت‌ها',
     hawza: 'درباره حوزه',
     reports: 'بخش تحلیلی',
-    export: 'خروجی‌گیری',
-    settings: 'کاربران و تنظیمات',
+    export: 'خروجی محتوا',
+    settings: 'تنظیمات بخش‌ها',
     feedback: 'نظرات کاربران',
     status: 'وضعیت سامانه',
     uploads: 'بارگذاری محتوا',
-    announce: 'اطلاعیه برای کاربران',
+    announce: 'درج اطلاعیه',
     users: 'کاربران',
   };
 
@@ -5298,7 +5294,7 @@
   document.getElementById('ann-level').addEventListener('change', updateAnnPreview);
 
   // ---- «کاربران» (دفترچه‌ی کاربران migration_037 + مشترکین فرم + ارسال گروهی + نظرات) ----
-  // سطح دسترسی فعلاً فقط ثبت/نمایش؛ ارسال گروهی فعلاً «آماده‌سازی دستی» (کپی/CSV) — پیامک
+  // سطح دسترسی فعلاً فقط ثبت/نمایش؛ ارسال گروهی: فعلاً فقط انتخاب افراد + متن (ابزارهای دستی کپی/CSV به خواست کاربر حذف شدن) — پیامک
   // و ایتا بعد از تهیه‌ی حساب/تصمیم کاربر اضافه می‌شن.
   const USER_LEVELS = { plus:'پلاس', pro:'پرو', normal:'عادی', limited:'محدود' };
   let APP_USERS = [];
@@ -5359,7 +5355,7 @@
         return `<tr class="${r.kind==='user' && !r.active ? 'inactive' : ''}"><td><input type="checkbox" data-sel="${r.key}" ${USR_SELECTED.has(r.key)?'checked':''}></td>
           <td>${r.kind==='sub' ? '<span class="usr-dim">— (از فرم اطلاع‌رسانی)</span>' : `<b>${escHtml(r.name)}</b>`}</td>
           <td class="mono" dir="ltr">${escHtml(r.phone)||'—'}</td><td dir="ltr">${escHtml(r.eitaa)||'—'}</td>
-          <td>${escHtml(r.title)||'—'}</td><td>${lvl}</td><td>${st}</td><td class="usr-acts">${act}</td></tr>`;
+          <td>${escHtml(r.title)||'—'}</td><td>${lvl}</td><td>${st}</td><td><div class="usr-acts">${act}</div></td></tr>`;
       }).join('') : '<tr><td colspan="8" class="usr-empty">موردی نیست.</td></tr>') + '</tbody>';
     updateUsrSelCount();
   }
@@ -5367,28 +5363,22 @@
     const valid = new Set(usrRows().map(r=>r.key));
     [...USR_SELECTED].forEach(k=>{ if(!valid.has(k)) USR_SELECTED.delete(k); });
     document.getElementById('usr-sel-count').textContent = toFaDigits(USR_SELECTED.size) + ' نفر انتخاب شده';
-    const pendingSubs = (NOTIFY_SUBSCRIBERS||[]).some(x=>!x.notified_at);
-    document.getElementById('usr-mark-subs').style.display = pendingSubs ? '' : 'none';
   }
   function usrSelectedRows(){ return usrRows().filter(r=>USR_SELECTED.has(r.key)); }
-  async function usrCopy(what){
-    let text = '';
-    if(what === 'msg'){ text = document.getElementById('usr-msg').value.trim(); if(!text){ showToast('متن پیام را بنویسید'); return; } }
-    else{
-      const sel = usrSelectedRows();
-      if(!sel.length){ showToast('کسی انتخاب نشده'); return; }
-      const vals = sel.map(r => what === 'phones' ? r.phone : r.eitaa).filter(Boolean);
-      if(!vals.length){ showToast(what === 'phones' ? 'هیچ‌کدام شماره ندارند' : 'هیچ‌کدام شناسه‌ی ایتا ندارند'); return; }
-      text = [...new Set(vals)].join('\n');
-    }
-    try{ await navigator.clipboard.writeText(text); showToast('کپی شد'); }
-    catch(e){ prompt('کپی کنید:', text); }
-  }
-  function usrExportSelected(){
-    const sel = usrSelectedRows();
-    if(!sel.length){ showToast('کسی انتخاب نشده'); return; }
-    const rows = sel.map(r=>({ name:r.name, phone:r.phone, eitaa:r.eitaa, title:r.title, level: r.kind==='sub' ? 'مشترک فرم' : (USER_LEVELS[r.level]||r.level) }));
-    downloadBlob('jarian-users.csv', toCSV(rows, ['name','phone','eitaa','title','level']), 'text/csv');
+  // خروجی CSV همون ردیف‌هایی که الان در جدول دیده می‌شن (فیلتر سطح + جست‌وجو)
+  function usrDownload(){
+    const rows = usrVisible();
+    if(!rows.length){ showToast('موردی برای خروجی نیست'); return; }
+    // شماره با قالب ="09…" تا اکسل صفر اولش را حذف نکند
+    const out = rows.map(r=>({
+      'نام': r.name || '(مشترک فرم اطلاع‌رسانی)', 'موبایل': r.phone ? '="' + r.phone + '"' : '','ایتا': r.eitaa, 'سمت': r.title,
+      'سطح دسترسی': r.kind === 'sub' ? 'مشترک فرم' : (USER_LEVELS[r.level] || r.level),
+      'وضعیت': r.kind === 'sub' ? (r.s.notified_at ? 'اطلاع‌رسانی‌شده' : 'در انتظار') : (r.active ? 'فعال' : 'غیرفعال'),
+    }));
+    const cols = ['نام','موبایل','ایتا','سمت','سطح دسترسی','وضعیت'];
+    const tag = USR_FILTER === 'all' ? '' : '-' + USR_FILTER;
+    downloadBlob('jarian-users' + tag + '.csv', '\ufeff' + toCSV(out, cols), 'text/csv;charset=utf-8');
+    showToast('فهرست ' + toFaDigits(rows.length) + ' نفر دانلود شد');
   }
   function openUserEditor(u){
     USR_EDIT_ID = u ? u.id : null;
@@ -7925,7 +7915,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.12.0';
+  const APP_VERSION = '5.12.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
