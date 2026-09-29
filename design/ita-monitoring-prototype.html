@@ -1639,7 +1639,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۱.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۲.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1733,6 +1733,11 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>
               اطلاعیه برای کاربران
             </button>
+            <button onclick="openUsersSection(); closeAdminMenu();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.5a3.5 3.5 0 010 7M21.5 20a6.5 6.5 0 00-4-6"/></svg>
+              کاربران
+              <span class="am-badge" id="am-feedback-badge"></span>
+            </button>
             <button onclick="switchSection('settings'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
               تنظیمات
@@ -1740,11 +1745,6 @@
             <button onclick="switchSection('export'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
               خروجی‌گیری
-            </button>
-            <button onclick="switchSection('feedback'); closeAdminMenu();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-1.2 4.4L21 20l-4.3-1.1a8.5 8.5 0 114.3-7.4z"/></svg>
-              نظرات کاربران
-              <span class="am-badge" id="am-feedback-badge"></span>
             </button>
           </div>
         </div>
@@ -2603,16 +2603,6 @@
         <button class="btn primary" style="margin-top:8px" onclick="exportReport()">دانلود گزارش آنالیز</button>
       </div>
 
-      <div class="panel">
-        <div class="panel-head"><span class="panel-pill">مشترکین اطلاع‌رسانی بسته جریان</span></div>
-        <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">شماره‌های زیر از فرم «اطلاع از انتشار» در صفحه‌ی ورود ثبت شده‌اند. هر وقت شماره‌ی جدید منتشر شد، لیست را خروجی بگیرید و از سامانه‌ی پیامکی خودتان ارسال کنید؛ بعد از ارسال، دکمه‌ی «علامت‌گذاری» را بزنید تا خروجی بعدی فقط شماره‌های جدید را نشان دهد.</p>
-        <p id="notify-subs-summary" style="font-size:13px;font-weight:600;color:var(--text);margin:0 0 12px;">در حال بارگذاری…</p>
-        <div id="notify-subs-list" class="notify-subs-list"></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
-          <button class="btn primary" onclick="exportNotifySubscribers()">دانلود لیست شماره‌ها (CSV)</button>
-          <button class="btn" onclick="markNotifySubscribersNotified()">علامت‌گذاری به‌عنوان اطلاع‌رسانی‌شده</button>
-        </div>
-      </div>
     </section>
 
     <!-- SETTINGS -->
@@ -2743,10 +2733,33 @@
       </div>
     </section>
 
-    <section class="section" id="sec-feedback">
-      <div class="panel">
-        <div class="panel-head"><span class="panel-pill">نظرات و پیشنهادهای ثبت‌شده</span></div>
-        <div id="feedback-list"></div>
+    <!-- «کاربران» (فقط مدیر، مهر ۱۴۰۵) — هر چیزی که به کاربرها مربوطه یه‌جا: مشترکین
+         اطلاع‌رسانی (قبلاً ته «خروجی‌گیری»)، نظرات کاربران (قبلاً گزینه‌ی جدای منو) و جای
+         «حساب‌ها و سطوح دسترسی» (به‌زودی — سطح‌بندی کاربران که بعداً ساخته می‌شه) -->
+    <section class="section" id="sec-users">
+      <div class="news-page-tabs" id="users-page-tabs">
+        <button class="active" data-users-tab="subs" data-ic="notify" onclick="setUsersTab('subs')">مشترکین اطلاع‌رسانی<span class="upl-count" id="users-count-subs"></span></button>
+        <button data-users-tab="feedback" data-ic="feedback" onclick="setUsersTab('feedback')">نظرات کاربران<span class="upl-count" id="users-count-feedback"></span></button>
+        <button disabled data-ic="users">حساب‌ها و سطوح دسترسی<span class="news-soon">به‌زودی</span></button>
+      </div>
+      <p class="news-tab-subtitle" id="users-tab-subtitle"><span></span></p>
+      <div id="users-pane-subs">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-pill">مشترکین اطلاع‌رسانی بسته جریان</span></div>
+          <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">شماره‌های زیر از فرم «اطلاع از انتشار» پایین صفحه‌ی نخست ثبت شده‌اند. هر وقت شماره‌ی جدید منتشر شد، لیست را خروجی بگیرید و از سامانه‌ی پیامکی خودتان ارسال کنید؛ بعد از ارسال، دکمه‌ی «علامت‌گذاری» را بزنید تا خروجی بعدی فقط شماره‌های جدید را نشان دهد.</p>
+          <p id="notify-subs-summary" style="font-size:13px;font-weight:600;color:var(--text);margin:0 0 12px;">در حال بارگذاری…</p>
+          <div id="notify-subs-list" class="notify-subs-list"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+            <button class="btn primary" onclick="exportNotifySubscribers()">دانلود لیست شماره‌ها (CSV)</button>
+            <button class="btn" onclick="markNotifySubscribersNotified()">علامت‌گذاری به‌عنوان اطلاع‌رسانی‌شده</button>
+          </div>
+        </div>
+      </div>
+      <div id="users-pane-feedback" style="display:none;">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-pill">نظرات و پیشنهادهای ثبت‌شده</span></div>
+          <div id="feedback-list"></div>
+        </div>
       </div>
     </section>
 
@@ -2755,7 +2768,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۱.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۲.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3088,7 +3101,7 @@
     });
   });
 
-  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback','status','uploads','announce'];
+  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback','status','uploads','announce','users'];
 
   function applyRoleUI(){
     const isAdmin = currentRole === 'app_admin';
@@ -3186,9 +3199,11 @@
     status: 'وضعیت سامانه',
     uploads: 'بارگذاری محتوا',
     announce: 'اطلاعیه برای کاربران',
+    users: 'کاربران',
   };
 
   function switchSection(key){
+    if(key === 'feedback'){ USERS_TAB = 'feedback'; key = 'users'; } // بخش قدیمی، حالا تب «کاربران»
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     document.getElementById('sec-'+key).classList.add('active');
     document.getElementById('sec-title').textContent = TITLES[key];
@@ -3207,8 +3222,7 @@
     if(key === 'overview'){ setNewsPageTab(NEWS_CURRENT_TAB); renderNewsFeed(); renderNewsAnalytics(); }
     if(key === 'hawza') setHawzaTab('news');
     if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
-    if(key === 'feedback') loadFeedbackList().then(()=>{ renderFeedbackList(); markFeedbackSeen(); });
-    if(key === 'export') loadNotifySubscribers().then(renderNotifySubscribers);
+    if(key === 'users') setUsersTab(USERS_TAB);
     if(key === 'status'){ renderSystemStatus(); ackAdminAlerts(); }
     if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
     if(key === 'announce') renderAnnAdmin();
@@ -3277,6 +3291,8 @@
     archive: '<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9M10 13h4"/>',
     hawza: '<path d="M4 21V11a8 8 0 0116 0v10M4 21h16M12 3v2M9 21v-5a3 3 0 016 0v5"/>',
     about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>',
+    notify: '<path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/>',
+    feedback: '<path d="M21 11.5a8.4 8.4 0 01-1.2 4.4L21 20l-4.3-1.1a8.5 8.5 0 114.3-7.4z"/>',
   };
   function lsGet(k, def){ try{ const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; }catch(e){ return def; } }
   function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -5196,6 +5212,32 @@
   }
   document.getElementById('ann-msg').addEventListener('input', updateAnnPreview);
   document.getElementById('ann-level').addEventListener('change', updateAnnPreview);
+
+  // ---- «کاربران» ----
+  let USERS_TAB = 'subs';
+  const USERS_TAB_INFO = {
+    subs: 'شماره‌هایی که برای خبر انتشار «بسته تحلیلی جریان» ثبت شده‌اند.',
+    feedback: 'نظرها و پیشنهادهای کاربران از فرم «ثبت نظر» صفحه‌ی نخست.',
+  };
+  // از منو: اگه نظر خونده‌نشده هست، مستقیم تب نظرات
+  function openUsersSection(){
+    if(document.getElementById('am-feedback-badge').classList.contains('show')) USERS_TAB = 'feedback';
+    switchSection('users');
+  }
+  function setUsersTab(tab){
+    USERS_TAB = tab;
+    document.querySelectorAll('#users-page-tabs button[data-users-tab]').forEach(b=>b.classList.toggle('active', b.dataset.usersTab === tab));
+    document.getElementById('users-pane-subs').style.display = tab === 'subs' ? '' : 'none';
+    document.getElementById('users-pane-feedback').style.display = tab === 'feedback' ? '' : 'none';
+    document.querySelector('#users-tab-subtitle span').textContent = USERS_TAB_INFO[tab];
+    if(tab === 'subs') loadNotifySubscribers().then(()=>{ renderNotifySubscribers(); updateUsersCounts(); });
+    if(tab === 'feedback') loadFeedbackList().then(()=>{ renderFeedbackList(); markFeedbackSeen(); updateUsersCounts(); });
+  }
+  function updateUsersCounts(){
+    const pending = (NOTIFY_SUBSCRIBERS || []).filter(x=>!x.notified_at).length;
+    document.getElementById('users-count-subs').textContent = pending ? toFaDigits(pending) : '';
+    document.getElementById('users-count-feedback').textContent = (FEEDBACK_LIST || []).length ? toFaDigits(FEEDBACK_LIST.length) : '';
+  }
 
   // ---- «بارگذاری محتوا» ----
   let UPLOADS_TAB = 'magazines';
@@ -7649,6 +7691,7 @@
       if(!r.ok) throw new Error('update failed');
       await loadNotifySubscribers();
       renderNotifySubscribers();
+      updateUsersCounts();
       showToast('علامت‌گذاری انجام شد');
     }catch(e){
       showToast('علامت‌گذاری ناموفق بود');
@@ -7662,7 +7705,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.11.1';
+  const APP_VERSION = '5.12.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
