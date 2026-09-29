@@ -458,9 +458,8 @@
   .usr-ch{ font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; display:inline-flex; gap:6px; align-items:center; }
   .usr-ch.on{ background: var(--navy); color:#fff; }
   .usr-ch.off{ background: var(--surface-2); color: var(--text-faint); border:1px solid var(--border); }
-  .usr-send-actions{ display:flex; gap:8px; flex-wrap:wrap; }
   .usr-hint{ font-size:11.5px; line-height:1.9; color: var(--text-faint); margin:10px 0 0; }
-  @media (max-width:640px){ .usr-search{ min-width:0; width:100%; } .usr-send-actions .btn{ flex:1 1 45%; } }
+  @media (max-width:640px){ .usr-search{ min-width:0; width:100%; } }
   /* «بارگذاری محتوا» */
   .upl-intro{ font-size:14px; font-weight:800; color:#fff; margin:4px 2px 12px; }
   .upl-choices{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; margin-bottom:22px; }
@@ -2829,18 +2828,10 @@
           <div class="usr-send-quick" id="usr-send-quick"></div>
           <textarea id="usr-msg" rows="3" maxlength="600" placeholder="متن پیام…"></textarea>
           <div class="usr-channels">
-            <span class="usr-ch on">آماده‌سازی دستی</span>
             <span class="usr-ch off" title="بعد از تهیه‌ی حساب سامانه‌ی پیامکی">ارسال پیامک<span class="news-soon">به‌زودی</span></span>
             <span class="usr-ch off" title="بعد از تصمیم درباره‌ی کانال ایتا">ارسال در ایتا<span class="news-soon">به‌زودی</span></span>
           </div>
-          <div class="usr-send-actions">
-            <button type="button" class="btn primary" onclick="usrCopy('msg')">کپی متن پیام</button>
-            <button type="button" class="btn" onclick="usrCopy('phones')">کپی شماره‌ها</button>
-            <button type="button" class="btn" onclick="usrCopy('eitaa')">کپی شناسه‌های ایتا</button>
-            <button type="button" class="btn" onclick="usrExportSelected()">دانلود فهرست (CSV)</button>
-            <button type="button" class="btn" id="usr-mark-subs" onclick="markNotifySubscribersNotified()">علامت «اطلاع‌رسانی‌شده» برای مشترکین فرم</button>
-          </div>
-          <p class="usr-hint">روش کار: افراد را در جدول بالا تیک بزنید و متن را بنویسید. «کپی متن پیام» متن را در حافظه‌ی گوشی/رایانه می‌گذارد؛ «کپی شماره‌ها» شماره‌ی افراد انتخاب‌شده را (هر کدام در یک خط) کپی می‌کند تا در سامانه‌ی پیامکی یا گروه ارسال پیامک بچسبانید؛ «کپی شناسه‌های ایتا» همین کار را برای شناسه‌های ایتا انجام می‌دهد؛ «دانلود فهرست» یک فایل اکسل‌خوان (CSV) از افراد انتخاب‌شده می‌سازد.</p>
+          <p class="usr-hint">ارسال مستقیم از همین‌جا بعد از اتصال سامانه‌ی پیامکی (و در صورت تصمیم، کانال ایتا) فعال می‌شود.</p>
         </div>
       </div>
 
@@ -5302,7 +5293,7 @@
   document.getElementById('ann-level').addEventListener('change', updateAnnPreview);
 
   // ---- «کاربران» (دفترچه‌ی کاربران migration_037 + مشترکین فرم + ارسال گروهی + نظرات) ----
-  // سطح دسترسی فعلاً فقط ثبت/نمایش؛ ارسال گروهی فعلاً «آماده‌سازی دستی» (کپی/CSV) — پیامک
+  // سطح دسترسی فعلاً فقط ثبت/نمایش؛ ارسال گروهی: فعلاً فقط انتخاب افراد + متن (ابزارهای دستی کپی/CSV به خواست کاربر حذف شدن) — پیامک
   // و ایتا بعد از تهیه‌ی حساب/تصمیم کاربر اضافه می‌شن.
   const USER_LEVELS = { plus:'پلاس', pro:'پرو', normal:'عادی', limited:'محدود' };
   let APP_USERS = [];
@@ -5371,29 +5362,8 @@
     const valid = new Set(usrRows().map(r=>r.key));
     [...USR_SELECTED].forEach(k=>{ if(!valid.has(k)) USR_SELECTED.delete(k); });
     document.getElementById('usr-sel-count').textContent = toFaDigits(USR_SELECTED.size) + ' نفر انتخاب شده';
-    const pendingSubs = (NOTIFY_SUBSCRIBERS||[]).some(x=>!x.notified_at);
-    document.getElementById('usr-mark-subs').style.display = pendingSubs ? '' : 'none';
   }
   function usrSelectedRows(){ return usrRows().filter(r=>USR_SELECTED.has(r.key)); }
-  async function usrCopy(what){
-    let text = '';
-    if(what === 'msg'){ text = document.getElementById('usr-msg').value.trim(); if(!text){ showToast('متن پیام را بنویسید'); return; } }
-    else{
-      const sel = usrSelectedRows();
-      if(!sel.length){ showToast('کسی انتخاب نشده'); return; }
-      const vals = sel.map(r => what === 'phones' ? r.phone : r.eitaa).filter(Boolean);
-      if(!vals.length){ showToast(what === 'phones' ? 'هیچ‌کدام شماره ندارند' : 'هیچ‌کدام شناسه‌ی ایتا ندارند'); return; }
-      text = [...new Set(vals)].join('\n');
-    }
-    try{ await navigator.clipboard.writeText(text); showToast('کپی شد'); }
-    catch(e){ prompt('کپی کنید:', text); }
-  }
-  function usrExportSelected(){
-    const sel = usrSelectedRows();
-    if(!sel.length){ showToast('کسی انتخاب نشده'); return; }
-    const rows = sel.map(r=>({ name:r.name, phone:r.phone, eitaa:r.eitaa, title:r.title, level: r.kind==='sub' ? 'مشترک فرم' : (USER_LEVELS[r.level]||r.level) }));
-    downloadBlob('jarian-users.csv', toCSV(rows, ['name','phone','eitaa','title','level']), 'text/csv');
-  }
   function openUserEditor(u){
     USR_EDIT_ID = u ? u.id : null;
     document.getElementById('usr-editor-title').textContent = u ? 'ویرایش کاربر' : 'افزودن کاربر';
