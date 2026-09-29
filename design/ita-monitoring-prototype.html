@@ -1141,6 +1141,11 @@
   .rank-item .rc{ min-width:0; }
   .rank-item .rc p{ margin:0; font-size:13.5px; color: var(--text); }
   .rank-item .rc .rmeta{ margin-top:6px; font-size:11px; color: var(--text-faint); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .sel-tags{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:6px; }
+  .sel-tag{ font-size:11px; font-weight:600; border-radius:999px; padding:2px 9px; background: rgba(22,32,42,0.06); color: var(--text-dim); }
+  .sel-tag.is-crit{ background: var(--navy); color:#fff; }
+  .sel-tag.is-wide{ background: rgba(234,179,147,0.3); color:#8a4516; }
+  .sel-reason{ margin-top:5px; font-size:12px; color: var(--text-dim); line-height:1.8; }
   .rank-item .rc .rmeta .cat{ color: var(--accent-strong); font-weight:600; }
 
   /* تب «آنالیز» — چیدمان دوستونه‌ی نامتقارن (masonry-مانند)، نه گرید
@@ -1184,6 +1189,7 @@
   .news-analytics-col{ display:flex; flex-direction:column; gap:16px; }
   .news-analytics-col .panel{ margin-bottom:0; }
   @media (max-width:900px){ .news-analytics-columns{ grid-template-columns:minmax(0,1fr); } }
+  @media (max-width:640px){ .news-analytics-col .panel-head{ flex-wrap:wrap; gap:6px 12px; } .news-analytics-col .panel-pill{ white-space:nowrap; } }
 
   /* نمودارهای Chart.js — کانتینر با ارتفاع کمینه‌ی یکسان (نه attribute
      height خودِ canvas) چون به همراه maintainAspectRatio:false توی JS،
@@ -1707,7 +1713,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۴.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۴.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2837,7 +2843,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۴.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۴.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -6548,23 +6554,37 @@
     // می‌ده؛ اگه هنوز هیچ تحلیلی اجرا نشده باشه، پیام «هنوز آماده نشده» میاد.
     // headline از سمت هوش مصنوعی میاد (نه اسلایس خام متن پست) — یه جمله‌ی
     // کامل و فارسی (اگه منبع انگلیسی بود، ترجمه‌شده)، نه نصفه‌رهاشده؛ لیبل
-    // «دلیل انتخاب» (تکرار در چند منبع/موضوع حساس و ...) دیگه نمایش داده
-    // نمی‌شه، طبق درخواست کاربر.
+    // «دلیل انتخاب» مهر ۱۴۰۵ به خواست کاربر برگشت (برچسب معیار + دلیل کوتاه، پایین‌تر).
     const selectedList = document.getElementById('news-analytics-selected-list');
     const selectedEmpty = document.getElementById('news-analytics-selected-empty');
     const selectedUpdatedEl = document.getElementById('news-selected-updated');
     selectedUpdatedEl.textContent = NEWS_AI_INSIGHTS ? ('به‌روزرسانی: ' + newsRelTime(NEWS_AI_INSIGHTS.computed_at)) : '';
+    // از مهر ۱۴۰۵ هر مورد خودش channel_id/time/link/sources رو هم داره (news-insights
+    // خبرها رو خوشه‌بندی می‌کنه و sources = تعداد واقعی منابع همون خبره) — پس
+    // اگه پست در کش ۱۰۰۰تایی نبود هم نمایش داده می‌شه؛ ردیف‌های قدیمی (فقط id)
+    // مثل قبل از روی POSTS_CACHE
     const aiSelected = (NEWS_AI_INSIGHTS?.selected_posts || [])
-      .map(sp => ({ post: POSTS_CACHE.find(p=>p.id===sp.id), headline: sp.headline }))
-      .filter(x => x.post);
+      .map(sp => ({ sp, post: POSTS_CACHE.find(p=>p.id===sp.id) }))
+      .filter(x => x.post || x.sp.channel_id);
     selectedList.innerHTML = '';
     selectedEmpty.style.display = aiSelected.length ? 'none' : '';
-    aiSelected.forEach(({post:p, headline}, i)=>{
-      const text = headline || p.title || (p.text||'').slice(0,140);
+    aiSelected.forEach(({sp, post:p}, i)=>{
+      const text = sp.headline || (p && (p.title || (p.text||'').slice(0,140))) || '';
+      const chId = p ? p.channel_id : sp.channel_id;
+      const when = sp.time || (p && (p.posted_at||p.scraped_at));
+      // برچسب معیار انتخاب (کاربر، مهر ۱۴۰۵ — نسخه‌ی قدیمی «دلیل انتخاب» قبلاً به
+      // خواست خودش حذف شده بود؛ حالا دوباره، با فهرست ثابت معیارها + دلیل کوتاه):
+      // «پوشش گسترده» از تعداد واقعی منابع (≥۵، همون آستانه‌ی موج خبری) + معیار
+      // موضوعی هوش مصنوعی (CRITERIA در news-insights) + یه جمله‌ی کوتاه چرا مهمه
+      const tags = [];
+      if(sp.sources >= 5) tags.push(`<span class="sel-tag is-wide">پوشش گسترده، ${toFaDigits(sp.sources)} منبع</span>`);
+      else if(sp.sources > 1) tags.push(`<span class="sel-tag">${toFaDigits(sp.sources)} منبع</span>`);
+      if(sp.criterion) tags.push(`<span class="sel-tag is-crit">${escHtml(sp.criterion)}</span>`);
       const el = document.createElement('div'); el.className = 'rank-item';
       el.innerHTML = `<span class="rank-num">${toFaDigits(i+1)}</span>
-        <div class="rc"><p>${escHtml(text)}</p>
-        <div class="rmeta">${chName(p.channel_id)} · ${newsRelTime(p.posted_at||p.scraped_at)}</div></div>`;
+        <div class="rc">${tags.length ? `<div class="sel-tags">${tags.join('')}</div>` : ''}<p>${escHtml(text)}</p>
+        ${sp.reason ? `<div class="sel-reason">معیار انتخاب: ${escHtml(sp.reason)}</div>` : ''}
+        <div class="rmeta"><span>${escHtml(chName(chId))}${sp.sources > 1 ? ' و …' : ''}</span><span>${when ? newsRelTime(when) : ''}</span></div></div>`;
       selectedList.appendChild(el);
     });
 
@@ -8165,7 +8185,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.14.0';
+  const APP_VERSION = '5.14.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
