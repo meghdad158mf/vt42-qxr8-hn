@@ -53,17 +53,30 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-// معیار انتخاب هر خبر منتخب — فهرست ثابت تا برچسب‌ها بین اجراها یکدست بمونن
-// (کاربر، مهر ۱۴۰۵: «روی هر خبر منتخب یه لیبل بزنه و معیار منتخب‌شدنش رو بنویسه»)
-const CRITERIA = [
-  "تصمیم حاکمیتی", // دولت، مجلس، قوه قضاییه، نهادهای حاکمیتی
-  "امنیتی و دفاعی",
-  "سیاست خارجی",
-  "اقتصاد و معیشت",
-  "اجتماعی و فرهنگی",
+// برچسب‌های معیار انتخاب هر خبر منتخب — کوتاه و تحلیلی، نه جمله‌ی توضیحی (کاربر،
+// مهر ۱۴۰۵: «معیار انتخاب توضیحی نباشد، مثلاً پرتکرار، اختلاف قومیتی، شکاف اجتماعی»).
+// فهرست ثابت تا برچسب‌ها بین اجراها یکدست بمونن؛ «پرتکرار» اینجا نیست چون از
+// تعداد واقعی منابع (sources ≥ ۵) در فرانت ساخته می‌شه، نه حدس مدل.
+const TAGS = [
+  "اختلاف قومیتی",
+  "اختلاف مذهبی",
+  "شکاف اجتماعی",
+  "اعتراض و تجمع",
+  "نارضایتی معیشتی",
+  "تنش سیاسی",
+  "تصمیم کلان حاکمیتی",
+  "امنیت ملی",
+  "تهدید خارجی",
+  "دیپلماسی",
+  "انتخابات",
+  "فساد و تخلف",
   "حوزه و روحانیت",
-  "خراسان و مشهد",
+  "مسائل دینی",
+  "مسائل فرهنگی",
+  "شایعه و عملیات روانی",
   "حادثه و بحران",
+  "آب و محیط زیست",
+  "خراسان و مشهد",
 ];
 
 const SYSTEM_PROMPT =
@@ -79,14 +92,14 @@ const SYSTEM_PROMPT =
   "greetings/occasion messages, poems or quotes, routine weather, sports results (unless politically significant), or two candidates that " +
   "are the same story. Each item: {\"id\": <a given id, exactly>, \"headline\": \"<ONE complete, factual Persian sentence (max ~25 words) " +
   "stating the news itself — never cut off; if the text is not Persian, translate>\", \"score\": <integer 1-10 importance>, " +
-  `\"criterion\": <exactly one of: ${CRITERIA.map((c) => `\"${c}\"`).join(", ")} — the main reason it matters>, ` +
-  "\"reason\": \"<a short Persian phrase (max 12 words) saying concretely WHY this story is important for the office; do not repeat the headline>\"}. " +
+  `\"tags\": [1 or 2 labels, each EXACTLY one of: ${TAGS.map((c) => `\"${c}\"`).join(", ")} — the analytical reason(s) this story ` +
+  "matters, most specific first; no explanations, no other words]}. " +
   "Order by importance.\n" +
   "2) topics: up to 6 real recurring themes across ALL candidates, each {\"name\": \"<short Persian label, 1-3 words>\", " +
   "\"ids\": [<ids of the candidates about this theme>]}. No dates, weekday/month names, or boilerplate as topics.\n" +
   'Respond with ONLY a raw JSON object {"selected":[...],"topics":[...]} — no markdown fences, no commentary. Use only the given ids.';
 
-type AiSelected = { id: number; headline?: string; score?: number; criterion?: string; reason?: string };
+type AiSelected = { id: number; headline?: string; score?: number; tags?: string[] };
 type AiTopic = { name: string; ids?: number[] };
 type Insight = { selected?: AiSelected[]; topics?: AiTopic[] };
 
@@ -161,7 +174,7 @@ Deno.serve(async (req) => {
     // اخبار منتخب: فقط idهای واقعاً فرستاده‌شده، بدون تکرار، مرتب با امتیاز مدل
     // و بعد تعداد منابع واقعی
     const seen = new Set<number>();
-    const picked: Array<{ c: Cluster<WindowPost>; headline: string; score: number; criterion: string | null; reason: string }> = [];
+    const picked: Array<{ c: Cluster<WindowPost>; headline: string; score: number; tags: string[] }> = [];
     for (const part of parts) {
       for (const sp of part.selected || []) {
         const id = Number(sp?.id);
@@ -169,19 +182,20 @@ Deno.serve(async (req) => {
         if (!c || seen.has(id)) continue;
         seen.add(id);
         const score = Math.min(10, Math.max(1, Math.round(Number(sp.score) || 5)));
-        const criterion = CRITERIA.includes(String(sp.criterion || "").trim()) ? String(sp.criterion).trim() : null;
-        picked.push({ c, headline: String(sp.headline || "").trim().slice(0, 300), score, criterion, reason: String(sp.reason || "").trim().slice(0, 120) });
+        // فقط برچسب‌های داخل فهرست، بدون تکرار، حداکثر ۲
+        const tags = [...new Set((Array.isArray(sp.tags) ? sp.tags : []).map((t) => String(t || "").trim()))]
+          .filter((t) => TAGS.includes(t)).slice(0, 2);
+        picked.push({ c, headline: String(sp.headline || "").trim().slice(0, 300), score, tags });
       }
     }
     picked.sort((a, b) => (b.score - a.score) || (b.c.channels - a.c.channels));
-    const selectedPosts = picked.slice(0, 10).map(({ c, headline, score, criterion, reason }) => {
+    const selectedPosts = picked.slice(0, 10).map(({ c, headline, score, tags }) => {
       const last = c.posts[c.posts.length - 1];
       return {
         id: c.rep.id,
         headline,
         score,
-        criterion,
-        reason,
+        tags,
         sources: c.channels,
         posts: c.posts.length,
         channel_id: c.rep.channel_id,
