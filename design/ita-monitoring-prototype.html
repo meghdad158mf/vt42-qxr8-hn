@@ -1678,7 +1678,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۳.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۳.۳</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2800,7 +2800,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۳.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۳.۳</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -2943,7 +2943,11 @@
     try{
       await loadAll();
       if(SESSION_EXPIRED) throw new Error('session expired');
+      NAV_RESTORING = true;
       enterDash(lastSectionKey());
+      const hashSt = navParse(location.hash);
+      if(hashSt) navApply(hashSt);
+      navMark();
       setTimeout(refreshAdminAlerts, 2000);
       if(document.body.classList.contains('app-loading')){
         // رفرش: اسکرول همون جایی که کاربر بود (بعد از رسیدن محتوا، تا ارتفاع صفحه درست باشه)
@@ -3037,6 +3041,8 @@
   // (نه صفحه‌ی نخست). بخش مدیریتی برای بیننده نادیده گرفته می‌شه.
   function lastSectionKey(){
     let k = null;
+    const fromHash = navParse(location.hash);
+    if(fromHash) return fromHash.s;
     try{ k = sessionStorage.getItem('jarian_last_section'); }catch(e){}
     if(!k || !document.getElementById('sec-'+k)) return 'dashboard';
     if(ADMIN_ONLY_SECTIONS.includes(k) && currentRole !== 'app_admin') return 'dashboard';
@@ -3050,6 +3056,7 @@
     // بستن زبانه پاکش می‌کرد و بعد از خروج/ورود در همون زبانه اطلاعیه‌ی مهم برنمی‌گشت)
     try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); sessionStorage.removeItem('jarian_ann_dismissed_s'); }catch(e){}
     clearTimeout(ADMIN_ALERT_TIMER);
+    try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
     goLogin();
   }
 
@@ -3235,6 +3242,7 @@
   };
 
   function switchSection(key){
+    navMark();
     if(key === 'feedback'){ key = 'users'; setTimeout(()=>document.getElementById('usr-feedback-panel').scrollIntoView({ block:'start' }), 400); } // بخش قدیمی، حالا قسمت دوم «کاربران»
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     document.getElementById('sec-'+key).classList.add('active');
@@ -3436,6 +3444,7 @@
   }
 
   function setNewsPageTab(tab){
+    navMark();
     NEWS_CURRENT_TAB = tab;
     lsSet('jarian_last_news_tab', tab);
     placeNewsStudyPanel('overview');
@@ -5404,6 +5413,7 @@
   // ---- «بارگذاری محتوا» ----
   let UPLOADS_TAB = 'magazines';
   function setUploadsTab(tab){
+    navMark();
     UPLOADS_TAB = tab;
     document.querySelectorAll('.upl-choice').forEach(b=>b.classList.toggle('active', b.dataset.uplTab === tab));
     ['magazines','archive','schools'].forEach(t=>{ document.getElementById('upl-pane-'+t).style.display = t === tab ? '' : 'none'; });
@@ -5613,6 +5623,7 @@
   const postsPageTabsEl = document.getElementById('posts-page-tabs');
   if(postsPageTabsEl) postsPageTabsEl.addEventListener('click', e=>{
     const b = e.target.closest('button'); if(!b || !b.dataset.postsTab) return;
+    navMark();
     lsSet('jarian_last_posts_tab', b.dataset.postsTab);
     postsPageTabsEl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
@@ -5630,6 +5641,7 @@
   const peoplePageTabsEl = document.getElementById('people-page-tabs');
   if(peoplePageTabsEl) peoplePageTabsEl.addEventListener('click', e=>{
     const b = e.target.closest('button'); if(!b || !b.dataset.peopleTab) return;
+    navMark();
     lsSet('jarian_last_people_tab', b.dataset.peopleTab);
     peoplePageTabsEl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
@@ -6043,6 +6055,7 @@
   }
 
   function setPfMode(mode){
+    navMark();
     if(pfMode !== mode){ pfMode = mode; pfSelectedChannel = null; pfGroupFilter = null; }
     if(pfGallerySearchEl) pfGallerySearchEl.value = '';
     renderPoliticalFigures();
@@ -6131,6 +6144,7 @@
   }
 
   function openPfChannel(id){
+    navMark();
     pfSelectedChannel = id;
     if(pfSearchEl) pfSearchEl.value = '';
     if(pfFilterTimeEl) pfFilterTimeEl.value = '';
@@ -6139,6 +6153,7 @@
   }
 
   function closePfChannel(){
+    navMark();
     pfSelectedChannel = null;
     renderPoliticalFigures();
     window.scrollTo(0,0);
@@ -7860,9 +7875,113 @@
     window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
   }
 
+  // ---- دکمه‌ی «برگشت» مرورگر/گوشی ----
+  // بخش‌ها و تب‌ها فقط با عوض‌شدن کلاس روی همین صفحه جابه‌جا می‌شن (ناوبری واقعی
+  // نیست)، پس بدون این بخش «برگشت» کلاً از سایت بیرون می‌رفت. هر جابه‌جایی
+  // (بخش، تب، فید یه کانال در «یادداشت‌ها»، تب «بارگذاری محتوا») یه ورودی تاریخچه
+  // با آدرس #بخش/تب/کانال می‌سازه؛ «برگشت» همون حالت + جای اسکرول رو برمی‌گردونه.
+  // هر تابع ناوبری اول navMark() صدا می‌زنه؛ ثبت واقعی بعد از تموم‌شدن همون
+  // کار انجام می‌شه (setTimeout) تا switchSection + setNewsPageTab پشت‌سرهم
+  // یه ورودی بشن. پنجره‌های روی صفحه (عکس/فیلم، ویرایش منبع و...) هم یه ورودی
+  // دارن تا «برگشت» روی گوشی اول پنجره رو ببنده.
+  // var (نه let): این توابع ممکنه پیش از رسیدن اجرا به این خط صدا زده بشن
+  var NAV_READY = false, NAV_TIMER = null, NAV_PENDING_Y = null, NAV_RESTORING = false, NAV_MODAL_OPEN = false;
+  function navCurrentState(){
+    const secEl = document.querySelector('.section.active');
+    const s = secEl ? secEl.id.slice(4) : 'dashboard';
+    let t = null, ch = null;
+    if(s === 'overview') t = NEWS_CURRENT_TAB;
+    else if(s === 'posts'){ const b = document.querySelector('#posts-page-tabs button.active'); t = b ? b.dataset.postsTab : null; }
+    else if(s === 'people'){
+      const b = document.querySelector('#people-page-tabs button.active'); t = b ? b.dataset.peopleTab : null;
+      if((t === 'figures' || t === 'orgs') && pfSelectedChannel) ch = pfSelectedChannel;
+    }
+    else if(s === 'uploads') t = UPLOADS_TAB;
+    const key = [s, t, ch].filter(x=>x !== null && x !== undefined && x !== '').join('/');
+    return { jarian:1, key, s, t, ch };
+  }
+  function navParse(hash){
+    const parts = String(hash || '').replace(/^#/, '').split('/').map(x=>{ try{ return decodeURIComponent(x); }catch(e){ return ''; } });
+    const s = parts[0];
+    if(!s || !/^[a-z]+$/.test(s) || !document.getElementById('sec-'+s)) return null;
+    if(ADMIN_ONLY_SECTIONS.includes(s) && currentRole !== 'app_admin') return null;
+    const ch = Number(parts[2]) || null;
+    return { jarian:1, key:[s, parts[1], ch].filter(Boolean).join('/'), s, t: parts[1] || null, ch };
+  }
+  function navMark(){
+    if(!NAV_READY) return;
+    if(NAV_PENDING_Y === null) NAV_PENDING_Y = window.scrollY;
+    if(!NAV_TIMER) NAV_TIMER = setTimeout(navFlush, 0);
+  }
+  function navFlush(){
+    NAV_TIMER = null;
+    const y = NAV_PENDING_Y; NAV_PENDING_Y = null;
+    const restoring = NAV_RESTORING; NAV_RESTORING = false;
+    if(!document.getElementById('view-dash').classList.contains('active')) return;
+    const st = navCurrentState();
+    const cur = history.state;
+    try{
+      if(restoring || !cur || !cur.jarian){
+        if(!cur || cur.key !== st.key) history.replaceState(st, '', '#' + st.key);
+        return;
+      }
+      if(cur.key === st.key) return;
+      history.replaceState(Object.assign({}, cur, { y }), '');
+      history.pushState(st, '', '#' + st.key);
+    }catch(e){}
+  }
+  function navClickTab(barSel, dataKey, val){
+    const b = document.querySelector(`${barSel} button[data-${dataKey}="${val}"]`);
+    if(b && !b.disabled && !b.classList.contains('active')) b.click();
+  }
+  // اعمال یه حالت ذخیره‌شده — فقط چیزهایی که با حالت فعلی فرق دارن
+  function navApply(st){
+    const cur = document.querySelector('.section.active');
+    if(!cur || cur.id !== 'sec-'+st.s) switchSection(st.s);
+    if(st.s === 'overview' && st.t && NEWS_TABS.includes(st.t) && st.t !== NEWS_CURRENT_TAB) setNewsPageTab(st.t);
+    if(st.s === 'posts' && st.t) navClickTab('#posts-page-tabs', 'posts-tab', st.t);
+    if(st.s === 'people'){
+      if(st.t) navClickTab('#people-page-tabs', 'people-tab', st.t);
+      if(st.ch && st.ch !== pfSelectedChannel) openPfChannel(st.ch);
+      else if(!st.ch && pfSelectedChannel) closePfChannel();
+    }
+    if(st.s === 'uploads' && st.t && ['magazines','archive','schools'].includes(st.t) && st.t !== UPLOADS_TAB) setUploadsTab(st.t);
+  }
+  window.addEventListener('popstate', e=>{
+    // اول پنجره‌ی باز (عکس/فیلم، ویرایش منبع...) بسته می‌شه، نه خودِ بخش
+    if(NAV_MODAL_OPEN){
+      NAV_MODAL_OPEN = false;
+      document.querySelectorAll('.modal-overlay.active .modal-close').forEach(b=>b.click());
+      return;
+    }
+    if(!authToken || !document.getElementById('view-dash').classList.contains('active')) return;
+    closeAdminMenu(); closeNavMenu();
+    let st = (e.state && e.state.jarian) ? e.state : navParse(location.hash);
+    if(!st || (ADMIN_ONLY_SECTIONS.includes(st.s) && currentRole !== 'app_admin')) st = { jarian:1, key:'dashboard', s:'dashboard' };
+    if(st.key === navCurrentState().key) return; // مثلاً بعد از بستن پنجره با دکمه‌ی ×
+    NAV_RESTORING = true;
+    try{ navApply(st); }catch(err){ console.error(err); }
+    if(typeof st.y === 'number') restoreScrollY(st.y);
+    navMark();
+  });
+  // پنجره‌ها: باز شدن = یه ورودی اضافه؛ بستن با × یا کلیک بیرون = مصرف همون ورودی
+  document.querySelectorAll('.modal-overlay').forEach(ov=>{
+    new MutationObserver(()=>{
+      const anyOpen = !!document.querySelector('.modal-overlay.active');
+      if(anyOpen && !NAV_MODAL_OPEN){
+        NAV_MODAL_OPEN = true;
+        try{ history.pushState(Object.assign({}, history.state, { modal:1 }), ''); }catch(e){}
+      }else if(!anyOpen && NAV_MODAL_OPEN){
+        NAV_MODAL_OPEN = false;
+        if(history.state && history.state.modal) history.back();
+      }
+    }).observe(ov, { attributes:true, attributeFilter:['class'] });
+  });
+  NAV_READY = true;
+
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.13.2';
+  const APP_VERSION = '5.13.3';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
@@ -7875,6 +7994,7 @@
     // می‌شه و داده‌ها پشت‌صحنه می‌رسن (loadAllAndEnter دوباره رندرش می‌کنه)
     document.body.classList.add('app-loading');
     applyRoleUI();
+    NAV_RESTORING = true;
     try{ show('view-dash'); switchSection(lastSectionKey()); }catch(e){ console.error(e); }
     document.documentElement.classList.remove('has-session');
     loadAllAndEnter();
