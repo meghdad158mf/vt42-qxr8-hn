@@ -232,6 +232,21 @@
   .afo-item{ display:flex; flex-direction:column; gap:5px; font-size:12px; max-width:250px; }
   .afo-item b{ color: rgba(255,255,255,0.85); font-weight:700; font-size:10.5px; }
   .afo-item span{ color: rgba(255,255,255,0.62); line-height:1.7; }
+  /* نوار تاریخ/ساعت/مناسبت بالای همه‌ی صفحه‌ها */
+  .datebar{ display:flex; align-items:center; gap:6px 14px; flex-wrap:wrap; font-size:12px; color: rgba(255,255,255,0.6); margin:-6px 0 14px; min-height:18px; }
+  .datebar .db-dates{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .datebar .db-dates b{ color: rgba(255,255,255,0.88); font-weight:600; }
+  .datebar .db-sep{ width:1px; height:11px; background: rgba(255,255,255,0.22); }
+  .datebar .db-occ{ display:inline-flex; align-items:center; gap:6px; color:#EAB393; font-weight:600; min-width:0; }
+  .datebar .db-occ svg{ width:13px; height:13px; flex-shrink:0; }
+  .datebar .db-occ span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .datebar .db-clock{ margin-inline-start:auto; font-weight:700; color: rgba(255,255,255,0.88); display:inline-flex; align-items:center; gap:6px; }
+  .datebar .db-clock svg{ width:13px; height:13px; opacity:.6; }
+  @media (max-width:640px){
+    .datebar{ font-size:11.5px; margin:-4px 0 10px; gap:4px 10px; }
+    .datebar .db-hide-m{ display:none; }
+    .datebar .db-occ{ order:3; flex-basis:100%; }
+  }
   .topbar{
     display:flex; align-items:center; justify-content:space-between; gap:16px;
     margin-bottom:28px; padding:0 0 18px; flex-wrap:wrap;
@@ -1734,7 +1749,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۵.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۶.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1762,6 +1777,8 @@
 <!-- =================== DASHBOARD SHELL (no sidebar — topbar carries admin shortcuts) =================== -->
 <div id="view-dash" class="view">
   <main class="main">
+    <!-- نوار تاریخ/ساعت/مناسبت (مهر ۱۴۰۵، خواست کاربر) — renderDatebar() -->
+    <div class="datebar" id="datebar" aria-live="off"></div>
     <div class="topbar">
       <div class="topbar-brand">
         <div class="admin-menu" id="nav-menu" onclick="event.stopPropagation()">
@@ -2869,7 +2886,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۵.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۶.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -8124,6 +8141,88 @@
     window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
   }
 
+  // ---- نوار تاریخ/ساعت/مناسبت (مهر ۱۴۰۵، خواست کاربر) ----
+  // تاریخ شمسی، قمری و میلادی + ساعت تهران + مناسبت امروز. قمری با تقویم نجومی
+  // umalqura مرورگره؛ تقویم رسمی ایران (رؤیت هلال) گاهی ±۱ روز فرق داره — اگه
+  // کاربر گفت قمری یه روز جلو/عقبه، فقط HIJRI_OFFSET رو عوض کن (+۱ یعنی یه روز
+  // جلوتر). مناسبت‌های قمری هم از همین تاریخ اصلاح‌شده حساب می‌شن.
+  const HIJRI_OFFSET = 0;
+  const HIJRI_MONTHS = ['محرم','صفر','ربیع‌الاول','ربیع‌الثانی','جمادی‌الاول','جمادی‌الثانی','رجب','شعبان','رمضان','شوال','ذی‌القعده','ذی‌الحجه'];
+  // کلید «ماه-روز»؛ «L-ماه» = روز آخر اون ماه قمری (۲۹ یا ۳۰)
+  const OCC_SOLAR = {
+    '1-1':'عید نوروز', '1-2':'تعطیلات نوروز', '1-3':'تعطیلات نوروز', '1-4':'تعطیلات نوروز',
+    '1-12':'روز جمهوری اسلامی', '1-13':'روز طبیعت', '1-20':'روز ملی فناوری هسته‌ای', '1-29':'روز ارتش',
+    '2-1':'روز بزرگداشت سعدی', '2-12':'روز معلم', '2-25':'روز بزرگداشت فردوسی',
+    '3-3':'سالروز آزادسازی خرمشهر', '3-14':'رحلت امام خمینی (ره)', '3-15':'قیام ۱۵ خرداد',
+    '4-7':'روز قوه قضاییه', '4-14':'روز قلم', '5-14':'سالروز صدور فرمان مشروطیت', '5-17':'روز خبرنگار',
+    '6-31':'آغاز هفته دفاع مقدس', '7-1':'آغاز سال تحصیلی', '7-7':'روز آتش‌نشانی و ایمنی', '7-8':'روز بزرگداشت مولوی',
+    '7-13':'روز نیروی انتظامی', '7-20':'روز بزرگداشت حافظ', '8-13':'روز دانش‌آموز و مبارزه با استکبار جهانی',
+    '9-16':'روز دانشجو', '9-30':'شب یلدا', '10-9':'روز بصیرت و میثاق امت با ولایت', '10-13':'سالروز شهادت سردار سلیمانی',
+    '11-12':'بازگشت امام خمینی (ره) و آغاز دهه فجر', '11-22':'پیروزی انقلاب اسلامی', '12-29':'روز ملی شدن صنعت نفت',
+  };
+  const OCC_LUNAR = {
+    '1-1':'آغاز ماه محرم', '1-9':'تاسوعای حسینی', '1-10':'عاشورای حسینی', '1-25':'شهادت امام سجاد (ع)',
+    '2-20':'اربعین حسینی', '2-28':'رحلت پیامبر اکرم (ص) و شهادت امام حسن مجتبی (ع)', 'L-2':'شهادت امام رضا (ع)',
+    '3-8':'شهادت امام حسن عسکری (ع)', '3-12':'آغاز هفته وحدت', '3-17':'ولادت پیامبر اکرم (ص) و امام جعفر صادق (ع)',
+    '4-10':'وفات حضرت معصومه (س)', '5-5':'ولادت حضرت زینب (س) و روز پرستار',
+    '6-3':'شهادت حضرت فاطمه زهرا (س)', '6-20':'ولادت حضرت فاطمه زهرا (س) و روز زن',
+    '7-1':'ولادت امام محمد باقر (ع)', '7-3':'شهادت امام علی النقی (ع)', '7-10':'ولادت امام محمد تقی (ع)',
+    '7-13':'ولادت امام علی (ع) و روز پدر', '7-15':'وفات حضرت زینب (س)', '7-25':'شهادت امام موسی کاظم (ع)', '7-27':'عید مبعث',
+    '8-3':'ولادت امام حسین (ع) و روز پاسدار', '8-4':'ولادت حضرت ابوالفضل (ع) و روز جانباز', '8-5':'ولادت امام سجاد (ع)',
+    '8-11':'ولادت حضرت علی اکبر (ع) و روز جوان', '8-15':'ولادت حضرت قائم (عج)',
+    '9-1':'آغاز ماه مبارک رمضان', '9-15':'ولادت امام حسن مجتبی (ع)', '9-19':'ضربت خوردن امام علی (ع)', '9-21':'شهادت امام علی (ع)',
+    '10-1':'عید سعید فطر', '10-2':'تعطیل به مناسبت عید فطر', '10-25':'شهادت امام جعفر صادق (ع)',
+    '11-1':'ولادت حضرت معصومه (س) و روز دختران', '11-11':'ولادت امام رضا (ع)', 'L-11':'شهادت امام محمد تقی (ع)',
+    '12-1':'سالروز ازدواج حضرت علی (ع) و حضرت فاطمه (س)', '12-7':'شهادت امام محمد باقر (ع)', '12-9':'روز عرفه',
+    '12-10':'عید سعید قربان', '12-15':'ولادت امام علی النقی (ع)', '12-18':'عید سعید غدیر خم', '12-24':'روز مباهله',
+  };
+  function calParts(date, cal){
+    let fmt;
+    try{ fmt = new Intl.DateTimeFormat('en-u-ca-' + cal + '-nu-latn', { year:'numeric', month:'numeric', day:'numeric', timeZone:'Asia/Tehran' }); }
+    catch(e){ fmt = new Intl.DateTimeFormat('en-u-ca-islamic-nu-latn', { year:'numeric', month:'numeric', day:'numeric', timeZone:'Asia/Tehran' }); }
+    const o = {};
+    fmt.formatToParts(date).forEach(p=>{ if(p.type === 'year' || p.type === 'month' || p.type === 'day') o[p.type] = parseInt(p.value, 10); });
+    return o;
+  }
+  function hijriParts(date){ return calParts(new Date(date.getTime() + HIJRI_OFFSET * 864e5), 'islamic-umalqura'); }
+  function todayOccasions(now){
+    const out = [];
+    const sh = calParts(now, 'persian');
+    if(OCC_SOLAR[sh.month + '-' + sh.day]) out.push(OCC_SOLAR[sh.month + '-' + sh.day]);
+    const hj = hijriParts(now);
+    if(OCC_LUNAR[hj.month + '-' + hj.day]) out.push(OCC_LUNAR[hj.month + '-' + hj.day]);
+    if(hijriParts(new Date(now.getTime() + 864e5)).day === 1 && OCC_LUNAR['L-' + hj.month]) out.push(OCC_LUNAR['L-' + hj.month]);
+    return out;
+  }
+  let DATEBAR_KEY = '';
+  function renderDatebar(){
+    const el = document.getElementById('datebar');
+    if(!el) return;
+    const now = new Date();
+    const clock = now.toLocaleTimeString('fa-IR', { hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'Asia/Tehran' });
+    const shp = calParts(now, 'persian');
+    const dayKey = shp.year + '-' + shp.month + '-' + shp.day;
+    if(DATEBAR_KEY === dayKey && el.firstChild){
+      el.querySelector('.db-clock b').textContent = clock;
+      return;
+    }
+    DATEBAR_KEY = dayKey;
+    // ترکیب weekday با تاریخ در Chromium به‌هم‌ریخته درمیاد («۱۴۰۵ مهر ۷, سه‌شنبه») — دستی سرهم می‌شه
+    const shamsi = now.toLocaleDateString('fa-IR', { weekday:'long', timeZone:'Asia/Tehran' }) + ' '
+      + now.toLocaleDateString('fa-IR', { day:'numeric', month:'long', year:'numeric', timeZone:'Asia/Tehran' });
+    const hj = hijriParts(now);
+    const hijri = toFaDigits(hj.day) + ' ' + HIJRI_MONTHS[hj.month - 1] + ' ' + toFaDigits(hj.year);
+    const greg = now.toLocaleDateString('fa-IR-u-ca-gregory', { day:'numeric', month:'long', year:'numeric', timeZone:'Asia/Tehran' });
+    const occ = todayOccasions(now);
+    el.innerHTML = `<div class="db-dates"><b>${escHtml(shamsi)}</b>
+        <span class="db-sep db-hide-m"></span><span class="db-hide-m">${escHtml(hijri)}</span>
+        <span class="db-sep db-hide-m"></span><span class="db-hide-m">${escHtml(greg)}</span></div>
+      ${occ.length ? `<div class="db-occ" title="${escAttr(occ.join('، '))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg><span>${escHtml(occ.join('، '))}</span></div>` : ''}
+      <div class="db-clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>${clock}</b></div>`;
+  }
+  renderDatebar();
+  setInterval(renderDatebar, 15000);
+
   // ---- دکمه‌ی «برگشت» مرورگر/گوشی ----
   // بخش‌ها و تب‌ها فقط با عوض‌شدن کلاس روی همین صفحه جابه‌جا می‌شن (ناوبری واقعی
   // نیست)، پس بدون این بخش «برگشت» کلاً از سایت بیرون می‌رفت. هر جابه‌جایی
@@ -8230,7 +8329,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.15.1';
+  const APP_VERSION = '5.16.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
