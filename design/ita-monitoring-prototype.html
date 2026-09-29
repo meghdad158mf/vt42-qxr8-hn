@@ -1564,13 +1564,6 @@
   /* گوشی: یک ردیف افقی اسکرول‌خور با جلدهای کوچک‌تر (۵ جلد دوستونه خیلی بلند می‌شد) */
   @media (max-width:900px){ .pkg-covers{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:6px 4px 10px; } .pkg-covers::-webkit-scrollbar{ display:none; } .pkg-tile{ width:128px; flex-shrink:0; scroll-snap-align:start; } .pkg-cover{ width:112px; height:156px; } }
   @media (min-width:640px) and (max-width:900px){ .pkg-covers{ justify-content:center; } }
-  /* جلدها روی خودِ قوس: مرکز هر جلد = y قوس در همان x (y=24+320t(1-t)) → جابه‌جایی نسبت به y=74:
-     کناری‌ها -5، دومی‌ها +21، وسطی +30 — فقط وقتی دقیقاً ۵ جلد هست (.on-arc) */
-  .pkg-covers.on-arc > .pkg-tile{ transform: translateY(var(--arc-dy, 0px)); }
-  .pkg-covers.on-arc > .pkg-tile:nth-child(1), .pkg-covers.on-arc > .pkg-tile:nth-child(5){ --arc-dy:-5px; }
-  .pkg-covers.on-arc > .pkg-tile:nth-child(2), .pkg-covers.on-arc > .pkg-tile:nth-child(4){ --arc-dy:21px; }
-  .pkg-covers.on-arc > .pkg-tile:nth-child(3){ --arc-dy:30px; }
-  @media (max-width:900px){ .pkg-covers.on-arc > .pkg-tile{ transform:none; } }
   .pkg-cover{ width:128px; height:178px; border-radius:6px; overflow:hidden; background:#243140; border:1px solid rgba(255,255,255,0.12);
     box-shadow: 0 22px 34px -16px rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; color: rgba(255,255,255,0.4);
     transition: transform .25s ease, box-shadow .25s ease; }
@@ -1587,7 +1580,7 @@
   .pkg-part{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color: rgba(255,255,255,0.78); white-space:nowrap; }
   .pkg-part svg{ width:15px; height:15px; color:#EAB393; flex-shrink:0; }
   @media (max-width:640px){ .pkg-parts{ gap:10px 16px; margin-bottom:34px; } .pkg-part{ font-size:12px; } }
-  .pkg-more{ display:flex; justify-content:center; margin:56px 0 0; }
+  .pkg-more{ display:flex; justify-content:center; margin:30px 0 0; }
   .pkg-more-btn{ display:inline-flex; align-items:center; gap:6px; font:700 12.5px 'IRANSansX',Tahoma,sans-serif; color:#EAB393; background:none; border:1px solid rgba(234,179,147,0.45); border-radius:999px; padding:8px 16px; cursor:pointer; transition: background .2s ease, color .2s ease; }
   .pkg-more-btn:hover{ background:#EAB393; color:#16202a; }
   .pkg-more-btn svg{ width:14px; height:14px; }
@@ -7185,7 +7178,6 @@
       wrap.innerHTML = '<div class="pkg-empty">هنوز شماره‌ای بارگذاری نشده.</div>';
       return;
     }
-    wrap.classList.toggle('on-arc', MAGAZINES.length >= 5);
     MAGAZINES.slice(0, 5).forEach(m=>{
       const files = Array.isArray(m.files) ? m.files : [];
       const tile = document.createElement('div'); tile.className = 'pkg-tile';
