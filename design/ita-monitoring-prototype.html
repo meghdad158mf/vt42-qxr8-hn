@@ -426,6 +426,8 @@
   .usr-chip.active span{ color: rgba(255,255,255,0.7); }
   .usr-search{ font:inherit; font-size:13px; padding:8px 12px; border-radius:10px; border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); min-width:220px; }
   .usr-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .usr-table th, .usr-table td{ text-align:right; vertical-align:middle; }
+  .usr-table th:first-child, .usr-table td:first-child{ width:32px; }
   .usr-table th{ text-align:right; font-size:11.5px; color: var(--text-faint); font-weight:700; padding:8px; border-bottom:1px solid var(--border); white-space:nowrap; }
   .usr-table td{ padding:9px 8px; border-bottom:1px solid var(--border); color: var(--text); white-space:nowrap; }
   .usr-table tr.inactive td{ opacity:.55; }
@@ -457,6 +459,7 @@
   .usr-ch.on{ background: var(--navy); color:#fff; }
   .usr-ch.off{ background: var(--surface-2); color: var(--text-faint); border:1px solid var(--border); }
   .usr-send-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .usr-hint{ font-size:11.5px; line-height:1.9; color: var(--text-faint); margin:10px 0 0; }
   @media (max-width:640px){ .usr-search{ min-width:0; width:100%; } .usr-send-actions .btn{ flex:1 1 45%; } }
   /* «بارگذاری محتوا» */
   .upl-intro{ font-size:14px; font-weight:800; color:#fff; margin:4px 2px 12px; }
@@ -1687,7 +1690,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۲.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۲.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2837,6 +2840,7 @@
             <button type="button" class="btn" onclick="usrExportSelected()">دانلود فهرست (CSV)</button>
             <button type="button" class="btn" id="usr-mark-subs" onclick="markNotifySubscribersNotified()">علامت «اطلاع‌رسانی‌شده» برای مشترکین فرم</button>
           </div>
+          <p class="usr-hint">روش کار: افراد را در جدول بالا تیک بزنید و متن را بنویسید. «کپی متن پیام» متن را در حافظه‌ی گوشی/رایانه می‌گذارد؛ «کپی شماره‌ها» شماره‌ی افراد انتخاب‌شده را (هر کدام در یک خط) کپی می‌کند تا در سامانه‌ی پیامکی یا گروه ارسال پیامک بچسبانید؛ «کپی شناسه‌های ایتا» همین کار را برای شناسه‌های ایتا انجام می‌دهد؛ «دانلود فهرست» یک فایل اکسل‌خوان (CSV) از افراد انتخاب‌شده می‌سازد.</p>
         </div>
       </div>
 
@@ -2852,7 +2856,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۲.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۲.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -5359,7 +5363,7 @@
         return `<tr class="${r.kind==='user' && !r.active ? 'inactive' : ''}"><td><input type="checkbox" data-sel="${r.key}" ${USR_SELECTED.has(r.key)?'checked':''}></td>
           <td>${r.kind==='sub' ? '<span class="usr-dim">— (از فرم اطلاع‌رسانی)</span>' : `<b>${escHtml(r.name)}</b>`}</td>
           <td class="mono" dir="ltr">${escHtml(r.phone)||'—'}</td><td dir="ltr">${escHtml(r.eitaa)||'—'}</td>
-          <td>${escHtml(r.title)||'—'}</td><td>${lvl}</td><td>${st}</td><td class="usr-acts">${act}</td></tr>`;
+          <td>${escHtml(r.title)||'—'}</td><td>${lvl}</td><td>${st}</td><td><div class="usr-acts">${act}</div></td></tr>`;
       }).join('') : '<tr><td colspan="8" class="usr-empty">موردی نیست.</td></tr>') + '</tbody>';
     updateUsrSelCount();
   }
@@ -7925,7 +7929,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.12.0';
+  const APP_VERSION = '5.12.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
