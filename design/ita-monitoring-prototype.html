@@ -583,11 +583,13 @@
 
   /* «چرا جریان» — سه ستون معرفی مزیت اصلی، این‌بار داخل یه کادر یکپارچه‌ی
      تمام‌عرض با زمینه‌ی رنگی (ته‌رنگ هلویی)، نه
-     مستقیم روی بوم تیره — طبق خواسته‌ی صریح کاربر. بین دو کارت راهنمای
-     سریع و گرید ۴تایی عرصه‌های رصد. */
+     مستقیم روی بوم تیره — طبق خواسته‌ی صریح کاربر. مهر ۱۴۰۵ به خواست کاربر از
+     زیر هرو به فاصله‌ی بین «عرصه‌های رصد» و «بسته تحلیلی جریان» منتقل شد (پل بین دو بخش). */
   .why-jarian-card{
-    margin:160px 0 64px;
+    margin:120px 0 0;
   }
+  .section-label.pkg-flow-label{ margin-top:130px; }
+  @media (max-width:640px){ .section-label.pkg-flow-label{ margin-top:70px; } }
   .why-jarian-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:20px; text-align:center; }
   @media (max-width:760px){ .why-jarian-grid{ grid-template-columns:1fr; } }
   .why-jarian-item{
@@ -1676,7 +1678,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۳.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۳.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1913,26 +1915,6 @@
 
       <div class="dash-hero-stats" id="dash-hero-stats"></div>
 
-      <div class="why-jarian-card">
-        <div class="why-jarian-grid">
-          <div class="why-jarian-item">
-            <div class="why-jarian-tag">رصد لحظه‌ای</div>
-            <div class="why-jarian-bar"></div>
-            <p>اخبار و رویدادها، کنشگری مجازی، مدارس و افراد را در یک سامانه‌ی واحد و به‌روز دنبال می‌کنیم. هر عرصه با روش پایش مخصوص به خودش رصد می‌شود تا هیچ تحولی در فضای سیاسی‌اجتماعی از دید جریان دور نماند.</p>
-          </div>
-          <div class="why-jarian-item">
-            <div class="why-jarian-tag">تحلیل تخصصی</div>
-            <div class="why-jarian-bar"></div>
-            <p>با نگاه جامعه‌شناسی سیاسی، رویدادها را از دل داده‌ها استخراج و تحلیل می‌کنیم. حاصل این تحلیل در قالب بسته‌ی تحلیلی جریان، هر شماره در اختیار مخاطب قرار می‌گیرد.</p>
-          </div>
-          <div class="why-jarian-item">
-            <div class="why-jarian-tag">دسترسی اختصاصی</div>
-            <div class="why-jarian-bar"></div>
-            <p>با سطح‌بندی دقیق نقش‌ها، اطلاعات حساس فقط در اختیار افراد مجاز قرار می‌گیرد. مدیران و بینندگان هرکدام دسترسی متناسب با نیاز خود را دارند، بدون افشای داده‌های حساس.</p>
-          </div>
-        </div>
-      </div>
-
       <div class="section-label">عرصه‌های رصد و پایش</div>
       <div class="domain-grid">
         <svg class="dom-orbit" viewBox="-600 -100 1200 360" aria-hidden="true">
@@ -1998,6 +1980,26 @@
         <a onclick="goToPostsTab('feed')">پست‌های منتشر شده</a>
         <a onclick="goToPostsTab('people')">افراد و مجموعه‌ها</a>
         <span class="domain-shortcut-disabled">آنالیز کنشگری<span class="news-soon">به‌زودی</span></span>
+      </div>
+
+      <div class="why-jarian-card">
+        <div class="why-jarian-grid">
+          <div class="why-jarian-item">
+            <div class="why-jarian-tag">رصد لحظه‌ای</div>
+            <div class="why-jarian-bar"></div>
+            <p>اخبار و رویدادها، کنشگری مجازی، مدارس و افراد را در یک سامانه‌ی واحد و به‌روز دنبال می‌کنیم. هر عرصه با روش پایش مخصوص به خودش رصد می‌شود تا هیچ تحولی در فضای سیاسی‌اجتماعی از دید جریان دور نماند.</p>
+          </div>
+          <div class="why-jarian-item">
+            <div class="why-jarian-tag">تحلیل تخصصی</div>
+            <div class="why-jarian-bar"></div>
+            <p>با نگاه جامعه‌شناسی سیاسی، رویدادها را از دل داده‌ها استخراج و تحلیل می‌کنیم. حاصل این تحلیل در قالب بسته‌ی تحلیلی جریان، هر شماره در اختیار مخاطب قرار می‌گیرد.</p>
+          </div>
+          <div class="why-jarian-item">
+            <div class="why-jarian-tag">دسترسی اختصاصی</div>
+            <div class="why-jarian-bar"></div>
+            <p>با سطح‌بندی دقیق نقش‌ها، اطلاعات حساس فقط در اختیار افراد مجاز قرار می‌گیرد. مدیران و بینندگان هرکدام دسترسی متناسب با نیاز خود را دارند، بدون افشای داده‌های حساس.</p>
+          </div>
+        </div>
       </div>
 
       <div class="section-label pkg-flow-label" id="pkg-flow">بسته تحلیلی جریان</div>
@@ -2798,7 +2800,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۳.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۳.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -7860,7 +7862,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.13.0';
+  const APP_VERSION = '5.13.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
