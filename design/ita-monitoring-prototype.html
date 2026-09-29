@@ -232,23 +232,24 @@
   .afo-item{ display:flex; flex-direction:column; gap:5px; font-size:12px; max-width:250px; }
   .afo-item b{ color: rgba(255,255,255,0.85); font-weight:700; font-size:10.5px; }
   .afo-item span{ color: rgba(255,255,255,0.62); line-height:1.7; }
-  /* نوار تاریخ/ساعت/مناسبت — زیر کارت‌های آمار هرو صفحه‌ی نخست، هم‌عرض اون‌ها */
-  .datebar{ display:flex; align-items:center; gap:8px 18px; flex-wrap:wrap; max-width:980px; margin:14px auto 0; padding:10px 18px;
-    border:1px solid rgba(255,255,255,0.1); border-radius:14px; background: rgba(255,255,255,0.03); font-size:12.5px; color: rgba(255,255,255,0.6); }
-  .datebar .db-dates{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .datebar .db-dates b{ color: rgba(255,255,255,0.9); font-weight:700; }
-  .datebar .db-sep{ width:1px; height:11px; background: rgba(255,255,255,0.22); }
-  .datebar .db-occ{ flex:1 1 auto; display:inline-flex; align-items:center; justify-content:center; gap:7px; color:#EAB393; font-weight:600; min-width:0; }
-  .datebar .db-occ svg{ width:14px; height:14px; flex-shrink:0; }
-  .datebar .db-occ span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .datebar .db-clock{ margin-inline-start:auto; font-weight:700; font-size:14px; color: rgba(255,255,255,0.9); display:inline-flex; align-items:center; gap:6px; }
+  /* نوار تاریخ/ساعت/مناسبت — زیر کارت‌های آمار هرو صفحه‌ی نخست؛ مدل «ساده و بی‌کادر»
+     (انتخاب کاربر از ۸ مدل، مهر ۱۴۰۵): خط اول تاریخ‌ها + ساعت وسط‌چین، خط دوم مناسبت
+     بین دو خط تزئینی هلویی. روز بی‌مناسبت فقط خط اول */
+  .datebar{ display:flex; flex-direction:column; align-items:center; gap:10px; max-width:980px; margin:18px auto 0; text-align:center; }
+  .datebar .db-top{ display:flex; align-items:center; justify-content:center; gap:6px 16px; flex-wrap:wrap; color: rgba(255,255,255,0.62); font-size:12.5px; }
+  .datebar .db-top b{ color:#fff; font-size:14px; font-weight:700; }
+  .datebar .db-clock{ display:inline-flex; align-items:center; gap:5px; color:#fff; font-weight:700; }
   .datebar .db-clock svg{ width:14px; height:14px; opacity:.6; }
-  @media (max-width:900px){ .datebar{ max-width:620px; } }
+  .datebar .db-occ{ display:flex; align-items:center; gap:10px; width:100%; color:#EAB393; font-weight:700; font-size:14px; }
+  .datebar .db-occ svg{ width:14px; height:14px; flex-shrink:0; }
+  .datebar .db-occ .ln{ flex:1; min-width:24px; height:1px; background: linear-gradient(90deg, transparent, rgba(234,179,147,0.5)); }
+  .datebar .db-occ .ln:last-child{ background: linear-gradient(90deg, rgba(234,179,147,0.5), transparent); }
+  .datebar .db-occ .t{ max-width:80%; }
   @media (max-width:640px){
-    .datebar{ max-width:460px; font-size:12px; padding:10px 14px; gap:8px 12px; }
+    .datebar{ margin-top:14px; gap:8px; }
+    .datebar .db-top{ font-size:12px; gap:4px 12px; }
     .datebar .db-hide-m{ display:none; }
-    .datebar .db-occ{ order:3; flex-basis:100%; justify-content:flex-start; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); }
-    .datebar .db-occ span{ white-space:normal; }
+    .datebar .db-occ{ font-size:12.5px; gap:8px; }
   }
   .topbar{
     display:flex; align-items:center; justify-content:space-between; gap:16px;
@@ -8238,11 +8239,10 @@
     const hijri = toFaDigits(hj.day) + ' ' + HIJRI_MONTHS[hj.month - 1] + ' ' + toFaDigits(hj.year);
     const greg = now.toLocaleDateString('fa-IR-u-ca-gregory', { day:'numeric', month:'long', year:'numeric', timeZone:'Asia/Tehran' });
     const occ = todayOccasions(now);
-    el.innerHTML = `<div class="db-dates"><b>${escHtml(shamsi)}</b>
-        <span class="db-sep"></span><span>${escHtml(hijri)}</span>
-        <span class="db-sep db-hide-m"></span><span class="db-hide-m">${escHtml(greg)}</span></div>
-      ${occ.length ? `<div class="db-occ" title="${escAttr(occ.join('، '))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg><span>${escHtml(occ.join('، '))}</span></div>` : ''}
-      <div class="db-clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>${clock}</b></div>`;
+    const star = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>';
+    el.innerHTML = `<div class="db-top"><b>${escHtml(shamsi)}</b><span>${escHtml(hijri)}</span><span class="db-hide-m">${escHtml(greg)}</span>
+        <span class="db-clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>${clock}</b></span></div>
+      ${occ.length ? `<div class="db-occ"><span class="ln"></span>${star}<span class="t">${escHtml(occ.join('، '))}</span>${star}<span class="ln"></span></div>` : ''}`;
   }
   renderDatebar();
   setInterval(renderDatebar, 15000);
