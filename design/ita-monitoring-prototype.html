@@ -410,6 +410,54 @@
   .ann-row.live .ann-dot{ background:#3fb97a; box-shadow:0 0 0 3px rgba(63,185,122,0.2); }
   .upl-del.ann-stop{ color: var(--accent); border-color: rgba(234,179,147,0.45); }
   .upl-del.ann-stop:hover{ background: rgba(234,179,147,0.12); }
+  /* «کاربران» */
+  .usr-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+  .usr-add{ padding:8px 16px; }
+  .usr-note{ font-size:12px; color: var(--text-faint); margin:0 0 12px; }
+  .usr-editor{ border:1px solid var(--border); background: var(--surface-2); border-radius:12px; padding:14px; margin-bottom:14px; }
+  .usr-editor-title{ font-size:13px; font-weight:800; color: var(--text); margin-bottom:8px; }
+  .usr-editor-actions{ display:flex; gap:8px; margin-top:4px; }
+  .usr-editor .field input, .usr-editor .field select{ background: var(--surface); }
+  .usr-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .usr-filters{ display:flex; gap:6px; flex-wrap:wrap; }
+  .usr-chip{ font:inherit; font-size:12px; font-weight:700; color: var(--text-dim); background: var(--surface-2); border:1px solid var(--border); border-radius:999px; padding:5px 11px; cursor:pointer; display:inline-flex; gap:6px; align-items:center; }
+  .usr-chip span{ font-size:10.5px; color: var(--text-faint); }
+  .usr-chip.active{ background: var(--navy); color:#fff; border-color: var(--navy); }
+  .usr-chip.active span{ color: rgba(255,255,255,0.7); }
+  .usr-search{ font:inherit; font-size:13px; padding:8px 12px; border-radius:10px; border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); min-width:220px; }
+  .usr-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .usr-table th{ text-align:right; font-size:11.5px; color: var(--text-faint); font-weight:700; padding:8px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .usr-table td{ padding:9px 8px; border-bottom:1px solid var(--border); color: var(--text); white-space:nowrap; }
+  .usr-table tr.inactive td{ opacity:.55; }
+  .usr-table input[type=checkbox]{ width:16px; height:16px; accent-color: var(--navy); cursor:pointer; }
+  .usr-dim{ color: var(--text-faint); font-size:12px; }
+  .usr-empty{ text-align:center; color: var(--text-faint); padding:18px !important; }
+  .usr-lvl{ display:inline-block; font-size:11px; font-weight:800; padding:2px 10px; border-radius:999px; }
+  .usr-lvl.plus{ background: linear-gradient(135deg,#f1c4a8,#d99a76); color:#16202a; }
+  .usr-lvl.pro{ background: rgba(181,101,29,0.14); color:#9a531a; }
+  .usr-lvl.normal{ background: rgba(22,32,42,0.08); color: var(--text); }
+  .usr-lvl.limited{ background: rgba(22,32,42,0.04); color: var(--text-faint); border:1px dashed var(--border-strong); }
+  .usr-lvl.sub{ background:none; color: var(--text-faint); border:1px solid var(--border); }
+  .usr-st{ font-size:11px; font-weight:700; color: var(--text-dim); }
+  .usr-st.on{ color:#2f9e63; } .usr-st.off{ color:#c9483e; } .usr-st.done{ color: var(--accent-strong, #b5651d); }
+  .usr-acts{ display:flex; gap:6px; }
+  .usr-act{ font:inherit; font-size:11.5px; font-weight:700; color: var(--text-dim); background:none; border:1px solid var(--border-strong); border-radius:8px; padding:4px 10px; cursor:pointer; }
+  .usr-act:hover{ background: var(--surface-2); color: var(--text); }
+  .usr-act.del{ color:#c9483e; border-color: rgba(201,72,62,0.35); }
+  .usr-send{ margin-top:18px; border-top:1px solid var(--border); padding-top:16px; }
+  .usr-send-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:8px; }
+  .usr-send-head b{ font-size:13.5px; color: var(--text); }
+  .usr-send-head span{ font-size:12px; color: var(--accent-strong, #b5651d); font-weight:700; }
+  .usr-send-quick{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:10px; font-size:12px; color: var(--text-faint); }
+  .usr-quick{ font:inherit; font-size:11.5px; color: var(--text-dim); background:none; border:1px dashed var(--border-strong); border-radius:999px; padding:3px 10px; cursor:pointer; }
+  .usr-quick:hover{ background: var(--surface-2); }
+  #usr-msg{ width:100%; box-sizing:border-box; font:inherit; font-size:14px; line-height:1.9; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius: var(--radius-control); resize:vertical; }
+  .usr-channels{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+  .usr-ch{ font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; display:inline-flex; gap:6px; align-items:center; }
+  .usr-ch.on{ background: var(--navy); color:#fff; }
+  .usr-ch.off{ background: var(--surface-2); color: var(--text-faint); border:1px solid var(--border); }
+  .usr-send-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  @media (max-width:640px){ .usr-search{ min-width:0; width:100%; } .usr-send-actions .btn{ flex:1 1 45%; } }
   /* «بارگذاری محتوا» */
   .upl-intro{ font-size:14px; font-weight:800; color:#fff; margin:4px 2px 12px; }
   .upl-choices{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; margin-bottom:22px; }
@@ -2737,29 +2785,65 @@
          اطلاع‌رسانی (قبلاً ته «خروجی‌گیری»)، نظرات کاربران (قبلاً گزینه‌ی جدای منو) و جای
          «حساب‌ها و سطوح دسترسی» (به‌زودی — سطح‌بندی کاربران که بعداً ساخته می‌شه) -->
     <section class="section" id="sec-users">
-      <div class="news-page-tabs" id="users-page-tabs">
-        <button class="active" data-users-tab="subs" data-ic="notify" onclick="setUsersTab('subs')">مشترکین اطلاع‌رسانی<span class="upl-count" id="users-count-subs"></span></button>
-        <button data-users-tab="feedback" data-ic="feedback" onclick="setUsersTab('feedback')">نظرات کاربران<span class="upl-count" id="users-count-feedback"></span></button>
-        <button disabled data-ic="users">حساب‌ها و سطوح دسترسی<span class="news-soon">به‌زودی</span></button>
-      </div>
-      <p class="news-tab-subtitle" id="users-tab-subtitle"><span></span></p>
-      <div id="users-pane-subs">
-        <div class="panel">
-          <div class="panel-head"><span class="panel-pill">مشترکین اطلاع‌رسانی بسته جریان</span></div>
-          <p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;line-height:1.7;">شماره‌های زیر از فرم «اطلاع از انتشار» پایین صفحه‌ی نخست ثبت شده‌اند. هر وقت شماره‌ی جدید منتشر شد، لیست را خروجی بگیرید و از سامانه‌ی پیامکی خودتان ارسال کنید؛ بعد از ارسال، دکمه‌ی «علامت‌گذاری» را بزنید تا خروجی بعدی فقط شماره‌های جدید را نشان دهد.</p>
-          <p id="notify-subs-summary" style="font-size:13px;font-weight:600;color:var(--text);margin:0 0 12px;">در حال بارگذاری…</p>
-          <div id="notify-subs-list" class="notify-subs-list"></div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
-            <button class="btn primary" onclick="exportNotifySubscribers()">دانلود لیست شماره‌ها (CSV)</button>
-            <button class="btn" onclick="markNotifySubscribersNotified()">علامت‌گذاری به‌عنوان اطلاع‌رسانی‌شده</button>
+      <!-- قسمت ۱: فهرست همه‌ی کاربران (جدول app_users، migration_037) + مشترکین فرم «اطلاع از
+           انتشار» (notify_subscribers) + ارسال گروهی -->
+      <div class="panel" id="usr-panel">
+        <div class="usr-head">
+          <span class="panel-pill">فهرست کاربران</span>
+          <button type="button" class="btn primary usr-add" onclick="openUserEditor(null)">＋ افزودن کاربر</button>
+        </div>
+        <p class="usr-note">سطح دسترسی فعلاً فقط ثبت و نمایش می‌شود؛ ورود هنوز با رمز مشترک مدیر/بیننده است.</p>
+        <p class="ann-missing" id="usr-missing" style="display:none;">برای ثبت کاربران، فایل <b>db/migration_037_app_users.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود. (مشترکین فرم اطلاع‌رسانی همین حالا هم پایین دیده می‌شوند.)</p>
+        <form class="usr-editor" id="usr-editor" style="display:none;" onsubmit="event.preventDefault(); saveUser();">
+          <div class="usr-editor-title" id="usr-editor-title">افزودن کاربر</div>
+          <div class="form-grid">
+            <div class="field"><label for="usr-name">نام و نام خانوادگی</label><input type="text" id="usr-name" maxlength="120" required /></div>
+            <div class="field"><label for="usr-title">سمت / توضیح کوتاه</label><input type="text" id="usr-title" maxlength="120" placeholder="مثلاً: مدیر مدرسه‌ی …" /></div>
+            <div class="field"><label for="usr-phone">شماره‌ی موبایل</label><input type="tel" id="usr-phone" class="mono" dir="ltr" maxlength="11" placeholder="09xxxxxxxxx" /></div>
+            <div class="field"><label for="usr-eitaa">شناسه‌ی ایتا</label><input type="text" id="usr-eitaa" dir="ltr" maxlength="64" placeholder="@username" /></div>
+            <div class="field">
+              <label for="usr-level">سطح دسترسی</label>
+              <select id="usr-level">
+                <option value="plus">پلاس</option>
+                <option value="pro">پرو</option>
+                <option value="normal" selected>عادی</option>
+                <option value="limited">محدود</option>
+              </select>
+            </div>
+            <div class="field"><label for="usr-active">وضعیت</label><select id="usr-active"><option value="1">فعال</option><option value="0">غیرفعال</option></select></div>
+          </div>
+          <div class="field"><label for="usr-notes">یادداشت (اختیاری)</label><input type="text" id="usr-notes" maxlength="500" /></div>
+          <div class="usr-editor-actions"><button type="submit" class="btn primary" id="usr-save">ذخیره</button><button type="button" class="btn" onclick="closeUserEditor()">انصراف</button></div>
+        </form>
+        <div class="usr-toolbar">
+          <div class="usr-filters" id="usr-filters"></div>
+          <input type="search" class="usr-search" id="usr-search" placeholder="جست‌وجوی نام، شماره یا سمت…" />
+        </div>
+        <div class="sys-login-wrap"><table class="usr-table" id="usr-table"></table></div>
+
+        <div class="usr-send" id="usr-send">
+          <div class="usr-send-head"><b>اطلاع‌رسانی گروهی</b><span id="usr-sel-count">۰ نفر انتخاب شده</span></div>
+          <div class="usr-send-quick" id="usr-send-quick"></div>
+          <textarea id="usr-msg" rows="3" maxlength="600" placeholder="متن پیام…"></textarea>
+          <div class="usr-channels">
+            <span class="usr-ch on">آماده‌سازی دستی</span>
+            <span class="usr-ch off" title="بعد از تهیه‌ی حساب سامانه‌ی پیامکی">ارسال پیامک<span class="news-soon">به‌زودی</span></span>
+            <span class="usr-ch off" title="بعد از تصمیم درباره‌ی کانال ایتا">ارسال در ایتا<span class="news-soon">به‌زودی</span></span>
+          </div>
+          <div class="usr-send-actions">
+            <button type="button" class="btn primary" onclick="usrCopy('msg')">کپی متن پیام</button>
+            <button type="button" class="btn" onclick="usrCopy('phones')">کپی شماره‌ها</button>
+            <button type="button" class="btn" onclick="usrCopy('eitaa')">کپی شناسه‌های ایتا</button>
+            <button type="button" class="btn" onclick="usrExportSelected()">دانلود فهرست (CSV)</button>
+            <button type="button" class="btn" id="usr-mark-subs" onclick="markNotifySubscribersNotified()">علامت «اطلاع‌رسانی‌شده» برای مشترکین فرم</button>
           </div>
         </div>
       </div>
-      <div id="users-pane-feedback" style="display:none;">
-        <div class="panel">
-          <div class="panel-head"><span class="panel-pill">نظرات و پیشنهادهای ثبت‌شده</span></div>
-          <div id="feedback-list"></div>
-        </div>
+
+      <!-- قسمت ۲: نظرات کاربران -->
+      <div class="panel" id="usr-feedback-panel">
+        <div class="panel-head"><span class="panel-pill">نظرات کاربران <span class="upl-count" id="users-count-feedback"></span></span></div>
+        <div id="feedback-list"></div>
       </div>
     </section>
 
@@ -3203,7 +3287,7 @@
   };
 
   function switchSection(key){
-    if(key === 'feedback'){ USERS_TAB = 'feedback'; key = 'users'; } // بخش قدیمی، حالا تب «کاربران»
+    if(key === 'feedback'){ key = 'users'; setTimeout(()=>document.getElementById('usr-feedback-panel').scrollIntoView({ block:'start' }), 400); } // بخش قدیمی، حالا قسمت دوم «کاربران»
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     document.getElementById('sec-'+key).classList.add('active');
     document.getElementById('sec-title').textContent = TITLES[key];
@@ -3222,7 +3306,7 @@
     if(key === 'overview'){ setNewsPageTab(NEWS_CURRENT_TAB); renderNewsFeed(); renderNewsAnalytics(); }
     if(key === 'hawza') setHawzaTab('news');
     if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
-    if(key === 'users') setUsersTab(USERS_TAB);
+    if(key === 'users') renderUsersSection();
     if(key === 'status'){ renderSystemStatus(); ackAdminAlerts(); }
     if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
     if(key === 'announce') renderAnnAdmin();
@@ -5213,31 +5297,167 @@
   document.getElementById('ann-msg').addEventListener('input', updateAnnPreview);
   document.getElementById('ann-level').addEventListener('change', updateAnnPreview);
 
-  // ---- «کاربران» ----
-  let USERS_TAB = 'subs';
-  const USERS_TAB_INFO = {
-    subs: 'شماره‌هایی که برای خبر انتشار «بسته تحلیلی جریان» ثبت شده‌اند.',
-    feedback: 'نظرها و پیشنهادهای کاربران از فرم «ثبت نظر» صفحه‌ی نخست.',
-  };
-  // از منو: اگه نظر خونده‌نشده هست، مستقیم تب نظرات
+  // ---- «کاربران» (دفترچه‌ی کاربران migration_037 + مشترکین فرم + ارسال گروهی + نظرات) ----
+  // سطح دسترسی فعلاً فقط ثبت/نمایش؛ ارسال گروهی فعلاً «آماده‌سازی دستی» (کپی/CSV) — پیامک
+  // و ایتا بعد از تهیه‌ی حساب/تصمیم کاربر اضافه می‌شن.
+  const USER_LEVELS = { plus:'پلاس', pro:'پرو', normal:'عادی', limited:'محدود' };
+  let APP_USERS = [];
+  let APP_USERS_MISSING = false;
+  let USR_FILTER = 'all';
+  const USR_SELECTED = new Set();
+  let USR_EDIT_ID = null;
+  async function loadAppUsers(){
+    try{
+      const r = await api('/app_users?select=*&order=created_at.desc');
+      APP_USERS_MISSING = r.status === 404 || r.status === 400;
+      APP_USERS = r.ok ? await r.json() : [];
+    }catch(e){ APP_USERS = []; }
+  }
+  // هر ردیف فهرست: کاربر ثبت‌شده، یا مشترک فرم که شماره‌ش هنوز در کاربران نیست
+  function usrRows(){
+    const phones = new Set(APP_USERS.map(u=>u.phone).filter(Boolean));
+    const users = APP_USERS.map(u=>({ key:'u:'+u.id, kind:'user', u, name:u.full_name, phone:u.phone||'', eitaa:u.eitaa_id||'', title:u.title||'', level:u.access_level, active:u.active }));
+    const subs = (NOTIFY_SUBSCRIBERS||[]).filter(x=>!phones.has(x.phone)).map(x=>({ key:'s:'+x.id, kind:'sub', s:x, name:'', phone:x.phone, eitaa:'', title:'', level:'sub', active:true }));
+    return [...users, ...subs];
+  }
+  function usrVisible(){
+    const q = (document.getElementById('usr-search').value || '').trim();
+    const qn = faDigitsToEn(q);
+    return usrRows().filter(r => (USR_FILTER === 'all' || r.level === USR_FILTER) &&
+      (!q || r.name.includes(q) || r.title.includes(q) || r.phone.includes(qn) || r.eitaa.includes(q)));
+  }
   function openUsersSection(){
-    if(document.getElementById('am-feedback-badge').classList.contains('show')) USERS_TAB = 'feedback';
     switchSection('users');
+    if(document.getElementById('am-feedback-badge').classList.contains('show'))
+      setTimeout(()=>document.getElementById('usr-feedback-panel').scrollIntoView({ behavior:'smooth', block:'start' }), 400);
   }
-  function setUsersTab(tab){
-    USERS_TAB = tab;
-    document.querySelectorAll('#users-page-tabs button[data-users-tab]').forEach(b=>b.classList.toggle('active', b.dataset.usersTab === tab));
-    document.getElementById('users-pane-subs').style.display = tab === 'subs' ? '' : 'none';
-    document.getElementById('users-pane-feedback').style.display = tab === 'feedback' ? '' : 'none';
-    document.querySelector('#users-tab-subtitle span').textContent = USERS_TAB_INFO[tab];
-    if(tab === 'subs') loadNotifySubscribers().then(()=>{ renderNotifySubscribers(); updateUsersCounts(); });
-    if(tab === 'feedback') loadFeedbackList().then(()=>{ renderFeedbackList(); markFeedbackSeen(); updateUsersCounts(); });
+  async function renderUsersSection(){
+    await Promise.all([loadAppUsers(), loadNotifySubscribers(), loadFeedbackList()]);
+    document.getElementById('usr-missing').style.display = APP_USERS_MISSING ? '' : 'none';
+    document.querySelector('#usr-panel .usr-add').style.display = APP_USERS_MISSING ? 'none' : '';
+    renderUsersTable();
+    renderFeedbackList(); markFeedbackSeen();
+    document.getElementById('users-count-feedback').textContent = FEEDBACK_LIST.length ? toFaDigits(FEEDBACK_LIST.length) : '';
   }
-  function updateUsersCounts(){
-    const pending = (NOTIFY_SUBSCRIBERS || []).filter(x=>!x.notified_at).length;
-    document.getElementById('users-count-subs').textContent = pending ? toFaDigits(pending) : '';
-    document.getElementById('users-count-feedback').textContent = (FEEDBACK_LIST || []).length ? toFaDigits(FEEDBACK_LIST.length) : '';
+  function renderUsersTable(){
+    const all = usrRows();
+    const counts = { all: all.length };
+    all.forEach(r=>{ counts[r.level] = (counts[r.level]||0) + 1; });
+    const chips = [['all','همه'], ...Object.entries(USER_LEVELS), ['sub','مشترک فرم']];
+    document.getElementById('usr-filters').innerHTML = chips.map(([k,l])=>`<button type="button" class="usr-chip ${USR_FILTER===k?'active':''}" data-f="${k}">${l}<span>${toFaDigits(counts[k]||0)}</span></button>`).join('');
+    document.getElementById('usr-send-quick').innerHTML = '<span>انتخاب سریع:</span>' + chips.map(([k,l])=>`<button type="button" class="usr-quick" data-q="${k}">${k==='all'?'همه‌ی فعال‌ها':l}</button>`).join('') + '<button type="button" class="usr-quick" data-q="none">هیچ‌کس</button>';
+    const rows = usrVisible();
+    const t = document.getElementById('usr-table');
+    const allSel = rows.length && rows.every(r=>USR_SELECTED.has(r.key));
+    t.innerHTML = `<thead><tr><th><input type="checkbox" id="usr-sel-all" ${allSel?'checked':''} aria-label="انتخاب همه"></th><th>نام</th><th>موبایل</th><th>ایتا</th><th>سمت</th><th>سطح دسترسی</th><th>وضعیت</th><th></th></tr></thead><tbody>` +
+      (rows.length ? rows.map(r=>{
+        const lvl = r.kind==='sub' ? '<span class="usr-lvl sub">مشترک فرم</span>' : `<span class="usr-lvl ${r.level}">${USER_LEVELS[r.level]||r.level}</span>`;
+        const st = r.kind==='sub' ? (r.s.notified_at ? '<span class="usr-st done">اطلاع‌رسانی‌شده</span>' : '<span class="usr-st">در انتظار</span>') : (r.active ? '<span class="usr-st on">فعال</span>' : '<span class="usr-st off">غیرفعال</span>');
+        const act = r.kind==='sub'
+          ? (APP_USERS_MISSING ? '' : `<button type="button" class="usr-act" data-promote="${r.s.id}">افزودن به کاربران</button>`)
+          : `<button type="button" class="usr-act" data-edit="${r.u.id}">ویرایش</button><button type="button" class="usr-act del" data-del="${r.u.id}">حذف</button>`;
+        return `<tr class="${r.kind==='user' && !r.active ? 'inactive' : ''}"><td><input type="checkbox" data-sel="${r.key}" ${USR_SELECTED.has(r.key)?'checked':''}></td>
+          <td>${r.kind==='sub' ? '<span class="usr-dim">— (از فرم اطلاع‌رسانی)</span>' : `<b>${escHtml(r.name)}</b>`}</td>
+          <td class="mono" dir="ltr">${escHtml(r.phone)||'—'}</td><td dir="ltr">${escHtml(r.eitaa)||'—'}</td>
+          <td>${escHtml(r.title)||'—'}</td><td>${lvl}</td><td>${st}</td><td class="usr-acts">${act}</td></tr>`;
+      }).join('') : '<tr><td colspan="8" class="usr-empty">موردی نیست.</td></tr>') + '</tbody>';
+    updateUsrSelCount();
   }
+  function updateUsrSelCount(){
+    const valid = new Set(usrRows().map(r=>r.key));
+    [...USR_SELECTED].forEach(k=>{ if(!valid.has(k)) USR_SELECTED.delete(k); });
+    document.getElementById('usr-sel-count').textContent = toFaDigits(USR_SELECTED.size) + ' نفر انتخاب شده';
+    const pendingSubs = (NOTIFY_SUBSCRIBERS||[]).some(x=>!x.notified_at);
+    document.getElementById('usr-mark-subs').style.display = pendingSubs ? '' : 'none';
+  }
+  function usrSelectedRows(){ return usrRows().filter(r=>USR_SELECTED.has(r.key)); }
+  async function usrCopy(what){
+    let text = '';
+    if(what === 'msg'){ text = document.getElementById('usr-msg').value.trim(); if(!text){ showToast('متن پیام را بنویسید'); return; } }
+    else{
+      const sel = usrSelectedRows();
+      if(!sel.length){ showToast('کسی انتخاب نشده'); return; }
+      const vals = sel.map(r => what === 'phones' ? r.phone : r.eitaa).filter(Boolean);
+      if(!vals.length){ showToast(what === 'phones' ? 'هیچ‌کدام شماره ندارند' : 'هیچ‌کدام شناسه‌ی ایتا ندارند'); return; }
+      text = [...new Set(vals)].join('\n');
+    }
+    try{ await navigator.clipboard.writeText(text); showToast('کپی شد'); }
+    catch(e){ prompt('کپی کنید:', text); }
+  }
+  function usrExportSelected(){
+    const sel = usrSelectedRows();
+    if(!sel.length){ showToast('کسی انتخاب نشده'); return; }
+    const rows = sel.map(r=>({ name:r.name, phone:r.phone, eitaa:r.eitaa, title:r.title, level: r.kind==='sub' ? 'مشترک فرم' : (USER_LEVELS[r.level]||r.level) }));
+    downloadBlob('jarian-users.csv', toCSV(rows, ['name','phone','eitaa','title','level']), 'text/csv');
+  }
+  function openUserEditor(u){
+    USR_EDIT_ID = u ? u.id : null;
+    document.getElementById('usr-editor-title').textContent = u ? 'ویرایش کاربر' : 'افزودن کاربر';
+    document.getElementById('usr-name').value = u ? u.full_name : '';
+    document.getElementById('usr-title').value = u ? (u.title||'') : '';
+    document.getElementById('usr-phone').value = u ? (u.phone||'') : '';
+    document.getElementById('usr-eitaa').value = u ? (u.eitaa_id||'') : '';
+    document.getElementById('usr-level').value = u ? u.access_level : 'normal';
+    document.getElementById('usr-active').value = !u || u.active ? '1' : '0';
+    document.getElementById('usr-notes').value = u ? (u.notes||'') : '';
+    const ed = document.getElementById('usr-editor'); ed.style.display = '';
+    ed.scrollIntoView({ behavior:'smooth', block:'center' });
+    document.getElementById('usr-name').focus({ preventScroll:true });
+  }
+  function closeUserEditor(){ document.getElementById('usr-editor').style.display = 'none'; USR_EDIT_ID = null; }
+  async function saveUser(){
+    const phone = faDigitsToEn(document.getElementById('usr-phone').value.trim());
+    if(phone && !/^09\d{9}$/.test(phone)){ showToast('شماره‌ی موبایل باید ۱۱ رقم و با ۰۹ شروع شود'); return; }
+    const body = {
+      full_name: document.getElementById('usr-name').value.trim(),
+      title: document.getElementById('usr-title').value.trim() || null,
+      phone: phone || null,
+      eitaa_id: document.getElementById('usr-eitaa').value.trim().replace(/^@?/, '@').replace(/^@$/, '') || null,
+      access_level: document.getElementById('usr-level').value,
+      active: document.getElementById('usr-active').value === '1',
+      notes: document.getElementById('usr-notes').value.trim() || null,
+    };
+    if(!body.full_name){ showToast('نام را وارد کنید'); return; }
+    const btn = document.getElementById('usr-save'); btn.disabled = true;
+    try{
+      const r = USR_EDIT_ID
+        ? await api('/app_users?id=eq.' + USR_EDIT_ID, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify(body) })
+        : await api('/app_users', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify(body) });
+      if(r.status === 409){ showToast('این شماره قبلاً برای کاربر دیگری ثبت شده'); return; }
+      if(!r.ok) throw new Error('app_users ' + r.status);
+      closeUserEditor(); await loadAppUsers(); renderUsersTable(); showToast('ذخیره شد');
+    }catch(e){ console.error(e); showToast('ذخیره ناموفق بود'); }
+    finally{ btn.disabled = false; }
+  }
+  async function deleteAppUser(id){
+    const u = APP_USERS.find(x=>x.id === id);
+    if(!u || !confirm('«' + u.full_name + '» از فهرست کاربران حذف شود؟')) return;
+    const r = await api('/app_users?id=eq.' + id, { method:'DELETE' });
+    if(!r.ok){ showToast('حذف ناموفق بود'); return; }
+    await loadAppUsers(); renderUsersTable(); showToast('حذف شد');
+  }
+  document.getElementById('sec-users').addEventListener('click', e=>{
+    const t = e.target.closest('button, input[type=checkbox]');
+    if(!t) return;
+    if(t.dataset.f){ USR_FILTER = t.dataset.f; renderUsersTable(); return; }
+    if(t.dataset.q){
+      const rows = usrRows();
+      if(t.dataset.q === 'none') USR_SELECTED.clear();
+      else rows.filter(r => (t.dataset.q === 'all' || r.level === t.dataset.q) && r.active).forEach(r=>USR_SELECTED.add(r.key));
+      renderUsersTable(); return;
+    }
+    if(t.dataset.sel){ t.checked ? USR_SELECTED.add(t.dataset.sel) : USR_SELECTED.delete(t.dataset.sel); updateUsrSelCount(); return; }
+    if(t.id === 'usr-sel-all'){ usrVisible().forEach(r => t.checked ? USR_SELECTED.add(r.key) : USR_SELECTED.delete(r.key)); renderUsersTable(); return; }
+    if(t.dataset.edit){ openUserEditor(APP_USERS.find(x=>x.id === Number(t.dataset.edit))); return; }
+    if(t.dataset.del){ deleteAppUser(Number(t.dataset.del)); return; }
+    if(t.dataset.promote){
+      const sub = NOTIFY_SUBSCRIBERS.find(x=>x.id === Number(t.dataset.promote));
+      openUserEditor(null);
+      document.getElementById('usr-phone').value = sub ? sub.phone : '';
+      document.getElementById('usr-level').value = 'limited';
+    }
+  });
+  document.getElementById('usr-search').addEventListener('input', renderUsersTable);
 
   // ---- «بارگذاری محتوا» ----
   let UPLOADS_TAB = 'magazines';
@@ -7691,7 +7911,7 @@
       if(!r.ok) throw new Error('update failed');
       await loadNotifySubscribers();
       renderNotifySubscribers();
-      updateUsersCounts();
+      renderUsersTable();
       showToast('علامت‌گذاری انجام شد');
     }catch(e){
       showToast('علامت‌گذاری ناموفق بود');
