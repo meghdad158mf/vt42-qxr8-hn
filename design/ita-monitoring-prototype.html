@@ -221,43 +221,6 @@
   /* بسته تحلیلی جریان — کارت واحد که کاروسل «مجلات جریان» قبلی و توضیح ۱۰بخشی
      قبلی (که جدا و زیر هم بودن) رو با هم ترکیب می‌کنه، زیر یه عنوان یکتا،
      تا با تب جدید «دیدن سایر بسته‌های تحلیلی» (که زیر همین کارت میاد) اشتباه نشه */
-  .package-card{
-    margin: 200px 0 40px; padding:18px 24px; border-radius: var(--radius-card); scroll-margin-top: 90px;
-    background: linear-gradient(155deg, #fffaf5, #fbe9d7);
-    border:1px solid rgba(181,101,29,0.3);
-    box-shadow: 0 22px 46px -20px rgba(10,15,22,0.45), 0 1px 0 rgba(255,255,255,0.7) inset;
-    animation: rise .55s .1s ease both;
-  }
-  .package-top{ display:grid; grid-template-columns: 1fr 1fr; gap:28px; align-items:center; }
-  @media (max-width:860px){ .package-top{ grid-template-columns:1fr; gap:18px; } }
-  .package-art{ position:relative; display:flex; align-items:center; justify-content:center; }
-  .package-art img{ width:100%; max-width:260px; height:auto; }
-  .package-title{ font-size: clamp(18px,2.2vw,23px); font-weight:800; color: var(--text); line-height:1.5; margin:0 0 8px; }
-  .package-title .hl{ color: var(--accent-strong); }
-  .package-sub{ font-size:13px; color: var(--text-dim); line-height:1.8; max-width:460px; margin:0 0 16px; }
-  .package-list{ display:grid; grid-template-columns: repeat(5,1fr); gap:0; }
-  @media (max-width:560px){ .package-list{ grid-template-columns: repeat(2,1fr); } }
-  .package-item{
-    display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;
-    padding:8px 8px;
-    border-inline-end:1px solid rgba(181,101,29,0.18);
-    border-block-end:1px solid rgba(181,101,29,0.18);
-  }
-  .package-item:nth-child(5n){ border-inline-end:none; }
-  .package-item:nth-child(n+6){ border-block-end:none; }
-  @media (max-width:560px){
-    .package-item:nth-child(5n){ border-inline-end:1px solid rgba(181,101,29,0.18); }
-    .package-item:nth-child(2n){ border-inline-end:none; }
-    .package-item:nth-child(n+6){ border-block-end:1px solid rgba(181,101,29,0.18); }
-    .package-item:nth-child(n+9){ border-block-end:none; }
-  }
-  .package-item-icon{ width:26px; height:26px; border-radius:8px; background: rgba(181,101,29,0.12); color: var(--accent-strong); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .package-item-icon svg{ width:12px; height:12px; }
-  .package-item-body h4{ font-size:10px; font-weight:700; color: var(--text); margin:0; line-height:1.35; }
-  .package-divider{ height:1px; background: rgba(181,101,29,0.22); margin:14px 0 12px; }
-  .package-carousel-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
-  .package-carousel-title{ font-size:13.5px; font-weight:700; color: var(--text); }
-  .package-carousel-head .btn.primary{ padding:8px 16px; font-size:12px; }
 
   .app-footer{ margin-top:56px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.14); }
   .app-footer-top{ display:flex; justify-content:space-between; gap:32px; flex-wrap:wrap; }
@@ -619,7 +582,7 @@
   @media (max-width:520px){ .qn-btn{ padding:9px 11px; font-size:12px; gap:5px; } .qn-btn svg.qn-down{ display:none; } }
 
   /* «چرا جریان» — سه ستون معرفی مزیت اصلی، این‌بار داخل یه کادر یکپارچه‌ی
-     تمام‌عرض با زمینه‌ی رنگی (عیناً همون ته‌رنگ هلویی .package-card)، نه
+     تمام‌عرض با زمینه‌ی رنگی (ته‌رنگ هلویی)، نه
      مستقیم روی بوم تیره — طبق خواسته‌ی صریح کاربر. بین دو کارت راهنمای
      سریع و گرید ۴تایی عرصه‌های رصد. */
   .why-jarian-card{
@@ -755,7 +718,7 @@
 
   /* «افراد و مجموعه‌ها» (کنشگری مجازی) — گالری معرفی کنشگر به‌شکل جدول/لیست
      فشرده (نه کارت‌های گرید)؛ سربرگ و ردیف‌ها با ته‌رنگ گرادیانی هلویی
-     .package-card تا نسبت به یه جدول خشک/اداری جذاب‌تر دیده بشه. ستون‌ها
+     (ته‌رنگ هلویی) تا نسبت به یه جدول خشک/اداری جذاب‌تر دیده بشه. ستون‌ها
      با flex-wrap (نه grid ثابت) پیاده شدن تا زیر ۷۰۰px بدون اسکرول افقی
      زیر هم بشکنن — سربرگ روی موبایل مخفی می‌شه چون دیگه با ستون‌ها هم‌تراز نیست. */
   .cyber-people-table{
@@ -1585,21 +1548,35 @@
   .archive-report-card .mag-reorder button:hover{ color:#fff; border-color: var(--accent); }
   .archive-report-card .del-btn{ color: rgba(255,255,255,0.5); }
 
-  /* کاروسل جلد مجلات — الان داخل کارت واحد .package-card (پایین‌تر) استفاده
-     می‌شه، نه یه ویجت جدای خودش */
-  .mag-carousel-wrap{ position:relative; display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
-  .mag-carousel{ display:flex; gap:14px; overflow-x:auto; scroll-behavior:smooth; padding:4px 2px 6px; scrollbar-width:none; flex:1; min-width:0; }
-  .mag-carousel::-webkit-scrollbar{ display:none; }
-  .mag-arrow{ flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid rgba(181,101,29,0.3); background:#fff; color: var(--accent-strong); cursor:pointer; display:flex; align-items:center; justify-content:center; transition: background .15s ease, transform .15s ease, border-color .15s ease, color .15s ease; }
-  .mag-arrow:hover{ background: var(--accent-strong); color:#fff; border-color: var(--accent-strong); transform:scale(1.08); }
-  .mag-arrow:active{ transform:scale(.94); }
-  .mag-arrow svg{ width:16px; height:16px; }
-  .mag-tile{ flex-shrink:0; width:150px; cursor:pointer; display:flex; flex-direction:column; gap:9px; }
-  .mag-tile-cover{ width:150px; height:210px; border-radius: var(--radius-control); overflow:hidden; background: var(--surface); border:1px solid var(--border); box-shadow: var(--shadow); display:flex; align-items:center; justify-content:center; color: var(--text-faint); transition: transform .2s ease, box-shadow .2s ease; }
-  .mag-tile:hover .mag-tile-cover{ transform:translateY(-5px) scale(1.02); box-shadow: var(--shadow-hover); }
-  .mag-tile-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .mag-tile-cover svg{ width:32%; height:32%; opacity:.5; }
-  .mag-tile-title{ font-size:12px; font-weight:600; color: var(--text); text-align:center; line-height:1.5; }
+  /* «بسته تحلیلی جریان» صفحه‌ی نخست (مهر ۱۴۰۵، به‌جای کارت هلویی + کاروسل): جلد ۵ شماره‌ی
+     اول (ترتیب مدیر) بدون قاب، روی قوسی که قرینه‌ی «مدار» عرصه‌هاست (رو به پایین)، با همون
+     «شهاب جریان». مختصات مثل .dom-orbit: کاشی ۱۷۰ + فاصله‌ی ۱۶ = ۱۸۶px بین مراکز؛ مرکز جلد
+     (۱۷۸/۲=۸۹px از بالای ردیف) = y=۷۴ در viewBox → top:-85px. قوس قرینه‌ی حول y=۷۴؛ طول مسیر
+     همون ≈۱۱۳۹ پس مقادیر dash شهاب همون‌هاست. زیر ۹۰۰px مخفی. */
+  .pkg-flow{ position:relative; }
+  .pkg-orbit{ position:absolute; left:50%; top:-85px; width:1200px; max-width:none; height:360px; margin-left:-600px; z-index:-1; pointer-events:none; overflow:visible;
+    -webkit-mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px));
+            mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px)); }
+  @media (max-width:900px){ .pkg-orbit{ display:none; } }
+  @media (prefers-reduced-motion: reduce){ .pkg-orbit .flow{ display:none; } }
+  .pkg-covers{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; }
+  .pkg-tile{ width:170px; display:flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; }
+  /* گوشی: یک ردیف افقی اسکرول‌خور با جلدهای کوچک‌تر (۵ جلد دوستونه خیلی بلند می‌شد) */
+  @media (max-width:900px){ .pkg-covers{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:6px 4px 10px; } .pkg-covers::-webkit-scrollbar{ display:none; } .pkg-tile{ width:128px; flex-shrink:0; scroll-snap-align:start; } .pkg-cover{ width:112px; height:156px; } }
+  @media (min-width:640px) and (max-width:900px){ .pkg-covers{ justify-content:center; } }
+  .pkg-cover{ width:128px; height:178px; border-radius:6px; overflow:hidden; background:#243140; border:1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 22px 34px -16px rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; color: rgba(255,255,255,0.4);
+    transition: transform .25s ease, box-shadow .25s ease; }
+  .pkg-tile:hover .pkg-cover{ transform: translateY(-6px); box-shadow: 0 28px 40px -16px rgba(0,0,0,0.8), 0 0 26px -6px rgba(234,179,147,0.45); }
+  .pkg-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pkg-cover svg{ width:34%; height:34%; }
+  .pkg-title{ font-size:13px; font-weight:700; color:#fff; text-align:center; line-height:1.6; max-width:160px; }
+  .pkg-empty{ font-size:13px; color: rgba(255,255,255,0.55); padding:40px 0; }
+  .pkg-caption{ margin-top:34px; }
+  .pkg-more{ display:flex; justify-content:center; margin:-8px 0 0; }
+  .pkg-more-btn{ display:inline-flex; align-items:center; gap:6px; font:700 12.5px 'IRANSansX',Tahoma,sans-serif; color:#EAB393; background:none; border:1px solid rgba(234,179,147,0.45); border-radius:999px; padding:8px 16px; cursor:pointer; transition: background .2s ease, color .2s ease; }
+  .pkg-more-btn:hover{ background:#EAB393; color:#16202a; }
+  .pkg-more-btn svg{ width:14px; height:14px; }
 
   /* کارت همیشه‌نمایان «ثبت نظر و پیشنهاد» — ته صفحه‌ی نخست، قبل از فوتر.
      طبق خواسته‌ی صریح کاربر، مثل .notify-card کناریش قاب/زمینه‌ی روشن
@@ -1641,7 +1618,6 @@
     /* فاصله‌های خیلی بزرگ دسکتاپ بین بلوک‌های صفحه‌ی نخست روی گوشی فضای خالی زیادی می‌ساخت */
     .why-jarian-card{ margin-top:80px; }
     .section-label{ margin-top:80px; }
-    .package-card{ margin-top:90px; }
     .home-bottom-row{ margin-top:90px; }
   }
   @media (max-width:560px){
@@ -1693,7 +1669,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۲.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۳.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2017,75 +1993,27 @@
         <span class="domain-shortcut-disabled">آنالیز کنشگری<span class="news-soon">به‌زودی</span></span>
       </div>
 
-      <div class="package-card">
-        <div class="package-top">
-          <div class="package-art">
-            <img src="images/analysis-illustration.webp" alt="" />
-          </div>
-          <div class="package-content">
-            <h3 class="package-title">بسته تحلیلی <span class="hl">جریان</span></h3>
-            <p class="package-sub">بسته تحلیلی جریان، خلاصه‌ای تحلیلی، دقیق و چندلایه از تحولات سیاسی‌اجتماعی است که سعی دارد نگاهی جامع را در اختیار مخاطب قرار دهد. این بسته شامل ۱۰ بخش است.</p>
-            <div class="package-list">
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4a16 16 0 0116 16M4 11a9 9 0 019 9"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg></div>
-                <div class="package-item-body"><h4>خط خبری</h4></div>
-              </div>
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/></svg></div>
-                <div class="package-item-body"><h4>تحلیل اخبار روز</h4></div>
-              </div>
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l2.6 5.6 6.2.6-4.6 4.2 1.3 6.1L12 16.8 6.5 19.5l1.3-6.1L3.2 9.2l6.2-.6L12 3z"/></svg></div>
-                <div class="package-item-body"><h4>مهم‌ترین اخبار</h4></div>
-              </div>
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
-                <div class="package-item-body"><h4>نگاه جامعه‌شناسی سیاسی</h4></div>
-              </div>
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg></div>
-                <div class="package-item-body"><h4>اصل ماجرا</h4></div>
-              </div>
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/></svg></div>
-                <div class="package-item-body"><h4>تحلیل سازمان‌ها</h4></div>
-              </div>
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19.5V4.5A1.5 1.5 0 015.5 3H16l4 4v12.5a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19.5z"/><path d="M16 3v4h4M8 12h8M8 16h5"/></svg></div>
-                <div class="package-item-body"><h4>یادداشت طلاب</h4></div>
-              </div>
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M6.7 6.7C4.6 8.1 3 12 3 12s2.4 4.2 6.3 5.9M14 5.1c5.4.7 7 6.9 7 6.9a12.9 12.9 0 01-2.2 3"/></svg></div>
-                <div class="package-item-body"><h4>خارج از دید</h4></div>
-              </div>
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></div>
-                <div class="package-item-body"><h4>نبض افکار</h4></div>
-              </div>
-              <div class="package-item">
-                <div class="package-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg></div>
-                <div class="package-item-body"><h4>تحلیل اندیشگده‌ها</h4></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="package-divider"></div>
-
-        <div class="package-carousel-head">
-          <span class="package-carousel-title">آخرین شماره‌های منتشرشده</span>
-          <button class="btn primary" onclick="switchSection('reports')">مشاهده‌ی همه</button>
-        </div>
-        <div class="mag-carousel-wrap">
-          <button class="mag-arrow" onclick="scrollMagCarousel(-1)" aria-label="بعدی">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
-          </button>
-          <div class="mag-carousel" id="mag-carousel-home"></div>
-          <button class="mag-arrow" onclick="scrollMagCarousel(1)" aria-label="قبلی">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg>
-          </button>
-        </div>
+      <div class="section-label pkg-flow-label" id="pkg-flow">بسته تحلیلی جریان</div>
+      <div class="pkg-flow">
+        <svg class="pkg-orbit" viewBox="-600 -100 1200 360" aria-hidden="true">
+          <defs>
+            <path id="pkg-orbit-path" d="M -562 24 Q 0 184, 562 24"/>
+            <path id="pkg-orbit-path2" d="M -512 2 Q 0 122, 512 2"/>
+          </defs>
+          <use href="#pkg-orbit-path" fill="none" stroke="#EAB393" stroke-opacity=".32" stroke-width="1.3"/>
+          <use href="#pkg-orbit-path2" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="1"/>
+          <g class="flow" fill="none" stroke="#EAB393" stroke-linecap="round">
+              <use href="#pkg-orbit-path" stroke-width="3" stroke-opacity="1" stroke-dasharray="18 2278"><animate attributeName="stroke-dashoffset" values="-1159;130;130" keyTimes="0;.65;1" dur="9s" repeatCount="indefinite"/></use>
+              <use href="#pkg-orbit-path" stroke-width="2" stroke-opacity="0.45" stroke-dasharray="55 2278"><animate attributeName="stroke-dashoffset" values="-1159;130;130" keyTimes="0;.65;1" dur="9s" repeatCount="indefinite"/></use>
+              <use href="#pkg-orbit-path" stroke-width="1.4" stroke-opacity="0.18" stroke-dasharray="110 2278"><animate attributeName="stroke-dashoffset" values="-1159;130;130" keyTimes="0;.65;1" dur="9s" repeatCount="indefinite"/></use>
+          </g>
+          <circle cx="-562" cy="24" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="-562" cy="24" r="2.2" fill="#EAB393" fill-opacity=".5"/>
+          <circle cx="562" cy="24" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="562" cy="24" r="2.2" fill="#EAB393" fill-opacity=".5"/>
+        </svg>
+        <div class="pkg-covers" id="pkg-covers"></div>
       </div>
+      <p class="domain-caption pkg-caption">بسته تحلیلی جریان، خلاصه‌ای تحلیلی، دقیق و چندلایه از تحولات سیاسی‌اجتماعی است که سعی دارد نگاهی جامع را در اختیار مخاطب قرار دهد.</p>
+      <div class="pkg-more"><button type="button" class="pkg-more-btn" onclick="switchSection('reports')">مشاهده‌ی همه‌ی شماره‌ها<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button></div>
 
       <div class="home-bottom-row">
         <div class="notify-card">
@@ -2851,7 +2779,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۲.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۳.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -7222,28 +7150,23 @@
     renderMagazineCarousel();
   }
 
-  // ویجت کاروسل صفحه‌ی نخست — جلدهای مجله در یک ردیف افقی
+  // «بسته تحلیلی جریان» صفحه‌ی نخست — جلد ۵ شماره‌ی اول (به ترتیب مدیر) روی قوس
   function renderMagazineCarousel(){
-    const wrap = document.getElementById('mag-carousel-home');
+    const wrap = document.getElementById('pkg-covers');
     if(!wrap) return;
     wrap.innerHTML = '';
     if(!MAGAZINES.length){
-      wrap.innerHTML = '<div class="mag-empty-hint">هنوز مجله‌ای بارگذاری نشده.</div>';
+      wrap.innerHTML = '<div class="pkg-empty">هنوز شماره‌ای بارگذاری نشده.</div>';
       return;
     }
-    MAGAZINES.forEach(m=>{
+    MAGAZINES.slice(0, 5).forEach(m=>{
       const files = Array.isArray(m.files) ? m.files : [];
-      const tile = document.createElement('div'); tile.className = 'mag-tile';
-      tile.innerHTML = `<div class="mag-tile-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
-        <div class="mag-tile-title">${escHtml(m.title)}</div>`;
+      const tile = document.createElement('div'); tile.className = 'pkg-tile';
+      tile.innerHTML = `<div class="pkg-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
+        <div class="pkg-title">${escHtml(m.title)}</div>`;
       tile.addEventListener('click', () => { if(files.length) openMagazineFile(m, files[0]); });
       wrap.appendChild(tile);
     });
-  }
-
-  function scrollMagCarousel(dir){
-    const wrap = document.getElementById('mag-carousel-home');
-    if(wrap) wrap.scrollBy({ left: dir * 320, behavior: 'smooth' });
   }
 
   // سه کارت راهنمای سریع زیر هرو — فقط اسکرول توی همون صفحه‌ی نخست،
@@ -7253,7 +7176,7 @@
     if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
   }
   function scrollToPackageCard(){
-    const el = document.querySelector('.package-card');
+    const el = document.getElementById('pkg-flow');
     if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
   }
   // تب «روزنامه‌ها» — گرید صفحه‌ی اول روزنامه‌ها برای یه تاریخ انتخاب‌شده.
@@ -7918,7 +7841,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.12.2';
+  const APP_VERSION = '5.13.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
