@@ -1707,7 +1707,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۴.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۴.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2837,7 +2837,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۴.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۴.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -6554,17 +6554,24 @@
     const selectedEmpty = document.getElementById('news-analytics-selected-empty');
     const selectedUpdatedEl = document.getElementById('news-selected-updated');
     selectedUpdatedEl.textContent = NEWS_AI_INSIGHTS ? ('به‌روزرسانی: ' + newsRelTime(NEWS_AI_INSIGHTS.computed_at)) : '';
+    // از مهر ۱۴۰۵ هر مورد خودش channel_id/time/link/sources رو هم داره (news-insights
+    // خبرها رو خوشه‌بندی می‌کنه و sources = تعداد واقعی منابع همون خبره) — پس
+    // اگه پست در کش ۱۰۰۰تایی نبود هم نمایش داده می‌شه؛ ردیف‌های قدیمی (فقط id)
+    // مثل قبل از روی POSTS_CACHE
     const aiSelected = (NEWS_AI_INSIGHTS?.selected_posts || [])
-      .map(sp => ({ post: POSTS_CACHE.find(p=>p.id===sp.id), headline: sp.headline }))
-      .filter(x => x.post);
+      .map(sp => ({ sp, post: POSTS_CACHE.find(p=>p.id===sp.id) }))
+      .filter(x => x.post || x.sp.channel_id);
     selectedList.innerHTML = '';
     selectedEmpty.style.display = aiSelected.length ? 'none' : '';
-    aiSelected.forEach(({post:p, headline}, i)=>{
-      const text = headline || p.title || (p.text||'').slice(0,140);
+    aiSelected.forEach(({sp, post:p}, i)=>{
+      const text = sp.headline || (p && (p.title || (p.text||'').slice(0,140))) || '';
+      const chId = p ? p.channel_id : sp.channel_id;
+      const when = sp.time || (p && (p.posted_at||p.scraped_at));
+      const srcTxt = sp.sources > 1 ? `<span class="cat">${toFaDigits(sp.sources)} منبع</span>` : '';
       const el = document.createElement('div'); el.className = 'rank-item';
       el.innerHTML = `<span class="rank-num">${toFaDigits(i+1)}</span>
         <div class="rc"><p>${escHtml(text)}</p>
-        <div class="rmeta">${chName(p.channel_id)} · ${newsRelTime(p.posted_at||p.scraped_at)}</div></div>`;
+        <div class="rmeta">${srcTxt}<span>${escHtml(chName(chId))}${sp.sources > 1 ? ' و …' : ''}</span><span>${when ? newsRelTime(when) : ''}</span></div></div>`;
       selectedList.appendChild(el);
     });
 
@@ -8165,7 +8172,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.14.0';
+  const APP_VERSION = '5.14.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
