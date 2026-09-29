@@ -1753,7 +1753,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۶.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۶.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2890,7 +2890,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۶.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۶.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -8150,7 +8150,7 @@
   // umalqura مرورگره؛ تقویم رسمی ایران (رؤیت هلال) گاهی ±۱ روز فرق داره — اگه
   // کاربر گفت قمری یه روز جلو/عقبه، فقط HIJRI_OFFSET رو عوض کن (+۱ یعنی یه روز
   // جلوتر). مناسبت‌های قمری هم از همین تاریخ اصلاح‌شده حساب می‌شن.
-  const HIJRI_OFFSET = 0;
+  const HIJRI_OFFSET = -1; // مهر ۱۴۰۵: کاربر تأیید کرد ۸ مهر = ۱۸ ربیع‌الثانی (umalqura یه روز جلو بود)
   const HIJRI_MONTHS = ['محرم','صفر','ربیع‌الاول','ربیع‌الثانی','جمادی‌الاول','جمادی‌الثانی','رجب','شعبان','رمضان','شوال','ذی‌القعده','ذی‌الحجه'];
   // کلید «ماه-روز»؛ «L-ماه» = روز آخر اون ماه قمری (۲۹ یا ۳۰)
   // ملی + سیاسی‌اجتماعی + انقلاب اسلامی + دفاع مقدس و مقاومت (کاربر، مهر ۱۴۰۵)
@@ -8353,7 +8353,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.16.0';
+  const APP_VERSION = '5.16.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
