@@ -1573,7 +1573,13 @@
   .pkg-title{ font-size:13px; font-weight:700; color:#fff; text-align:center; line-height:1.6; max-width:160px; }
   .pkg-empty{ font-size:13px; color: rgba(255,255,255,0.55); padding:40px 0; }
   /* قرینه‌ی عرصه‌ها: آن‌جا توضیح زیر آیکون‌هاست، این‌جا بالای جلدها */
-  .pkg-caption{ margin:-8px auto 44px; }
+  .pkg-caption{ margin:-8px auto 16px; }
+  /* فهرست ۱۰ بخش بسته — فقط نمایشی، بدون قاب؛ دو ردیف ۵تایی روی دسکتاپ */
+  .pkg-parts{ display:grid; grid-template-columns:repeat(5,auto); justify-content:center; gap:12px 26px; margin:0 auto 54px; }
+  @media (max-width:900px){ .pkg-parts{ display:flex; flex-wrap:wrap; } }
+  .pkg-part{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color: rgba(255,255,255,0.78); white-space:nowrap; }
+  .pkg-part svg{ width:15px; height:15px; color:#EAB393; flex-shrink:0; }
+  @media (max-width:640px){ .pkg-parts{ gap:10px 16px; margin-bottom:34px; } .pkg-part{ font-size:12px; } }
   .pkg-more{ display:flex; justify-content:center; margin:30px 0 0; }
   .pkg-more-btn{ display:inline-flex; align-items:center; gap:6px; font:700 12.5px 'IRANSansX',Tahoma,sans-serif; color:#EAB393; background:none; border:1px solid rgba(234,179,147,0.45); border-radius:999px; padding:8px 16px; cursor:pointer; transition: background .2s ease, color .2s ease; }
   .pkg-more-btn:hover{ background:#EAB393; color:#16202a; }
@@ -1996,6 +2002,18 @@
 
       <div class="section-label pkg-flow-label" id="pkg-flow">بسته تحلیلی جریان</div>
       <p class="domain-caption pkg-caption">بسته تحلیلی جریان، خلاصه‌ای تحلیلی، دقیق و چندلایه از تحولات سیاسی‌اجتماعی است که سعی دارد نگاهی جامع را در اختیار مخاطب قرار دهد. این بسته شامل ۱۰ بخش است.</p>
+      <div class="pkg-parts" aria-label="بخش‌های بسته">
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4a16 16 0 0116 16M4 11a9 9 0 019 9"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>خط خبری</span>
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/></svg>تحلیل اخبار روز</span>
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l2.6 5.6 6.2.6-4.6 4.2 1.3 6.1L12 16.8 6.5 19.5l1.3-6.1L3.2 9.2l6.2-.6L12 3z"/></svg>مهم‌ترین اخبار</span>
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>نگاه جامعه‌شناسی سیاسی</span>
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg>اصل ماجرا</span>
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/></svg>تحلیل سازمان‌ها</span>
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19.5V4.5A1.5 1.5 0 015.5 3H16l4 4v12.5a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19.5z"/><path d="M16 3v4h4M8 12h8M8 16h5"/></svg>یادداشت طلاب</span>
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M6.7 6.7C4.6 8.1 3 12 3 12s2.4 4.2 6.3 5.9M14 5.1c5.4.7 7 6.9 7 6.9a12.9 12.9 0 01-2.2 3"/></svg>خارج از دید</span>
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>نبض افکار</span>
+        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>تحلیل اندیشگده‌ها</span>
+      </div>
       <div class="pkg-flow">
         <svg class="pkg-orbit" viewBox="-600 -100 1200 360" aria-hidden="true">
           <defs>
