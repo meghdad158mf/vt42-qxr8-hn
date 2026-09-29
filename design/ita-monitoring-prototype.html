@@ -1140,7 +1140,6 @@
   .sel-tag{ font-size:11px; font-weight:600; border-radius:999px; padding:2px 9px; background: rgba(22,32,42,0.06); color: var(--text-dim); }
   .sel-tag.is-crit{ background: var(--navy); color:#fff; }
   .sel-tag.is-wide{ background: rgba(234,179,147,0.3); color:#8a4516; }
-  .sel-reason{ margin-top:5px; font-size:12px; color: var(--text-dim); line-height:1.8; }
   .rank-item .rc .rmeta .cat{ color: var(--accent-strong); font-weight:600; }
 
   /* «در یک نگاه»: چینش (بازچینی مهر ۱۴۰۵) */
@@ -1735,7 +1734,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۵.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۵.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2870,7 +2869,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۵.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۵.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3567,7 +3566,7 @@
   let NEWSPAPER_DATES = [];   // تاریخ‌های موجود (نزولی) که حداقل یه عکس پاک‌نشده دارن
   const newspaperState = { selected: [], date: null };  // date=null یعنی جدیدترین تاریخ موجود
   let SCHOOL_REPORTS = []; // {id, title, image_url, media_storage_path, sort_order, uploaded_at, file_type, file_name} — گزارش‌های تحلیل Power BI (تصویر/PDF/اکسل)
-  let NEWS_AI_INSIGHTS = null; // {id, computed_at, window_hours, selected_posts:[{id,reason}], topics:[{name,weight}]} — آخرین تحلیل هوش مصنوعی تب «آنالیز» (روزی ۲ بار از GitHub Actions، نه هر بار بازکردن تب)
+  let NEWS_AI_INSIGHTS = null; // {id, computed_at, window_hours, selected_posts:[{id,headline,score,tags,sources,posts,channel_id,time,link}], topics:[{name,weight}]} — آخرین تحلیل هوش مصنوعی تب «در یک نگاه» (روزی ۴ بار از GitHub Actions، نه هر بار بازکردن تب)
 
   function chById(id){ return CHANNELS.find(c=>c.id===id); }
   function chName(id){ const c=chById(id); return c ? (c.title || c.username) : '؟'; }
@@ -6608,7 +6607,7 @@
     // می‌ده؛ اگه هنوز هیچ تحلیلی اجرا نشده باشه، پیام «هنوز آماده نشده» میاد.
     // headline از سمت هوش مصنوعی میاد (نه اسلایس خام متن پست) — یه جمله‌ی
     // کامل و فارسی (اگه منبع انگلیسی بود، ترجمه‌شده)، نه نصفه‌رهاشده؛ لیبل
-    // «دلیل انتخاب» مهر ۱۴۰۵ به خواست کاربر برگشت (برچسب معیار + دلیل کوتاه، پایین‌تر).
+    // «دلیل انتخاب» مهر ۱۴۰۵ به خواست کاربر برگشت — به‌صورت برچسب‌های کوتاه (پایین‌تر).
     const selectedList = document.getElementById('news-analytics-selected-list');
     const selectedEmpty = document.getElementById('news-analytics-selected-empty');
     const selectedUpdatedEl = document.getElementById('news-selected-updated');
@@ -6626,19 +6625,19 @@
       const text = sp.headline || (p && (p.title || (p.text||'').slice(0,140))) || '';
       const chId = p ? p.channel_id : sp.channel_id;
       const when = sp.time || (p && (p.posted_at||p.scraped_at));
-      // برچسب معیار انتخاب (کاربر، مهر ۱۴۰۵ — نسخه‌ی قدیمی «دلیل انتخاب» قبلاً به
-      // خواست خودش حذف شده بود؛ حالا دوباره، با فهرست ثابت معیارها + دلیل کوتاه):
-      // «پوشش گسترده» از تعداد واقعی منابع (≥۵، همون آستانه‌ی موج خبری) + معیار
-      // موضوعی هوش مصنوعی (CRITERIA در news-insights) + یه جمله‌ی کوتاه چرا مهمه
+      // برچسب‌های معیار انتخاب (کاربر، مهر ۱۴۰۵: کوتاه، نه جمله‌ی توضیحی): «پرتکرار»
+      // از تعداد واقعی منابع (≥۵، همون آستانه‌ی موج خبری) + ۱–۲ برچسب تحلیلی هوش
+      // مصنوعی از فهرست ثابت TAGS در news-insights. ردیف‌های کمی قدیمی‌تر فقط
+      // criterion (یک برچسب) دارن
       const tags = [];
-      if(sp.sources >= 5) tags.push(`<span class="sel-tag is-wide">پوشش گسترده، ${toFaDigits(sp.sources)} منبع</span>`);
-      else if(sp.sources > 1) tags.push(`<span class="sel-tag">${toFaDigits(sp.sources)} منبع</span>`);
-      if(sp.criterion) tags.push(`<span class="sel-tag is-crit">${escHtml(sp.criterion)}</span>`);
+      if(sp.sources >= 5) tags.push('<span class="sel-tag is-wide">پرتکرار</span>');
+      const aiTags = Array.isArray(sp.tags) ? sp.tags : (sp.criterion ? [sp.criterion] : []);
+      aiTags.forEach(t=>tags.push(`<span class="sel-tag is-crit">${escHtml(t)}</span>`));
+      const srcTxt = sp.sources > 1 ? ` و ${toFaDigits(sp.sources - 1)} منبع دیگر` : '';
       const el = document.createElement('div'); el.className = 'rank-item';
       el.innerHTML = `<span class="rank-num">${toFaDigits(i+1)}</span>
         <div class="rc">${tags.length ? `<div class="sel-tags">${tags.join('')}</div>` : ''}<p>${escHtml(text)}</p>
-        ${sp.reason ? `<div class="sel-reason">معیار انتخاب: ${escHtml(sp.reason)}</div>` : ''}
-        <div class="rmeta"><span>${escHtml(chName(chId))}${sp.sources > 1 ? ' و …' : ''}</span><span>${when ? newsRelTime(when) : ''}</span></div></div>`;
+        <div class="rmeta"><span>${escHtml(chName(chId))}${srcTxt}${when ? '،' : ''}</span><span>${when ? newsRelTime(when) : ''}</span></div></div>`;
       selectedList.appendChild(el);
     });
 
@@ -8231,7 +8230,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.15.0';
+  const APP_VERSION = '5.15.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
