@@ -432,6 +432,9 @@
   .usr-table th{ text-align:right; font-size:11.5px; color: var(--text-faint); font-weight:700; padding:8px; border-bottom:1px solid var(--border); white-space:nowrap; }
   .usr-table td{ padding:9px 8px; border-bottom:1px solid var(--border); color: var(--text); white-space:nowrap; }
   .usr-table tr.inactive td{ opacity:.55; }
+  /* فهرست بلند: کادر با ارتفاع ثابت (~۱۲ ردیف) و سربرگ چسبان — به‌جای صفحه‌بندی تا تیک‌های اطلاع‌رسانی گروهی یک‌جا دیده شوند */
+  .usr-scroll{ max-height:540px; overflow:auto; overscroll-behavior:contain; }
+  .usr-scroll .usr-table thead th{ position:sticky; top:0; z-index:1; background: var(--surface); box-shadow: inset 0 -1px 0 var(--border); }
   .usr-table input[type=checkbox]{ width:16px; height:16px; accent-color: var(--navy); cursor:pointer; }
   .usr-dim{ color: var(--text-faint); font-size:12px; }
   .usr-empty{ text-align:center; color: var(--text-faint); padding:18px !important; }
@@ -1690,7 +1693,7 @@
       <div class="lv-content">
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۲.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۲.۲</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2822,7 +2825,7 @@
           <div class="usr-filters" id="usr-filters"></div>
           <input type="search" class="usr-search" id="usr-search" placeholder="جست‌وجوی نام، شماره یا سمت…" />
         </div>
-        <div class="sys-login-wrap"><table class="usr-table" id="usr-table"></table></div>
+        <div class="sys-login-wrap usr-scroll"><table class="usr-table" id="usr-table"></table></div>
 
         <div class="usr-send" id="usr-send">
           <div class="usr-send-head"><b>اطلاع‌رسانی گروهی</b><span id="usr-sel-count">۰ نفر انتخاب شده</span></div>
@@ -2848,7 +2851,7 @@
         <div class="app-footer-brand">
           <b class="app-footer-title">سامانه هوشمند جریان</b>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۲.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۲.۲</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -7915,7 +7918,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.12.1';
+  const APP_VERSION = '5.12.2';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
