@@ -41,7 +41,7 @@ design/ita-monitoring-prototype.html — فرانت‌اند تک‌فایلی (
 
 - ⚠️ **هر تغییر در `scripts/*.py` یا ورک‌فلوهای schedule باید جدا به `main` هم sync بشه**: شاخه از `origin/main`، `git merge origin/claude/new-project-8ekywm`، PR به `main` (PRهای «sync: به‌روزرسانی main با ...»). وگرنه هیچ‌وقت اجرا نمی‌شه. Edge Functionها و `deploy-edge-functions.yml` نیازی به sync ندارن.
 - `SUPABASE_URL`/`SUPABASE_ANON_KEY` محرمانه نیستن (توی فرانت هاردکدن، RLS امنیت رو تضمین می‌کنه). این محیط **دسترسی شبکه به Supabase نداره** — هر بررسی داده‌ی زنده رو کاربر خودش در SQL Editor اجرا می‌کنه.
-- ⚠️ **همیشه از کاربر بخواه URL بالای مرورگرش رو چک کنه که `komqnapfqrtxxaytpcdt` باشه.** پروژه‌ی قدیمی `tfppjveupcxisepteibn` (قفل‌شده به‌خاطر پرشدن Storage، شهریور ۱۴۰۵) هنوز SQL Editorش باز می‌شه و یه‌بار باعث شد چند دور کوئری روی دیتابیس اشتباه بررسی بشه. چند `avatar_url` قدیمی هنوز به دامنه‌ی اون پروژه اشاره می‌کنن و شکسته‌ان.
+- پروژه‌ی زنده‌ی سوپابیس فقط `komqnapfqrtxxaytpcdt`ه. پروژه‌ی قدیمی `tfppjveupcxisepteibn` (قفل‌شده به‌خاطر پرشدن Storage، شهریور ۱۴۰۵) **۹ مهر ۱۴۰۵ کامل حذف شد** (توصیه‌ی سند امنیت). چند `avatar_url` قدیمی (از جمله در `migration_021`) هنوز به دامنه‌ی اون پروژه اشاره می‌کنن و شکسته‌ان — باید از پنل دوباره آپلود بشن.
 - همه‌ی migrationها **دستی** در SQL Editor اجرا می‌شن. جدول جدید → فایل `db/migration_0NN_*.sql` بعدی، با **GRANT صریح** به app_admin/app_viewer (سوپابیس از ۳۰ اکتبر ۲۰۲۶ دیگه خودکار grant نمی‌ده). bucket جدید فقط RLS policy خودش رو می‌خواد (grantهای schema `storage` یک‌بار در migration_003 انجام شده).
 
 ## secretها و توکن‌ها (مقدارشون رو هرگز در چت نخواه/نگو)
