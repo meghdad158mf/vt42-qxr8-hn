@@ -24,6 +24,12 @@ on:
         required: false
         type: string
 
+# دو اجرای هم‌زمان (زمان‌بندی + «اجرای دستی» از صفحه‌ی وضعیت) نشه — برای تلگرام
+# استفاده‌ی هم‌زمان از یک نشست از دو سرور می‌تونه نشست رو باطل کنه؛ اجرای دوم صبر می‌کنه
+concurrency:
+  group: cleanup-media
+  cancel-in-progress: false
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest

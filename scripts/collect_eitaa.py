@@ -241,9 +241,9 @@ def fetch_existing_post_ids(token: str, channel_id: int, post_ids: list[str]) ->
         return set()
 
 
-def upsert_posts(token: str, posts: list[dict]) -> None:
+def upsert_posts(token: str, posts: list[dict]) -> bool:
     if not posts:
-        return
+        return True
     r = requests.post(
         f"{SUPABASE_URL}/rest/v1/posts",
         headers={**auth_headers(token), "Prefer": "resolution=merge-duplicates,return=minimal"},
@@ -253,6 +253,16 @@ def upsert_posts(token: str, posts: list[dict]) -> None:
     )
     if not r.ok:
         print(f"    [!] upsert failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
+        return False
+    return True
+
+
+def exit_if_all_failed(failed: int, total: int) -> None:
+    # اگه همه‌ی منابع خطا دادن، اجرا «ناموفق» ثبت بشه تا کارت «وضعیت سامانه» قرمز
+    # بشه (قبلاً هر خطایی فقط چاپ می‌شد و اجرا همیشه سبز می‌موند)
+    if total and failed == total:
+        print(f"[!] all {total} source(s) failed", file=sys.stderr)
+        sys.exit(1)
 
 
 def main() -> None:
@@ -262,6 +272,7 @@ def main() -> None:
 
     total_saved = 0
     total_media = 0
+    failed = 0
     for i, ch in enumerate(channels):
         username = ch["username"]
         channel_id = ch["id"]
@@ -293,17 +304,21 @@ def main() -> None:
                         # تکرار می‌کنه، بدون فایده‌ی «لینک منبع برای دانلود بعدی» که
                         # media_source_url در بقیه‌ی موارد داره.
                         p["media_source_url"] = None
-            upsert_posts(token, new_posts)
-            upsert_posts(token, old_posts)
+            ok_new = upsert_posts(token, new_posts)
+            ok_old = upsert_posts(token, old_posts)
+            if not (ok_new and ok_old):
+                failed += 1
             total_saved += len(posts)
             print(f"[+] @{username}: {len(posts)} post(s) ({len(new_posts)} new)")
         except Exception as e:
+            failed += 1
             print(f"[!] @{username}: {e}", file=sys.stderr)
 
         if i < len(channels) - 1:
             time.sleep(POLITE_DELAY_SECONDS)
 
     print(f"[done] total posts processed: {total_saved}, media downloaded: {total_media}")
+    exit_if_all_failed(failed, len(channels))
 
 
 if __name__ == "__main__":

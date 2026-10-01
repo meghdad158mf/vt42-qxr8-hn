@@ -20,6 +20,7 @@ import { fetchPostForUser } from "../_shared/auth.ts";
 
 const LIARA_BASE_URL = "https://ai.liara.ir/api/6a9271a1d6564b043acdefe1/v1";
 const LIARA_MODEL = "openai/gpt-4o-mini";
+const MAX_TEXT_CHARS = 6000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,7 +41,8 @@ Deno.serve(async (req) => {
 
   try {
     const { postId } = await req.json();
-    if (!postId) return jsonResponse({ error: "postId is required" }, 400);
+    // فقط عدد صحیح — چون مستقیم توی آدرس کوئری PostgREST می‌شینه
+    if (!Number.isSafeInteger(postId) || postId <= 0) return jsonResponse({ error: "postId is required" }, 400);
 
     const post = await fetchPostForUser(req, postId);
     if (!post) return jsonResponse({ error: "unauthorized or post not found" }, 401);
@@ -63,7 +65,8 @@ Deno.serve(async (req) => {
               'Respond with ONLY a raw JSON object like {"title":"...","text":"..."} and nothing else ' +
               "— no markdown fences, no extra commentary. Keep the same meaning and tone; do not summarize.",
           },
-          { role: "user", content: JSON.stringify({ title: title || "", text: text || "" }) },
+          // سقف طول متن (هزینه‌ی هوش مصنوعی): مقاله‌ی خیلی بلند فید RSS
+          { role: "user", content: JSON.stringify({ title: (title || "").slice(0, 500), text: (text || "").slice(0, MAX_TEXT_CHARS) }) },
         ],
       }),
     });

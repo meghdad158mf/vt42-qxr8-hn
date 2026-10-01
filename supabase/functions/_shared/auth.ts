@@ -5,6 +5,31 @@
 // چک می‌کنیم — اگه PostgREST قبولش کنه (یعنی نقش app_admin/app_viewer
 // داره)، توکن معتبره.
 
+// فقط مدیر (۵.۲۲.۱، بررسی امنیتی): توکن با یه کوئری سبک PostgREST اعتبارسنجی می‌شه
+// (امضا رو خودِ PostgREST چک می‌کنه) و بعد نقش از claim همون توکن خونده می‌شه —
+// به‌جای «select روی جدولی که بیننده دسترسی نداره» که با یه GRANT اشتباه در آینده
+// بی‌صدا به روی بیننده باز می‌شد.
+export async function isAdminRequest(req: Request): Promise<boolean> {
+  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!token) return false;
+  let role = "";
+  try {
+    const part = token.split(".")[1] || "";
+    const b64 = part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=");
+    role = JSON.parse(atob(b64))?.role || "";
+  } catch {
+    return false;
+  }
+  if (role !== "app_admin") return false;
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const res = await fetch(`${supabaseUrl}/rest/v1/categories?select=id&limit=1`, {
+    headers: { apikey: anonKey ?? "", Authorization: `Bearer ${token}` },
+  });
+  await res.body?.cancel();
+  return res.ok;
+}
+
 export async function fetchPostForUser(
   req: Request,
   postId: number,
