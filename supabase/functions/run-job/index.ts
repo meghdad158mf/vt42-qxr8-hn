@@ -131,27 +131,36 @@ Deno.serve(async (req) => {
     }
 
     if (action === "status") {
+      // runs: آخرین اجرای هر کار (کارت‌های «کارهای خودکار»)؛ history: اجراهای ۳۰ ساعت اخیر
+      // برای خط زمانی «برنامه‌ی اجرا» (۵.۲۲.۳)
+      const since = Date.now() - 30 * 3600 * 1000;
       const entries = await Promise.all(Object.entries(JOBS).map(async ([key, file]) => {
         try {
           const r = await fetch(
-            `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${file}/runs?per_page=1&branch=${GITHUB_REF}`,
+            `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${file}/runs?per_page=30&branch=${GITHUB_REF}`,
             { headers: ghHeaders },
           );
-          if (!r.ok) return [key, null];
-          const run = (await r.json())?.workflow_runs?.[0];
-          if (!run) return [key, null];
-          return [key, {
+          if (!r.ok) return [key, null, []];
+          const list = (await r.json())?.workflow_runs || [];
+          const brief = (run: Record<string, string>) => ({
             status: run.status,
             conclusion: run.conclusion,
             event: run.event,
             created_at: run.run_started_at || run.created_at,
             updated_at: run.updated_at,
-          }];
+          });
+          const history = list
+            .filter((run: Record<string, string>) => new Date(run.run_started_at || run.created_at).getTime() >= since)
+            .map(brief);
+          return [key, list[0] ? brief(list[0]) : null, history];
         } catch {
-          return [key, null];
+          return [key, null, []];
         }
       }));
-      return jsonResponse({ runs: Object.fromEntries(entries) });
+      return jsonResponse({
+        runs: Object.fromEntries(entries.map(([k, r]) => [k, r])),
+        history: Object.fromEntries(entries.map(([k, , h]) => [k, h])),
+      });
     }
 
     const workflow = JOBS[job];
