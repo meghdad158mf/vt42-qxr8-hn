@@ -135,9 +135,9 @@ def extract_posts(feed, channel_id: int) -> list[dict]:
     return posts
 
 
-def upsert_posts(token: str, posts: list[dict]) -> None:
+def upsert_posts(token: str, posts: list[dict]) -> bool:
     if not posts:
-        return
+        return True
     r = requests.post(
         f"{SUPABASE_URL}/rest/v1/posts",
         headers={**auth_headers(token), "Prefer": "resolution=merge-duplicates,return=minimal"},
@@ -147,6 +147,16 @@ def upsert_posts(token: str, posts: list[dict]) -> None:
     )
     if not r.ok:
         print(f"    [!] upsert failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
+        return False
+    return True
+
+
+def exit_if_all_failed(failed: int, total: int) -> None:
+    # اگه همه‌ی منابع خطا دادن، اجرا «ناموفق» ثبت بشه تا کارت «وضعیت سامانه» قرمز
+    # بشه (قبلاً هر خطایی فقط چاپ می‌شد و اجرا همیشه سبز می‌موند)
+    if total and failed == total:
+        print(f"[!] all {total} source(s) failed", file=sys.stderr)
+        sys.exit(1)
 
 
 def main() -> None:
@@ -155,6 +165,7 @@ def main() -> None:
     print(f"[*] {len(channels)} active RSS source(s) to scan")
 
     total_saved = 0
+    failed = 0
     for i, ch in enumerate(channels):
         feed_url = ch["username"]
         channel_id = ch["id"]
@@ -163,16 +174,19 @@ def main() -> None:
             resp.raise_for_status()
             feed = feedparser.parse(resp.content)
             posts = extract_posts(feed, channel_id)
-            upsert_posts(token, posts)
+            if not upsert_posts(token, posts):
+                failed += 1
             total_saved += len(posts)
             print(f"[+] {feed_url}: {len(posts)} item(s)")
         except Exception as e:
+            failed += 1
             print(f"[!] {feed_url}: {e}", file=sys.stderr)
 
         if i < len(channels) - 1:
             time.sleep(POLITE_DELAY_SECONDS)
 
     print(f"[done] total items processed: {total_saved}")
+    exit_if_all_failed(failed, len(channels))
 
 
 if __name__ == "__main__":

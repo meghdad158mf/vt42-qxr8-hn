@@ -5,6 +5,19 @@
 //      تولید می‌کنه؛ اگه پست اصلی انگلیسی باشه همین headline ترجمه‌شه‌ست
 //   ۲) «موضوعات پرتکرار» — موضوعات پرتکرار واقعی متن پست‌ها
 //
+// ⚠️ بازطراحی مهر ۱۴۰۵ (کاربر: «واقعی‌تر بشه») — سه اشکال نسخه‌ی قبل:
+//   • فقط ۱۵۰ پست آخر رو می‌دید (نه کل ۶ ساعت) و پست‌های ایتا (posted_at=NULL)
+//     اصلاً وارد نمی‌شدن؛
+//   • «تکرار بین منابع» رو مدل باید از روی ۱۵۰ متن بریده حدس می‌زد؛
+//   • وقتی لیارا دسته‌ی بزرگ رو رد می‌کرد (معمول)، هر تکه‌ی ۲۰تایی ۱۰ انتخاب
+//     برمی‌گردوند و slice(0,10) عملاً انتخاب‌های تکه‌ی اول (= ۲۰ پست آخر) رو
+//     نگه می‌داشت — «منتخب» ≈ «جدیدترین».
+// حالا: کل پست‌های بازه (تا ۲۰۰۰) خوشه‌بندی می‌شن (_shared/cluster.ts، هر خوشه
+// = یه خبر با تعداد واقعی منابع)، ۶۰ خبر پرمنبع‌تر با «تعداد منابع» به مدل
+// داده می‌شه، مدل برای هر انتخاب امتیاز ۱–۱۰ می‌ده و ادغام تکه‌ها بر اساس
+// امتیاز (نه ترتیب تکه) انجام می‌شه. وزن موضوعات = مجموع پست‌های خبرهای
+// همون موضوع (شمارش واقعی، نه عدد حدسی مدل).
+//
 // روزی چهار بار (هر ۶ ساعت) از GitHub Actions (scripts/analyze_news_insights.py،
 // با توکن مدیر) صدا زده می‌شه، نه با هر بار بازکردن تب توسط کاربر — چون
 // هر درخواست هزینه‌ی هوش مصنوعی داره. نتیجه توی جدول news_ai_insights کش
@@ -19,12 +32,14 @@
 // لازم (LIARA_API_KEY, SUPABASE_ACCESS_TOKEN) از قبل برای translate تنظیم
 // شدن، نیازی به تنظیم دوباره نیست.
 
-import { fetchRecentNewsPostsForUser } from "../_shared/auth.ts";
+import { fetchRecentNewsPostsForUser, type WindowPost, isAdminRequest } from "../_shared/auth.ts";
 import { liaraChat, mapLimit } from "../_shared/liara.ts";
+import { clusterPosts, postTime, type Cluster } from "../_shared/cluster.ts";
 
 const DEFAULT_WINDOW_HOURS = 6;
-const MAX_POSTS_TO_MODEL = 150;
-const TEXT_TRUNCATE = 220;
+const MAX_POSTS_FETCH = 2000;
+const MAX_CANDIDATES = 60;
+const TEXT_TRUNCATE = 260;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -38,6 +53,56 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+// برچسب‌های معیار انتخاب هر خبر منتخب — کوتاه و تحلیلی، نه جمله‌ی توضیحی (کاربر،
+// مهر ۱۴۰۵: «معیار انتخاب توضیحی نباشد، مثلاً پرتکرار، اختلاف قومیتی، شکاف اجتماعی»).
+// فهرست ثابت تا برچسب‌ها بین اجراها یکدست بمونن؛ «پرتکرار» اینجا نیست چون از
+// تعداد واقعی منابع (sources ≥ ۵) در فرانت ساخته می‌شه، نه حدس مدل.
+const TAGS = [
+  "اختلاف قومیتی",
+  "اختلاف مذهبی",
+  "شکاف اجتماعی",
+  "اعتراض و تجمع",
+  "نارضایتی معیشتی",
+  "تنش سیاسی",
+  "تصمیم کلان حاکمیتی",
+  "امنیت ملی",
+  "تهدید خارجی",
+  "دیپلماسی",
+  "انتخابات",
+  "فساد و تخلف",
+  "حوزه و روحانیت",
+  "مسائل دینی",
+  "مسائل فرهنگی",
+  "شایعه و عملیات روانی",
+  "حادثه و بحران",
+  "آب و محیط زیست",
+  "خراسان و مشهد",
+];
+
+const SYSTEM_PROMPT =
+  "You are a senior news editor for the political-social monitoring office of the Khorasan Islamic Seminary (Mashhad, Iran). " +
+  "You receive candidate news STORIES from the last hours, collected from Iranian news channels (Eitaa/Telegram) and news websites. " +
+  "Each candidate = {id, sources, outlets, text}: `sources` is the real number of DISTINCT channels/sites that published this same story " +
+  "(computed by us, trust it), `outlets` are some of their names, `text` is one representative post (may be cut).\n" +
+  "Produce two things:\n" +
+  "1) selected: up to 10 of the MOST IMPORTANT stories. Judge importance by (a) coverage — a higher `sources` is a strong signal; and " +
+  "(b) political/social significance for Iran: national politics, government and parliament decisions, security and foreign policy, " +
+  "major economic decisions affecting people, social tensions, religious institutions, seminaries and clergy, Khorasan/Mashhad. " +
+  "A single-source story may be chosen only if it is clearly highly significant. NEVER select: advertisements, channel promotions, " +
+  "greetings/occasion messages, poems or quotes, routine weather, sports results (unless politically significant), or two candidates that " +
+  "are the same story. Each item: {\"id\": <a given id, exactly>, \"headline\": \"<ONE complete, factual Persian sentence (max ~25 words) " +
+  "stating the news itself — never cut off; if the text is not Persian, translate>\", \"score\": <integer 1-10 importance>, " +
+  `\"tags\": [1 or 2 labels, each EXACTLY one of: ${TAGS.map((c) => `\"${c}\"`).join(", ")} — the analytical reason(s) this story ` +
+  "matters, most specific first; no explanations, no other words]}. " +
+  "Order by importance.\n" +
+  "2) topics: up to 6 real recurring themes across ALL candidates, each {\"name\": \"<short Persian label, 1-3 words>\", " +
+  "\"ids\": [<ids of the candidates about this theme>]}. No dates, weekday/month names, or boilerplate as topics.\n" +
+  'Respond with ONLY a raw JSON object {"selected":[...],"topics":[...]} — no markdown fences, no commentary. Use only the given ids.';
+
+type AiSelected = { id: number; headline?: string; score?: number; tags?: string[] };
+type AiTopic = { name: string; ids?: number[] };
+type Insight = { selected?: AiSelected[]; topics?: AiTopic[] };
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -49,56 +114,36 @@ Deno.serve(async (req) => {
       const body = await req.json();
       if (body?.windowHours) windowHours = Number(body.windowHours) || DEFAULT_WINDOW_HOURS;
     } catch {
-      // بدنه‌ی خالی هم مجازه — همون پیش‌فرض ۱۲ ساعت استفاده می‌شه
+      // بدنه‌ی خالی هم مجازه — همون پیش‌فرض استفاده می‌شه
     }
+    windowHours = Math.min(24, Math.max(1, windowHours));
 
-    const posts = await fetchRecentNewsPostsForUser(req, windowHours, MAX_POSTS_TO_MODEL);
+    // فقط مدیر (کالر واقعی analyze_news_insights.py با توکن مدیره): قبلاً بیننده هم
+    // می‌تونست صداش بزنه و هزینه‌ی هوش مصنوعی بسازه (فقط ذخیره‌ی آخر با RLS رد می‌شد)
+    if (!(await isAdminRequest(req))) return jsonResponse({ error: "admin only" }, 403);
+
+    const posts = await fetchRecentNewsPostsForUser(req, windowHours, MAX_POSTS_FETCH);
     if (posts === null) return jsonResponse({ error: "unauthorized" }, 401);
     if (!posts.length) {
       return jsonResponse({ selected_posts: [], topics: [], window_hours: windowHours, note: "no posts in window" });
     }
 
-    const compact = posts.map((p) => ({
-      id: p.id,
-      source: p.channels?.title || null,
-      title: p.title || null,
-      text: (p.text || "").slice(0, TEXT_TRUNCATE),
-    }));
+    // هر خوشه = یه خبر؛ پرمنبع‌ترها (و در تساوی تازه‌ترها) به مدل می‌رن
+    const clusters = clusterPosts(posts)
+      .sort((a, b) => (b.channels - a.channels) || (postTime(b.posts[b.posts.length - 1]) - postTime(a.posts[a.posts.length - 1])));
+    const candidates = clusters.slice(0, MAX_CANDIDATES);
+    const byRepId = new Map<number, Cluster<WindowPost>>(candidates.map((c) => [c.rep.id, c]));
+    const compact = candidates.map((c) => {
+      const outlets = [...new Set(c.posts.map((p) => p.channels?.title).filter(Boolean))].slice(0, 4);
+      const t = c.rep.title ? `${c.rep.title} — ${c.rep.text || ""}` : (c.rep.text || "");
+      return { id: c.rep.id, sources: c.channels, outlets, text: t.replace(/\s+/g, " ").trim().slice(0, TEXT_TRUNCATE) };
+    });
 
-    const SYSTEM_PROMPT =
-              "You analyze a batch of Persian/English news posts (each with an id, source, title, text) from the " +
-              `last ${windowHours} hours and produce two things:\n` +
-              "1) selected_posts: up to 10 of the MOST IMPORTANT posts (importance = the same story repeated " +
-              "across multiple sources, OR a sensitive/high-impact political-social topic) — NOT simply the most " +
-              "recent. Each item is {\"id\": <one of the given post ids, exactly>, \"headline\": \"<a single " +
-              "complete Persian sentence summarizing this specific post — never cut off mid-sentence/mid-word. " +
-              "If the post's original title/text is in English or any non-Persian language, this headline MUST " +
-              "be its Persian translation, not the original language>\"}.\n" +
-              "2) topics: up to 6 real recurring topics/themes across the batch, each {\"name\": \"<short Persian " +
-              "topic label, 1-3 words>\", \"weight\": <integer count of posts about it>}. Do NOT include dates, " +
-              "weekday/month names, or generic website boilerplate as topics.\n" +
-              'Respond with ONLY a raw JSON object like {"selected_posts":[...],"topics":[...]} and nothing else ' +
-              "— no markdown fences, no extra commentary. ids in selected_posts MUST be from the given list only.";
-    type Insight = { selected_posts?: Array<{ id: number; headline?: string }>; topics?: Array<{ name: string; weight?: number }> };
-
-    async function callAi(items: typeof compact): Promise<Insight> {
-      const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.2, Math.min(CALL_TIMEOUT_MS, deadline - Date.now()));
-      try {
-        return JSON.parse(content);
-      } catch {
-        throw new Error(`ai returned invalid json: ${content.slice(0, 200)}`);
-      }
-    }
-
-    // ⚠️ مهر ۱۴۰۵: لیارا درخواست‌هایی که جوابشون طول می‌کشید رو بعد از ~۱۸
-    // ثانیه با ۵۰۰ رد می‌کرد (ترجمه‌ی تک‌پستی سالم بود). حالا جواب stream
-    // می‌شه (_shared/liara.ts) و اگه کل دسته باز هم خطا داد، دسته پله‌پله
-    // کوچیک‌تر می‌شه (۲۰تایی، بعد ۵تایی؛ حداکثر ۴ درخواست هم‌زمان) و نتیجه‌ها
-    // ادغام می‌شن. هر پله با یه موج ۴تایی امتحان می‌شه؛ اگه هیچ‌کدوم موفق نشد
-    // پله‌ی بعدی. تکه‌ی ناموفق در پله‌ی موفق کنار گذاشته می‌شه (برای خلاصه‌ی
-    // دوره‌ای چند پست کمتر مهم نیست). اگه هیچ فراخوانی موفق نشد → ۵۰۲.
-    // بودجه‌ی زمانی: هر درخواست حداکثر CALL_TIMEOUT_MS و کل کار تا
-    // TIME_BUDGET_MS — تا از سقف ۱۲۰ ثانیه‌ای اسکریپت کالر رد نشه.
+    // ⚠️ لیارا درخواست‌های طولانی رو گاهی بعد از ~۱۸ ثانیه با ۵۰۰ رد می‌کنه —
+    // جواب stream می‌شه (_shared/liara.ts) و اگه کل دسته خطا داد، دسته پله‌پله
+    // کوچیک‌تر می‌شه (۲۰تایی، بعد ۱۰تایی؛ حداکثر ۴ درخواست هم‌زمان). چون هر
+    // تکه امتیاز می‌ده، ادغام بر اساس امتیازه نه ترتیب تکه‌ها. بودجه‌ی زمانی:
+    // هر درخواست حداکثر CALL_TIMEOUT_MS و کل کار تا TIME_BUDGET_MS (کالر ۱۲۰ ثانیه صبر می‌کنه).
     const CONCURRENCY = 4;
     const TIME_BUDGET_MS = 90_000;
     const CALL_TIMEOUT_MS = 40_000;
@@ -108,16 +153,17 @@ Deno.serve(async (req) => {
     async function tryAi(items: typeof compact): Promise<Insight | null> {
       if (Date.now() >= deadline) return null;
       try {
-        const r = await callAi(items);
+        const content = await liaraChat(SYSTEM_PROMPT, JSON.stringify(items), 0.2, Math.min(CALL_TIMEOUT_MS, deadline - Date.now()));
+        const parsed = JSON.parse(content);
         aiSuccesses++;
-        return r;
+        return parsed;
       } catch (e) {
         lastError = String(e);
         return null;
       }
     }
     let parts: Insight[] = [];
-    for (const size of [...new Set([compact.length, 20, 5])].filter((n) => n <= compact.length)) {
+    for (const size of [...new Set([compact.length, 20, 10])].filter((n) => n <= compact.length)) {
       const chunks: (typeof compact)[] = [];
       for (let i = 0; i < compact.length; i += size) chunks.push(compact.slice(i, i + size));
       const wave = await Promise.all(chunks.slice(0, CONCURRENCY).map(tryAi));
@@ -129,30 +175,56 @@ Deno.serve(async (req) => {
     if (aiSuccesses === 0) {
       return jsonResponse({ error: "ai request failed", detail: lastError }, 502);
     }
-    // ادغام: اخبار منتخب به ترتیب از همه‌ی بخش‌ها، موضوعات هم‌نام با جمع وزن
-    const topicMap = new Map<string, number>();
+
+    // اخبار منتخب: فقط idهای واقعاً فرستاده‌شده، بدون تکرار، مرتب با امتیاز مدل
+    // و بعد تعداد منابع واقعی
+    const seen = new Set<number>();
+    const picked: Array<{ c: Cluster<WindowPost>; headline: string; score: number; tags: string[] }> = [];
     for (const part of parts) {
-      for (const t of part.topics || []) {
-        if (!t || !t.name) continue;
-        const k = String(t.name).trim();
-        topicMap.set(k, (topicMap.get(k) || 0) + Math.max(1, Number(t.weight) || 1));
+      for (const sp of part.selected || []) {
+        const id = Number(sp?.id);
+        const c = byRepId.get(id);
+        if (!c || seen.has(id)) continue;
+        seen.add(id);
+        const score = Math.min(10, Math.max(1, Math.round(Number(sp.score) || 5)));
+        // فقط برچسب‌های داخل فهرست، بدون تکرار، حداکثر ۲
+        const tags = [...new Set((Array.isArray(sp.tags) ? sp.tags : []).map((t) => String(t || "").trim()))]
+          .filter((t) => TAGS.includes(t)).slice(0, 2);
+        picked.push({ c, headline: String(sp.headline || "").trim().slice(0, 300), score, tags });
       }
     }
-    const parsed: Insight = {
-      selected_posts: parts.flatMap((p) => p.selected_posts || []),
-      topics: [...topicMap.entries()].sort((a, b) => b[1] - a[1]).map(([name, weight]) => ({ name, weight })),
-    };
+    picked.sort((a, b) => (b.score - a.score) || (b.c.channels - a.c.channels));
+    const selectedPosts = picked.slice(0, 10).map(({ c, headline, score, tags }) => {
+      const last = c.posts[c.posts.length - 1];
+      return {
+        id: c.rep.id,
+        headline,
+        score,
+        tags,
+        sources: c.channels,
+        posts: c.posts.length,
+        channel_id: c.rep.channel_id,
+        time: last.posted_at || last.scraped_at,
+        link: c.rep.link,
+      };
+    });
 
-    // اعتبارسنجی: idهای هذیان‌گفته‌شده (که توی دسته‌ی واقعی نبودن) رو حذف کن
-    const validIds = new Set(posts.map((p) => p.id));
-    const selectedPosts = (parsed.selected_posts || [])
-      .filter((sp) => validIds.has(Number(sp.id)))
-      .slice(0, 10)
-      .map((sp) => ({ id: Number(sp.id), headline: String(sp.headline || "").slice(0, 300) }));
-    const topics = (parsed.topics || [])
-      .filter((t) => t && t.name)
-      .slice(0, 6)
-      .map((t) => ({ name: String(t.name).slice(0, 60), weight: Math.max(1, Number(t.weight) || 1) }));
+    // موضوعات: وزن = مجموع پست‌های خبرهای همون موضوع (شمارش واقعی)
+    const topicMap = new Map<string, Set<number>>();
+    for (const part of parts) {
+      for (const t of part.topics || []) {
+        const name = String(t?.name || "").trim().slice(0, 60);
+        if (!name) continue;
+        let set = topicMap.get(name);
+        if (!set) topicMap.set(name, set = new Set());
+        for (const id of t.ids || []) if (byRepId.has(Number(id))) set.add(Number(id));
+      }
+    }
+    const topics = [...topicMap.entries()]
+      .map(([name, ids]) => ({ name, weight: [...ids].reduce((s, id) => s + (byRepId.get(id)?.posts.length || 0), 0) }))
+      .filter((t) => t.weight > 0)
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 6);
 
     // ذخیره‌ی نتیجه با همون توکن کاربر (باید app_admin باشه، طبق RLS جدول)
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -173,7 +245,12 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "failed to store insights", detail }, 502);
     }
 
-    return jsonResponse({ selected_posts: selectedPosts, topics, window_hours: windowHours });
+    return jsonResponse({
+      selected_posts: selectedPosts,
+      topics,
+      window_hours: windowHours,
+      stats: { posts: posts.length, stories: clusters.length, candidates: candidates.length, ai_calls_ok: aiSuccesses },
+    });
   } catch (e) {
     return jsonResponse({ error: String(e) }, 500);
   }
