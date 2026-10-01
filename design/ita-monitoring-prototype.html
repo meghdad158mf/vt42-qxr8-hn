@@ -1544,6 +1544,47 @@
   .sys-login-badge.fail{ background: rgba(220,60,60,0.12); color: var(--danger); }
   .sys-login-wrap{ overflow-x:auto; }
   .sys-login-more{ margin-top:10px; }
+  /* «گزارش فعالیت» (فقط مدیر) */
+  .act-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .act-chart-title{ font-size:12.5px; font-weight:800; color: var(--text); margin:18px 0 8px; }
+  .act-days{ display:flex; align-items:flex-end; gap:3px; height:140px; padding:8px 4px 0; border-bottom:1px solid var(--border); }
+  .act-day{ flex:1; min-width:0; height:100%; display:flex; align-items:flex-end; }
+  .act-day i{ display:block; width:100%; min-height:2px; background: var(--accent); border-radius:4px 4px 0 0; }
+  .act-day:hover i{ background: var(--accent-strong); }
+  .act-days-axis{ display:flex; justify-content:space-between; font-size:10.5px; color: var(--text-faint); padding:5px 2px 0; }
+  .act-secs{ display:flex; flex-direction:column; gap:2px; }
+  .act-sec-row{ display:grid; grid-template-columns: minmax(110px,190px) minmax(0,1fr) 64px; align-items:center; gap:10px; padding:6px 0; font-size:12.5px; color: var(--text); }
+  .act-sec-row b{ font-weight:800; }
+  .act-sec-row.sub{ font-size:11.5px; color: var(--text-dim); padding:2px 0; }
+  .act-sec-row.sub span:first-child{ padding-inline-start:16px; }
+  .act-bar{ height:10px; border-radius:999px; background: var(--surface-2); overflow:hidden; }
+  .act-bar i{ display:block; height:100%; background: var(--accent); border-radius:999px; }
+  .act-sec-row.sub .act-bar{ height:6px; }
+  .act-sec-row.sub .act-bar i{ background: rgba(181,101,29,0.45); }
+  .act-sec-row > span:last-child{ text-align:left; font-variant-numeric: tabular-nums; }
+  .act-op{ display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; background: var(--primary-soft); color: var(--primary-strong); white-space:nowrap; }
+  .act-op.add{ background: var(--ok-soft); color: var(--ok); }
+  .act-op.del{ background: var(--danger-soft); color: var(--danger); }
+  .act-op.sec{ background: var(--accent-soft); color: var(--accent-strong); }
+  .act-audit-table td{ vertical-align:top; }
+  .act-audit-table td.act-item{ white-space:normal; min-width:160px; max-width:280px; }
+  .act-audit-table td.act-chg{ white-space:normal; min-width:200px; font-size:11.5px; color: var(--text-dim); line-height:1.9; }
+  .act-chg b{ color: var(--text); font-weight:700; }
+  .act-hid-item{ display:flex; gap:14px; align-items:flex-start; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+  .act-hid-item:last-child{ border-bottom:none; }
+  .act-hid-meta{ font-size:11.5px; color: var(--text-faint); margin-bottom:4px; }
+  .act-hid-meta b{ color: var(--text); font-weight:800; }
+  .act-hid-text{ font-size:13px; color: var(--text); line-height:1.9; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+  .act-hid-acts{ display:flex; flex-direction:column; gap:6px; align-items:flex-end; flex-shrink:0; }
+  .act-hid-acts a{ font-size:11.5px; color: var(--accent-strong); text-decoration:none; }
+  .post-hide-btn{ font-size:10.5px; color: var(--danger); background:none; border:none; padding:0; cursor:pointer; font-family:inherit; text-decoration:underline; margin-inline-start:auto; }
+  .post-admin-row{ display:flex; margin-top:8px; }
+  @media (max-width:640px){
+    .act-sec-row{ grid-template-columns: minmax(90px,120px) minmax(0,1fr) 48px; gap:8px; }
+    .act-hid-item{ flex-direction:column; gap:8px; }
+    .act-hid-acts{ flex-direction:row; align-items:center; gap:14px; }
+    .act-days{ height:110px; gap:2px; }
+  }
   /* «سرویس‌های مرتبط» — نمای فهرستی گروه‌بندی‌شده (متفاوت از کارت‌های کارهای خودکار) */
   .svc-summary{ display:flex; align-items:center; gap:14px; padding:4px 2px 14px; margin-bottom:14px; border-bottom:1px dashed var(--border); }
   .svc-summary-num{ font-size:30px; font-weight:800; line-height:1; color: var(--text-dim); }
@@ -1779,7 +1820,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۶.۹</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۷.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -1865,6 +1906,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
               وضعیت سامانه
               <span class="am-dot" id="am-status-dot"></span>
+            </button>
+            <button onclick="switchSection('activity'); closeAdminMenu();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg>
+              گزارش فعالیت
             </button>
             <button onclick="switchSection('settings'); closeAdminMenu();">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
@@ -2853,6 +2898,40 @@
       </div>
     </section>
 
+    <!-- «گزارش فعالیت» (فقط مدیر، مهر ۱۴۰۵ — migration_039): آمار بازدید بخش‌ها، دفتر
+         تغییرات پنل مدیریت (پر شده با trigger دیتابیس) و پست‌های پنهان‌شده -->
+    <section class="section" id="sec-activity">
+      <div class="news-page-tabs" id="act-page-tabs">
+        <button class="active" data-act-tab="views" data-ic="analytics">آمار بازدید</button>
+        <button data-act-tab="audit" data-ic="feed">دفتر تغییرات</button>
+        <button data-act-tab="hidden" data-ic="claims">پست‌های پنهان‌شده</button>
+      </div>
+      <p class="news-tab-subtitle" id="act-tab-subtitle"><span></span></p>
+      <div id="act-pane-views">
+        <div class="panel">
+          <div class="act-toolbar">
+            <div class="usr-filters" id="act-views-days"></div>
+            <div class="usr-filters" id="act-views-role"></div>
+          </div>
+          <div id="act-views"></div>
+        </div>
+      </div>
+      <div id="act-pane-audit" style="display:none;">
+        <div class="panel">
+          <div class="act-toolbar">
+            <div class="usr-filters" id="act-audit-filters"></div>
+            <input type="search" class="usr-search" id="act-audit-search" placeholder="جست‌وجوی نام مورد…" />
+          </div>
+          <div id="act-audit"></div>
+        </div>
+      </div>
+      <div id="act-pane-hidden" style="display:none;">
+        <div class="panel">
+          <div id="act-hidden"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- «کاربران» (فقط مدیر، مهر ۱۴۰۵) — هر چیزی که به کاربرها مربوطه یه‌جا: مشترکین
          اطلاع‌رسانی (قبلاً ته «خروجی‌گیری»)، نظرات کاربران (قبلاً گزینه‌ی جدای منو) و جای
          «حساب‌ها و سطوح دسترسی» (به‌زودی — سطح‌بندی کاربران که بعداً ساخته می‌شه) -->
@@ -2917,7 +2996,7 @@
         <div class="app-footer-brand">
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۶.۹</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۷.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3171,7 +3250,8 @@
     sessionStorage.removeItem('jarian_token'); sessionStorage.removeItem('jarian_role');
     // «مهم»های بسته‌شده فقط تا ورود بعدی پنهان‌ان — خروج باید اینو هم پاک کنه (قبلاً فقط
     // بستن زبانه پاکش می‌کرد و بعد از خروج/ورود در همون زبانه اطلاعیه‌ی مهم برنمی‌گشت)
-    try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); sessionStorage.removeItem('jarian_ann_dismissed_s'); }catch(e){}
+    try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); sessionStorage.removeItem('jarian_ann_dismissed_s'); sessionStorage.removeItem('jarian_pv_session'); }catch(e){}
+    PV_LAST = '';
     clearTimeout(ADMIN_ALERT_TIMER);
     try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
     goLogin();
@@ -3257,7 +3337,7 @@
     });
   });
 
-  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback','status','uploads','announce','users'];
+  const ADMIN_ONLY_SECTIONS = ['export','settings','feedback','status','uploads','announce','users','activity'];
 
   function applyRoleUI(){
     const isAdmin = currentRole === 'app_admin';
@@ -3356,6 +3436,7 @@
     uploads: 'بارگذاری محتوا',
     announce: 'درج اطلاعیه',
     users: 'کاربران',
+    activity: 'گزارش فعالیت',
   };
 
   function switchSection(key){
@@ -3383,6 +3464,7 @@
     if(key === 'status'){ renderSystemStatus(); ackAdminAlerts(); }
     if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
     if(key === 'announce') renderAnnAdmin();
+    if(key === 'activity') setActTab(ACT_TAB);
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
     if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
     // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
@@ -4310,6 +4392,7 @@
           <div class="news-kw-row" id="news-kw-row-${p.id}" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
             <div class="news-kw-chips" id="news-kw-chips-${p.id}">${keywordChipsHtml(p.ai_keywords)}</div>
             <button type="button" class="news-kw-edit-btn" onclick="editPostKeywords(${p.id})">ویرایش کلیدواژه</button>
+            ${postHideBtnHtml(p)}
           </div>` : ''}
         </div>
       </div>`;
@@ -5068,7 +5151,8 @@
     // از POSTS_CACHE (که سقف ۱۰۰۰تایی داره و پست‌های ادعا/شایعه زود ازش
     // بیرون می‌افتن) پیدا بشه — نگاه کن به buildNewsletterPrintHtml
     const r = await api('/newsletter_posts?select=*,posts(*)&order=section.asc,sort_order.asc');
-    NEWSLETTER_POSTS = r.ok ? await r.json() : [];
+    // پست پنهان‌شده: برای بیننده posts=null (RLS)، برای مدیر hidden_at پر
+    NEWSLETTER_POSTS = (r.ok ? await r.json() : []).filter(np=>np.posts && !np.posts.hidden_at);
   }
   // هر سه کوئری (اصلی/حوزه/بله) دقیقاً هم‌زمان، از همون خط اول، ارسال
   // می‌شن — نه اینکه hawza/claims منتظر تموم‌شدن کامل کوئری اصلی (که با
@@ -5091,6 +5175,9 @@
     for(const p of [...hawzaExtra, ...claimsExtra]){
       if(!existingIds.has(p.id)){ POSTS_CACHE.push(p); existingIds.add(p.id); }
     }
+    // پست‌های پنهان‌شده (migration_039): بیننده از خودِ دیتابیس نمی‌گیره، مدیر
+    // می‌گیره ولی در هیچ فید/تحلیلی نشون داده نمی‌شن (فقط «گزارش فعالیت»)
+    POSTS_CACHE = POSTS_CACHE.filter(p=>!p.hidden_at);
   }
 
   // تب «اخبار حوزه» روی همون POSTS_CACHE سوار می‌شه (بخش «تب «اخبار حوزه»»ی
@@ -5295,7 +5382,7 @@
     // کوئری اضافه‌ی پشت‌سرهم داخل خودِ loadPosts (loadHawzaPosts/
     // loadClaimsPosts) این تأخیر برای زمان ورود به سایت محسوس شده بود
     // (بخش «سرعت ورود» CLAUDE.md رو ببین).
-    await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadProfileGroups(), loadChannelProfileGroups(), loadPosts(), loadAnnouncements()]);
+    await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadProfileGroups(), loadChannelProfileGroups(), loadPosts(), loadAnnouncements(), loadHiddenPostIds()]);
     renderAnnBar();
     renderDashHeroStats();
     renderChannelCards();
@@ -6145,6 +6232,7 @@
               ${p.link ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
             </div>
           </div>
+          ${currentRole === 'app_admin' ? `<div class="post-admin-row">${postHideBtnHtml(p)}</div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -6401,6 +6489,7 @@
               ${p.link ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
             </div>
           </div>
+          ${currentRole === 'app_admin' ? `<div class="post-admin-row">${postHideBtnHtml(p)}</div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -6594,7 +6683,7 @@
         + '&order=scraped_at.desc&limit=1000&offset=' + (page * 1000));
       if(!r.ok) break;
       const rows = await r.json();
-      out.push(...rows);
+      out.push(...rows.filter(p=>!HIDDEN_POST_IDS.has(Number(p.id))));
       if(rows.length < 1000) break;
     }
     return out;
@@ -6710,6 +6799,7 @@
     // اگه پست در کش ۱۰۰۰تایی نبود هم نمایش داده می‌شه؛ ردیف‌های قدیمی (فقط id)
     // مثل قبل از روی POSTS_CACHE
     const aiSelected = (NEWS_AI_INSIGHTS?.selected_posts || [])
+      .filter(sp => !HIDDEN_POST_IDS.has(Number(sp.id)))
       .map(sp => ({ sp, post: POSTS_CACHE.find(p=>p.id===sp.id) }))
       .filter(x => x.post || x.sp.channel_id);
     selectedList.innerHTML = '';
@@ -8319,6 +8409,280 @@
   renderDatebar();
   setInterval(renderDatebar, 15000);
 
+  // ---- «گزارش فعالیت» (فقط مدیر، migration_039) ----
+  // سه قسمت: پنهان‌کردن پست (دکمه زیر هر پست برای مدیر + فهرست/بازگرداندن)،
+  // آمار بازدید (شمارنده‌ی روزانه‌ی هر بخش/تب — فقط عدد، بدون نام یا دستگاه) و
+  // دفتر تغییرات (admin_audit، پرشده با trigger دیتابیس — از فرانت‌اند قابل دور
+  // زدن نیست؛ کارهای خودکار گیت‌هاب/Edge Functionها ثبت نمی‌شن). تا وقتی
+  // migration_039 اجرا نشده، همه‌ی این‌ها بی‌صدا غیرفعال‌ان و بقیه‌ی سایت سالمه.
+  var ACT_TAB = 'views';
+  let HIDDEN_POST_IDS = new Set();
+  let ACT_HIDDEN = null, ACT_AUDIT = null, ACT_VIEWS = null;
+  let ACT_VIEWS_DAYS = 30, ACT_VIEWS_ROLE = 'app_viewer', ACT_AUDIT_FILTER = 'all', ACT_AUDIT_SHOW = 50;
+  const ACT_TAB_INFO = {
+    views: 'هر بخش و تب سایت چند بار باز شده، به تفکیک روز. فقط عدد ثبت می‌شود، نه نام یا دستگاه افراد.',
+    audit: 'تغییرهایی که از پنل مدیریت انجام شده: چه چیزی، کی و از کدام دستگاه. کارهای خودکار سامانه ثبت نمی‌شوند.',
+    hidden: 'پست‌هایی که از دید بیننده‌ها پنهان شده‌اند؛ با «بازگرداندن» دوباره در همه‌ی بخش‌ها دیده می‌شوند.',
+  };
+  const ACT_MIGRATION_NOTE = 'برای این بخش، فایل <b>db/migration_039_admin_activity.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.';
+
+  // شناسه‌ی پست‌های پنهان برای هر دو نقش (تابع security definer فقط شناسه می‌ده، نه متن) —
+  // لازمه چون «اخبار منتخب» هوش مصنوعی عنوان خبر رو جدا ذخیره کرده و بدون این فیلتر
+  // پست پنهان‌شده رو باز هم نشون می‌داد
+  async function loadHiddenPostIds(){
+    try{
+      const r = await api('/rpc/hidden_post_ids', { method:'POST', body:'{}' });
+      if(!r.ok){ HIDDEN_POST_IDS = new Set(); return; }
+      const rows = await r.json();
+      HIDDEN_POST_IDS = new Set((Array.isArray(rows) ? rows : []).map(x=>Number(x && typeof x === 'object' ? Object.values(x)[0] : x)));
+    }catch(e){ HIDDEN_POST_IDS = new Set(); }
+  }
+  function postHideBtnHtml(p){
+    return currentRole === 'app_admin' ? `<button type="button" class="post-hide-btn" onclick="hidePost(${Number(p.id)})" title="این پست برای همه‌ی بیننده‌ها پنهان می‌شود">پنهان کردن پست</button>` : '';
+  }
+  function rerenderPostViews(){
+    [renderNewsFeed, renderPosts, renderPoliticalFigures, renderDossierTab].forEach(fn=>{ try{ fn(); }catch(e){ console.error(e); } });
+    if(document.getElementById('sec-overview').classList.contains('active') && NEWS_CURRENT_TAB === 'analytics'){ try{ renderNewsAnalytics(); }catch(e){ console.error(e); } }
+  }
+  async function hidePost(id){
+    if(!confirm('این پست برای همه‌ی بیننده‌ها پنهان شود؟\nبعداً از «مدیریت ← گزارش فعالیت ← پست‌های پنهان‌شده» قابل بازگرداندن است.')) return;
+    const r = await api('/posts?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ hidden_at: new Date().toISOString() }) });
+    if(!r.ok){ showToast(r.status === 400 ? 'اول باید migration_039 در سوپابیس اجرا شود' : 'پنهان کردن پست انجام نشد'); return; }
+    HIDDEN_POST_IDS.add(id);
+    POSTS_CACHE = POSTS_CACHE.filter(p=>p.id !== id);
+    NEWSLETTER_POSTS = NEWSLETTER_POSTS.filter(np=>np.post_id !== id);
+    ACT_HIDDEN = null;
+    rerenderPostViews();
+    showToast('پست پنهان شد');
+  }
+  async function unhidePost(id){
+    const r = await api('/posts?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=representation' }, body: JSON.stringify({ hidden_at: null }) });
+    if(!r.ok){ showToast('بازگرداندن پست انجام نشد'); return; }
+    const rows = await r.json().catch(()=>[]);
+    HIDDEN_POST_IDS.delete(id);
+    if(rows[0] && !POSTS_CACHE.some(p=>p.id === id)){
+      POSTS_CACHE = POSTS_CACHE.concat(rows).sort((a,b)=>String(b.scraped_at||'').localeCompare(String(a.scraped_at||'')));
+    }
+    if(ACT_HIDDEN) ACT_HIDDEN = ACT_HIDDEN.filter(p=>p.id !== id);
+    renderActHidden();
+    rerenderPostViews();
+    showToast('پست بازگردانده شد');
+  }
+
+  function setActTab(tab){
+    navMark();
+    ACT_TAB = ACT_TAB_INFO[tab] ? tab : 'views';
+    document.querySelectorAll('#act-page-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.actTab === ACT_TAB));
+    document.querySelector('#act-tab-subtitle span').textContent = ACT_TAB_INFO[ACT_TAB];
+    ['views','audit','hidden'].forEach(t=>{ document.getElementById('act-pane-' + t).style.display = t === ACT_TAB ? '' : 'none'; });
+    // هر بار باز کردن تب = داده‌ی تازه (بدون اثر روی سرعت بقیه‌ی سایت)
+    if(ACT_TAB === 'views'){ ACT_VIEWS = null; renderActViews(); }
+    if(ACT_TAB === 'audit'){ ACT_AUDIT = null; ACT_AUDIT_SHOW = 50; renderActAudit(); }
+    if(ACT_TAB === 'hidden'){ ACT_HIDDEN = null; renderActHidden(); }
+  }
+  document.getElementById('act-page-tabs').addEventListener('click', e=>{
+    const b = e.target.closest('button');
+    if(b && b.dataset.actTab && b.dataset.actTab !== ACT_TAB) setActTab(b.dataset.actTab);
+  });
+
+  // ---- آمار بازدید ----
+  // هر جابه‌جایی بخش/تب (از navFlush) یه شماره؛ باز کردن دوباره‌ی همون جا پشت‌سرهم
+  // شمرده نمی‌شه. «ورود به سایت» یک‌بار برای هر زبانه (section=session).
+  let PV_LAST = '', PV_OFF = false;
+  function logPageView(st){
+    if(PV_OFF || !authToken || !st || !st.s) return;
+    const calls = [];
+    try{
+      if(!sessionStorage.getItem('jarian_pv_session')){ sessionStorage.setItem('jarian_pv_session', '1'); calls.push(['session', '']); }
+    }catch(e){}
+    const key = st.s + '/' + (st.t || '');
+    if(key !== PV_LAST){ PV_LAST = key; calls.push([st.s, st.t || '']); }
+    calls.forEach(([sec, tab])=>{
+      api('/rpc/log_page_view', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ p_section: sec, p_tab: tab }) })
+        .then(r=>{ if(r.status === 404) PV_OFF = true; }).catch(()=>{});
+    });
+  }
+  const ACT_SECTION_NAMES = { dashboard:'صفحه نخست', overview:'اخبار و رویدادها', posts:'کنشگری مجازی', people:'یادداشت‌ها', hawza:'درباره حوزه', schools:'برنامه مدارس', reports:'بسته تحلیلی جریان' };
+  const ACT_TAB_NAMES = { magazines:'بسته تحلیلی جریان', archive:'بسته‌های سایر نهادها', schools:'گزارش‌های مدارس' };
+  function actSectionName(s){ return ACT_SECTION_NAMES[s] || TITLES[s] || s; }
+  function actTabName(s, t){
+    if(!t) return 'بدون تب';
+    for(const b of document.querySelectorAll('#sec-' + s + ' .news-page-tabs button')){
+      if(!Object.values(b.dataset).includes(t)) continue;
+      const c = b.cloneNode(true);
+      c.querySelectorAll('.news-soon').forEach(x=>x.remove());
+      return c.textContent.trim() || t;
+    }
+    return ACT_TAB_NAMES[t] || t;
+  }
+  function tehranDateStr(ms){ return new Date(ms).toLocaleDateString('en-CA', { timeZone:'Asia/Tehran' }); }
+  async function renderActViews(){
+    const el = document.getElementById('act-views');
+    document.getElementById('act-views-days').innerHTML = [[7,'۷ روز اخیر'],[30,'۳۰ روز اخیر'],[90,'۹۰ روز اخیر']].map(([d,l])=>`<button type="button" class="usr-chip ${ACT_VIEWS_DAYS===d?'active':''}" data-d="${d}">${l}</button>`).join('');
+    document.getElementById('act-views-role').innerHTML = [['app_viewer','بیننده‌ها'],['app_admin','مدیر'],['all','همه']].map(([k,l])=>`<button type="button" class="usr-chip ${ACT_VIEWS_ROLE===k?'active':''}" data-r="${k}">${l}</button>`).join('');
+    if(!ACT_VIEWS){
+      el.innerHTML = '<div class="sys-note">در حال دریافت…</div>';
+      try{
+        const since = tehranDateStr(Date.now() - 89 * 86400000);
+        const rows = [];
+        for(let page = 0; page < 10; page++){
+          const r = await api('/page_views?select=day,section,tab,role,views&day=gte.' + since + '&order=day.asc&limit=1000&offset=' + (page * 1000));
+          if(r.status === 404 || r.status === 400){ el.innerHTML = '<div class="ann-missing">' + ACT_MIGRATION_NOTE + '</div>'; return; }
+          if(!r.ok) throw new Error('page_views ' + r.status);
+          const part = await r.json();
+          rows.push(...part);
+          if(part.length < 1000) break;
+        }
+        ACT_VIEWS = rows;
+      }catch(e){ console.error(e); el.innerHTML = '<div class="sys-note">خطا در دریافت آمار بازدید.</div>'; return; }
+    }
+    const days = [];
+    for(let i = ACT_VIEWS_DAYS - 1; i >= 0; i--) days.push(tehranDateStr(Date.now() - i * 86400000));
+    const rows = ACT_VIEWS.filter(x=>x.day >= days[0] && (ACT_VIEWS_ROLE === 'all' || x.role === ACT_VIEWS_ROLE));
+    const pages = rows.filter(x=>x.section !== 'session');
+    const total = pages.reduce((a,x)=>a + x.views, 0);
+    const sessions = rows.filter(x=>x.section === 'session').reduce((a,x)=>a + x.views, 0);
+    if(!ACT_VIEWS.length){
+      el.innerHTML = '<div class="sys-note">هنوز بازدیدی ثبت نشده. آمار از زمان اجرای migration_039 جمع می‌شود.</div>';
+      return;
+    }
+    const perDay = {}; days.forEach(d=>perDay[d] = 0);
+    pages.forEach(x=>{ if(x.day in perDay) perDay[x.day] += x.views; });
+    const maxDay = Math.max(1, ...Object.values(perDay));
+    const secs = {};
+    pages.forEach(x=>{
+      const s = secs[x.section] || (secs[x.section] = { n:0, tabs:{} });
+      s.n += x.views;
+      s.tabs[x.tab] = (s.tabs[x.tab] || 0) + x.views;
+    });
+    const secList = Object.entries(secs).sort((a,b)=>b[1].n - a[1].n);
+    const maxSec = secList.length ? secList[0][1].n : 1;
+    const fmtDay = d=>new Date(d + 'T12:00:00Z').toLocaleDateString('fa-IR', { timeZone:'Asia/Tehran', day:'numeric', month:'long' });
+    const top = secList[0];
+    el.innerHTML = `<div class="sys-login-sum">
+        <div class="sys-login-stat"><b>${faNum(total)}</b><span>بازدید بخش‌ها و تب‌ها</span></div>
+        <div class="sys-login-stat"><b>${faNum(sessions)}</b><span>ورود به سایت (هر زبانه‌ی مرورگر یک‌بار)</span></div>
+        <div class="sys-login-stat"><b>${faNum(Math.round(total / days.length))}</b><span>میانگین بازدید در روز</span></div>
+        <div class="sys-login-stat"><b>${top ? escHtml(actSectionName(top[0])) : '—'}</b><span>پربازدیدترین بخش</span></div>
+      </div>
+      <div class="act-chart-title">بازدید روزانه</div>
+      <div class="act-days">${days.map(d=>`<div class="act-day" title="${escAttr(fmtDay(d) + '، ' + faNum(perDay[d]) + ' بازدید')}"><i style="height:${(perDay[d] / maxDay * 100).toFixed(1)}%"></i></div>`).join('')}</div>
+      <div class="act-days-axis"><span>${fmtDay(days[0])}</span><span>${fmtDay(days[days.length - 1])}</span></div>
+      <div class="act-chart-title">بازدید به تفکیک بخش و تب</div>
+      ${secList.length ? `<div class="act-secs">${secList.map(([s, v])=>{
+        const tabs = Object.entries(v.tabs).filter(([t])=>t).sort((a,b)=>b[1] - a[1]);
+        return `<div class="act-sec-row"><span><b>${escHtml(actSectionName(s))}</b></span><span class="act-bar"><i style="width:${(v.n / maxSec * 100).toFixed(1)}%"></i></span><span>${faNum(v.n)}</span></div>`
+          + tabs.map(([t, n])=>`<div class="act-sec-row sub"><span>${escHtml(actTabName(s, t))}</span><span class="act-bar"><i style="width:${(n / maxSec * 100).toFixed(1)}%"></i></span><span>${faNum(n)}</span></div>`).join('');
+      }).join('')}</div>` : '<div class="sys-note">در این بازه بازدیدی ثبت نشده.</div>'}`;
+  }
+  document.getElementById('act-views-days').addEventListener('click', e=>{ const b = e.target.closest('button'); if(b){ ACT_VIEWS_DAYS = Number(b.dataset.d); renderActViews(); } });
+  document.getElementById('act-views-role').addEventListener('click', e=>{ const b = e.target.closest('button'); if(b){ ACT_VIEWS_ROLE = b.dataset.r; renderActViews(); } });
+
+  // ---- دفتر تغییرات ----
+  const AUDIT_TBL = {
+    channels:['منبع','sources'], categories:['موضوع منابع','sources'], regions:['منطقه','sources'], profile_groups:['گروه چهره/سازمان','sources'],
+    channel_profile_groups:['عضویت منبع در گروه','sources'], news_topics:['میان‌بر جست‌وجو','content'], dossier_topics:['پرونده‌ی موضوعی','content'],
+    dossier_topic_posts:['مطلب پرونده','content'], newsletter_posts:['خبرنامه مدارس','content'], magazines:['بسته تحلیلی جریان','content'],
+    archive_reports:['بسته‌ی سایر نهادها','content'], school_reports:['گزارش برنامه مدارس','content'], announcements:['اطلاعیه','content'],
+    app_users:['کاربر','users'], feedback:['نظر کاربر','users'], notify_subscribers:['مشترک اطلاع‌رسانی','users'],
+    posts:['پست','posts'], app_config:['رمز عبور','security'],
+  };
+  const AUDIT_GROUPS = [['all','همه'],['sources','منابع'],['content','محتوا'],['posts','پست‌ها'],['users','کاربران'],['security','امنیت']];
+  const AUDIT_OP = { insert:['افزودن','add'], update:['ویرایش',''], delete:['حذف','del'], hide:['پنهان کردن','del'], unhide:['بازگرداندن','add'], password:['تغییر رمز','sec'], publish:['انتشار','add'] };
+  const AUDIT_FIELD = {
+    title:'عنوان', name:'نام', username:'آدرس / شناسه', platform:'بستر', active:'فعال', category_id:'موضوع', region_id:'منطقه', hawza_region_id:'منطقه‌ی حوزه',
+    show_in_news:'بخش اخبار و رویدادها', show_in_cyberspace:'بخش کنشگری مجازی', show_in_people:'بخش چهره‌ها', show_in_orgs:'بخش سازمان‌ها', show_in_hawza:'بخش درباره حوزه',
+    avatar_url:'عکس', owner_name:'صاحب کانال', subscriber_count:'مخاطب', is_khorasan_talabeh:'طلاب خراسان', keywords:'کلیدواژه‌ها', color:'رنگ', kind:'نوع',
+    excluded:'پنهان در پرونده', message:'متن', level:'اهمیت', expires_at:'انقضا', full_name:'نام', phone:'موبایل', eitaa_id:'شناسه‌ی ایتا',
+    access_level:'سطح دسترسی', notes:'یادداشت', issue_no:'شماره', publish_date:'تاریخ انتشار', file_type:'نوع فایل', files:'فایل‌ها', cover_url:'جلد',
+    source_org:'نهاد', image_url:'تصویر', media_storage_path:'فایل', notified_at:'زمان اطلاع‌رسانی', type:'نوع منبع',
+  };
+  const AUDIT_FILE_FIELDS = ['avatar_url','files','cover_url','image_url','media_storage_path'];
+  function auditVal(k, v){
+    if(v === null || v === undefined || v === '') return '—';
+    if(typeof v === 'boolean') return v ? 'بله' : 'خیر';
+    if(k === 'category_id'){ const c = CATEGORIES.find(x=>x.id === v); return c ? escHtml(c.name) : faNum(v); }
+    if(k === 'region_id' || k === 'hawza_region_id') return escHtml(regionNameOf(v) || String(v));
+    if(k === 'access_level') return escHtml(USER_LEVELS[v] || v);
+    if(k === 'level') return v === 'important' ? 'مهم' : 'عادی';
+    if(k === 'platform') return escHtml(NEWS_PLATFORM_LABEL[v] || v);
+    if(typeof v === 'number') return faNum(v);
+    if(typeof v === 'string' && /^\d{4}-\d\d-\d\dT/.test(v)) return new Date(v).toLocaleString('fa-IR', { timeZone:'Asia/Tehran', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    const t = typeof v === 'string' ? v : JSON.stringify(v);
+    return escHtml(t.length > 70 ? t.slice(0, 70) + '…' : t);
+  }
+  function auditChangesHtml(x){
+    if(!x.changes || typeof x.changes !== 'object') return '';
+    return Object.entries(x.changes).map(([k, pair])=>{
+      const label = escHtml(AUDIT_FIELD[k] || k);
+      if(AUDIT_FILE_FIELDS.includes(k)) return `<div><b>${label}</b>: عوض شد</div>`;
+      const [a, b] = Array.isArray(pair) ? pair : [null, pair];
+      return `<div><b>${label}</b>: ${auditVal(k, a)} ← ${auditVal(k, b)}</div>`;
+    }).join('');
+  }
+  async function renderActAudit(){
+    const el = document.getElementById('act-audit');
+    if(!ACT_AUDIT){
+      el.innerHTML = '<div class="sys-note">در حال دریافت…</div>';
+      try{
+        const r = await api('/admin_audit?select=*&order=created_at.desc&limit=1000');
+        if(r.status === 404 || r.status === 400){ document.getElementById('act-audit-filters').innerHTML = ''; el.innerHTML = '<div class="ann-missing">' + ACT_MIGRATION_NOTE + '</div>'; return; }
+        if(!r.ok) throw new Error('admin_audit ' + r.status);
+        ACT_AUDIT = await r.json();
+      }catch(e){ console.error(e); el.innerHTML = '<div class="sys-note">خطا در دریافت دفتر تغییرات.</div>'; return; }
+    }
+    const groupOf = x=>(AUDIT_TBL[x.tbl] || [x.tbl, 'content'])[1];
+    const counts = { all: ACT_AUDIT.length };
+    ACT_AUDIT.forEach(x=>{ const g = groupOf(x); counts[g] = (counts[g] || 0) + 1; });
+    document.getElementById('act-audit-filters').innerHTML = AUDIT_GROUPS.map(([k,l])=>`<button type="button" class="usr-chip ${ACT_AUDIT_FILTER===k?'active':''}" data-f="${k}">${l}<span>${toFaDigits(counts[k] || 0)}</span></button>`).join('');
+    const q = (document.getElementById('act-audit-search').value || '').trim();
+    const list = ACT_AUDIT.filter(x=>(ACT_AUDIT_FILTER === 'all' || groupOf(x) === ACT_AUDIT_FILTER) && (!q || (x.label || '').includes(q)));
+    if(!list.length){
+      el.innerHTML = '<div class="sys-note">' + (ACT_AUDIT.length ? 'موردی با این فیلتر پیدا نشد.' : 'هنوز تغییری ثبت نشده. از این به بعد هر تغییر در پنل مدیریت اینجا دیده می‌شود.') + '</div>';
+      return;
+    }
+    const shown = list.slice(0, ACT_AUDIT_SHOW);
+    el.innerHTML = `<div class="sys-login-wrap"><table class="sys-login-table act-audit-table"><thead><tr><th>زمان</th><th>عملیات</th><th>بخش</th><th>مورد</th><th>جزئیات</th><th>دستگاه</th></tr></thead><tbody>${shown.map(x=>{
+        const when = new Date(x.created_at).toLocaleString('fa-IR', { timeZone:'Asia/Tehran', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+        const op = AUDIT_OP[x.op] || [x.op, ''];
+        const ua = sysDeviceLabel(x.user_agent);
+        return `<tr><td>${escHtml(when)}</td><td><span class="act-op ${op[1]}">${escHtml(op[0])}</span></td><td>${escHtml((AUDIT_TBL[x.tbl] || [x.tbl])[0])}</td>`
+          + `<td class="act-item">${escHtml(x.label || '—')}</td><td class="act-chg">${auditChangesHtml(x)}</td>`
+          + `<td title="${escAttr((x.user_agent || '') + (x.ip ? ' — IP: ' + x.ip : ''))}">${escHtml(ua)}</td></tr>`;
+      }).join('')}</tbody></table></div>${list.length > ACT_AUDIT_SHOW ? `<button type="button" class="btn sys-login-more" onclick="ACT_AUDIT_SHOW+=100;renderActAudit()">نمایش بیشتر (${faNum(list.length - ACT_AUDIT_SHOW)} مورد دیگر)</button>` : ''}`;
+  }
+  document.getElementById('act-audit-filters').addEventListener('click', e=>{ const b = e.target.closest('button'); if(b){ ACT_AUDIT_FILTER = b.dataset.f; ACT_AUDIT_SHOW = 50; renderActAudit(); } });
+  document.getElementById('act-audit-search').addEventListener('input', ()=>{ ACT_AUDIT_SHOW = 50; renderActAudit(); });
+
+  // ---- پست‌های پنهان‌شده ----
+  async function renderActHidden(){
+    const el = document.getElementById('act-hidden');
+    if(!ACT_HIDDEN){
+      el.innerHTML = '<div class="sys-note">در حال دریافت…</div>';
+      try{
+        const r = await api('/posts?select=id,channel_id,platform,title,text,link,hidden_at,posted_at,scraped_at&hidden_at=not.is.null&order=hidden_at.desc&limit=300');
+        if(r.status === 400){ el.innerHTML = '<div class="ann-missing">' + ACT_MIGRATION_NOTE + '</div>'; return; }
+        if(!r.ok) throw new Error('posts ' + r.status);
+        ACT_HIDDEN = await r.json();
+      }catch(e){ console.error(e); el.innerHTML = '<div class="sys-note">خطا در دریافت پست‌های پنهان‌شده.</div>'; return; }
+    }
+    if(!ACT_HIDDEN.length){
+      el.innerHTML = '<div class="sys-note">هیچ پستی پنهان نشده. برای پنهان کردن یک پست، روی «پنهان کردن پست» زیر همان پست بزنید.</div>';
+      return;
+    }
+    el.innerHTML = ACT_HIDDEN.map(p=>{
+      const ch = chById(p.channel_id) || {};
+      const text = (p.title ? p.title + ' — ' : '') + (p.text || '');
+      return `<div class="act-hid-item"><div>
+          <div class="act-hid-meta"><b>${escHtml(ch.title || ch.username || '؟')}</b>، ${escHtml(NEWS_PLATFORM_LABEL[p.platform] || p.platform || '')}، انتشار ${escHtml(newsRelTime(p.posted_at || p.scraped_at))}، پنهان‌شده ${escHtml(newsRelTime(p.hidden_at))}</div>
+          <div class="act-hid-text">${escHtml(text.slice(0, 400))}</div>
+        </div><div class="act-hid-acts">
+          <button type="button" class="btn" onclick="unhidePost(${Number(p.id)})">بازگرداندن</button>
+          ${p.link ? `<a href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
+        </div></div>`;
+    }).join('');
+  }
+
   // ---- دکمه‌ی «برگشت» مرورگر/گوشی ----
   // بخش‌ها و تب‌ها فقط با عوض‌شدن کلاس روی همین صفحه جابه‌جا می‌شن (ناوبری واقعی
   // نیست)، پس بدون این بخش «برگشت» کلاً از سایت بیرون می‌رفت. هر جابه‌جایی
@@ -8341,6 +8705,7 @@
       if((t === 'figures' || t === 'orgs') && pfSelectedChannel) ch = pfSelectedChannel;
     }
     else if(s === 'uploads') t = UPLOADS_TAB;
+    else if(s === 'activity') t = ACT_TAB;
     const key = [s, t, ch].filter(x=>x !== null && x !== undefined && x !== '').join('/');
     return { jarian:1, key, s, t, ch };
   }
@@ -8363,6 +8728,7 @@
     const restoring = NAV_RESTORING; NAV_RESTORING = false;
     if(!document.getElementById('view-dash').classList.contains('active')) return;
     const st = navCurrentState();
+    logPageView(st);
     const cur = history.state;
     try{
       if(restoring || !cur || !cur.jarian){
@@ -8390,6 +8756,7 @@
       else if(!st.ch && pfSelectedChannel) closePfChannel();
     }
     if(st.s === 'uploads' && st.t && ['magazines','archive','schools'].includes(st.t) && st.t !== UPLOADS_TAB) setUploadsTab(st.t);
+    if(st.s === 'activity' && st.t && ACT_TAB_INFO[st.t] && st.t !== ACT_TAB) setActTab(st.t);
   }
   window.addEventListener('popstate', e=>{
     // اول پنجره‌ی باز (عکس/فیلم، ویرایش منبع...) بسته می‌شه، نه خودِ بخش
@@ -8425,7 +8792,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.16.9';
+  const APP_VERSION = '5.17.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----

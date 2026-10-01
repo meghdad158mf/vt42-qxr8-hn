@@ -56,7 +56,8 @@ export async function fetchRecentNewsPostsForUser(
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const headers = { apikey: anonKey ?? "", Authorization: `Bearer ${token}` };
 
-  // فقط کانال‌های «شبکه‌های اجتماعی» + «وب‌سایت‌ها» (show_in_news، غیر از بله)
+  // فقط کانال‌های «شبکه‌های اجتماعی» + «وب‌سایت‌ها» (show_in_news، غیر از بله)؛
+  // پست‌هایی که مدیر پنهان کرده (hidden_at، migration_039) در «اخبار منتخب» نمیان
   const chRes = await fetch(
     `${supabaseUrl}/rest/v1/channels?select=id&show_in_news=eq.true&platform=neq.bale`,
     { headers },
@@ -73,7 +74,7 @@ export async function fetchRecentNewsPostsForUser(
   for (let offset = 0; offset < maxPosts; offset += 1000) {
     const postsRes = await fetch(
       `${supabaseUrl}/rest/v1/posts?select=id,channel_id,title,text,link,posted_at,scraped_at,ai_keywords,channels(title)` +
-        `&channel_id=in.(${ids})&scraped_at=gte.${cutoff}&order=scraped_at.desc&limit=${Math.min(1000, maxPosts - offset)}&offset=${offset}`,
+        `&channel_id=in.(${ids})&hidden_at=is.null&scraped_at=gte.${cutoff}&order=scraped_at.desc&limit=${Math.min(1000, maxPosts - offset)}&offset=${offset}`,
       { headers },
     );
     if (!postsRes.ok) return offset ? out : null;
