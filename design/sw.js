@@ -3,7 +3,7 @@
 // داده‌ها همیشه زنده بمونن. فایل‌های ثابت هم‌دامنه (فونت/تصویر/کتابخونه/آیکون)
 // cache-first؛ خودِ صفحه network-first تا هر انتشار جدید فوراً دیده بشه.
 // با تغییر فهرست فایل‌های ثابت یا منطق این فایل، CACHE رو یک شماره بالا ببر.
-const CACHE = 'jarian-static-v4';
+const CACHE = 'jarian-static-v5';
 const PRECACHE = [
   'ita-monitoring-prototype.html',
   'manifest.webmanifest',
@@ -12,6 +12,7 @@ const PRECACHE = [
   'icons/icon.svg',
   'icons/jarian-mark.svg',
   'fonts/IRANSansXV.woff2',
+  'vendor/gsap.min.js',
 ];
 
 self.addEventListener('install', event => {
