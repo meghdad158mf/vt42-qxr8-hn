@@ -149,6 +149,7 @@ def upsert_newspapers(token: str, rows: list[dict]) -> None:
     )
     if not r.ok:
         print(f"    [!] upsert failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
+        sys.exit(1)  # اجرا «ناموفق» ثبت بشه تا کارت «وضعیت سامانه» قرمز بشه
 
 
 def main() -> None:

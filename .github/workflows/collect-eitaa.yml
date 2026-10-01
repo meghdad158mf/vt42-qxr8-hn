@@ -5,6 +5,12 @@ on:
     - cron: "0 */2 * * *"   # هر ۲ ساعت
   workflow_dispatch: {}      # امکان اجرای دستی از تب Actions
 
+# دو اجرای هم‌زمان (زمان‌بندی + «اجرای دستی» از صفحه‌ی وضعیت) نشه — برای تلگرام
+# استفاده‌ی هم‌زمان از یک نشست از دو سرور می‌تونه نشست رو باطل کنه؛ اجرای دوم صبر می‌کنه
+concurrency:
+  group: collect-eitaa
+  cancel-in-progress: false
+
 jobs:
   collect:
     runs-on: ubuntu-latest

@@ -13,10 +13,11 @@
 // ورودی فقط یه کلید از فهرست ثابت JOBS‌ه، نه اسم دلخواه ورک‌فلو — پس حتی با
 // یه توکن مدیر هم نمی‌شه هر ورک‌فلویی (مثلاً پاک‌سازی/purge) رو اجرا کرد.
 //
-// فقط مدیر: با توکن کالر یه select روی جدول feedback زده می‌شه — این جدول
-// برای app_viewer فقط insert داره (migration_018)، پس select فقط برای
-// app_admin موفقه. همون الگوی «اعتبارسنجی با کوئری واقعی PostgREST» بقیه‌ی
-// Edge Functionهای این پروژه (_shared/auth.ts).
+// فقط مدیر: isAdminRequest در _shared/auth.ts (توکن با یه کوئری واقعی PostgREST
+// اعتبارسنجی و نقش از claim همون توکن خونده می‌شه — ۵.۲۲.۱؛ قبلاً «select روی
+// feedback» بود که فقط تا وقتی بیننده GRANT نداشت درست کار می‌کرد).
+
+import { isAdminRequest } from "../_shared/auth.ts";
 
 const GITHUB_REPO = "meghdad158mf/vt42-qxr8-hn";
 // کرون‌ها فقط از main اجرا می‌شن (نکته‌ی عملیاتی ۶ CLAUDE.md)، اجرای دستی هم همونجا
@@ -102,17 +103,6 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-async function isAdmin(req: Request): Promise<boolean> {
-  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
-  if (!token) return false;
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  const res = await fetch(`${supabaseUrl}/rest/v1/feedback?select=id&limit=1`, {
-    headers: { apikey: anonKey ?? "", Authorization: `Bearer ${token}` },
-  });
-  return res.ok;
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -120,9 +110,12 @@ Deno.serve(async (req) => {
 
   try {
     const { job, action } = await req.json();
-    if (action !== "status" && action !== "health" && !JOBS[job]) return jsonResponse({ error: "unknown job" }, 400);
+    // Object.hasOwn: کلیدهایی مثل «constructor» از prototype رد بشن، نه فقط کلیدهای JOBS
+    if (action !== "status" && action !== "health" && !(typeof job === "string" && Object.hasOwn(JOBS, job))) {
+      return jsonResponse({ error: "unknown job" }, 400);
+    }
 
-    if (!(await isAdmin(req))) return jsonResponse({ error: "admin only" }, 403);
+    if (!(await isAdminRequest(req))) return jsonResponse({ error: "admin only" }, 403);
 
     const ghToken = Deno.env.get("GITHUB_DISPATCH_TOKEN");
     if (!ghToken) return jsonResponse({ error: "GITHUB_DISPATCH_TOKEN is not set" }, 500);

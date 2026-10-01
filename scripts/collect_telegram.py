@@ -86,9 +86,9 @@ def fetch_last_post_id(token: str, channel_id: int) -> int:
     return int(rows[0]["platform_post_id"]) if rows else 0
 
 
-def upsert_posts(token: str, posts: list[dict]) -> None:
+def upsert_posts(token: str, posts: list[dict]) -> bool:
     if not posts:
-        return
+        return True
     r = requests.post(
         f"{SUPABASE_URL}/rest/v1/posts",
         headers={**auth_headers(token), "Prefer": "resolution=merge-duplicates,return=minimal"},
@@ -98,6 +98,8 @@ def upsert_posts(token: str, posts: list[dict]) -> None:
     )
     if not r.ok:
         print(f"    [!] upsert failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
+        return False
+    return True
 
 
 def media_type_of(msg) -> str | None:
@@ -163,7 +165,12 @@ async def collect_channel(client: TelegramClient, token: str, channel: dict) -> 
 
     posts = []
     media_count = 0
-    async for msg in client.iter_messages(username, min_id=last_id, limit=MESSAGES_PER_CHANNEL_LIMIT):
+    # ۵.۲۲.۱ (بررسی پشت صحنه): قبلاً همیشه «۱۰۰ پیام آخر» گرفته می‌شد؛ اگه کانالی
+    # بین دو اجرا بیشتر از ۱۰۰ پیام می‌ذاشت، پیام‌های وسط برای همیشه جا می‌موندن
+    # (اجرای بعد از آخرین پیام ادامه می‌داد). حالا اگه قبلاً پیامی ثبت شده، از همون
+    # نقطه به ترتیب قدیمی→جدید ادامه می‌ده (حداکثر ۱۰۰ تا، بقیه اجرای بعد) — چیزی جا
+    # نمی‌مونه. کانال تازه (last_id=0) مثل قبل فقط ۱۰۰ پیام آخر رو می‌گیره، نه کل تاریخچه.
+    async for msg in client.iter_messages(username, min_id=last_id, limit=MESSAGES_PER_CHANNEL_LIMIT, reverse=last_id > 0):
         post = {
             "channel_id": channel_id,
             "platform": "telegram",
@@ -188,8 +195,17 @@ async def collect_channel(client: TelegramClient, token: str, channel: dict) -> 
             media_count += 1
         posts.append(post)
 
-    upsert_posts(token, posts)
+    if not upsert_posts(token, posts):
+        raise RuntimeError("upsert failed")
     return len(posts), media_count
+
+
+def exit_if_all_failed(failed: int, total: int) -> None:
+    # اگه همه‌ی منابع خطا دادن، اجرا «ناموفق» ثبت بشه تا کارت «وضعیت سامانه» قرمز
+    # بشه (قبلاً هر خطایی فقط چاپ می‌شد و اجرا همیشه سبز می‌موند)
+    if total and failed == total:
+        print(f"[!] all {total} source(s) failed", file=sys.stderr)
+        sys.exit(1)
 
 
 async def main() -> None:
@@ -200,6 +216,7 @@ async def main() -> None:
     async with TelegramClient(StringSession(TG_SESSION), TG_API_ID, TG_API_HASH) as client:
         total = 0
         total_media = 0
+        failed = 0
         for channel in channels:
             try:
                 n, m = await collect_channel(client, token, channel)
@@ -207,9 +224,11 @@ async def main() -> None:
                 total_media += m
                 print(f"[+] @{channel['username']}: {n} new message(s), {m} media downloaded")
             except Exception as e:
+                failed += 1
                 print(f"[!] @{channel['username']}: {e}", file=sys.stderr)
 
     print(f"[done] total new messages: {total}, media downloaded: {total_media}")
+    exit_if_all_failed(failed, len(channels))
 
 
 if __name__ == "__main__":

@@ -36,7 +36,7 @@
 // لازم (LIARA_API_KEY, SUPABASE_ACCESS_TOKEN) از قبل برای translate/
 // news-insights تنظیم شدن، نیازی به تنظیم دوباره نیست.
 
-import { fetchPostsMissingKeywords } from "../_shared/auth.ts";
+import { fetchPostsMissingKeywords, isAdminRequest } from "../_shared/auth.ts";
 import { AiTimeoutError, liaraChat, mapLimit } from "../_shared/liara.ts";
 
 const DEFAULT_LIMIT = 80; // هم‌راستا با BATCH_LIMIT در scripts/extract_keywords.py — کالر همیشه صریح limit می‌فرسته، این فقط fallbacke
@@ -67,6 +67,10 @@ Deno.serve(async (req) => {
     } catch {
       // بدنه‌ی خالی هم مجازه — همون پیش‌فرض استفاده می‌شه
     }
+    limit = Math.min(200, Math.max(1, Math.floor(limit)));
+
+    // فقط مدیر (کالر واقعی extract_keywords.py با توکن مدیره) — همون دلیل news-insights
+    if (!(await isAdminRequest(req))) return jsonResponse({ error: "admin only" }, 403);
 
     const result = await fetchPostsMissingKeywords(req, limit);
     if (result === null) return jsonResponse({ error: "unauthorized" }, 401);

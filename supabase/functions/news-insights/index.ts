@@ -32,7 +32,7 @@
 // لازم (LIARA_API_KEY, SUPABASE_ACCESS_TOKEN) از قبل برای translate تنظیم
 // شدن، نیازی به تنظیم دوباره نیست.
 
-import { fetchRecentNewsPostsForUser, type WindowPost } from "../_shared/auth.ts";
+import { fetchRecentNewsPostsForUser, type WindowPost, isAdminRequest } from "../_shared/auth.ts";
 import { liaraChat, mapLimit } from "../_shared/liara.ts";
 import { clusterPosts, postTime, type Cluster } from "../_shared/cluster.ts";
 
@@ -116,6 +116,11 @@ Deno.serve(async (req) => {
     } catch {
       // بدنه‌ی خالی هم مجازه — همون پیش‌فرض استفاده می‌شه
     }
+    windowHours = Math.min(24, Math.max(1, windowHours));
+
+    // فقط مدیر (کالر واقعی analyze_news_insights.py با توکن مدیره): قبلاً بیننده هم
+    // می‌تونست صداش بزنه و هزینه‌ی هوش مصنوعی بسازه (فقط ذخیره‌ی آخر با RLS رد می‌شد)
+    if (!(await isAdminRequest(req))) return jsonResponse({ error: "admin only" }, 403);
 
     const posts = await fetchRecentNewsPostsForUser(req, windowHours, MAX_POSTS_FETCH);
     if (posts === null) return jsonResponse({ error: "unauthorized" }, 401);
