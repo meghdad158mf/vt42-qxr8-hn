@@ -1025,7 +1025,7 @@
   .news-search-hint{ display:none; position:absolute; top:calc(100% + 6px); inset-inline:0; z-index:21; background: var(--surface); color: var(--text-dim); border:1px solid var(--border-strong); border-radius: var(--radius-control); padding:8px 12px; font-size:11.5px; line-height:1.8; box-shadow: var(--shadow-hover); }
   .news-search-box:focus-within .news-search-hint{ display:block; }
   .news-search-box:focus-within input:not(:placeholder-shown) ~ .news-search-hint{ display:none; }
-  #news-time-seg .news-daterange-clear{ align-self:flex-start; font-size:11px; font-weight:600; color: var(--accent-strong); background:none; border:none; cursor:pointer; padding:0; font-family:inherit; }
+  .news-seg .news-daterange-clear{ align-self:flex-start; font-size:11px; font-weight:600; color: var(--accent-strong); background:none; border:none; cursor:pointer; padding:0; font-family:inherit; }
 
   .news-source-details{ position:relative; margin-inline-start:auto; }
   .news-source-details summary{
@@ -1831,6 +1831,22 @@
     #news-time-seg > button, #news-time-seg .news-daterange-details summary{ white-space:nowrap; padding-inline:9px; }
   }
 
+  /* «کنشگری مجازی» — ردیف گروه + زمان، نوار «فقط پست‌های X»، دسته‌بندی تیره (هم‌شکل اخبار)، مرتب‌سازی گوشی */
+  .posts-seg-row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+  .posts-focus-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:14px; padding:10px 14px; border-radius:12px; background: rgba(234,179,147,0.12); border:1px solid rgba(234,179,147,0.4); color:#fff; font-size:13px; }
+  .posts-focus-bar b{ color: var(--accent); }
+  .posts-focus-bar button{ font:inherit; font-size:12px; font-weight:700; color: var(--primary); background: var(--accent); border:none; border-radius:999px; padding:7px 14px; cursor:pointer; min-height:36px; }
+  #posts-tab-feed .toolbar select{ background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color:#fff; color-scheme:dark; }
+  .cpt-sort-m{ display:none; }
+  @media (max-width:700px){
+    .cpt-sort-m{ display:flex; align-items:center; gap:8px; padding:10px 14px; font-size:12px; color: var(--text-dim); border-bottom:1px solid var(--border); }
+    .cpt-sort-m select{ flex:1; font:inherit; font-size:13px; padding:8px 10px; min-height:40px; border-radius:8px; border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); }
+  }
+  @media (max-width:640px){
+    #posts-time-seg{ gap:2px; }
+    #posts-time-seg > button, #posts-time-seg .news-daterange-details summary{ white-space:nowrap; padding-inline:9px; }
+    .posts-seg-row{ gap:8px; }
+  }
   /* «جستجوی هوشمند» هنوز «به‌زودی»ه — تا وقتی کار نمی‌کنه جا نگیره */
   .news-smart-toggle{ display:none !important; }
   /* اندازه‌ی لمسی روی گوشی (حدود ۴۰–۴۴px) — دکمه‌های ریز «نمایش بیشتر»، «مشاهده‌ی منبع»، زمان و صفحه‌ها */
@@ -1857,7 +1873,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۸.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۸.۳</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2709,23 +2725,35 @@
       <p class="news-tab-subtitle" id="posts-tab-subtitle"><span>پست‌های منتشرشده‌ی کانال‌های کنشگر فضای مجازی، قابل‌فیلتر بر اساس کانال، دسته و زمان.</span></p>
 
       <div id="posts-tab-feed" data-mfilters>
-        <div class="news-seg m-collapse" id="posts-group-seg" style="margin-bottom:14px">
+        <div class="posts-seg-row">
+        <div class="news-seg m-collapse" id="posts-group-seg">
           <button class="active" data-g="">همه</button>
           <button data-g="khorasan">طلاب خراسان</button>
           <button data-g="other">سایر کنشگران</button>
         </div>
+        <!-- زمان: همون شکل «اخبار و رویدادها» (قبلاً یه فهرست کشویی سفید بود) -->
+        <div class="news-seg m-collapse" id="posts-time-seg">
+          <button class="active" data-t="">همه</button>
+          <button data-t="today">امروز</button>
+          <button data-t="yesterday">دیروز</button>
+          <button data-t="week">هفته گذشته</button>
+          <details class="news-daterange-details" id="posts-daterange-details">
+            <summary id="posts-daterange-summary">بازه زمانی</summary>
+            <div class="news-source-list news-daterange-popover">
+              <div class="news-daterange-field"><span>از</span><span class="jdate" data-which="from"></span></div>
+              <div class="news-daterange-field"><span>تا</span><span class="jdate" data-which="to"></span></div>
+              <button type="button" class="news-daterange-clear" id="posts-daterange-clear">پاک‌کردن بازه</button>
+            </div>
+          </details>
+        </div>
+        </div>
+        <div class="posts-focus-bar" id="posts-focus-bar" style="display:none;"></div>
         <div class="toolbar">
           <details class="news-source-details m-collapse" id="posts-source-details">
             <summary id="posts-source-summary">انتخاب کانال‌ها…</summary>
             <div class="news-source-list" id="posts-source-list"></div>
           </details>
           <select id="posts-filter-cat" class="m-collapse"><option value="">همه‌ی دسته‌بندی‌ها</option></select>
-          <select id="posts-filter-time" class="m-collapse">
-            <option value="">همه‌ی زمان‌ها</option>
-            <option value="today">امروز</option>
-            <option value="yesterday">دیروز</option>
-            <option value="week">این هفته</option>
-          </select>
           <div class="news-search-box" id="posts-search-box">
             <input type="text" id="posts-search" placeholder="جست‌وجو در متن پست‌ها…" />
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -2751,6 +2779,17 @@
         <p class="posts-empty" id="cyber-people-empty" style="display:none;">هنوز کانالی برای «کنشگری مجازی» تگ نشده.</p>
         <div class="cyber-people-table" id="cyber-people-table" style="display:none;">
           <div class="cpt-count-row" id="cyber-people-count"></div>
+          <label class="cpt-sort-m">مرتب‌سازی:
+            <select id="cyber-people-sort-m" onchange="const [f,d]=this.value.split(':'); cyberPeopleSort={ field: f || null, dir: d || 'asc' }; renderCyberPeopleGrid();">
+              <option value="">پیش‌فرض</option>
+              <option value="subscribers:desc">بیشترین مخاطب</option>
+              <option value="activity:desc">بیشترین فعالیت</option>
+              <option value="name:asc">نام (الف تا ی)</option>
+              <option value="owner:asc">صاحب کانال</option>
+              <option value="category:asc">موضوع</option>
+              <option value="group:asc">گروه</option>
+            </select>
+          </label>
           <div class="cpt-head" id="cyber-people-head">
             <span class="cpt-sort-btn cpt-head-center" data-sort="name" style="flex:1.5 1 140px">نام کانال<span class="cpt-sort-ind"></span></span>
             <span class="cpt-sort-btn" data-sort="platform" style="flex:0 0 128px">بستر فعالیت<span class="cpt-sort-ind"></span></span>
@@ -3070,7 +3109,7 @@
         <div class="app-footer-brand">
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۸.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۸.۳</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3495,7 +3534,7 @@
 
   const TITLES = {
     dashboard: 'صفحه نخست',
-    posts: 'پست‌ها',
+    posts: 'کنشگری مجازی',
     analytics: 'آنالیز',
     channels: 'کانال‌ها و افراد',
     overview: 'اخبار و رویدادها',
@@ -4410,10 +4449,9 @@
       + (newsState.region ? 1 : 0) + (newsState.sources.length ? 1 : 0)
       + (topic && topic.dataset.kw ? 1 : 0));
     const catEl = document.getElementById('posts-filter-cat');
-    const timeEl = document.getElementById('posts-filter-time');
     setMobileFilterCount('#posts-tab-feed',
       (postsGroupFilter ? 1 : 0) + (postsSelectedChannels.length ? 1 : 0)
-      + (catEl && catEl.value ? 1 : 0) + (timeEl && timeEl.value ? 1 : 0));
+      + (catEl && catEl.value ? 1 : 0) + (postsTime ? 1 : 0));
   }
 
   function renderNewsFeed(){
@@ -4465,7 +4503,7 @@
           <div class="news-foot">
             <div>${topic ? `<span class="news-topic">${topic}</span>` : ''}</div>
             <div style="display:flex; gap:10px; align-items:center;">
-              ${ch.platform === 'website' ? `<button type="button" class="news-translate-btn" id="news-translate-btn-${p.id}" onclick="translatePost(${p.id})">ترجمه به فارسی</button>` : ''}
+              ${ch.platform === 'website' && needsTranslation(p) ? `<button type="button" class="news-translate-btn" id="news-translate-btn-${p.id}" onclick="translatePost(${p.id})">ترجمه به فارسی</button>` : ''}
               ${isRealVideo ? `<a class="news-link" href="${p.media_path}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}
               ${(!isClaims && p.link) ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
             </div>
@@ -5166,9 +5204,9 @@
     const a = jalaliToGregorian(jy, 12, 30), b = jalaliToGregorian(jy + 1, 1, 1);
     return (a[0] === b[0] && a[1] === b[1] && a[2] === b[2]) ? 29 : 30;
   }
-  function setupJalaliRange(){
+  function setupJalaliRange(details, onPick){
     const today = calParts(new Date(), 'persian');
-    document.querySelectorAll('#news-daterange-details .jdate').forEach(box=>{
+    details.querySelectorAll('.jdate').forEach(box=>{
       const opt = (v, t)=>`<option value="${v}">${t}</option>`;
       let days = opt('', 'روز'), months = opt('', 'ماه'), years = opt('', 'سال');
       for(let d = 1; d <= 31; d++) days += opt(d, toFaDigits(d));
@@ -5187,12 +5225,14 @@
         if(jd > ml){ jd = ml; get('d').value = ml; }
         const g = jalaliToGregorian(jy, jm, jd);
         const iso = g[0] + '-' + String(g[1]).padStart(2, '0') + '-' + String(g[2]).padStart(2, '0');
-        if(box.dataset.which === 'from') newsState.dateFrom = iso; else newsState.dateTo = iso;
-        applyNewsDateRange();
+        onPick(box.dataset.which, iso);
       });
     });
   }
-  setupJalaliRange();
+  setupJalaliRange(document.getElementById('news-daterange-details'), (which, iso)=>{
+    if(which === 'from') newsState.dateFrom = iso; else newsState.dateTo = iso;
+    applyNewsDateRange();
+  });
   document.getElementById('news-daterange-clear').addEventListener('click', (e)=>{
     e.stopPropagation();
     clearNewsDateRange();
@@ -6006,7 +6046,10 @@
       const el = document.getElementById('posts-tab-'+key);
       if(el) el.style.display = key === b.dataset.postsTab ? '' : 'none';
     });
-    if(b.dataset.postsTab === 'people') renderCyberPeopleGrid();
+    if(b.dataset.postsTab === 'people'){
+      if(POSTS_FOCUS_FROM_TABLE) clearPostsFocus();
+      renderCyberPeopleGrid();
+    }
   });
 
   // زیرتب‌های «یادداشت‌ها»: چهره‌های سیاسی (پیش‌فرض) + دو تب منتقل‌شده از
@@ -6045,12 +6088,18 @@
   // مرتب‌سازی جدول «افراد و مجموعه‌ها» با کلیک روی سرستون‌ها — بدون سرور،
   // کاملاً سمت کلاینت روی همون آرایه‌ی فیلترشده‌ی CHANNELS
   let cyberPeopleSort = { field: null, dir: 'asc' };
+  const CPT_NUMERIC_SORT = ['subscribers', 'activity'];
+  // روی گوشی سربرگ جدول مخفیه — مرتب‌سازی با این فهرست کشویی
+  function syncCyberPeopleSortSelect(){
+    const sel = document.getElementById('cyber-people-sort-m');
+    if(sel) sel.value = cyberPeopleSort.field ? cyberPeopleSort.field + ':' + cyberPeopleSort.dir : '';
+  }
   function cyberPeopleSortValue(ch, field){
     switch(field){
       case 'name': return ch.title || ch.username || '';
       case 'platform': return ch.platform==='telegram' ? 'تلگرام' : 'ایتا';
       case 'owner': return ch.owner_name || '';
-      case 'subscribers': return ch.subscriber_count == null ? -1 : ch.subscriber_count;
+      case 'subscribers': return ch.subscriber_count == null ? null : ch.subscriber_count;
       case 'activity': return activityOf(ch.id).n;
       case 'category': { const c = CATEGORIES.find(x=>x.id===ch.category_id); return c ? c.name : ''; }
       case 'group': return ch.is_khorasan_talabeh ? 'طلاب خراسان' : 'سایر کنشگران';
@@ -6062,7 +6111,9 @@
     const btn = e.target.closest('.cpt-sort-btn'); if(!btn) return;
     const field = btn.dataset.sort;
     if(cyberPeopleSort.field === field){ cyberPeopleSort.dir = cyberPeopleSort.dir==='asc' ? 'desc' : 'asc'; }
-    else{ cyberPeopleSort.field = field; cyberPeopleSort.dir = 'asc'; }
+    // ستون‌های عددی (مخاطب، فعالیت) با کلیک اول از بیشترین شروع می‌شن
+    else{ cyberPeopleSort.field = field; cyberPeopleSort.dir = CPT_NUMERIC_SORT.includes(field) ? 'desc' : 'asc'; }
+    syncCyberPeopleSortSelect();
     renderCyberPeopleGrid();
   });
 
@@ -6080,6 +6131,9 @@
       const dir = cyberPeopleSort.dir === 'desc' ? -1 : 1;
       channels.sort((a,b)=>{
         const va = cyberPeopleSortValue(a, field), vb = cyberPeopleSortValue(b, field);
+        // بدون مقدار (مثلاً مخاطب ثبت‌نشده) همیشه ته فهرست، در هر دو جهت
+        const ea = va === null || va === '', eb = vb === null || vb === '';
+        if(ea || eb) return ea === eb ? 0 : (ea ? 1 : -1);
         if(typeof va === 'number' && typeof vb === 'number') return (va-vb)*dir;
         return String(va).localeCompare(String(vb), 'fa') * dir;
       });
@@ -6132,7 +6186,26 @@
     });
   }
 
+  // کانالی که از جدول «افراد و مجموعه‌ها» باز شده: بالای فید یه نوار «فقط پست‌های X» با
+  // «نمایش همه» نشون داده می‌شه، و با برگشتن به جدول انتخاب پاک می‌شه — قبلاً بی‌صدا
+  // روی فید می‌موند و کاربر فکر می‌کرد پست‌ها کمه
+  var POSTS_FOCUS_FROM_TABLE = false;
+  function clearPostsFocus(){
+    POSTS_FOCUS_FROM_TABLE = false;
+    postsSelectedChannels = [];
+    populatePostSourceOptions();
+    renderPosts();
+  }
+  function renderPostsFocusBar(){
+    const bar = document.getElementById('posts-focus-bar');
+    if(!bar) return;
+    if(!POSTS_FOCUS_FROM_TABLE || postsSelectedChannels.length !== 1){ POSTS_FOCUS_FROM_TABLE = false; bar.style.display = 'none'; return; }
+    const ch = chById(Number(postsSelectedChannels[0])) || {};
+    bar.innerHTML = `<span>فقط پست‌های <b>${escHtml(ch.title || ch.username || '')}</b></span><button type="button" onclick="clearPostsFocus()">نمایش همه‌ی کانال‌ها</button>`;
+    bar.style.display = '';
+  }
   function openPersonFeed(channelId){
+    POSTS_FOCUS_FROM_TABLE = true;
     postsSelectedChannels = [String(channelId)];
     populatePostSourceOptions();
     renderPosts();
@@ -6142,7 +6215,8 @@
 
   // ---- posts page ----
   const filterCatEl = document.getElementById('posts-filter-cat');
-  const filterTimeEl = document.getElementById('posts-filter-time');
+  // زمان فید کنشگری: '' | today | yesterday | week | custom (بازه‌ی شمسی، postsDateFrom/To میلادی)
+  let postsTime = '', postsDateFrom = '', postsDateTo = '';
   const searchEl = document.getElementById('posts-search');
   const postsList = document.getElementById('posts-list');
   const postsEmpty = document.getElementById('posts-empty');
@@ -6173,6 +6247,7 @@
     list.querySelectorAll('input[type=checkbox]').forEach(chk=>{
       chk.addEventListener('change', ()=>{
         const id = chk.value;
+        POSTS_FOCUS_FROM_TABLE = false;
         if(chk.checked){ if(!postsSelectedChannels.includes(id)) postsSelectedChannels.push(id); }
         else{ postsSelectedChannels = postsSelectedChannels.filter(x=>x!==id); }
         updatePostSourceSummary();
@@ -6210,8 +6285,9 @@
 
   function filteredPosts(){
     const catFilter = filterCatEl.value;
-    const timeFilter = filterTimeEl.value;
     const q = searchEl.value.trim();
+    const fromMs = postsDateFrom ? new Date(postsDateFrom + 'T00:00:00').getTime() : null;
+    const toMs = postsDateTo ? new Date(postsDateTo + 'T23:59:59').getTime() : null;
     return POSTS_CACHE.filter(p=>{
       const ownerCh = chById(p.channel_id);
       if(!ownerCh || !ownerCh.show_in_cyberspace) return false;
@@ -6221,7 +6297,11 @@
         const ch = chById(p.channel_id);
         if(!ch || String(ch.category_id) !== catFilter) return false;
       }
-      if(!matchesTime(p.scraped_at, timeFilter)) return false;
+      if(postsTime === 'custom'){
+        const ms = new Date(p.scraped_at).getTime();
+        if(fromMs !== null && ms < fromMs) return false;
+        if(toMs !== null && ms > toMs) return false;
+      }else if(!matchesTime(p.scraped_at, postsTime)) return false;
       if(q && !searchHay(p).includes(searchNorm(q)) && !searchNorm(chName(p.channel_id)).includes(searchNorm(q))) return false;
       return true;
     });
@@ -6243,6 +6323,21 @@
   // خروجی هوش مصنوعیه (نه متن دستی مدیر)، احتیاطاً escape می‌شه
   // جست‌وجوی فارسی: «ي/ك» عربی، «ۀ/ة»، اعراب، کشیده و نیم‌فاصله یکسان‌سازی می‌شن (هر دو طرف:
   // متن پست و عبارت جست‌وجو) — وگرنه «كم‌آبي» یا «همسان سازی» هیچ نتیجه‌ای نمی‌داد
+  // دکمه‌ی «ترجمه به فارسی» فقط برای متن غیرفارسی (انگلیسی/عربی…) — قبلاً زیر همه‌ی خبرهای
+  // سایت‌ها بود، حتی حوزه‌نیوز و مهر، و زدنش بی‌دلیل هزینه‌ی هوش مصنوعی داشت. فارسی از عربی با
+  // حروف مخصوص فارسی (پ چ ژ گ) و نیم‌فاصله جدا می‌شه
+  function needsTranslation(p){
+    const s = (p.title || '') + ' ' + (p.text || '');
+    const latin = (s.match(/[A-Za-z]/g) || []).length;
+    const arabicScript = (s.match(/[\u0600-\u06FF]/g) || []).length;
+    if(latin > arabicScript) return true;
+    if(!arabicScript) return false;
+    // حروف مخصوص فارسی یا نیم‌فاصله = فارسی (حتی اگه با «ي/ك» عربی تایپ شده باشه)
+    if(/[پچژگ\u200c]/.test(s)) return false;
+    const fa = (s.match(/[کی]/g) || []).length;
+    const ar = (s.match(/[يكة]/g) || []).length;
+    return ar > fa;
+  }
   function searchNorm(s){
     return String(s || '')
       .replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[ۀة]/g, 'ه').replace(/[أإ]/g, 'ا').replace(/ؤ/g, 'و')
@@ -6354,7 +6449,7 @@
   // (امضای postsFilterKey) به صفحه‌ی ۱ برمی‌گرده؛ رفرش داده صفحه رو نگه می‌داره
   let postsPage = 1, postsFilterSig = '';
   function postsFilterKey(){
-    return JSON.stringify([filterCatEl.value, filterTimeEl.value, searchEl.value.trim(), postsGroupFilter, postsSelectedChannels]);
+    return JSON.stringify([filterCatEl.value, postsTime, postsDateFrom, postsDateTo, searchEl.value.trim(), postsGroupFilter, postsSelectedChannels]);
   }
   function goPostsPage(p){
     postsPage = p;
@@ -6363,6 +6458,7 @@
   }
   function renderPosts(){
     updateMobileFilterBadges();
+    renderPostsFocusBar();
     const filtered = filteredPosts();
     postsEmpty.style.display = filtered.length ? 'none' : 'block';
     const sig = postsFilterKey();
@@ -6435,7 +6531,41 @@
   }
 
   filterCatEl.addEventListener('change', renderPosts);
-  filterTimeEl.addEventListener('change', renderPosts);
+  function updatePostsRangeSummary(){
+    const has = !!(postsDateFrom || postsDateTo);
+    const f = postsDateFrom ? new Date(postsDateFrom).toLocaleDateString('fa-IR') : '…';
+    const t = postsDateTo ? new Date(postsDateTo).toLocaleDateString('fa-IR') : '…';
+    document.getElementById('posts-daterange-summary').textContent = has ? f + ' تا ' + t : 'بازه زمانی';
+    document.getElementById('posts-daterange-details').classList.toggle('has-value', has);
+  }
+  function clearPostsRange(){
+    postsDateFrom = ''; postsDateTo = '';
+    document.querySelectorAll('#posts-daterange-details .jdate select').forEach(sel=>{ sel.value = ''; });
+    updatePostsRangeSummary();
+  }
+  document.getElementById('posts-time-seg').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b || b.dataset.t === undefined) return;
+    document.querySelectorAll('#posts-time-seg > button').forEach(x=>x.classList.toggle('active', x === b));
+    postsTime = b.dataset.t;
+    clearPostsRange();
+    document.getElementById('posts-daterange-details').removeAttribute('open');
+    renderPosts();
+  });
+  setupJalaliRange(document.getElementById('posts-daterange-details'), (which, iso)=>{
+    if(which === 'from') postsDateFrom = iso; else postsDateTo = iso;
+    postsTime = 'custom';
+    document.querySelectorAll('#posts-time-seg > button').forEach(x=>x.classList.remove('active'));
+    updatePostsRangeSummary();
+    renderPosts();
+  });
+  document.getElementById('posts-daterange-clear').addEventListener('click', e=>{
+    e.stopPropagation();
+    clearPostsRange();
+    postsTime = '';
+    document.querySelectorAll('#posts-time-seg > button').forEach(x=>x.classList.toggle('active', x.dataset.t === ''));
+    document.getElementById('posts-daterange-details').removeAttribute('open');
+    renderPosts();
+  });
   searchEl.addEventListener('input', renderPosts);
   const postsGroupSegEl = document.getElementById('posts-group-seg');
   if(postsGroupSegEl) postsGroupSegEl.addEventListener('click', e=>{
@@ -9074,7 +9204,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.18.2';
+  const APP_VERSION = '5.18.3';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
