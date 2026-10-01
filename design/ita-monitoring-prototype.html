@@ -1279,7 +1279,16 @@
   .school-report-caption{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; padding:12px 4px 0; }
   .school-report-title{ font-size:13.5px; font-weight:700; color:#fff; }
   .school-report-date{ font-size:11px; color: rgba(255,255,255,0.4); }
-  .school-report-file-card{ display:flex; align-items:center; gap:14px; background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:16px 18px; box-shadow: var(--shadow); cursor:pointer; }
+  .school-report-img-btn{ display:block; position:relative; width:100%; padding:0; border:none; background:none; cursor:zoom-in; border-radius: var(--radius); }
+  .school-report-zoom{ position:absolute; bottom:12px; left:12px; display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:999px; background:rgba(22,32,42,0.82); color:#fff; font-size:12px; font-weight:700; font-family:inherit; }
+  .school-report-zoom svg{ width:15px; height:15px; }
+  .school-report-file-text{ display:flex; flex-direction:column; gap:3px; flex:1; min-width:0; text-align:right; }
+  .school-report-file-action{ flex-shrink:0; padding:9px 16px; min-height:40px; display:inline-flex; align-items:center; border-radius:999px; background: var(--navy); color:#fff; font-size:12.5px; font-weight:700; }
+  .school-report-file-icon.sch-pdf{ color:#c0392b; }
+  .school-report-file-icon.sch-excel{ color:#1d7a46; }
+  .sch-month-row{ margin-bottom:16px; }
+  .sch-month-title{ margin-bottom:-14px; }
+  .school-report-file-card{ width:100%; font:inherit; text-align:inherit; display:flex; align-items:center; gap:14px; background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:16px 18px; box-shadow: var(--shadow); cursor:pointer; }
   .school-report-file-icon{ width:34px; height:34px; color: var(--text-faint); flex-shrink:0; }
   .school-report-file-card .school-report-title{ color: var(--text); }
   .school-report-file-card .school-report-date{ color: var(--text-faint); }
@@ -1714,6 +1723,9 @@
   .archive-report-card .mag-reorder button{ border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.55); }
   .archive-report-card .mag-reorder button:hover{ color:#fff; border-color: var(--accent); }
   .archive-report-card .del-btn{ color: rgba(255,255,255,0.5); }
+  .mag-issue-card .mag-actions{ justify-content:space-between; }
+  .mag-read-btn{ min-height:40px; padding-inline:20px; }
+  .sec-intro{ margin-top:0; }
 
   /* «بسته تحلیلی جریان» صفحه‌ی نخست (مهر ۱۴۰۵، به‌جای کارت هلویی + کاروسل): جلد ۵ شماره‌ی
      اول (ترتیب مدیر) بدون قاب، روی قوسی که قرینه‌ی «مدار» عرصه‌هاست (رو به پایین)، با همون
@@ -1847,6 +1859,45 @@
     #posts-time-seg > button, #posts-time-seg .news-daterange-details summary{ white-space:nowrap; padding-inline:9px; }
     .posts-seg-row{ gap:8px; }
   }
+  /* نمایشگر سند (بسته تحلیلی جریان، برنامه مدارس) */
+  .dv-overlay{ background:rgba(6,9,13,0.92); padding:16px; }
+  .dv-card{ width:min(1100px, 100%); height:min(92vh, 100%); display:flex; flex-direction:column; background: var(--surface); border-radius: var(--radius-card); overflow:hidden; box-shadow: 0 30px 70px -20px rgba(0,0,0,0.6); }
+  .dv-head{ display:flex; align-items:center; gap:10px; padding:10px 12px 10px 14px; border-bottom:1px solid var(--border); }
+  .dv-title{ flex:1; min-width:0; font-size:14px; font-weight:800; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dv-count{ font-size:12px; color: var(--text-dim); white-space:nowrap; }
+  .dv-tool{ width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background: var(--surface-2); color: var(--text-dim); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+  .dv-tool svg{ width:18px; height:18px; }
+  .dv-tool:hover{ color: var(--text); border-color: var(--border-strong); }
+  .dv-tool.on{ background: var(--accent); color: var(--primary); border-color: var(--accent); }
+  .dv-tool[hidden]{ display:none; }
+  .dv-card .modal-close.dv-close{ position:static; width:40px; height:40px; flex-shrink:0; }
+  .dv-stage{ flex:1; min-height:0; overflow:auto; background:#e9edf2; display:flex; align-items:flex-start; justify-content:center; padding:14px; touch-action:pan-x pan-y pinch-zoom; }
+  .dv-stage img{ display:block; max-width:100%; max-height:100%; height:auto; margin:auto; border-radius:6px; box-shadow:0 6px 20px -10px rgba(0,0,0,0.35); cursor:zoom-in; background:#fff; }
+  .dv-stage.zoomed{ align-items:flex-start; justify-content:flex-start; }
+  .dv-stage.zoomed img{ max-width:none; max-height:none; width:200%; cursor:zoom-out; margin:0; }
+  .dv-stage iframe{ width:100%; height:100%; border:none; border-radius:6px; background:#fff; }
+  .dv-msg{ margin:auto; text-align:center; color: var(--text-dim); font-size:13px; line-height:2; max-width:360px; }
+  .dv-msg svg{ width:46px; height:46px; color: var(--text-faint); display:block; margin:0 auto 8px; }
+  .dv-msg b{ display:block; color: var(--text); font-size:14px; margin-bottom:4px; }
+  .dv-action{ display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:11px 20px; min-height:44px; border-radius:999px; background: var(--navy); color:#fff; font-size:13px; font-weight:700; text-decoration:none; }
+  .dv-nav{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-top:1px solid var(--border); }
+  .dv-nav[hidden]{ display:none; }
+  .dv-nav-btn{ display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--border-strong); background: var(--surface); color: var(--text); font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+  .dv-nav-btn svg{ width:16px; height:16px; }
+  .dv-nav-btn:disabled{ opacity:.35; cursor:default; }
+  .dv-pages{ flex:1; display:flex; gap:6px; justify-content:center; overflow-x:auto; padding:2px; scrollbar-width:none; }
+  .dv-pages button{ min-width:36px; height:36px; border-radius:9px; border:1px solid var(--border); background: var(--surface-2); color: var(--text-dim); font:inherit; font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0; }
+  .dv-pages button.on{ background: var(--accent); color: var(--primary); border-color: var(--accent); }
+  @media (max-width:640px){
+    .dv-overlay{ padding:0; }
+    .dv-card{ width:100%; height:100%; border-radius:0; }
+    .dv-stage{ padding:8px; }
+    .dv-pages{ display:none; }
+    .dv-count{ display:none; } /* شماره‌ی صفحه روی گوشی پایین، کنار قبلی/بعدی */
+    .dv-nav{ justify-content:space-between; }
+    .dv-nav::after{ content: attr(data-count); order:0; font-size:12px; color: var(--text-dim); }
+    .dv-nav #dv-next{ order:1; }
+  }
   /* «جستجوی هوشمند» هنوز «به‌زودی»ه — تا وقتی کار نمی‌کنه جا نگیره */
   .news-smart-toggle{ display:none !important; }
   /* اندازه‌ی لمسی روی گوشی (حدود ۴۰–۴۴px) — دکمه‌های ریز «نمایش بیشتر»، «مشاهده‌ی منبع»، زمان و صفحه‌ها */
@@ -1873,7 +1924,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۸.۳</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۹.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2094,6 +2145,27 @@
         </button>
         <div id="media-viewer-body"></div>
         <a class="media-viewer-link" id="media-viewer-link" href="#" target="_blank" rel="noopener" style="display:none"></a>
+      </div>
+    </div>
+
+    <!-- نمایشگر سند (۵.۱۹.۰): شماره‌های «بسته تحلیلی جریان» و گزارش‌های «برنامه مدارس» داخل
+         همین صفحه — ورق زدن بین صفحه‌ها، بزرگ‌نمایی، و لینک واقعی «باز کردن / دانلود» (به‌جای
+         window.open بعد از await که سافاری بلاکش می‌کرد) -->
+    <div class="modal-overlay dv-overlay" id="doc-viewer" onclick="if(event.target===this) closeDocViewer()">
+      <div class="dv-card" role="dialog" aria-modal="true" aria-labelledby="dv-title">
+        <div class="dv-head">
+          <div class="dv-title" id="dv-title"></div>
+          <span class="dv-count" id="dv-count"></span>
+          <button type="button" class="dv-tool" id="dv-zoom" onclick="dvToggleZoom()" title="بزرگ‌نمایی" aria-label="بزرگ‌نمایی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg></button>
+          <a class="dv-tool" id="dv-open" target="_blank" rel="noopener" title="باز کردن در پنجره‌ی جدید" aria-label="باز کردن در پنجره‌ی جدید"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/></svg></a>
+          <button type="button" class="modal-close dv-close" onclick="closeDocViewer()" aria-label="بستن"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        </div>
+        <div class="dv-stage" id="dv-stage"></div>
+        <div class="dv-nav" id="dv-nav">
+          <button type="button" class="dv-nav-btn" id="dv-prev" onclick="dvGo(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>قبلی</button>
+          <div class="dv-pages" id="dv-pages"></div>
+          <button type="button" class="dv-nav-btn" id="dv-next" onclick="dvGo(1)">بعدی<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
+        </div>
       </div>
     </div>
 
@@ -2484,6 +2556,8 @@
     </section>
 
     <section class="section" id="sec-schools">
+      <p class="news-tab-subtitle sec-intro"><span>گزارش‌های تحلیلی برنامه‌های مدارس علمیه؛ برای بزرگ‌نمایی روی هر گزارش بزنید.</span></p>
+      <div class="news-topic-chips sch-month-row" id="sch-month-row" style="display:none;"></div>
       <p class="school-reports-empty" id="school-reports-empty" style="display:none;color:rgba(255,255,255,0.55);font-size:13px;text-align:center;padding:40px 0;">هنوز گزارشی بارگذاری نشده.</p>
       <div class="school-report-list" id="school-report-list"></div>
       <button type="button" class="upl-goto" data-upl="schools" onclick="goToUploadsTab('schools')">＋ بارگذاری گزارش جدید</button>
@@ -2569,7 +2643,7 @@
     </section>
 
     <section class="section" id="sec-reports">
-      <div class="panel-head"><span class="panel-pill">بخش تحلیلی</span></div>
+      <p class="news-tab-subtitle sec-intro"><span>شماره‌های «بسته تحلیلی جریان»؛ برای مطالعه روی جلد یا دکمه‌ی «مطالعه» بزنید.</span></p>
 
       <div id="reports-tab-own">
         <p class="magazines-empty" id="magazines-empty" style="display:none;color:rgba(255,255,255,0.55);font-size:13px;text-align:center;padding:40px 0;">هنوز مجله‌ای بارگذاری نشده.</p>
@@ -3109,7 +3183,7 @@
         <div class="app-footer-brand">
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۸.۳</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۹.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3541,7 +3615,7 @@
     schools: 'برنامه مدارس',
     people: 'یادداشت‌ها',
     hawza: 'درباره حوزه',
-    reports: 'بخش تحلیلی',
+    reports: 'بسته تحلیلی جریان',
     export: 'خروجی محتوا',
     settings: 'تنظیمات بخش‌ها',
     feedback: 'نظرات کاربران',
@@ -5423,23 +5497,6 @@
       rows.forEach(r => { r.signed_url = null; });
     }
   }
-  async function openSchoolReportFile(r){
-    const path = schoolReportPath(r);
-    try{
-      if(!path) throw new Error('no path');
-      const res = await fetch(SUPABASE_URL + '/storage/v1/object/sign/school-reports/' + path, {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ expiresIn: 60 }),
-      });
-      if(!res.ok) throw new Error('sign failed');
-      const data = await res.json();
-      window.open(SUPABASE_URL + '/storage/v1' + data.signedURL, '_blank');
-    }catch(e){
-      if(r.image_url) window.open(r.image_url, '_blank');
-      else showToast('باز کردن فایل ممکن نشد');
-    }
-  }
   function toFaDigits(n){
     const fa = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
     return String(n).replace(/[0-9]/g, d => fa[d]);
@@ -5901,6 +5958,36 @@
     });
   }
 
+  // «برنامه مدارس» (۵.۱۹.۰): گزارش‌ها زیر تیتر ماه (شمسی، از تاریخ بارگذاری) + چیپ‌های ماه برای
+  // پیدا کردن گزارش یه ماه خاص؛ تصویرها با کلیک در نمایشگر سند باز می‌شن (بزرگ‌نمایی + ورق زدن
+  // بین همه‌ی گزارش‌های تصویری)؛ PDF/اکسل کارت جدا با نوع فایل و «مشاهده/دانلود»
+  var SCHOOL_MONTH = '';
+  const SCH_TYPE = {
+    pdf:   { label:'PDF',  action:'مشاهده', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>' },
+    excel: { label:'اکسل', action:'دانلود', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/></svg>' },
+  };
+  function schoolMonthKey(r){
+    if(!r.uploaded_at) return '';
+    const p = calParts(new Date(r.uploaded_at), 'persian');
+    return p.year + '-' + String(p.month).padStart(2, '0');
+  }
+  function schoolMonthLabel(key){
+    const [y, m] = key.split('-').map(Number);
+    return (JALALI_MONTHS[m - 1] || '') + ' ' + toFaDigits(y);
+  }
+  function openSchoolImage(r){
+    const imgs = SCHOOL_REPORTS.filter(x => (x.file_type || 'image') === 'image');
+    openDocViewer('گزارش‌های برنامه مدارس', ()=> imgs.map(x => ({ kind:'image', url: schoolReportSrc(x), label: x.title || '' })), Math.max(0, imgs.indexOf(r)));
+  }
+  function openSchoolReportFile(r){
+    const path = schoolReportPath(r);
+    const kind = (r.file_type === 'pdf') ? 'pdf' : 'file';
+    openDocViewer(r.title || 'گزارش', async ()=>{
+      let url = null;
+      if(path){ try{ url = (await signStoragePaths('school-reports', [path]))[0]; }catch(e){} }
+      return [{ kind, url: url || r.image_url, label: r.title || '' }];
+    });
+  }
   function renderSchoolReports(){
     renderUploadLists();
     const list = document.getElementById('school-report-list');
@@ -5908,38 +5995,61 @@
     if(!list) return;
     const isAdmin = currentRole === 'app_admin';
     empty.style.display = SCHOOL_REPORTS.length ? 'none' : 'block';
+    // چیپ‌های ماه (فقط وقتی بیش از یک ماه هست)
+    const months = [...new Set(SCHOOL_REPORTS.map(schoolMonthKey).filter(Boolean))].sort().reverse();
+    if(SCHOOL_MONTH && !months.includes(SCHOOL_MONTH)) SCHOOL_MONTH = '';
+    const row = document.getElementById('sch-month-row');
+    row.style.display = months.length > 1 ? '' : 'none';
+    row.innerHTML = [`<button type="button" class="news-topic-chip${SCHOOL_MONTH ? '' : ' active'}" data-m="">همه</button>`]
+      .concat(months.map(k => `<button type="button" class="news-topic-chip${SCHOOL_MONTH === k ? ' active' : ''}" data-m="${k}">${schoolMonthLabel(k)}</button>`)).join('');
     list.innerHTML = '';
+    let lastMonth = null;
     SCHOOL_REPORTS.forEach(r => {
+      const mk = schoolMonthKey(r);
+      if(SCHOOL_MONTH && mk !== SCHOOL_MONTH) return;
+      if(months.length > 1 && mk && mk !== lastMonth){
+        lastMonth = mk;
+        const h = document.createElement('h4'); h.className = 'pf-group-title sch-month-title';
+        h.textContent = schoolMonthLabel(mk);
+        list.appendChild(h);
+      }
       const el = document.createElement('div'); el.className = 'school-report-block';
-      const isImage = (r.file_type || 'image') === 'image';
+      const type = r.file_type || 'image';
       const dateStr = r.uploaded_at ? new Date(r.uploaded_at).toLocaleDateString('fa-IR') : '';
-      const titleText = escAttr(r.title || 'گزارش بدون عنوان');
-      if(isImage){
-        el.innerHTML = `<img class="school-report-full-img" src="${escAttr(schoolReportSrc(r))}" alt="${escAttr(r.title||'')}" loading="lazy" />
+      const titleText = escHtml(r.title || 'گزارش بدون عنوان');
+      if(type === 'image'){
+        el.innerHTML = `<button type="button" class="school-report-img-btn" aria-label="بزرگ‌نمایی ${escAttr(r.title || 'گزارش')}"><img class="school-report-full-img" src="${escAttr(schoolReportSrc(r))}" alt="${escAttr(r.title||'')}" loading="lazy" /><span class="school-report-zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg>بزرگ‌نمایی</span></button>
           <div class="school-report-caption">
             <span class="school-report-title">${titleText}</span>
             <span class="school-report-date">${dateStr}</span>
           </div>`;
+        el.querySelector('.school-report-img-btn').addEventListener('click', () => openSchoolImage(r));
       }else{
+        const t = SCH_TYPE[type] || SCH_TYPE.pdf;
         el.innerHTML = `
-          <div class="school-report-file-card">
-            <div class="school-report-file-icon">${ICONS.doc}</div>
-            <span class="school-report-title">${titleText}</span>
-            <span class="school-report-date">${dateStr}</span>
-          </div>`;
+          <button type="button" class="school-report-file-card">
+            <span class="school-report-file-icon sch-${type}">${t.icon}</span>
+            <span class="school-report-file-text"><span class="school-report-title">${titleText}</span><span class="school-report-date">${t.label}، ${dateStr}</span></span>
+            <span class="school-report-file-action">${t.action}</span>
+          </button>`;
         el.querySelector('.school-report-file-card').addEventListener('click', () => openSchoolReportFile(r));
       }
       if(isAdmin){
         const del = document.createElement('button'); del.className = 'del-btn'; del.textContent = '✕';
         del.title = 'حذف گزارش'; del.setAttribute('aria-label', 'حذف گزارش');
-        del.style.cssText = 'position:absolute;top:8px;left:8px;background:rgba(20,27,36,0.6);color:#fff;';
-        del.addEventListener('click', () => deleteSchoolReport(r));
-        (el.querySelector('.school-report-file-card') || el).style.position = 'relative';
-        (el.querySelector('.school-report-file-card') || el).appendChild(del);
+        del.style.cssText = 'position:absolute;top:8px;left:8px;background:rgba(20,27,36,0.6);color:#fff;z-index:2;';
+        del.addEventListener('click', e => { e.stopPropagation(); deleteSchoolReport(r); });
+        el.style.position = 'relative';
+        el.appendChild(del);
       }
       list.appendChild(el);
     });
   }
+  document.getElementById('sch-month-row').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    SCHOOL_MONTH = b.dataset.m || '';
+    renderSchoolReports();
+  });
 
   function detectSchoolReportFileType(file){
     const name = (file.name || '').toLowerCase();
@@ -7883,22 +7993,26 @@
     MAGAZINES.forEach((m, i)=>{
       const files = Array.isArray(m.files) ? m.files : [];
       const meta = [
-        m.issue_no ? ('شماره ' + m.issue_no) : '',
+        m.issue_no ? ('شماره ' + toFaDigits(m.issue_no)) : '',
         m.publish_date ? new Date(m.publish_date).toLocaleDateString('fa-IR') : '',
-        (MAG_TYPE_LABEL[m.file_type] || m.file_type) + ' · ' + files.length + ' فایل',
-      ].filter(Boolean).join(' · ');
-      const el = document.createElement('div'); el.className = 'magazine-card';
-      el.innerHTML = `<div class="mag-icon">${m.file_type==='images' ? ICONS.photo : ICONS.doc}</div>
+        m.file_type === 'images' ? (toFaDigits(files.length) + ' صفحه') : 'PDF',
+      ].filter(Boolean).join('، ');
+      // هم‌شکل کارت‌های «بسته‌های تحلیلی» یادداشت‌ها: جلد بلند + عنوان + یه دکمه‌ی «مطالعه» (قبلاً
+      // آیکون کوچیک به‌جای جلد و برای هر صفحه‌ی شماره‌ی عکسی یه دکمه‌ی «مشاهده N» جدا)
+      const el = document.createElement('div'); el.className = 'magazine-card archive-report-card mag-issue-card';
+      el.innerHTML = `<div class="archive-report-poster">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
         <div class="mag-title">${escHtml(m.title)}</div>
         <div class="mag-meta">${meta}</div>
         <div class="mag-actions"></div>`;
       const actions = el.querySelector('.mag-actions');
-      files.forEach((path, idx) => {
+      if(files.length){
+        el.querySelector('.archive-report-poster').style.cursor = 'pointer';
+        el.querySelector('.archive-report-poster').addEventListener('click', () => openMagazineViewer(m));
         const btn = document.createElement('button');
-        btn.className = 'btn'; btn.textContent = files.length > 1 ? ('مشاهده ' + (idx+1)) : 'مشاهده';
-        btn.addEventListener('click', () => openMagazineFile(m, path));
+        btn.className = 'btn primary mag-read-btn'; btn.textContent = 'مطالعه';
+        btn.addEventListener('click', () => openMagazineViewer(m));
         actions.appendChild(btn);
-      });
+      }
       if(isAdmin){
         const reorder = document.createElement('div'); reorder.className = 'mag-reorder';
         const up = document.createElement('button'); up.title = 'انتقال به بالا'; up.disabled = i===0;
@@ -7934,7 +8048,7 @@
       const tile = document.createElement('div'); tile.className = 'pkg-tile';
       tile.innerHTML = `<div class="pkg-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
         <div class="pkg-title">${escHtml(m.title)}</div>`;
-      tile.addEventListener('click', () => { if(files.length) openMagazineFile(m, files[0]); });
+      tile.addEventListener('click', () => { if(files.length) openMagazineViewer(m); });
       wrap.appendChild(tile);
     });
   }
@@ -8056,20 +8170,116 @@
 
   // فایل‌ها در bucket خصوصی Storage هستن — با یک signed URL کوتاه‌عمر در یک سربرگ جدید باز می‌شن
   // (نه لینک مستقیم/دانلود دائمی — این جلوی دانلود عادی رو می‌گیره، ولی جلوی اسکرین‌شات یا کاربر فنی مصمم رو نه)
-  async function openMagazineFile(magazine, path){
-    try{
-      const r = await fetch(SUPABASE_URL + '/storage/v1/object/sign/magazines/' + path, {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ expiresIn: 60 }),
-      });
-      if(!r.ok) throw new Error('sign failed');
-      const data = await r.json();
-      const url = SUPABASE_URL + '/storage/v1' + data.signedURL;
-      window.open(url, '_blank');
-    }catch(e){
-      showToast('باز کردن فایل ممکن نشد — احتمالاً دسترسی Storage هنوز تنظیم نشده');
+  // ---- نمایشگر سند (۵.۱۹.۰) ----
+  // items: [{ kind:'image'|'pdf'|'file', url, name, label }] — پنجره همون لحظه‌ی کلیک باز می‌شه
+  // (قبل از گرفتن لینک امن)، پس مرورگر بلاکش نمی‌کنه؛ «باز کردن/دانلود» یه لینک واقعیه
+  var DV = { items: [], i: 0, zoom: false };
+  const DV_TTL = 600; // لینک امن ۱۰ دقیقه‌ای برای ورق زدن (قبلاً ۶۰ ثانیه برای باز کردن تک‌فایل)
+  async function signStoragePaths(bucket, paths){
+    const res = await fetch(SUPABASE_URL + '/storage/v1/object/sign/' + bucket, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ expiresIn: DV_TTL, paths }),
+    });
+    if(!res.ok) throw new Error('sign failed');
+    const out = await res.json();
+    const map = new Map((Array.isArray(out) ? out : []).filter(x => x && x.signedURL && !x.error).map(x => [x.path, SUPABASE_URL + '/storage/v1' + x.signedURL]));
+    return paths.map(p => map.get(p) || null);
+  }
+  function openDocViewer(title, loader, startIndex){
+    DV = { items: [], i: startIndex || 0, zoom: false };
+    document.getElementById('dv-title').textContent = title || '';
+    document.getElementById('dv-stage').innerHTML = '<div class="dv-msg">در حال آماده‌سازی…</div>';
+    document.getElementById('dv-count').textContent = '';
+    document.getElementById('dv-nav').hidden = true;
+    document.getElementById('dv-zoom').hidden = true;
+    document.getElementById('dv-open').hidden = true;
+    document.getElementById('doc-viewer').classList.add('active');
+    Promise.resolve().then(loader).then(items=>{
+      DV.items = (items || []).filter(x => x && x.url);
+      if(!DV.items.length) throw new Error('empty');
+      DV.i = Math.min(Math.max(0, DV.i), DV.items.length - 1);
+      dvRender();
+    }).catch(()=>{
+      document.getElementById('dv-stage').innerHTML = '<div class="dv-msg"><b>باز کردن فایل ممکن نشد</b>اتصال اینترنت را بررسی کنید و دوباره امتحان کنید.</div>';
+    });
+  }
+  function closeDocViewer(){
+    document.getElementById('doc-viewer').classList.remove('active');
+    document.getElementById('dv-stage').innerHTML = '';
+  }
+  const DV_FILE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
+  function dvRender(){
+    const it = DV.items[DV.i];
+    const stage = document.getElementById('dv-stage');
+    const n = DV.items.length;
+    stage.classList.toggle('zoomed', DV.zoom && it.kind === 'image');
+    stage.scrollTop = 0; stage.scrollLeft = 0;
+    const openEl = document.getElementById('dv-open');
+    openEl.href = it.url; openEl.hidden = false;
+    if(it.kind === 'image'){
+      openEl.removeAttribute('download');
+      stage.innerHTML = `<img src="${escAttr(it.url)}" alt="${escAttr(it.label || '')}" onclick="dvToggleZoom()">`;
+    }else if(it.kind === 'pdf'){
+      // نمایش PDF داخل صفحه فقط روی رایانه قابل‌اعتماده؛ گوشی‌ها (مخصوصاً اندروید) iframe‌ی PDF رو نشون نمی‌دن
+      const inline = window.matchMedia('(min-width: 761px)').matches;
+      stage.innerHTML = inline
+        ? `<iframe src="${escAttr(it.url)}" title="${escAttr(it.label || 'PDF')}"></iframe>`
+        : `<div class="dv-msg">${DV_FILE_ICON}<b>${escHtml(it.label || 'فایل PDF')}</b>برای خواندن، فایل را در نمایشگر PDF گوشی باز کنید.<br><a class="dv-action" href="${escAttr(it.url)}" target="_blank" rel="noopener">باز کردن PDF</a></div>`;
+    }else{
+      openEl.setAttribute('download', '');
+      stage.innerHTML = `<div class="dv-msg">${DV_FILE_ICON}<b>${escHtml(it.label || 'فایل')}</b>پیش‌نمایش این نوع فایل در سایت ممکن نیست.<br><a class="dv-action" href="${escAttr(it.url)}" target="_blank" rel="noopener" download>دانلود فایل</a></div>`;
     }
+    document.getElementById('dv-zoom').hidden = it.kind !== 'image';
+    document.getElementById('dv-zoom').classList.toggle('on', DV.zoom && it.kind === 'image');
+    const countTxt = n > 1 ? ('صفحه‌ی ' + toFaDigits(DV.i + 1) + ' از ' + toFaDigits(n)) : '';
+    document.getElementById('dv-count').textContent = countTxt;
+    const nav = document.getElementById('dv-nav');
+    nav.hidden = n < 2;
+    nav.dataset.count = countTxt;
+    document.getElementById('dv-prev').disabled = DV.i === 0;
+    document.getElementById('dv-next').disabled = DV.i === n - 1;
+    const pages = document.getElementById('dv-pages');
+    pages.innerHTML = n > 1 ? DV.items.map((_, k)=>`<button type="button" class="${k === DV.i ? 'on' : ''}" onclick="dvGo(${k - DV.i})" aria-label="صفحه‌ی ${toFaDigits(k + 1)}">${toFaDigits(k + 1)}</button>`).join('') : '';
+    const cur = pages.querySelector('.on'); if(cur) cur.scrollIntoView({ block:'nearest', inline:'center' });
+    // صفحه‌ی بعد پیش‌بارگذاری شه تا ورق زدن بی‌مکث باشه
+    const nx = DV.items[DV.i + 1]; if(nx && nx.kind === 'image'){ const im = new Image(); im.src = nx.url; }
+  }
+  function dvGo(delta){
+    const j = DV.i + delta;
+    if(j < 0 || j >= DV.items.length) return;
+    DV.i = j; DV.zoom = false; dvRender();
+  }
+  function dvToggleZoom(){
+    const it = DV.items[DV.i]; if(!it || it.kind !== 'image') return;
+    DV.zoom = !DV.zoom; dvRender();
+  }
+  document.addEventListener('keydown', e=>{
+    if(!document.getElementById('doc-viewer').classList.contains('active')) return;
+    // راست‌به‌چپ: صفحه‌ی بعد سمت چپه
+    if(e.key === 'ArrowLeft'){ dvGo(1); e.preventDefault(); }
+    else if(e.key === 'ArrowRight'){ dvGo(-1); e.preventDefault(); }
+    else if(e.key === 'Escape'){ closeDocViewer(); }
+  });
+  (function(){
+    const stage = document.getElementById('dv-stage');
+    let x0 = null, y0 = null;
+    stage.addEventListener('touchstart', e=>{ if(e.touches.length === 1 && !DV.zoom){ x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } else x0 = null; }, { passive:true });
+    stage.addEventListener('touchend', e=>{
+      if(x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) dvGo(dx > 0 ? 1 : -1); // کشیدن به راست = صفحه‌ی بعد (راست‌به‌چپ)
+    }, { passive:true });
+  })();
+  function openMagazineViewer(m){
+    const files = Array.isArray(m.files) ? m.files : [];
+    openDocViewer(m.title, async ()=>{
+      if(!files.length) return [];
+      const urls = await signStoragePaths('magazines', files);
+      const isPdf = m.file_type === 'pdf';
+      return files.map((f, k)=>({ kind: isPdf ? 'pdf' : 'image', url: urls[k], label: m.title + (files.length > 1 ? ' — صفحه‌ی ' + toFaDigits(k + 1) : '') }));
+    });
   }
 
   async function moveMagazine(m, direction){
@@ -9204,7 +9414,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.18.3';
+  const APP_VERSION = '5.19.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
