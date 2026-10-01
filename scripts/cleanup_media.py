@@ -74,27 +74,26 @@ def auth_headers(token: str) -> dict:
     }
 
 
-def remove_storage_objects(token: str, bucket: str, paths: list[str]) -> bool:
+def remove_storage_objects(token: str, bucket: str, paths: list[str]) -> set[str] | None:
     """حذف واقعی فایل‌ها از Storage. مسیر درست حذف گروهی متد DELETE روی
     /object/{bucket} است (نه POST به /object/remove/{bucket} — اون یه
     مسیر نامعتبره که «remove» رو به‌جای اسم باکت تفسیر می‌کنه و همیشه
     با «Bucket not found» شکست می‌خوره، بدون این‌که چیزی واقعاً حذف بشه).
-    خروجی bool تا caller بدونه واقعاً حذف انجام شده یا نه — چون اگه این
-    حذف fail بشه ولی رکورد دیتابیس پاک بشه، فایل برای همیشه orphan
-    می‌مونه (رد دیتابیسی‌اش از دست می‌ره ولی خودش توی Storage جا می‌مونه).
 
     ⚠️ فقط status code (r.ok) کافی نیست: این endpoint حتی وقتی هیچ‌کدوم
     از prefixهای داده‌شده با فایل واقعی توی باکت match نمی‌کنن، باز هم
-    HTTP 200 با یه آرایه‌ی خالی برمی‌گردونه (یعنی «موفق، صفر فایل حذف
-    شد» رو هم‌رنگ با «موفق، همه حذف شدن» نشون می‌ده). این باگ واقعاً
-    باعث شد چند روز پشت‌سرهم چیزی از Storage واقعاً کم نشه ولی
-    media_storage_path دیتابیس هرروز پاک بشه (رد فایل از بین رفت، خودِ
-    فایل orphan موند) — برای همین این تابع الان بدنه‌ی پاسخ رو هم چک
-    می‌کنه و اگه تعداد واقعاً حذف‌شده کمتر از تعداد درخواستی بود، آن
-    را شکست‌خورده در نظر می‌گیرد (تا caller دیتابیس رو پاک نکنه).
+    HTTP 200 با یه آرایه‌ی خالی برمی‌گردونه. یه‌بار همین باعث شد رد فایل‌ها
+    از دیتابیس پاک بشه ولی خودِ فایل‌ها orphan بمونن.
+
+    خروجی: مجموعه‌ی مسیرهایی که «دیگه توی Storage نیستن» — یعنی یا همین الان
+    حذف شدن، یا از قبل نبودن (با list خودِ Storage بررسی می‌شه). None یعنی خودِ
+    درخواست شکست خورد. ۵.۲۲.۱ (بررسی پشت صحنه): قبلاً خروجی bool بود و اگه
+    حتی یه فایل از ۱۰۰۰تا از قبل حذف شده بود، کل دسته رد می‌شد؛ دسته‌ی بعدی هم
+    دقیقاً همون ردیف‌ها بود (فایل‌های بقیه این بار واقعاً حذف شده بودن ولی ردشون
+    نه)، پس پاک‌سازی برای همیشه گیر می‌کرد.
     """
     if not paths:
-        return True
+        return set()
     r = requests.delete(
         f"{SUPABASE_URL}/storage/v1/object/{bucket}",
         headers=auth_headers(token),
@@ -103,23 +102,42 @@ def remove_storage_objects(token: str, bucket: str, paths: list[str]) -> bool:
     )
     if not r.ok:
         print(f"[!] storage remove failed ({bucket}): {r.status_code} {r.text[:300]}", file=sys.stderr)
-        return False
+        return None
     try:
         deleted = r.json()
     except ValueError:
         print(f"[!] storage remove ({bucket}): پاسخ غیرقابل‌پارس {r.text[:300]}", file=sys.stderr)
-        return False
-    deleted_names = {item.get("name") for item in deleted} if isinstance(deleted, list) else set()
-    if len(deleted_names) < len(paths):
-        missing = [p for p in paths if p not in deleted_names]
-        sample = missing[:3]
+        return None
+    gone = {item.get("name") for item in deleted} if isinstance(deleted, list) else set()
+    missing = [p for p in paths if p not in gone]
+    if missing:
+        absent = [p for p in missing if object_exists(token, bucket, p) is False]
+        gone.update(absent)
+        still = len(missing) - len(absent)
         print(
-            f"[!] storage remove ({bucket}): {len(deleted_names)}/{len(paths)} فایل واقعاً حذف شد — "
-            f"{len(missing)} تا match نشدن. نمونه‌ی مسیر درخواستی: {sample}",
+            f"[!] storage remove ({bucket}): {len(paths) - len(missing)} حذف شد، {len(absent)} از قبل نبود"
+            + (f"، {still} نامعلوم (ردشون نگه داشته می‌شه): {[p for p in missing if p not in absent][:3]}" if still else ""),
             file=sys.stderr,
         )
-        return False
-    return True
+    return gone
+
+
+def object_exists(token: str, bucket: str, path: str) -> bool | None:
+    """True/False از روی فهرست خودِ Storage؛ None اگه بررسی ممکن نشد (پس ردش پاک نمی‌شه)."""
+    folder, _, name = path.rpartition("/")
+    try:
+        r = requests.post(
+            f"{SUPABASE_URL}/storage/v1/object/list/{bucket}",
+            headers=auth_headers(token),
+            json={"prefix": folder + "/" if folder else "", "search": name, "limit": 100, "offset": 0},
+            timeout=REQUEST_TIMEOUT,
+        )
+        if not r.ok:
+            return None
+        items = r.json()
+        return any(isinstance(it, dict) and it.get("name") == name and it.get("id") is not None for it in items)
+    except (requests.RequestException, ValueError):
+        return None
 
 
 def fetch_expired_posts(token: str) -> list[dict]:
@@ -160,16 +178,37 @@ def cleanup_post_media(token: str) -> None:
     if not expired:
         return
     paths = [p["media_storage_path"] for p in expired if p.get("media_storage_path")]
-    ids = [p["id"] for p in expired]
-    if not remove_storage_objects(token, MEDIA_BUCKET, paths):
+    gone = remove_storage_objects(token, MEDIA_BUCKET, paths)
+    if gone is None:
         print("[!] skipping DB cleanup for this batch — storage delete failed, retry next run", file=sys.stderr)
         return
+    # فقط ردیف‌هایی که فایلشون واقعاً دیگه نیست — بقیه اجرای بعد دوباره امتحان می‌شن
+    ids = [p["id"] for p in expired if p.get("media_storage_path") in gone]
     clear_post_media(token, ids)
-    print(f"[done] cleaned up {len(expired)} post(s)")
+    print(f"[done] cleaned up {len(ids)}/{len(expired)} post(s)")
+
+
+def latest_newspaper_date(token: str) -> str | None:
+    """آخرین تاریخی که هنوز جلد دارد — این تاریخ هیچ‌وقت پاک نمی‌شه."""
+    r = requests.get(
+        f"{SUPABASE_URL}/rest/v1/newspapers",
+        headers=auth_headers(token),
+        params={"media_storage_path": "not.is.null", "select": "edition_date", "order": "edition_date.desc", "limit": "1"},
+        timeout=REQUEST_TIMEOUT,
+    )
+    r.raise_for_status()
+    rows = r.json()
+    return rows[0]["edition_date"] if rows else None
 
 
 def fetch_expired_newspapers(token: str) -> list[dict]:
     cutoff = (datetime.date.today() - datetime.timedelta(days=RETENTION_DAYS)).isoformat()
+    # ۵.۲۲.۱ (بررسی پشت صحنه): جمعه‌ها و تعطیلات روزنامه منتشر نمی‌شه؛ قبلاً جلدهای
+    # آخرین روز (مثلاً پنج‌شنبه) صبح جمعه پاک می‌شد و تب «روزنامه‌ها» تا شنبه خالی بود.
+    # حالا آخرین تاریخِ دارای جلد همیشه نگه داشته می‌شه تا شماره‌ی تازه‌تری برسه.
+    latest = latest_newspaper_date(token)
+    if latest and latest < cutoff:
+        cutoff = latest
     r = requests.get(
         f"{SUPABASE_URL}/rest/v1/newspapers",
         headers=auth_headers(token),
@@ -206,12 +245,14 @@ def cleanup_newspaper_covers(token: str) -> None:
     if not expired:
         return
     paths = [p["media_storage_path"] for p in expired if p.get("media_storage_path")]
-    ids = [p["id"] for p in expired]
-    if not remove_storage_objects(token, NEWSPAPER_BUCKET, paths):
+    gone = remove_storage_objects(token, NEWSPAPER_BUCKET, paths)
+    if gone is None:
         print("[!] skipping DB cleanup for this batch — storage delete failed, retry next run", file=sys.stderr)
         return
+    # فقط ردیف‌هایی که فایلشون واقعاً دیگه نیست — بقیه اجرای بعد دوباره امتحان می‌شن
+    ids = [p["id"] for p in expired if p.get("media_storage_path") in gone]
     clear_newspaper_media(token, ids)
-    print(f"[done] cleaned up {len(expired)} newspaper edition(s)")
+    print(f"[done] cleaned up {len(ids)}/{len(expired)} newspaper edition(s)")
 
 
 def main() -> None:

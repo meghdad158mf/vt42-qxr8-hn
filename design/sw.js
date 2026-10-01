@@ -3,13 +3,16 @@
 // داده‌ها همیشه زنده بمونن. فایل‌های ثابت هم‌دامنه (فونت/تصویر/کتابخونه/آیکون)
 // cache-first؛ خودِ صفحه network-first تا هر انتشار جدید فوراً دیده بشه.
 // با تغییر فهرست فایل‌های ثابت یا منطق این فایل، CACHE رو یک شماره بالا ببر.
-const CACHE = 'jarian-static-v1';
+const CACHE = 'jarian-static-v6';
 const PRECACHE = [
   'ita-monitoring-prototype.html',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',
+  'icons/icon.svg',
+  'icons/jarian-mark.svg',
   'fonts/IRANSansXV.woff2',
+  'vendor/gsap.min.js',
 ];
 
 self.addEventListener('install', event => {
@@ -31,8 +34,11 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return; // سوپابیس/CDN: دست‌نخورده
 
   if (req.mode === 'navigate' || url.pathname.endsWith('.html')) {
+    // cache:'no-cache' — بدون این، کش HTTP مرورگر (گیت‌هاب پیجز: max-age=600)
+    // تا ۱۰ دقیقه بعد از هر انتشار نسخه‌ی قبلی رو به اپ نصب‌شده می‌داد؛ حالا همیشه
+    // از سرور تازه‌سنجی می‌شه (اگه عوض نشده باشه، فقط یه پاسخ ۳۰۴ کوچیک)
     event.respondWith(
-      fetch(req).then(res => {
+      fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }).then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(req, copy));
         return res;
