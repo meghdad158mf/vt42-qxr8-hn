@@ -8,7 +8,7 @@
 - ریپو (۲ مهر ۱۴۰۵، بعد از دسترسی غیرمجاز به لینک قدیمی) از `meghdad158mf/meghdad` به **`meghdad158mf/vt42-qxr8-hn`** تغییر نام داد. ابزارهای MCP گیت‌هاب این سشن با `owner=meghdad158mf, repo=meghdad` کار می‌کنن (ریدایرکت می‌شه)؛ `vt42-qxr8-hn` مستقیم رد می‌شه.
 - هارنس معمولاً یه شاخه‌ی قدیمی رو لوکال چک‌اوت می‌کنه — همیشه اول `git fetch origin claude/new-project-8ekywm` و کار رو از `origin/claude/new-project-8ekywm` شروع کن.
 - **روش کار همیشگی**: شاخه‌ی کاری از `origin/claude/new-project-8ekywm` → تغییر → پیش‌نمایش Playwright با داده‌ی موک (پایین‌تر) → اسکرین‌شات با `SendUserFile` و **پرسیدن صریح تأیید** → فقط بعد از تأیید: commit + push + PR به `claude/new-project-8ekywm` (نه `main`) → `pull_request_read`/`get_commits` → merge → `git fetch` + `git diff` صفر → به کاربر بگو Ctrl+F5. **push مستقیم به `claude/new-project-8ekywm` مسدوده**.
-- **شماره‌ی ویرایش (درخواست صریح کاربر)**: هر PR به شاخه‌ی زنده ثابت `APP_VERSION` (درست قبل از `// ---- boot ----` در فرانت‌اند؛ بج صفحه‌ی ورود و فوتر از کلاس `.app-version` پر می‌شن) رو بالا می‌بره. تشخیص اندازه با Claude: تغییر کوچیک (باگ، متن/ظاهر، تنظیم جزئی، فقط مستندات/اسکریپت) → عدد آخر +۱؛ تغییر بزرگ (قابلیت/تب/بخش جدید، بازطراحی صفحه، جدول/migration جدید) → عدد وسط +۱ و آخر صفر؛ عدد اول فقط با درخواست کاربر. ⚠️ نسخه‌ی فارسیِ داخل دو `<span class="app-version">` هم باید هم‌زمان عوض بشه (fallback قبل از اجرای JS). بعد از مرج شماره‌ی جدید رو به کاربر بگو. آخرین: **۵.۱۶.۵**.
+- **شماره‌ی ویرایش (درخواست صریح کاربر)**: هر PR به شاخه‌ی زنده ثابت `APP_VERSION` (درست قبل از `// ---- boot ----` در فرانت‌اند؛ بج صفحه‌ی ورود و فوتر از کلاس `.app-version` پر می‌شن) رو بالا می‌بره. تشخیص اندازه با Claude: تغییر کوچیک (باگ، متن/ظاهر، تنظیم جزئی، فقط مستندات/اسکریپت) → عدد آخر +۱؛ تغییر بزرگ (قابلیت/تب/بخش جدید، بازطراحی صفحه، جدول/migration جدید) → عدد وسط +۱ و آخر صفر؛ عدد اول فقط با درخواست کاربر. ⚠️ نسخه‌ی فارسیِ داخل دو `<span class="app-version">` هم باید هم‌زمان عوض بشه (fallback قبل از اجرای JS). بعد از مرج شماره‌ی جدید رو به کاربر بگو. آخرین: **۵.۱۶.۸**.
 - کاربر با گیت/GitHub راحت نیست — هر کار دستی (SQL Editor، ساخت توکن، secret) رو قدم‌به‌قدم و با مسیر دقیق منو توضیح بده.
 - دیباگ خطاهای سمت کاربر: F12 → Network → درخواست قرمز → تب Response (اگه DevTools زود پاک کرد، Clear و یه‌بار دیگه امتحان). اگه کاربر عکسی رو مستقیم در چت paste کرد و به دستت نرسید، اول ترنسکریپت سشن (`.jsonl`، بلوک‌های base64) رو بگرد، بعد درخواست پیوست کن.
 
@@ -171,7 +171,7 @@ design/ita-monitoring-prototype.html — فرانت‌اند تک‌فایلی (
 - **posts**: channel_id، platform، platform_post_id (یکتا با channel_id)، title (RSS و بله)، text، link، media_storage_path/media_source_url/media_fetched_at، posted_at، scraped_at، views، forwards، ai_keywords، ai_keywords_extracted_at، hawza_relevant.
 - **categories**، **regions**، **profile_groups** + **channel_profile_groups**، **news_topics**، **dossier_topics** + **dossier_topic_posts**، **news_ai_insights**، **newsletter_posts**، **newspapers** (یکتا روی slug+edition_date)، **magazines**، **archive_reports**، **school_reports**، **feedback**، **notify_subscribers**، **login_events** (فقط مدیر select؛ insert فقط از `login()`)، **app_config** (هش رمزها + JWT secret، فقط از توابع security definer).
 - **توابع**: `login(password)` (ثبت ورود در `login_events`؛ ناموفق → `response.status=401` به‌جای exception تا لاگ rollback نشه؛ ورود موفق user-agent `python*` ثبت نمی‌شه؛ پاک‌سازی >۳۰ روز)، `change_password(role, new)` (فقط مدیر)، `storage_usage()` و `channel_last_post()` (فقط مدیر، فقط‌خواندنی).
-- **Storage** (۹ bucket): خصوصی `magazines`، `archive-reports` (signed URL)؛ عمومی `post-media`، `newspaper-covers`، `magazine-covers`، `archive-report-covers`، `channel-avatars`، `school-reports`، `basirat-course-posters` (بلااستفاده).
+- **Storage** (۹ bucket): خصوصی `magazines`، `archive-reports`، `school-reports` (signed URL؛ `school-reports` از ۵.۱۶.۸ با migration_038 خصوصی شد — عکس‌ها با `signSchoolReports()` امضای ۶ ساعته‌ی دسته‌ای، PDF/اکسل با `openSchoolReportFile()` شصت‌ثانیه‌ای؛ اگه امضا شکست بخوره به `image_url` عمومی قبلی برمی‌گرده)؛ عمومی `post-media`، `newspaper-covers`، `magazine-covers`، `archive-report-covers`، `channel-avatars`، `basirat-course-posters` (بلااستفاده).
 - جدول‌های orphan (دست‌نخورده، بلااستفاده): `domains`، `people`/`professors`/... (migration_015)، `basirat_courses`.
 
 ## Storage و پاک‌سازی رسانه
@@ -211,6 +211,7 @@ db/migration_002 … 037                  به ترتیب شماره؛ مهم‌
   024 newsletter   025/026 پروفایل کانال و طلاب   027/028/029 اخبار حوزه   030 view شمارش روزنامه‌ها
   031 ایندکس posts.scraped_at   032 show_in_orgs   033 profile_groups   034 storage_usage/channel_last_post
   035 login_events + login() جدید   036 announcements (اطلاعیه برای کاربران)   037 app_users (دفترچه‌ی کاربران)
+  038 خصوصی کردن bucket گزارش‌های مدارس
 brand-kit/                              بسته گرافیکی (زیپ) + tools/ اسکریپت‌های سازنده — بخش «بسته گرافیکی و لوگو»
 .claude/skills/                         اسکیل‌های نصب‌شده (پایین)
 ```
