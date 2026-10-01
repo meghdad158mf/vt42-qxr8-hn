@@ -299,7 +299,7 @@
 
   /* admin-only shortcuts (export / settings), grouped under one dropdown, top-left of every page */
   .admin-menu{ position:relative; }
-  .admin-menu.open{ z-index:70; } /* منوی باز روی کارت‌های اطلاعیه (#ann-bar، z-index ۶۰) — ۵.۱۹.۱ */
+  .admin-menu.open{ z-index:70; } /* منوی باز روی کارت‌های اطلاعیه (#ann-bar، z-index ۶۰) — ۵.۲۰.۰ */
   .chip-btn{ display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color: var(--text-dim); background: var(--surface); border:1px solid var(--border); padding:7px 13px; border-radius: var(--radius-pill); cursor:pointer; font-family:inherit; transition: color .15s ease, border-color .15s ease, background .15s ease; }
   .chip-btn svg{ width:14px; height:14px; flex-shrink:0; }
   .chip-btn:hover{ color: var(--text); border-color: var(--border-strong); background: var(--surface-2); }
@@ -350,7 +350,7 @@
     width:7px; height:1px; background: rgba(181,101,29,0.35);
   }
   .admin-menu-list button:hover{ background: var(--surface-2); color: var(--text); }
-  /* جای فعلی کاربر در منوی «بخش‌ها» (updateNavMenuCurrent، ۵.۱۹.۱) */
+  /* جای فعلی کاربر در منوی «بخش‌ها» (updateNavMenuCurrent، ۵.۲۰.۰) */
   .admin-menu-list button.is-current-group{ color: var(--accent-strong); }
   .admin-menu-list button.is-current,
   .admin-menu-list button.is-current:hover{ background: rgba(234,179,147,0.3); color: var(--accent-strong); font-weight:800; }
@@ -378,7 +378,7 @@
     .topbar-brand{ gap:7px; min-width:0; }
     .topbar-badge{ width:32px; height:32px; }
     .topbar-badge svg{ width:16px; height:16px; }
-    /* دکمه‌ی منو روی گوشی تنها راه رفتن به بخش‌هاست — ناحیه‌ی لمس حدود ۴۴px (۵.۱۹.۱) */
+    /* دکمه‌ی منو روی گوشی تنها راه رفتن به بخش‌هاست — ناحیه‌ی لمس حدود ۴۴px (۵.۲۰.۰) */
     .nav-menu-badge-btn{ position:relative; }
     .nav-menu-badge-btn::after{ content:''; position:absolute; inset:-6px; }
     .topbar-brand-text{ font-size:13px; overflow:hidden; }
@@ -402,7 +402,7 @@
      نوار زیر هدر / زنگوله / کارت شناور / پنجره‌ی وسط / نوار متحرک) */
   .ann-bar{ position:fixed; bottom:22px; left:22px; z-index:60; display:flex; flex-direction:column; gap:10px; width:350px; max-width:calc(100vw - 32px); }
   @media (max-width:640px){ .ann-bar{ left:16px; right:16px; bottom:16px; width:auto; } }
-  /* دکمه‌ی «بالای صفحه» (۵.۱۹.۱): بعد از یک‌ونیم صفحه اسکرول، گوشه‌ی پایین راست
+  /* دکمه‌ی «بالای صفحه» (۵.۲۰.۰): بعد از یک‌ونیم صفحه اسکرول، گوشه‌ی پایین راست
      (اطلاعیه‌ها پایین چپ‌اند؛ روی گوشی که اطلاعیه تمام‌عرضه، updateToTop بالاتر می‌بردش) */
   .to-top{ position:fixed; right:22px; bottom:22px; z-index:58; width:44px; height:44px; border-radius:50%;
     display:grid; place-items:center; cursor:pointer; color: var(--primary);
@@ -477,6 +477,26 @@
   .usr-st{ font-size:11px; font-weight:700; color: var(--text-dim); }
   .usr-st.on{ color:#2f9e63; } .usr-st.off{ color:#c9483e; } .usr-st.done{ color: var(--accent-strong, #b5651d); }
   .usr-acts{ display:flex; gap:6px; }
+  /* گوشی (۵.۲۰.۰): هر کاربر یه کارت — قبلاً جدول افقی اسکرول می‌خورد و «ویرایش/حذف» دیده نمی‌شد */
+  @media (max-width:640px){
+    .usr-scroll{ overflow-x:hidden; }
+    .usr-table thead{ display:none; }
+    .usr-table, .usr-table tbody{ display:block; }
+    .usr-table tr{ display:grid; grid-template-columns:28px minmax(0,1fr) auto; column-gap:8px; row-gap:4px; align-items:center;
+      grid-template-areas:"sel name lvl" "sel phone st" "sel title title" "sel eitaa eitaa" "sel act act"; padding:12px 2px; border-bottom:1px solid var(--border); }
+    .usr-table td{ border:none; padding:0; white-space:normal; min-width:0; }
+    .usr-table td.is-empty{ display:none; }
+    .usr-table td.u-sel{ grid-area:sel; align-self:start; padding-top:2px; width:auto; }
+    .usr-table td.u-name{ grid-area:name; font-size:13.5px; }
+    .usr-table td.u-phone{ grid-area:phone; justify-self:start; }
+    .usr-table td.u-eitaa{ grid-area:eitaa; justify-self:start; color: var(--text-dim); }
+    .usr-table td.u-title{ grid-area:title; color: var(--text-dim); font-size:12px; }
+    .usr-table td.u-lvl{ grid-area:lvl; justify-self:end; }
+    .usr-table td.u-st{ grid-area:st; justify-self:end; }
+    .usr-table td.u-act{ grid-area:act; padding-top:6px; }
+    .usr-table td.u-act .usr-act{ padding:7px 14px; font-size:12px; }
+    .usr-table td.usr-empty{ display:block; grid-column:1 / -1; }
+  }
   .usr-act{ font:inherit; font-size:11.5px; font-weight:700; color: var(--text-dim); background:none; border:1px solid var(--border-strong); border-radius:8px; padding:4px 10px; cursor:pointer; }
   .usr-act:hover{ background: var(--surface-2); color: var(--text); }
   .usr-act.del{ color:#c9483e; border-color: rgba(201,72,62,0.35); }
@@ -720,7 +740,7 @@
      تا کاربر بدون رد شدن از تب پیش‌فرض مستقیم بره به همون زیربخش */
   .domain-shortcuts{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:0 0 40px; }
   .domain-shortcuts a{ font-size:11.5px; color: rgba(255,255,255,0.65); cursor:pointer; text-decoration:none; padding:5px 12px; border:1px solid rgba(255,255,255,0.14); border-radius: var(--radius-pill); transition: color .15s ease, border-color .15s ease, background .15s ease; }
-  /* صفحه‌کلید (۵.۱۹.۱): کارت‌های عرصه، میان‌برها و جلدهای بسته با Tab/Enter */
+  /* صفحه‌کلید (۵.۲۰.۰): کارت‌های عرصه، میان‌برها و جلدهای بسته با Tab/Enter */
   .domain-card:focus-visible, .domain-shortcuts a:focus-visible, .pkg-tile:focus-visible{ outline:2px solid var(--accent); outline-offset:4px; border-radius:12px; }
   .domain-shortcuts a:hover{ color: var(--accent); border-color: var(--accent); background: rgba(234,179,147,0.08); }
   .domain-shortcuts .domain-shortcut-disabled{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color: rgba(255,255,255,0.32); cursor:default; padding:5px 12px; border:1px solid rgba(255,255,255,0.08); border-radius: var(--radius-pill); }
@@ -1524,6 +1544,12 @@
   @media (max-width:640px){ .form-grid{ grid-template-columns:1fr; } }
   .form-grid .field select, .form-grid .field input{ width:100%; background: var(--surface-2); border:1px solid var(--border-strong); color:var(--text); padding:9px 12px; border-radius:7px; font-size:13px; font-family:inherit; }
   .fmt-row{ display:flex; gap:8px; margin-top:6px; }
+  .upl-hint{ font-weight:500; color: var(--text-faint); font-size:11.5px; }
+  .exp-range{ display:flex; gap:10px 24px; flex-wrap:wrap; }
+  .exp-range-row{ display:flex; align-items:center; gap:8px; flex:1; min-width:260px; max-width:420px; }
+  .exp-range-row > span{ font-size:12.5px; font-weight:700; color: var(--text-dim); width:18px; }
+  .exp-hint{ font-size:12px; color: var(--text-faint); margin:8px 0 0; }
+  .exp-clear{ font:inherit; font-size:12px; color: var(--accent-strong); background:none; border:none; padding:0 4px; cursor:pointer; text-decoration:underline; }
   .fmt{ border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text-dim); padding:8px 16px; border-radius: var(--radius-control); font-size:12.5px; cursor:pointer; font-weight:600; }
   .fmt.sel{ border-color: var(--primary); color: var(--primary-strong); background: var(--primary-soft); }
   .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background: var(--navy); border:1px solid var(--navy-2); color:#fff; padding:11px 20px; border-radius: var(--radius-pill); font-size:13px; opacity:0; pointer-events:none; transition: all .25s ease; z-index:95; }
@@ -1567,6 +1593,26 @@
   .sys-row-name{ flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .sys-row-meta{ color: var(--text-dim); font-size:12px; white-space:nowrap; }
   .sys-row.warn .sys-status-dot{ background:#d99a1e; } .sys-row.bad .sys-status-dot{ background: var(--danger); } .sys-row.ok .sys-status-dot{ background: var(--ok); }
+  /* خلاصه‌ی بالای «وضعیت سامانه» (renderSysSummary، ۵.۲۰.۰): موارد زرد/قرمز همه‌ی کارت‌ها یه‌جا */
+  .sys-summary{ display:flex; align-items:center; gap:10px 14px; flex-wrap:wrap; padding:14px 18px; border-radius: var(--radius-card, 16px);
+    background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; font-size:13px; }
+  .sys-summary b{ font-size:14px; font-weight:800; display:flex; align-items:center; gap:8px; }
+  .sys-summary b::before{ content:''; width:9px; height:9px; border-radius:50%; background: var(--text-faint); flex-shrink:0; }
+  .sys-summary.ok b::before{ background: var(--ok); } .sys-summary.warn b::before{ background:#e0b04a; } .sys-summary.bad b::before{ background:#e05a4f; }
+  .sys-summary.ok{ border-color: rgba(14,153,104,0.45); }
+  .sys-summary.warn{ border-color: rgba(224,176,74,0.55); }
+  .sys-summary.bad{ border-color: rgba(224,90,79,0.6); }
+  .sys-sum-chips{ display:flex; gap:8px; flex-wrap:wrap; }
+  .sys-sum-chip{ font:inherit; font-size:12px; font-weight:600; cursor:pointer; border-radius: var(--radius-pill); padding:6px 12px; min-height:32px;
+    border:1px solid rgba(224,176,74,0.6); background: rgba(224,176,74,0.14); color:#f3d28c; }
+  .sys-sum-chip.bad{ border-color: rgba(224,90,79,0.65); background: rgba(224,90,79,0.16); color:#ffb4ac; }
+  .sys-sum-chip:hover{ filter:brightness(1.15); }
+  .sys-flash{ animation: sysFlash 1.6s ease; }
+  @keyframes sysFlash{ 0%,60%{ box-shadow:0 0 0 3px var(--accent); } 100%{ box-shadow:0 0 0 3px transparent; } }
+  @media (prefers-reduced-motion: reduce){ .sys-flash{ animation:none; } }
+  .sys-row-link{ cursor:pointer; border-radius:8px; }
+  .sys-row-link:hover, .sys-row-link:focus-visible{ background: var(--surface-2); outline:none; }
+  .sys-row-edit{ margin-inline-start:auto; font-size:11.5px; font-weight:700; color: var(--accent-strong); white-space:nowrap; }
   .sys-note{ font-size:12.5px; color: var(--text-dim); line-height:1.8; }
   .sys-login-sum{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px; }
   .sys-login-stat{ flex:1; min-width:120px; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background: var(--surface-2); }
@@ -1949,11 +1995,11 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۹.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۰.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
-      <!-- فرم واقعی + autocomplete تا مرورگر پیشنهاد ذخیره‌ی رمز بده (۵.۱۹.۱)؛ نام کاربری
+      <!-- فرم واقعی + autocomplete تا مرورگر پیشنهاد ذخیره‌ی رمز بده (۵.۲۰.۰)؛ نام کاربری
            ثابت و پنهانه چون ورود فقط با رمز مشترکه -->
       <form class="login-form-wrap" id="login-form" autocomplete="on" onsubmit="event.preventDefault(); handleLogin();">
         <input type="text" name="username" autocomplete="username" value="جریان" tabindex="-1" aria-hidden="true" style="display:none">
@@ -2095,7 +2141,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
         <h3>حذف کانال «<span id="delete-channel-name"></span>»؟</h3>
-        <p>این کار غیرقابل‌بازگشته — همه‌ی پست‌های جمع‌آوری‌شده از این منبع هم برای همیشه پاک می‌شن.</p>
+        <p>این کار غیرقابل‌بازگشته — همه‌ی پست‌های جمع‌آوری‌شده از این منبع هم برای همیشه پاک می‌شوند.</p>
         <div style="display:flex; gap:10px; margin-top:18px;">
           <button class="btn" onclick="closeDeleteChannelModal()" style="flex:1;">انصراف</button>
           <button class="btn danger" id="confirm-delete-channel-btn" style="flex:1;">حذف قطعی</button>
@@ -2283,7 +2329,7 @@
         <a role="button" tabindex="0" onclick="goToHawzaTab('news')">اخبار حوزه</a>
         <a role="button" tabindex="0" onclick="goToPostsTab('feed')">پست‌های منتشر شده</a>
         <a role="button" tabindex="0" onclick="goToPostsTab('people')">افراد و مجموعه‌ها</a>
-        <!-- «به‌زودی»ها آخر ردیف (۵.۱۹.۱) -->
+        <!-- «به‌زودی»ها آخر ردیف (۵.۲۰.۰) -->
         <span class="domain-shortcut-disabled">آنچه درباره حوزه گفته می‌شود<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled">شرکت‌کننده در برنامه‌ها<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled">جامعه مخاطب<span class="news-soon">به‌زودی</span></span>
@@ -2541,7 +2587,7 @@
               <span class="ai-updated-note" id="news-selected-updated"></span>
             </div>
             <div class="rank-list" id="news-analytics-selected-list"></div>
-            <p id="news-analytics-selected-empty" style="display:none;color:var(--text-faint);font-size:12.5px;">تحلیل هوش مصنوعی هنوز آماده نشده — طبق زمان‌بندی روزی ۴ بار (۲، ۸، ۱۴ و ۲۰) به‌روز می‌شه.</p>
+            <p id="news-analytics-selected-empty" style="display:none;color:var(--text-faint);font-size:12.5px;">تحلیل هوش مصنوعی هنوز آماده نشده — طبق زمان‌بندی روزی ۴ بار (۲، ۸، ۱۴ و ۲۰) به‌روز می‌شود.</p>
           </div>
           <div class="nga-side">
             <div class="panel">
@@ -2550,7 +2596,7 @@
                 <span class="ai-updated-note" id="news-topics-updated"></span>
               </div>
               <div class="chart-box nga-donut" id="news-topics-chart-box"><canvas id="news-topics-chart"></canvas></div>
-              <p id="news-topics-empty" style="display:none;color:var(--text-faint);font-size:12.5px;">تحلیل هوش مصنوعی هنوز آماده نشده — طبق زمان‌بندی روزی ۴ بار (۲، ۸، ۱۴ و ۲۰) به‌روز می‌شه.</p>
+              <p id="news-topics-empty" style="display:none;color:var(--text-faint);font-size:12.5px;">تحلیل هوش مصنوعی هنوز آماده نشده — طبق زمان‌بندی روزی ۴ بار (۲، ۸، ۱۴ و ۲۰) به‌روز می‌شود.</p>
             </div>
             <div class="panel">
               <div class="panel-head">
@@ -2726,11 +2772,11 @@
             </div>
           </div>
           <div class="field">
-            <label>فایل(ها) — یک PDF یا چند عکس صفحه‌ها</label>
+            <label>فایل(ها) — یک PDF یا چند عکس صفحه‌ها <span class="upl-hint">(هر فایل حداکثر ۵۰ مگابایت؛ عکس‌ها به ترتیب نام فایل مرتب می‌شوند)</span></label>
             <input type="file" id="mag-files" multiple accept=".pdf,image/*" />
           </div>
           <div class="field">
-            <label>تصویر جلد (اختیاری — در کاروسل صفحه‌ی نخست نمایش داده می‌شه)</label>
+            <label>تصویر جلد (اختیاری — در کاروسل صفحه‌ی نخست نمایش داده می‌شود)</label>
             <input type="file" id="mag-cover" accept="image/*" />
           </div>
           <button class="btn primary" id="mag-upload-btn" style="margin-top:8px">بارگذاری مجله</button>
@@ -2754,7 +2800,7 @@
             </div>
           </div>
           <div class="field">
-            <label>فایل(ها) — یک PDF یا چند عکس صفحه‌ها</label>
+            <label>فایل(ها) — یک PDF یا چند عکس صفحه‌ها <span class="upl-hint">(هر فایل حداکثر ۵۰ مگابایت؛ عکس‌ها به ترتیب نام فایل مرتب می‌شوند)</span></label>
             <input type="file" id="arc-files" multiple accept=".pdf,image/*" />
           </div>
           <div class="field">
@@ -2771,7 +2817,7 @@
           <div class="panel-head"><span class="panel-pill">بارگذاری گزارش جدید مدارس</span></div>
           <div class="field"><label>عنوان (اختیاری)</label><input type="text" id="school-report-title" /></div>
           <div class="field">
-            <label>فایل (تصویر، PDF یا اکسل)</label>
+            <label>فایل (تصویر، PDF یا اکسل) <span class="upl-hint">(حداکثر ۵۰ مگابایت)</span></label>
             <input type="file" id="school-report-file" accept="image/*,.pdf,.xlsx,.xls,.csv" />
           </div>
           <button class="btn primary" id="school-report-upload-btn" style="margin-top:8px">بارگذاری گزارش</button>
@@ -2784,7 +2830,7 @@
     <!-- «اطلاعیه برای کاربران» (فقط مدیر، migration_036) — پیام کوتاهی که بالای همه‌ی
          صفحه‌ها برای همه نمایش داده می‌شه (#ann-bar) -->
     <section class="section" id="sec-announce">
-      <p class="ann-missing" id="ann-missing" style="display:none;">برای فعال شدن این بخش، فایل <b>db/migration_036_announcements.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا بشه.</p>
+      <p class="ann-missing" id="ann-missing" style="display:none;">برای فعال شدن این بخش، فایل <b>db/migration_036_announcements.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</p>
       <div class="panel" id="ann-form">
         <div class="panel-head"><span class="panel-pill">اطلاعیه‌ی جدید</span></div>
         <div class="field">
@@ -2795,8 +2841,8 @@
           <div class="field">
             <label for="ann-level">اهمیت</label>
             <select id="ann-level">
-              <option value="info">عادی — کاربر می‌تونه ببنده</option>
-              <option value="important">مهم — با هر ورود دوباره نمایش داده می‌شه</option>
+              <option value="info">عادی — کاربر می‌تواند ببندد</option>
+              <option value="important">مهم — با هر ورود دوباره نمایش داده می‌شود</option>
             </select>
           </div>
           <div class="field">
@@ -2916,41 +2962,53 @@
     <!-- ANALYTICS (with AI merged in as a sub-tab) -->
     <!-- EXPORT -->
     <section class="section" id="sec-export">
-      <div class="panel">
+      <!-- ۵.۲۰.۰: داده از خودِ سرور برای همه‌ی بازه گرفته می‌شه (قبلاً فقط از ۱۰۰۰ مطلب آخرِ کش)،
+           تاریخ‌ها شمسی، CSV با BOM تا اکسل فارسی رو درست نشون بده -->
+      <div class="panel" id="export-posts-panel">
         <div class="panel-head"><span class="panel-pill">خروجی پست‌ها</span></div>
+        <div class="field">
+          <label>بازه‌ی زمانی</label>
+          <div class="exp-range">
+            <div class="exp-range-row"><span>از</span><div class="jdate" data-which="from"></div></div>
+            <div class="exp-range-row"><span>تا</span><div class="jdate" data-which="to"></div></div>
+          </div>
+          <p class="exp-hint">اگر تاریخی انتخاب نکنید، مطالب ۳۰ روز اخیر خروجی گرفته می‌شود. <button type="button" class="exp-clear" data-clear="posts">پاک کردن تاریخ‌ها</button></p>
+        </div>
         <div class="form-grid">
-          <div class="field"><label>از تاریخ</label><input type="date" id="export-posts-from" /></div>
-          <div class="field"><label>تا تاریخ</label><input type="date" id="export-posts-to" /></div>
-          <div class="field"><label>کانال</label><select id="export-posts-channel"><option value="">همه‌ی کانال‌ها</option></select></div>
-          <div class="field"><label>دسته‌بندی</label><select id="export-posts-cat"><option value="">همه‌ی دسته‌بندی‌ها</option></select></div>
+          <div class="field"><label for="export-posts-channel">منبع</label><select id="export-posts-channel"><option value="">همه‌ی منابع</option></select></div>
+          <div class="field"><label for="export-posts-cat">موضوع منبع</label><select id="export-posts-cat"><option value="">همه‌ی موضوع‌ها</option></select></div>
         </div>
         <div class="field">
           <label>فرمت خروجی</label>
           <div class="fmt-row" id="export-posts-fmt">
-            <button class="fmt sel" data-f="csv">CSV</button>
-            <button class="fmt" data-f="xlsx">Excel</button>
+            <button class="fmt sel" data-f="csv">CSV (برای اکسل)</button>
             <button class="fmt" data-f="json">JSON</button>
           </div>
         </div>
-        <button class="btn primary" style="margin-top:8px" onclick="exportPosts()">دانلود خروجی پست‌ها</button>
+        <button class="btn primary" id="export-posts-btn" style="margin-top:8px" onclick="exportPosts()">دانلود خروجی پست‌ها</button>
       </div>
 
-      <div class="panel">
+      <div class="panel" id="export-report-panel">
         <div class="panel-head"><span class="panel-pill">خروجی گزارش آنالیز</span></div>
+        <div class="field">
+          <label>بازه‌ی زمانی</label>
+          <div class="exp-range">
+            <div class="exp-range-row"><span>از</span><div class="jdate" data-which="from"></div></div>
+            <div class="exp-range-row"><span>تا</span><div class="jdate" data-which="to"></div></div>
+          </div>
+          <p class="exp-hint">اگر تاریخی انتخاب نکنید، ۳۰ روز اخیر بررسی می‌شود. <button type="button" class="exp-clear" data-clear="report">پاک کردن تاریخ‌ها</button></p>
+        </div>
         <div class="form-grid">
-          <div class="field"><label>از تاریخ</label><input type="date" id="export-report-from" /></div>
-          <div class="field"><label>تا تاریخ</label><input type="date" id="export-report-to" /></div>
-          <div class="field"><label>نوع گزارش</label><select id="export-report-type"><option value="channels">آمار پست به ازای کانال</option><option value="words">کلمات پرتکرار</option></select></div>
+          <div class="field"><label for="export-report-type">نوع گزارش</label><select id="export-report-type"><option value="channels">تعداد مطلب هر منبع</option><option value="words">۱۰۰ واژه‌ی پرتکرار</option></select></div>
         </div>
         <div class="field">
           <label>فرمت خروجی</label>
           <div class="fmt-row" id="export-report-fmt">
-            <button class="fmt sel" data-f="csv">CSV</button>
-            <button class="fmt" data-f="xlsx">Excel</button>
+            <button class="fmt sel" data-f="csv">CSV (برای اکسل)</button>
             <button class="fmt" data-f="json">JSON</button>
           </div>
         </div>
-        <button class="btn primary" style="margin-top:8px" onclick="exportReport()">دانلود گزارش آنالیز</button>
+        <button class="btn primary" id="export-report-btn" style="margin-top:8px" onclick="exportReport()">دانلود گزارش آنالیز</button>
       </div>
 
     </section>
@@ -3090,29 +3148,30 @@
     <!-- نظرات کاربران — فقط مدیر، از کارت «ثبت نظر و پیشنهاد» صفحه‌ی نخست پر می‌شه -->
     <section class="section" id="sec-status">
       <div class="sys-page">
+        <div class="sys-summary" id="sys-summary" aria-live="polite"></div>
         <div class="panel">
-          <div class="panel-head"><span class="panel-pill">فضای ذخیره‌سازی</span><span class="settings-sum-desc">سقف پلن رایگان سوپابیس ۱ گیگابایته؛ اگه پر بشه، سایت قفل می‌شه.</span><button type="button" class="btn" id="sys-status-refresh" onclick="renderSystemStatus()">به‌روزرسانی همه</button></div>
+          <div class="panel-head"><span class="panel-pill">فضای ذخیره‌سازی</span><span class="settings-sum-desc">سقف پلن رایگان سوپابیس ۱ گیگابایت است؛ اگر پر شود، سایت قفل می‌شود.</span><button type="button" class="btn" id="sys-status-refresh" onclick="renderSystemStatus()">به‌روزرسانی همه</button></div>
           <div id="sys-storage"></div>
         </div>
         <div class="panel">
-          <div class="panel-head"><span class="panel-pill">سرویس‌های مرتبط</span><span class="settings-sum-desc">سایت‌ها و سرویس‌هایی که «جریان» برای کار کردن بهشون وابسته‌ست. سبز یعنی در دسترس، زرد یعنی کُند، قرمز یعنی قطع یا خطا.</span></div>
+          <div class="panel-head"><span class="panel-pill">سرویس‌های مرتبط</span><span class="settings-sum-desc">سایت‌ها و سرویس‌هایی که «جریان» برای کار به آن‌ها وابسته است. سبز یعنی در دسترس، زرد یعنی کُند، قرمز یعنی قطع یا خطا.</span></div>
           <div id="sys-services"></div>
         </div>
         <div class="panel">
-          <div class="panel-head"><span class="panel-pill">کارهای خودکار</span><span class="settings-sum-desc">زمان آخرین خروجی هر کار و نتیجه‌ی آخرین اجرای آن در گیت‌هاب. زرد یا قرمز یعنی باید بررسی بشه.</span></div>
+          <div class="panel-head"><span class="panel-pill">کارهای خودکار</span><span class="settings-sum-desc">زمان آخرین خروجی هر کار و نتیجه‌ی آخرین اجرای آن در گیت‌هاب. زرد یا قرمز یعنی باید بررسی شود.</span></div>
           <div class="sys-status-list" id="sys-status-list"></div>
         </div>
         <div class="panel">
-          <div class="panel-head"><span class="panel-pill">ورودها</span><span class="settings-sum-desc">ورودهای ۳۰ روز اخیر به سایت. چون رمز مشترکه، فقط نقش (مدیر/بیننده)، دستگاه و IP معلومه، نه نام افراد. ورود خودکار کارهای گیت‌هاب نمایش داده نمی‌شه.</span></div>
+          <div class="panel-head"><span class="panel-pill">ورودها</span><span class="settings-sum-desc">ورودهای ۳۰ روز اخیر به سایت. چون رمز مشترک است، فقط نقش (مدیر/بیننده)، دستگاه و IP معلوم است، نه نام افراد. ورود خودکار کارهای گیت‌هاب نمایش داده نمی‌شود.</span></div>
           <div id="sys-logins"></div>
         </div>
         <div class="sys-page-row">
           <div class="panel">
-            <div class="panel-head"><span class="panel-pill">منابع بی‌خبر</span><span class="settings-sum-desc">منابع فعالی که بیش از ۳ روز هیچ مطلبی ازشون نیومده (احتمال خرابی آدرس یا بسته‌شدن کانال).</span></div>
+            <div class="panel-head"><span class="panel-pill">منابع بی‌خبر</span><span class="settings-sum-desc">منابع فعالی که بیش از ۳ روز هیچ مطلبی از آن‌ها نیامده (احتمال خرابی آدرس یا بسته‌شدن کانال).</span></div>
             <div id="sys-stale"></div>
           </div>
           <div class="panel">
-            <div class="panel-head"><span class="panel-pill">انقضای توکن‌ها</span><span class="settings-sum-desc">بعد از انقضا، کار مربوطه بی‌صدا از کار می‌افته؛ قبلش توکن جدید بساز.</span></div>
+            <div class="panel-head"><span class="panel-pill">انقضای توکن‌ها</span><span class="settings-sum-desc">بعد از انقضا، کار مربوطه بی‌صدا از کار می‌افتد؛ پیش از آن توکن جدید بسازید.</span></div>
             <div id="sys-tokens"></div>
           </div>
         </div>
@@ -3217,7 +3276,7 @@
         <div class="app-footer-brand">
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۹.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۰.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3478,7 +3537,7 @@
     goLogin();
   }
 
-  // شماره‌ی موبایل با فاصله/خط تیره/پرانتز و پیش‌شماره‌ی ۹۸+ یا ۰۰۹۸ → 09xxxxxxxxx (۵.۱۹.۱)
+  // شماره‌ی موبایل با فاصله/خط تیره/پرانتز و پیش‌شماره‌ی ۹۸+ یا ۰۰۹۸ → 09xxxxxxxxx (۵.۲۰.۰)
   function normalizeIrMobile(v){
     let d = faDigitsToEn(v || '').replace(/[^\d+]/g, '');
     if(d.startsWith('+')) d = d.slice(1);
@@ -3639,7 +3698,7 @@
     btn.setAttribute('aria-label', show ? 'پنهان‌کردن رمز عبور' : 'نمایش رمز عبور');
   }
 
-  // هشدار صفحه‌کلید (۵.۱۹.۱): رایج‌ترین علت «رمز اشتباه» صفحه‌کلید فارسی یا Caps Lock روشنه
+  // هشدار صفحه‌کلید (۵.۲۰.۰): رایج‌ترین علت «رمز اشتباه» صفحه‌کلید فارسی یا Caps Lock روشنه
   function updateLoginKbHint(e){
     const pwEl = document.getElementById('login-password');
     const hint = document.getElementById('login-kb-hint');
@@ -4155,7 +4214,7 @@
       if(!results) return { s, cls:'', pill:'…', note:'در حال بررسی', pct:0 };
       const r = results[s.key];
       let cls, pill, note = s.use;
-      if(!r){ cls = ''; pill = 'نامعلوم'; note = 'تابع‌های سرور جواب ندادن'; }
+      if(!r){ cls = ''; pill = 'نامعلوم'; note = 'تابع‌های سرور پاسخ ندادند'; }
       else if(!r.ok){
         cls = 'bad';
         pill = r.detail === 'timeout' ? 'بی‌پاسخ' : r.status ? 'خطای ' + toFaDigits(String(r.status)) : 'قطع';
@@ -4176,7 +4235,7 @@
     }else{
       const ok = rows.filter(x=>x.cls === 'ok').length, warn = rows.filter(x=>x.cls === 'warn').length, bad = rows.filter(x=>x.cls === 'bad').length;
       const cls = bad ? 'bad' : warn ? 'warn' : ok === rows.length ? 'ok' : '';
-      const text = bad ? faNum(bad) + ' سرویس قطع یا دچار خطاست' : warn ? faNum(warn) + ' سرویس کُند جواب می‌ده' : ok === rows.length ? 'همه‌ی سرویس‌ها در دسترس‌اند' : 'وضعیت برخی سرویس‌ها نامعلومه';
+      const text = bad ? faNum(bad) + ' سرویس قطع یا دچار خطاست' : warn ? faNum(warn) + ' سرویس کُند پاسخ می‌دهد' : ok === rows.length ? 'همه‌ی سرویس‌ها در دسترس‌اند' : 'وضعیت برخی سرویس‌ها نامعلوم است';
       head = `<div class="svc-summary ${cls}"><span class="svc-summary-num">${faNum(ok)}<small> از ${faNum(rows.length)}</small></span><span class="svc-summary-text">${text}</span></div>`;
     }
     return head + '<div class="svc-groups">' + SYS_SERVICE_GROUPS.map(g=>`<div class="svc-group"><div class="svc-group-title">${g.name}</div>${rows.filter(x=>x.s.group === g.key).map(x=>`<div class="svc-row ${x.cls}"${x.tip ? ` title="${escAttr(x.tip)}"` : ''}><span class="svc-dot"></span><div class="svc-main"><div class="svc-name">${x.s.name}</div><div class="svc-note">${x.note}</div><div class="svc-meter"><span style="width:${x.pct.toFixed(0)}%"></span></div></div><span class="svc-pill">${x.pill}</span></div>`).join('')}</div>`).join('') + '</div>';
@@ -4187,7 +4246,7 @@
     el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
     try{
       const r = await api('/rpc/storage_usage', { method:'POST', body:'{}' });
-      if(r.status === 404){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_034_system_status.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا بشه.</div>'; return; }
+      if(r.status === 404){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_034_system_status.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</div>'; return; }
       if(!r.ok) throw new Error('storage_usage ' + r.status);
       const rows = (await r.json()).sort((a,b)=>b.size_bytes - a.size_bytes);
       const total = rows.reduce((t,x)=>t + Number(x.size_bytes||0), 0);
@@ -4206,7 +4265,7 @@
     el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
     try{
       const r = await api('/rpc/channel_last_post', { method:'POST', body:'{}' });
-      if(r.status === 404){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_034_system_status.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا بشه.</div>'; return; }
+      if(r.status === 404){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_034_system_status.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</div>'; return; }
       if(!r.ok) throw new Error('channel_last_post ' + r.status);
       const last = {};
       (await r.json()).forEach(x=>{ last[x.channel_id] = x.last_scraped_at; });
@@ -4217,7 +4276,7 @@
         .filter(x=>Date.now() - x.at > LIMIT)
         .sort((a,b)=>a.at - b.at);
       el.innerHTML = stale.length
-        ? '<div class="sys-rows">' + stale.map(x=>`<div class="sys-row ${x.at ? 'warn' : 'bad'}"><span class="sys-status-dot"></span><span class="sys-row-name">${escHtml(x.c.title||x.c.username)}</span><span class="sys-row-meta">${PLAT[x.c.platform]||''}، ${x.at ? 'آخرین مطلب ' + newsRelTime(new Date(x.at).toISOString()) : 'تا حالا مطلبی نیومده'}</span></div>`).join('') + '</div>'
+        ? '<div class="sys-rows">' + stale.map(x=>`<div class="sys-row sys-row-link ${x.at ? 'warn' : 'bad'}" role="button" tabindex="0" data-chan="${x.c.id}" title="باز کردن پنجره‌ی ویرایش این منبع"><span class="sys-status-dot"></span><span class="sys-row-name">${escHtml(x.c.title||x.c.username)}</span><span class="sys-row-meta">${PLAT[x.c.platform]||''}، ${x.at ? 'آخرین مطلب ' + newsRelTime(new Date(x.at).toISOString()) : 'تاکنون مطلبی نیامده'}</span><span class="sys-row-edit">ویرایش منبع</span></div>`).join('') + '</div>'
         : '<div class="sys-note">✓ همه‌ی منابع فعال در ۳ روز اخیر مطلب داشته‌اند.</div>';
     }catch(e){
       console.error(e);
@@ -4239,7 +4298,7 @@
     el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
     try{
       const r = await api('/login_events?select=created_at,success,role,user_agent,ip&order=created_at.desc&limit=300');
-      if(r.status === 404 || r.status === 400){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_035_login_events.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا بشه.</div>'; return; }
+      if(r.status === 404 || r.status === 400){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_035_login_events.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</div>'; return; }
       if(!r.ok) throw new Error('login_events ' + r.status);
       const rows = await r.json();
       const dayAgo = Date.now() - 86400000;
@@ -4283,10 +4342,9 @@
     const wrap = document.getElementById('sys-status-list');
     if(!wrap) return;
     renderSysTokens();
-    renderSysStorage();
-    renderSysStale();
-    renderSysLogins();
-    if(auto !== true) renderSysServices();
+    const parts = [renderSysStorage(), renderSysStale(), renderSysLogins()];
+    if(auto !== true) parts.push(renderSysServices());
+    renderSysSummary(true);
     wrap.innerHTML = SYS_STATUS_JOBS.map(j=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">در حال بررسی…</div></div></div>`).join('');
     const ghPromise = sysFetchGithubRuns();
     const results = await Promise.all(SYS_STATUS_JOBS.map(async j=>{
@@ -4327,6 +4385,8 @@
         ? `<button type="button" class="sys-run-btn" data-job="${j.job}" ${pending ? 'disabled' : ''}>${pending ? 'در حال اجرا…' : 'اجرای دستی'}</button>` : '';
       return `<div class="sys-status-item ${cls}"><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${j.name}</div><div class="sys-status-when">${when}</div>${res.extra ? `<div class="sys-extra">${res.extra}</div>` : ''}<div class="sys-gh ${gh.cls}">${gh.text}</div><div class="sys-status-exp">زمان‌بندی: ${j.exp}</div>${runBtn}</div></div>`;
     }).join('');
+    await Promise.all(parts.map(x=>Promise.resolve(x).catch(()=>{})));
+    renderSysSummary();
     // تا وقتی اجرایی در جریانه، هر دقیقه (فقط اگه همچنان توی همین صفحه باشیم) دوباره چک کن
     clearTimeout(SYS_STATUS_TIMER);
     if(Object.keys(JOB_REQUESTED_AT).length){
@@ -4336,6 +4396,60 @@
     }
   }
   const JOB_REQUESTED_AT = {};
+
+  // خلاصه‌ی بالای صفحه (۵.۲۰.۰): موارد زرد/قرمز همه‌ی کارت‌ها از خودِ صفحه‌ی رندرشده
+  // جمع می‌شن؛ کلیک روی هر مورد = اسکرول به همون کارت
+  let SYS_SUMMARY_TARGETS = [];
+  function renderSysSummary(loading){
+    const el = document.getElementById('sys-summary');
+    if(!el) return;
+    if(loading){ el.className = 'sys-summary'; el.innerHTML = '<b>در حال بررسی وضعیت سامانه…</b>'; return; }
+    const items = [];
+    const add = (cls, text, target) => items.push({ cls, text, target });
+    const lvl = e => e.classList.contains('bad') ? 'bad' : e.classList.contains('warn') ? 'warn' : '';
+    const bar = document.querySelector('#sys-storage .sys-bar');
+    if(bar && lvl(bar)) add(lvl(bar), 'فضای ذخیره‌سازی ' + (document.querySelector('#sys-storage .sys-storage-head span:last-child') || {}).textContent + ' پر', bar.closest('.panel'));
+    document.querySelectorAll('#sys-services .svc-row.bad, #sys-services .svc-row.warn').forEach(r=>{
+      const n = (r.querySelector('.svc-name') || {}).textContent || '';
+      add(lvl(r), n + (lvl(r) === 'bad' ? ': قطع یا خطا' : ': کُند'), r);
+    });
+    document.querySelectorAll('#sys-status-list .sys-status-item.bad, #sys-status-list .sys-status-item.warn').forEach(r=>{
+      add(lvl(r), (r.querySelector('.sys-status-name') || {}).textContent || '', r);
+    });
+    document.querySelectorAll('#sys-logins .sys-login-stat.bad, #sys-logins .sys-login-stat.warn').forEach(r=>{
+      add(lvl(r), 'تلاش ناموفق ورود زیاد', r);
+    });
+    const stale = document.querySelectorAll('#sys-stale .sys-row');
+    if(stale.length) add([...stale].some(r=>r.classList.contains('bad')) ? 'bad' : 'warn', faNum(stale.length) + ' منبع بی‌خبر', stale[0].closest('.panel'));
+    document.querySelectorAll('#sys-tokens .sys-row.bad, #sys-tokens .sys-row.warn').forEach(r=>{
+      add(lvl(r), 'انقضای توکن «' + ((r.querySelector('.sys-row-name') || {}).textContent || '') + '»', r);
+    });
+    items.sort((a,b)=>(b.cls === 'bad') - (a.cls === 'bad'));
+    SYS_SUMMARY_TARGETS = items.map(x=>x.target);
+    if(!items.length){
+      el.className = 'sys-summary ok';
+      el.innerHTML = '<b>همه‌چیز سالم است</b><span>هیچ موردی نیاز به رسیدگی ندارد.</span>';
+      return;
+    }
+    el.className = 'sys-summary ' + (items.some(x=>x.cls === 'bad') ? 'bad' : 'warn');
+    el.innerHTML = `<b>${faNum(items.length)} مورد نیازمند توجه</b><div class="sys-sum-chips">${items.map((x,i)=>`<button type="button" class="sys-sum-chip ${x.cls}" data-i="${i}">${escHtml(x.text)}</button>`).join('')}</div>`;
+  }
+  document.getElementById('sys-summary').addEventListener('click', e=>{
+    const b = e.target.closest('.sys-sum-chip'); if(!b) return;
+    const t = SYS_SUMMARY_TARGETS[+b.dataset.i]; if(!t || !t.isConnected) return;
+    t.scrollIntoView({ behavior:'smooth', block:'center' });
+    t.classList.remove('sys-flash'); void t.offsetWidth; t.classList.add('sys-flash');
+  });
+  // «منابع بی‌خبر»: کلیک = پنجره‌ی ویرایش همون منبع (۵.۲۰.۰)
+  function openStaleChannel(e){
+    const row = e.target.closest('.sys-row-link'); if(!row) return;
+    if(e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    const ch = CHANNELS.find(c=>String(c.id) === row.dataset.chan);
+    if(ch) openChanEditor(ch);
+  }
+  document.getElementById('sys-stale').addEventListener('click', openStaleChannel);
+  document.getElementById('sys-stale').addEventListener('keydown', openStaleChannel);
 
   // ---- نشانگرهای هشدار منوی «مدیریت» ----
   // فقط برای مدیر، ۲ ثانیه بعد از ورود و بعد هر ۱۵ دقیقه. عمداً سبک: همون
@@ -4462,7 +4576,7 @@
       });
       if(!r.ok) throw new Error('run-job ' + r.status);
       JOB_REQUESTED_AT[job] = Date.now();
-      showToast('درخواست اجرا ثبت شد؛ معمولاً ۱ تا ۵ دقیقه طول می‌کشه');
+      showToast('درخواست اجرا ثبت شد؛ معمولاً ۱ تا ۵ دقیقه طول می‌کشد');
       renderSystemStatus(true);
     }catch(e){
       console.error(e);
@@ -5764,7 +5878,7 @@
   function updateAnnPreview(){
     const msg = document.getElementById('ann-msg').value.trim();
     document.getElementById('ann-counter').textContent = toFaDigits(document.getElementById('ann-msg').value.length) + ' / ۳۰۰';
-    document.getElementById('ann-preview').innerHTML = annItemHtml({ message: msg || 'متن اطلاعیه اینجا نمایش داده می‌شه.', level: document.getElementById('ann-level').value }, false);
+    document.getElementById('ann-preview').innerHTML = annItemHtml({ message: msg || 'متن اطلاعیه اینجا نمایش داده می‌شود.', level: document.getElementById('ann-level').value }, false);
   }
   function renderAnnAdmin(){
     document.getElementById('ann-missing').style.display = ANN_TABLE_MISSING ? '' : 'none';
@@ -5870,10 +5984,12 @@
         const act = r.kind==='sub'
           ? (APP_USERS_MISSING ? '' : `<button type="button" class="usr-act" data-promote="${r.s.id}">افزودن به کاربران</button>`)
           : `<button type="button" class="usr-act" data-edit="${r.u.id}">ویرایش</button><button type="button" class="usr-act del" data-del="${r.u.id}">حذف</button>`;
-        return `<tr class="${r.kind==='user' && !r.active ? 'inactive' : ''}"><td><input type="checkbox" data-sel="${r.key}" ${USR_SELECTED.has(r.key)?'checked':''}></td>
-          <td>${r.kind==='sub' ? '<span class="usr-dim">— (از فرم اطلاع‌رسانی)</span>' : `<b>${escHtml(r.name)}</b>`}</td>
-          <td class="mono" dir="ltr">${escHtml(r.phone)||'—'}</td><td dir="ltr">${escHtml(r.eitaa)||'—'}</td>
-          <td>${escHtml(r.title)||'—'}</td><td>${lvl}</td><td>${st}</td><td><div class="usr-acts">${act}</div></td></tr>`;
+        // کلاس هر خانه برای نمای کارتی گوشی (۵.۲۰.۰)؛ خانه‌ی خالی روی گوشی پنهان می‌شه
+        const emp = v => v ? '' : ' is-empty';
+        return `<tr class="${r.kind==='user' && !r.active ? 'inactive' : ''}"><td class="u-sel"><input type="checkbox" data-sel="${r.key}" ${USR_SELECTED.has(r.key)?'checked':''} aria-label="انتخاب"></td>
+          <td class="u-name">${r.kind==='sub' ? '<span class="usr-dim">— (از فرم اطلاع‌رسانی)</span>' : `<b>${escHtml(r.name)}</b>`}</td>
+          <td class="u-phone mono${emp(r.phone)}" dir="ltr">${escHtml(r.phone)||'—'}</td><td class="u-eitaa${emp(r.eitaa)}" dir="ltr">${escHtml(r.eitaa)||'—'}</td>
+          <td class="u-title${emp(r.title)}">${escHtml(r.title)||'—'}</td><td class="u-lvl">${lvl}</td><td class="u-st">${st}</td><td class="u-act${act ? '' : ' is-empty'}"><div class="usr-acts">${act}</div></td></tr>`;
       }).join('') : '<tr><td colspan="8" class="usr-empty">موردی نیست.</td></tr>') + '</tbody>';
     updateUsrSelCount();
   }
@@ -6163,6 +6279,56 @@
     }
   }
 
+  // ---- کمک‌تابع‌های بارگذاری (۵.۲۰.۰): سقف حجم، ترتیب صفحه‌ها، پیام خطای قابل‌فهم و
+  // پاک‌کردن فایل‌های نیمه‌کاره (تا فضای ۱ گیگی سوپابیس با بارگذاری ناموفق پر نشه)
+  const UPLOAD_MAX_MB = 50; // سقف هر فایل در پلن رایگان سوپابیس
+  async function uploadHttpError(r, file){
+    const err = new Error('upload failed: ' + (file && file.name));
+    err.status = r.status;
+    try{ err.body = await r.text(); }catch(e){}
+    return err;
+  }
+  function uploadTooBig(files){
+    const big = files.find(f=>f && f.size > UPLOAD_MAX_MB * 1048576);
+    return big ? 'فایل «' + big.name + '» ' + faNum(+(big.size / 1048576).toFixed(1)) + ' مگابایت است؛ حداکثر حجم هر فایل ' + faNum(UPLOAD_MAX_MB) + ' مگابایت است. فایل را فشرده‌تر کنید یا به چند بخش تقسیم کنید.' : '';
+  }
+  // ترتیب عددی بر اساس نام (صفحه-۲ قبل از صفحه-۱۰) — مرورگرها ترتیب انتخاب رو تضمین نمی‌کنن
+  function sortFilesByName(files){
+    return files.slice().sort((a,b)=>a.name.localeCompare(b.name, 'en', { numeric:true, sensitivity:'base' }));
+  }
+  function uploadErrorMsg(e){
+    if(e && (e.status === 413 || /413|too large|exceeded the maximum/i.test(e.body || ''))) return 'حجم فایل بیش از حد مجاز سوپابیس است؛ فایل را فشرده‌تر کنید.';
+    if(e instanceof TypeError) return 'اتصال اینترنت قطع شد؛ دوباره امتحان کنید.';
+    if(e && (e.status === 401 || e.status === 403)) return 'نشست شما منقضی شده یا اجازه‌ی بارگذاری ندارید؛ یک‌بار خارج و دوباره وارد شوید.';
+    return 'بارگذاری انجام نشد؛ دوباره امتحان کنید. اگر تکرار شد، صفحه‌ی «وضعیت سامانه» را ببینید.';
+  }
+  async function removeStoragePaths(bucket, paths){
+    paths = (paths || []).filter(Boolean);
+    if(!paths.length) return;
+    try{
+      await fetch(SUPABASE_URL + '/storage/v1/object/remove/' + bucket, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prefixes: paths }),
+      });
+    }catch(e){}
+  }
+  const publicPathOf = (url, bucket) => (url && url.includes('/' + bucket + '/')) ? url.split('/' + bucket + '/')[1] : null;
+  // بارگذاری چند فایل پشت‌سرهم با «فایل ۳ از ۸» روی دکمه؛ اگه یکی شکست بخوره، قبلی‌ها پاک می‌شن
+  async function uploadFilesWithProgress(files, uploadOne, bucket, btn){
+    const paths = [];
+    try{
+      for(let i = 0; i < files.length; i++){
+        btn.textContent = files.length > 1 ? 'در حال بارگذاری فایل ' + faNum(i + 1) + ' از ' + faNum(files.length) + '…' : 'در حال بارگذاری…';
+        paths.push(await uploadOne(files[i]));
+      }
+      return paths;
+    }catch(e){
+      await removeStoragePaths(bucket, paths);
+      throw e;
+    }
+  }
+
   async function uploadSchoolReportFile(file){
     const safeName = file.name.replace(/[^\w.\-]+/g, '_');
     const path = Date.now() + '-' + Math.random().toString(36).slice(2,8) + '-' + safeName;
@@ -6171,7 +6337,7 @@
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': file.type || 'application/octet-stream' },
       body: file,
     });
-    if(!r.ok) throw new Error('upload failed');
+    if(!r.ok) throw await uploadHttpError(r, file);
     return { path, url: SUPABASE_URL + '/storage/v1/object/public/school-reports/' + path };
   }
 
@@ -6181,18 +6347,25 @@
     const fileEl = document.getElementById('school-report-file');
     const file = fileEl.files[0];
     if(!file){ showToast('یک فایل انتخاب کنید'); return; }
+    const tooBig = uploadTooBig([file]);
+    if(tooBig){ showToast(tooBig); return; }
     btn.disabled = true; btn.textContent = 'در حال بارگذاری…';
+    let path = null, saved = false;
     try{
-      const { path, url } = await uploadSchoolReportFile(file);
+      const up = await uploadSchoolReportFile(file);
+      path = up.path; const url = up.url;
       const nextOrder = SCHOOL_REPORTS.length ? Math.max(...SCHOOL_REPORTS.map(r=>r.sort_order||0)) + 1 : 0;
       const body = { title: titleEl.value.trim() || null, image_url: url, media_storage_path: path, sort_order: nextOrder, file_type: detectSchoolReportFileType(file), file_name: file.name };
       const r = await api('/school_reports', {method:'POST', headers:{Prefer:'return=minimal'}, body: JSON.stringify(body)});
       if(!r.ok) throw new Error('insert failed');
+      saved = true;
       titleEl.value=''; fileEl.value='';
       await loadSchoolReports(); renderSchoolReports();
       showToast('گزارش بارگذاری شد');
     }catch(e){
-      showToast('بارگذاری ناموفق بود — Storage یا دیتابیس را بررسی کنید');
+      console.error(e);
+      if(!saved) await removeStoragePaths('school-reports', [path]);
+      showToast(saved ? 'ذخیره شد، ولی فهرست به‌روز نشد؛ صفحه را تازه کنید.' : uploadErrorMsg(e));
     }finally{
       btn.disabled = false; btn.textContent = 'بارگذاری گزارش';
     }
@@ -7030,7 +7203,7 @@
     return Object.entries(byChannel).sort((a,b)=>b[1]-a[1]);
   }
 
-  function wordFrequency(list){
+  function wordFrequency(list, limit){
     const counts = {};
     list.forEach(p=>{
       const text = (p.text||'').replace(/https?:\/\/\S+/g,'').replace(/[^؀-ۿ\s]/g,' ');
@@ -7039,7 +7212,7 @@
         if(w.length>=3 && !STOPWORDS.has(w)) counts[w]=(counts[w]||0)+1;
       });
     });
-    return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,20);
+    return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0, limit || 20);
   }
 
   // «آنالیز» تب «اخبار و رویدادها» فقط روی «شبکه‌های اجتماعی» + «وب‌سایت‌ها»
@@ -7895,7 +8068,7 @@
       renderDossierTopicAdminList();
       if(created){
         const count = await autoMatchDossierTopic(created.id, {silent:true});
-        alert(count ? ('موضوع اضافه شد. ' + toFaDigits(count) + ' خبر مرتبط از پست‌های موجود پیدا و اضافه شد.') : 'موضوع اضافه شد. فعلاً خبری با این کلیدواژه‌ها توی پست‌های موجود پیدا نشد — با ورود خبر تازه یا با دکمه‌ی «جست‌وجوی خودکار» دوباره بررسی می‌شه.');
+        alert(count ? ('موضوع اضافه شد. ' + toFaDigits(count) + ' خبر مرتبط از پست‌های موجود پیدا و اضافه شد.') : 'موضوع اضافه شد. فعلاً خبری با این کلیدواژه‌ها در پست‌های موجود پیدا نشد — با ورود خبر تازه یا با دکمه‌ی «جست‌وجوی خودکار» دوباره بررسی می‌شود.');
       }
     }else{
       alert('خطایی رخ داد.');
@@ -7938,7 +8111,7 @@
       await loadDossierTopicPosts();
       renderDossierTopicAdminList();
     }
-    if(!opts.silent) alert(inserts.length ? (toFaDigits(inserts.length) + ' خبر با کلیدواژه‌های این موضوع پیدا و اضافه شد.') : 'با کلیدواژه‌های فعلی این موضوع، خبر جدیدی توی پست‌های موجود پیدا نشد.');
+    if(!opts.silent) alert(inserts.length ? (toFaDigits(inserts.length) + ' خبر با کلیدواژه‌های این موضوع پیدا و اضافه شد.') : 'با کلیدواژه‌های فعلی این موضوع، خبر جدیدی در پست‌های موجود پیدا نشد.');
     return inserts.length;
   }
 
@@ -7972,7 +8145,7 @@
     await loadDossierTopics();
     renderDossierTopicAdminList();
     const count = await autoMatchDossierTopic(id, {silent:true});
-    alert(count ? ('کلیدواژه‌ها ذخیره شد. ' + toFaDigits(count) + ' خبر تازه با کلیدواژه‌های جدید پیدا و اضافه شد.') : 'کلیدواژه‌ها ذخیره شد. با کلیدواژه‌های تازه، خبر جدیدی توی پست‌های موجود پیدا نشد.');
+    alert(count ? ('کلیدواژه‌ها ذخیره شد. ' + toFaDigits(count) + ' خبر تازه با کلیدواژه‌های جدید پیدا و اضافه شد.') : 'کلیدواژه‌ها ذخیره شد. با کلیدواژه‌های تازه، خبر جدیدی در پست‌های موجود پیدا نشد.');
   }
 
   function renderDossierTopicAdminList(){
@@ -8002,7 +8175,7 @@
         <span class="name"><b>${escAttr(t.name)}</b><div class="kw" id="dossier-topic-kw-${t.id}">${escAttr(t.keywords)}</div></span>
         <span class="dossier-topic-card-actions">
           <button class="btn" style="padding:3px 10px;font-size:10.5px;" onclick="editDossierTopicKeywords(${t.id})">ویرایش کلیدواژه</button>
-          <button class="btn" style="padding:3px 10px;font-size:10.5px;" title="پست‌های موجود رو دوباره با کلیدواژه‌های این موضوع تطبیق بده" onclick="autoMatchDossierTopic(${t.id})">جست‌وجوی خودکار</button>
+          <button class="btn" style="padding:3px 10px;font-size:10.5px;" title="پست‌های موجود دوباره با کلیدواژه‌های این موضوع تطبیق داده شوند" onclick="autoMatchDossierTopic(${t.id})">جست‌وجوی خودکار</button>
           <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;">
             <input type="checkbox" ${t.active?'checked':''} onchange="toggleDossierTopicActive(${t.id}, this.checked)" />
             فعال
@@ -8026,7 +8199,7 @@
 
   async function deleteDossierTopic(id){
     const t = DOSSIER_TOPICS.find(x=>x.id===id);
-    if(!confirm('موضوع «' + (t?t.name:'') + '» حذف شود؟ (پست‌های منتسب به این موضوع هم حذف می‌شن)')) return;
+    if(!confirm('موضوع «' + (t?t.name:'') + '» حذف شود؟ (پست‌های منتسب به این موضوع هم حذف می‌شوند)')) return;
     await api('/dossier_topics?id=eq.'+id, {method:'DELETE'});
     await loadDossierTopics();
     await loadDossierTopicPosts();
@@ -8141,7 +8314,7 @@
     });
   }
 
-  // دکمه‌ی «بالای صفحه» (۵.۱۹.۱) — به‌روزرسانی فقط یک‌بار در هر فریم
+  // دکمه‌ی «بالای صفحه» (۵.۲۰.۰) — به‌روزرسانی فقط یک‌بار در هر فریم
   const TO_TOP_EL = document.getElementById('to-top');
   let TO_TOP_RAF = 0;
   function updateToTop(){
@@ -8409,7 +8582,7 @@
   }
 
   async function deleteMagazine(m){
-    if(!confirm('مجله‌ی «' + m.title + '» حذف شود؟ فایل‌هاش هم برای همیشه پاک می‌شن.')) return;
+    if(!confirm('مجله‌ی «' + m.title + '» حذف شود؟ فایل‌های آن هم برای همیشه پاک می‌شوند.')) return;
     try{
       const files = Array.isArray(m.files) ? m.files : [];
       if(files.length){
@@ -8443,7 +8616,7 @@
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': file.type || 'application/octet-stream' },
       body: file,
     });
-    if(!r.ok) throw new Error('upload failed: ' + file.name);
+    if(!r.ok) throw await uploadHttpError(r, file);
     return path;
   }
 
@@ -8457,7 +8630,7 @@
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': file.type || 'application/octet-stream' },
       body: file,
     });
-    if(!r.ok) throw new Error('cover upload failed');
+    if(!r.ok) throw await uploadHttpError(r, file);
     return SUPABASE_URL + '/storage/v1/object/public/magazine-covers/' + path;
   }
 
@@ -8486,22 +8659,30 @@
     const title = titleEl.value.trim();
     const files = Array.from(filesEl.files || []);
     if(!title || !files.length){ showToast('عنوان و حداقل یک فایل لازم است'); return; }
+    const tooBig = uploadTooBig(files.concat(coverEl.files[0] || []));
+    if(tooBig){ showToast(tooBig); return; }
     btn.disabled = true; btn.textContent = 'در حال بارگذاری…';
+    let paths = [], coverUrl = null, saved = false;
     try{
-      const paths = [];
-      for(const f of files){ paths.push(await uploadMagazineFile(f)); }
-      let coverUrl = null;
+      paths = await uploadFilesWithProgress(sortFilesByName(files), uploadMagazineFile, 'magazines', btn);
       const coverFile = coverEl.files[0];
-      if(coverFile) coverUrl = await uploadCoverFile(coverFile);
+      if(coverFile){ btn.textContent = 'در حال بارگذاری جلد…'; coverUrl = await uploadCoverFile(coverFile); }
       const nextOrder = MAGAZINES.length ? Math.max(...MAGAZINES.map(m=>m.sort_order||0)) + 1 : 0;
       const body = { title, issue_no: issueEl.value.trim() || null, publish_date: dateEl.value || null, file_type: typeEl.value, files: paths, cover_url: coverUrl, sort_order: nextOrder };
       const r = await api('/magazines', {method:'POST', headers:{Prefer:'return=minimal'}, body: JSON.stringify(body)});
       if(!r.ok) throw new Error('insert failed');
+      saved = true;
       titleEl.value=''; issueEl.value=''; dateEl.value=''; filesEl.value=''; coverEl.value='';
       await loadMagazines(); renderMagazines();
       showToast('مجله بارگذاری شد');
     }catch(e){
-      showToast('بارگذاری ناموفق بود — Storage یا دیتابیس را بررسی کنید');
+      console.error(e);
+      // فایل‌هایی که رفتن ولی ردیفشون ثبت نشد، پاک بشن
+      if(!saved){
+        await removeStoragePaths('magazines', paths);
+        await removeStoragePaths('magazine-covers', [publicPathOf(coverUrl, 'magazine-covers')]);
+      }
+      showToast(saved ? 'ذخیره شد، ولی فهرست به‌روز نشد؛ صفحه را تازه کنید.' : uploadErrorMsg(e));
     }finally{
       btn.disabled = false; btn.textContent = 'بارگذاری مجله';
     }
@@ -8587,7 +8768,7 @@
   }
 
   async function deleteArchiveReport(m){
-    if(!confirm('«' + m.title + '» از آرشیو حذف شود؟ فایل‌هاش هم برای همیشه پاک می‌شن.')) return;
+    if(!confirm('«' + m.title + '» از آرشیو حذف شود؟ فایل‌های آن هم برای همیشه پاک می‌شوند.')) return;
     try{
       const files = Array.isArray(m.files) ? m.files : [];
       if(files.length){
@@ -8621,7 +8802,7 @@
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': file.type || 'application/octet-stream' },
       body: file,
     });
-    if(!r.ok) throw new Error('upload failed: ' + file.name);
+    if(!r.ok) throw await uploadHttpError(r, file);
     return path;
   }
 
@@ -8633,7 +8814,7 @@
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': file.type || 'application/octet-stream' },
       body: file,
     });
-    if(!r.ok) throw new Error('cover upload failed');
+    if(!r.ok) throw await uploadHttpError(r, file);
     return SUPABASE_URL + '/storage/v1/object/public/archive-report-covers/' + path;
   }
 
@@ -8649,22 +8830,29 @@
     const sourceOrg = sourceOrgEl.value.trim();
     const files = Array.from(filesEl.files || []);
     if(!title || !sourceOrg || !files.length){ showToast('عنوان، نهاد تولیدکننده و حداقل یک فایل لازم است'); return; }
+    const tooBig = uploadTooBig(files.concat(coverEl.files[0] || []));
+    if(tooBig){ showToast(tooBig); return; }
     btn.disabled = true; btn.textContent = 'در حال بارگذاری…';
+    let paths = [], coverUrl = null, saved = false;
     try{
-      const paths = [];
-      for(const f of files){ paths.push(await uploadArchiveReportFile(f)); }
-      let coverUrl = null;
+      paths = await uploadFilesWithProgress(sortFilesByName(files), uploadArchiveReportFile, 'archive-reports', btn);
       const coverFile = coverEl.files[0];
-      if(coverFile) coverUrl = await uploadArchiveCoverFile(coverFile);
+      if(coverFile){ btn.textContent = 'در حال بارگذاری جلد…'; coverUrl = await uploadArchiveCoverFile(coverFile); }
       const nextOrder = ARCHIVE_REPORTS.length ? Math.max(...ARCHIVE_REPORTS.map(m=>m.sort_order||0)) + 1 : 0;
       const body = { title, source_org: sourceOrg, publish_date: dateEl.value || null, file_type: typeEl.value, files: paths, cover_url: coverUrl, sort_order: nextOrder };
       const r = await api('/archive_reports', {method:'POST', headers:{Prefer:'return=minimal'}, body: JSON.stringify(body)});
       if(!r.ok) throw new Error('insert failed');
+      saved = true;
       titleEl.value=''; sourceOrgEl.value=''; dateEl.value=''; filesEl.value=''; coverEl.value='';
       await loadArchiveReports(); renderArchiveReports();
       showToast('به آرشیو اضافه شد');
     }catch(e){
-      showToast('بارگذاری ناموفق بود — Storage یا دیتابیس را بررسی کنید');
+      console.error(e);
+      if(!saved){
+        await removeStoragePaths('archive-reports', paths);
+        await removeStoragePaths('archive-report-covers', [publicPathOf(coverUrl, 'archive-report-covers')]);
+      }
+      showToast(saved ? 'ذخیره شد، ولی فهرست به‌روز نشد؛ صفحه را تازه کنید.' : uploadErrorMsg(e));
     }finally{
       btn.disabled = false; btn.textContent = 'بارگذاری';
     }
@@ -8787,8 +8975,8 @@
 
   // ---- export ----
   function populateExportFilters(){
-    const chOpts = '<option value="">همه‌ی کانال‌ها</option>' + CHANNELS.map(c=>`<option value="${c.id}">${escHtml(c.title||c.username)}</option>`).join('');
-    const catOpts = '<option value="">همه‌ی دسته‌بندی‌ها</option>' + CATEGORIES.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
+    const chOpts = '<option value="">همه‌ی منابع</option>' + CHANNELS.map(c=>`<option value="${c.id}">${escHtml(c.title||c.username)}</option>`).join('');
+    const catOpts = '<option value="">همه‌ی موضوع‌ها</option>' + CATEGORIES.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
     document.getElementById('export-posts-channel').innerHTML = chOpts;
     document.getElementById('export-posts-cat').innerHTML = catOpts;
   }
@@ -8932,49 +9120,117 @@
     return head + '\n' + body;
   }
 
+  // ---- «خروجی محتوا» (۵.۲۰.۰) ----
+  // داده‌ها برای کل بازه از سرور گرفته می‌شن (صفحه‌ای، ۱۰۰۰تایی) — قبلاً فقط از ۱۰۰۰ مطلب آخرِ
+  // POSTS_CACHE ساخته می‌شد و بازه‌ی طولانی بی‌صدا ناقص می‌اومد. بازه بر اساس scraped_at
+  // (پست‌های ایتا posted_at ندارن) و نیمه‌شب تهران؛ بدون تاریخ = ۳۰ روز اخیر.
+  const EXPORT_RANGE = { posts:{ from:'', to:'' }, report:{ from:'', to:'' } };
+  ['posts','report'].forEach(k=>{
+    const panel = document.getElementById('export-' + k + '-panel');
+    setupJalaliRange(panel, (which, iso)=>{ EXPORT_RANGE[k][which] = iso; });
+  });
+  document.getElementById('sec-export').addEventListener('click', e=>{
+    const b = e.target.closest('.exp-clear'); if(!b) return;
+    const k = b.dataset.clear;
+    EXPORT_RANGE[k] = { from:'', to:'' };
+    document.querySelectorAll('#export-' + k + '-panel .jdate select').forEach(sel=>{ sel.value = ''; });
+  });
+  function exportBounds(k){
+    const r = EXPORT_RANGE[k];
+    const tehranIso = ms => new Date(ms).toLocaleDateString('en-CA', { timeZone:'Asia/Tehran' });
+    const to = r.to || tehranIso(Date.now());
+    const from = r.from || tehranIso(Date.now() - 29*86400000);
+    if(from > to) return null;
+    const start = new Date(from + 'T00:00:00+03:30');
+    const end = new Date(new Date(to + 'T00:00:00+03:30').getTime() + 86400000);
+    const jl = iso => { const p = calParts(new Date(iso + 'T12:00:00+03:30'), 'persian'); return p.year + '-' + String(p.month).padStart(2,'0') + '-' + String(p.day).padStart(2,'0'); };
+    return { start: start.toISOString(), end: end.toISOString(), tag: jl(from) + '_' + jl(to) };
+  }
+  // همه‌ی مطالب بازه، صفحه‌ای؛ onProgress(دریافت‌شده، کل). پست‌های پنهان‌شده حذف می‌شن.
+  async function fetchPostsInRange(b, filter, cols, onProgress){
+    const base = '/posts?scraped_at=gte.' + encodeURIComponent(b.start) + '&scraped_at=lt.' + encodeURIComponent(b.end) + (filter || '');
+    const total = await fetchExactCount(base);
+    if(total > 30000 && !confirm(faNum(total) + ' مطلب در این بازه هست و دریافتش ممکن است چند دقیقه طول بکشد. ادامه می‌دهید؟')) return null;
+    const out = [];
+    for(let off = 0; off < Math.max(total, 1); off += 1000){
+      onProgress(out.length, total);
+      const r = await api(base + '&select=' + cols + '&order=scraped_at.asc,id.asc&limit=1000&offset=' + off);
+      if(!r.ok) throw new Error('posts ' + r.status);
+      const rows = await r.json();
+      out.push(...rows);
+      if(rows.length < 1000) break;
+    }
+    return out.filter(p=>!HIDDEN_POST_IDS.has(Number(p.id)));
+  }
+  function downloadCsv(filename, rows, columns){
+    // BOM اول فایل: بدونش اکسل متن فارسی رو به‌هم‌ریخته نشون می‌ده
+    downloadBlob(filename, '\ufeff' + toCSV(rows, columns), 'text/csv;charset=utf-8');
+  }
+  const EXPORT_PLAT = { eitaa:'ایتا', telegram:'تلگرام', website:'وب‌سایت', bale:'بله' };
+  async function runExport(btn, label, job){
+    btn.disabled = true;
+    try{ await job(t=>{ btn.textContent = t; }); }
+    catch(e){ console.error(e); showToast('دریافت اطلاعات انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید'); }
+    finally{ btn.disabled = false; btn.textContent = label; }
+  }
   function exportPosts(){
+    const b = exportBounds('posts');
+    if(!b){ showToast('تاریخ «از» بعد از تاریخ «تا» است'); return; }
     const fmt = selectedFormat('export-posts-fmt');
-    if(fmt==='xlsx'){ showToast('فرمت Excel به‌زودی اضافه می‌شود — فعلاً از CSV یا JSON استفاده کنید'); return; }
-    const from = document.getElementById('export-posts-from').value;
-    const to = document.getElementById('export-posts-to').value;
     const chFilter = document.getElementById('export-posts-channel').value;
     const catFilter = document.getElementById('export-posts-cat').value;
-    let rows = POSTS_CACHE.filter(p=>{
-      if(chFilter && String(p.channel_id)!==chFilter) return false;
-      if(catFilter){ const ch=chById(p.channel_id); if(!ch || String(ch.category_id)!==catFilter) return false; }
-      const d = p.posted_at || p.scraped_at;
-      if(from && d && d.slice(0,10) < from) return false;
-      if(to && d && d.slice(0,10) > to) return false;
-      return true;
-    }).map(p=>({
-      channel: chName(p.channel_id),
-      platform: p.platform,
-      category: catNameOf(p.channel_id),
-      text: p.text,
-      link: p.link,
-      posted_at: p.posted_at,
-      scraped_at: p.scraped_at,
-    }));
-    if(fmt==='json') downloadBlob('posts.json', JSON.stringify(rows,null,2), 'application/json');
-    else downloadBlob('posts.csv', toCSV(rows, ['channel','platform','category','text','link','posted_at','scraped_at']), 'text/csv');
-    showToast('خروجی پست‌ها آماده شد');
+    let filter = '';
+    if(chFilter) filter = '&channel_id=eq.' + Number(chFilter);
+    else if(catFilter){
+      const ids = CHANNELS.filter(c=>String(c.category_id) === catFilter).map(c=>c.id);
+      if(!ids.length){ showToast('هیچ منبعی با این موضوع نیست'); return; }
+      filter = '&channel_id=in.(' + ids.join(',') + ')';
+    }
+    const btn = document.getElementById('export-posts-btn');
+    runExport(btn, 'دانلود خروجی پست‌ها', async setLabel=>{
+      setLabel('در حال شمارش…');
+      const list = await fetchPostsInRange(b, filter, 'id,channel_id,platform,title,text,link,posted_at,scraped_at', (n, t)=>setLabel('در حال دریافت ' + faNum(n) + ' از ' + faNum(t) + '…'));
+      if(!list) return;
+      if(!list.length){ showToast('در این بازه مطلبی پیدا نشد'); return; }
+      const dateF = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { timeZone:'Asia/Tehran', year:'numeric', month:'2-digit', day:'2-digit' });
+      const timeF = new Intl.DateTimeFormat('en-GB', { timeZone:'Asia/Tehran', hour:'2-digit', minute:'2-digit' });
+      const plain = t => String(t || '').replace(/<[^>]+>/g, '');
+      const name = 'jarian-posts-' + b.tag;
+      if(fmt === 'json'){
+        const rows = list.map(p=>({ channel: chName(p.channel_id), platform: p.platform, category: catNameOf(p.channel_id), title: p.title || null, text: plain(p.text), link: p.link, posted_at: p.posted_at, scraped_at: p.scraped_at }));
+        downloadBlob(name + '.json', JSON.stringify(rows, null, 2), 'application/json');
+      }else{
+        const cols = ['منبع','بستر','موضوع منبع','عنوان','متن','لینک','تاریخ (شمسی)','ساعت'];
+        const rows = list.map(p=>{ const d = new Date(p.posted_at || p.scraped_at); return { 'منبع': chName(p.channel_id), 'بستر': EXPORT_PLAT[p.platform] || p.platform, 'موضوع منبع': catNameOf(p.channel_id), 'عنوان': p.title || '', 'متن': plain(p.text), 'لینک': p.link || '', 'تاریخ (شمسی)': dateF.format(d), 'ساعت': timeF.format(d) }; });
+        downloadCsv(name + '.csv', rows, cols);
+      }
+      showToast('خروجی ' + faNum(list.length) + ' مطلب آماده شد');
+    });
   }
 
   function exportReport(){
+    const b = exportBounds('report');
+    if(!b){ showToast('تاریخ «از» بعد از تاریخ «تا» است'); return; }
     const fmt = selectedFormat('export-report-fmt');
-    if(fmt==='xlsx'){ showToast('فرمت Excel به‌زودی اضافه می‌شود — فعلاً از CSV یا JSON استفاده کنید'); return; }
     const type = document.getElementById('export-report-type').value;
-    let rows;
-    if(type==='words'){
-      rows = wordFrequency(POSTS_CACHE).map(([word,count])=>({word,count}));
-      if(fmt==='json') downloadBlob('words-report.json', JSON.stringify(rows,null,2), 'application/json');
-      else downloadBlob('words-report.csv', toCSV(rows,['word','count']), 'text/csv');
-    }else{
-      rows = topChannelsByCount(POSTS_CACHE).map(([id,count])=>({channel: chName(Number(id)), count}));
-      if(fmt==='json') downloadBlob('channels-report.json', JSON.stringify(rows,null,2), 'application/json');
-      else downloadBlob('channels-report.csv', toCSV(rows,['channel','count']), 'text/csv');
-    }
-    showToast('گزارش آنالیز آماده شد');
+    const btn = document.getElementById('export-report-btn');
+    runExport(btn, 'دانلود گزارش آنالیز', async setLabel=>{
+      setLabel('در حال شمارش…');
+      const list = await fetchPostsInRange(b, '', type === 'words' ? 'id,channel_id,text' : 'id,channel_id', (n, t)=>setLabel('در حال دریافت ' + faNum(n) + ' از ' + faNum(t) + '…'));
+      if(!list) return;
+      if(!list.length){ showToast('در این بازه مطلبی پیدا نشد'); return; }
+      let rows, cols, name;
+      if(type === 'words'){
+        rows = wordFrequency(list, 100).map(([w, n])=>({ 'واژه': w, 'تعداد': n }));
+        cols = ['واژه','تعداد']; name = 'jarian-words-' + b.tag;
+      }else{
+        rows = topChannelsByCount(list).map(([id, n])=>{ const ch = chById(Number(id)); return { 'منبع': chName(Number(id)), 'بستر': ch ? (EXPORT_PLAT[ch.platform] || ch.platform) : '', 'تعداد مطلب': n }; });
+        cols = ['منبع','بستر','تعداد مطلب']; name = 'jarian-sources-' + b.tag;
+      }
+      if(fmt === 'json') downloadBlob(name + '.json', JSON.stringify(rows, null, 2), 'application/json');
+      else downloadCsv(name + '.csv', rows, cols);
+      showToast('گزارش آماده شد (' + faNum(list.length) + ' مطلب بررسی شد)');
+    });
   }
 
   function showToast(msg){
@@ -9013,7 +9269,7 @@
   function exportNotifySubscribers(){
     if(!NOTIFY_SUBSCRIBERS.length){ showToast('هنوز مشترکی ثبت نشده'); return; }
     const rows = NOTIFY_SUBSCRIBERS.map(s=>({ phone: s.phone, created_at: s.created_at, notified_at: s.notified_at||'' }));
-    downloadBlob('notify-subscribers.csv', toCSV(rows, ['phone','created_at','notified_at']), 'text/csv');
+    downloadCsv('notify-subscribers.csv', rows, ['phone','created_at','notified_at']);
     showToast('خروجی لیست شماره‌ها آماده شد');
   }
 
@@ -9288,7 +9544,8 @@
     pages.forEach(x=>{
       const s = secs[x.section] || (secs[x.section] = { n:0, tabs:{} });
       s.n += x.views;
-      s.tabs[x.tab] = (s.tabs[x.tab] || 0) + x.views;
+      const tk = x.tab || ''; // ردیف بدون تب (مثل صفحه‌ی نخست) زیرردیف جدا نمی‌گیره
+      s.tabs[tk] = (s.tabs[tk] || 0) + x.views;
     });
     const secList = Object.entries(secs).sort((a,b)=>b[1].n - a[1].n);
     const maxSec = secList.length ? secList[0][1].n : 1;
@@ -9370,8 +9627,9 @@
     const counts = { all: ACT_AUDIT.length };
     ACT_AUDIT.forEach(x=>{ const g = groupOf(x); counts[g] = (counts[g] || 0) + 1; });
     document.getElementById('act-audit-filters').innerHTML = AUDIT_GROUPS.map(([k,l])=>`<button type="button" class="usr-chip ${ACT_AUDIT_FILTER===k?'active':''}" data-f="${k}">${l}<span>${toFaDigits(counts[k] || 0)}</span></button>`).join('');
-    const q = (document.getElementById('act-audit-search').value || '').trim();
-    const list = ACT_AUDIT.filter(x=>(ACT_AUDIT_FILTER === 'all' || groupOf(x) === ACT_AUDIT_FILTER) && (!q || (x.label || '').includes(q)));
+    // همون نرمال‌سازی جست‌وجوی اخبار (ي/ك عربی، نیم‌فاصله، ارقام فارسی) — ۵.۲۰.۰
+    const q = searchNorm((document.getElementById('act-audit-search').value || '').trim());
+    const list = ACT_AUDIT.filter(x=>(ACT_AUDIT_FILTER === 'all' || groupOf(x) === ACT_AUDIT_FILTER) && (!q || searchNorm((x.label || '') + ' ' + ((AUDIT_TBL[x.tbl] || [x.tbl])[0] || '')).includes(q)));
     if(!list.length){
       el.innerHTML = '<div class="sys-note">' + (ACT_AUDIT.length ? 'موردی با این فیلتر پیدا نشد.' : 'هنوز تغییری ثبت نشده. از این به بعد هر تغییر در پنل مدیریت اینجا دیده می‌شود.') + '</div>';
       return;
@@ -9527,7 +9785,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.19.1';
+  const APP_VERSION = '5.20.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
