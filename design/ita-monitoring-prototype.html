@@ -170,6 +170,7 @@
   .field label{ font-size:12.5px; color: var(--text-dim); font-weight:600; }
   .field input{ background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius: var(--radius-control); font-size:14px; font-family:inherit; direction:rtl; width:100%; box-sizing:border-box; }
   .field input:focus{ border-color: var(--primary-strong); outline:none; }
+  .login-kb-hint{ font-size:12px; color:#b5651d; background: rgba(234,179,147,0.16); border-radius:8px; padding:7px 10px; margin:-8px 0 14px; line-height:1.7; }
   .login-form-wrap .btn.primary{ width:100%; margin-top:6px; padding:11px; position:relative; overflow:hidden; }
   /* فاصله‌ی بین کلیک «ورود» و رسیدن به داشبورد (بخش «سرعت ورود» CLAUDE.md
      رو ببین) حتی بعد از بهینه‌سازی‌ها حدود ۲ ثانیه‌ست — بدون بازخورد بصری
@@ -298,6 +299,7 @@
 
   /* admin-only shortcuts (export / settings), grouped under one dropdown, top-left of every page */
   .admin-menu{ position:relative; }
+  .admin-menu.open{ z-index:70; } /* منوی باز روی کارت‌های اطلاعیه (#ann-bar، z-index ۶۰) — ۵.۱۹.۱ */
   .chip-btn{ display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color: var(--text-dim); background: var(--surface); border:1px solid var(--border); padding:7px 13px; border-radius: var(--radius-pill); cursor:pointer; font-family:inherit; transition: color .15s ease, border-color .15s ease, background .15s ease; }
   .chip-btn svg{ width:14px; height:14px; flex-shrink:0; }
   .chip-btn:hover{ color: var(--text); border-color: var(--border-strong); background: var(--surface-2); }
@@ -324,6 +326,8 @@
   .nav-menu-col{ display:flex; flex-direction:column; gap:2px; }
   @media (max-width:640px){
     #nav-menu-list.nav-menu-grid{ grid-template-columns:1fr; min-width:220px; gap:2px; padding:6px; }
+    /* گوشی: «صفحه نخست» و «بسته تحلیلی جریان» بالای فهرست بلند عرصه‌ها */
+    .nav-menu-col-top{ order:-1; padding-bottom:4px; margin-bottom:4px; border-bottom:1px solid rgba(181,101,29,0.2); }
   }
   .admin-menu-list button{
     display:flex; align-items:center; gap:8px; width:100%; text-align:right; font-family:inherit;
@@ -346,6 +350,10 @@
     width:7px; height:1px; background: rgba(181,101,29,0.35);
   }
   .admin-menu-list button:hover{ background: var(--surface-2); color: var(--text); }
+  /* جای فعلی کاربر در منوی «بخش‌ها» (updateNavMenuCurrent، ۵.۱۹.۱) */
+  .admin-menu-list button.is-current-group{ color: var(--accent-strong); }
+  .admin-menu-list button.is-current,
+  .admin-menu-list button.is-current:hover{ background: rgba(234,179,147,0.3); color: var(--accent-strong); font-weight:800; }
   .admin-menu-list svg{ width:14px; height:14px; flex-shrink:0; }
   /* نشانگرهای هشدار منوی «مدیریت» (refreshAdminAlerts): نقطه‌ی زرد/قرمز کنار «وضعیت
      سامانه»، شمار نظرهای خونده‌نشده کنار «نظرات کاربران»، و یه نقطه روی خودِ دکمه */
@@ -368,8 +376,11 @@
     .topbar-status{ font-size:0; gap:0; }
     .topbar-divider{ display:none; }
     .topbar-brand{ gap:7px; min-width:0; }
-    .topbar-badge{ width:24px; height:24px; }
-    .topbar-badge svg{ width:12px; height:12px; }
+    .topbar-badge{ width:32px; height:32px; }
+    .topbar-badge svg{ width:16px; height:16px; }
+    /* دکمه‌ی منو روی گوشی تنها راه رفتن به بخش‌هاست — ناحیه‌ی لمس حدود ۴۴px (۵.۱۹.۱) */
+    .nav-menu-badge-btn{ position:relative; }
+    .nav-menu-badge-btn::after{ content:''; position:absolute; inset:-6px; }
     .topbar-brand-text{ font-size:13px; overflow:hidden; }
     .topbar-brand-text b, .topbar-brand-text .sep{ display:none; }
     .topbar-brand-text #sec-title{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -391,6 +402,18 @@
      نوار زیر هدر / زنگوله / کارت شناور / پنجره‌ی وسط / نوار متحرک) */
   .ann-bar{ position:fixed; bottom:22px; left:22px; z-index:60; display:flex; flex-direction:column; gap:10px; width:350px; max-width:calc(100vw - 32px); }
   @media (max-width:640px){ .ann-bar{ left:16px; right:16px; bottom:16px; width:auto; } }
+  /* دکمه‌ی «بالای صفحه» (۵.۱۹.۱): بعد از یک‌ونیم صفحه اسکرول، گوشه‌ی پایین راست
+     (اطلاعیه‌ها پایین چپ‌اند؛ روی گوشی که اطلاعیه تمام‌عرضه، updateToTop بالاتر می‌بردش) */
+  .to-top{ position:fixed; right:22px; bottom:22px; z-index:58; width:44px; height:44px; border-radius:50%;
+    display:grid; place-items:center; cursor:pointer; color: var(--primary);
+    background: linear-gradient(145deg, #f1c4a8, #d99a76); border:none;
+    box-shadow: 0 10px 24px -8px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.12);
+    opacity:0; visibility:hidden; transform:translateY(10px); transition: opacity .2s ease, transform .2s ease, visibility .2s, bottom .2s ease; }
+  .to-top.show{ opacity:1; visibility:visible; transform:none; }
+  .to-top:hover{ filter:brightness(1.06); }
+  .to-top svg{ width:20px; height:20px; }
+  @media (max-width:640px){ .to-top{ right:16px; bottom:16px; } }
+  @media (prefers-reduced-motion: reduce){ .to-top{ transition:none; } }
   .ann-item{ display:flex; align-items:flex-start; gap:10px; padding:12px 12px 12px 10px; border-radius:14px; background: var(--surface); color: var(--text);
     border-inline-start:4px solid var(--accent); box-shadow: 0 22px 44px -14px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.04); animation: annIn .45s cubic-bezier(.16,1,.3,1) both; }
   .ann-item + .ann-item{ animation-delay:.12s; }
@@ -588,7 +611,7 @@
     font-size:21px; font-weight:700; line-height:1.25; color:#fff;
     font-family: 'IRANSansX', ui-monospace,'JetBrains Mono',monospace; font-variant-numeric: tabular-nums;
   }
-  .dash-hero-stat span.dash-hero-stat-l{ font-size:10.5px; color: rgba(255,255,255,0.58); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dash-hero-stat span.dash-hero-stat-l{ font-size:12px; color: rgba(255,255,255,0.58); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   @media (max-width:400px){
     .dash-hero-stat{ gap:8px; padding:10px 9px; }
     .dash-hero-stat-ic{ width:32px; height:32px; border-radius:9px; } .dash-hero-stat-ic svg{ width:17px; height:17px; }
@@ -697,6 +720,8 @@
      تا کاربر بدون رد شدن از تب پیش‌فرض مستقیم بره به همون زیربخش */
   .domain-shortcuts{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:0 0 40px; }
   .domain-shortcuts a{ font-size:11.5px; color: rgba(255,255,255,0.65); cursor:pointer; text-decoration:none; padding:5px 12px; border:1px solid rgba(255,255,255,0.14); border-radius: var(--radius-pill); transition: color .15s ease, border-color .15s ease, background .15s ease; }
+  /* صفحه‌کلید (۵.۱۹.۱): کارت‌های عرصه، میان‌برها و جلدهای بسته با Tab/Enter */
+  .domain-card:focus-visible, .domain-shortcuts a:focus-visible, .pkg-tile:focus-visible{ outline:2px solid var(--accent); outline-offset:4px; border-radius:12px; }
   .domain-shortcuts a:hover{ color: var(--accent); border-color: var(--accent); background: rgba(234,179,147,0.08); }
   .domain-shortcuts .domain-shortcut-disabled{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color: rgba(255,255,255,0.32); cursor:default; padding:5px 12px; border:1px solid rgba(255,255,255,0.08); border-radius: var(--radius-pill); }
   @media (max-width:640px){ .domain-shortcuts{ gap:8px; } }
@@ -1924,27 +1949,31 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۹.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۱۹.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
-      <div class="login-form-wrap">
+      <!-- فرم واقعی + autocomplete تا مرورگر پیشنهاد ذخیره‌ی رمز بده (۵.۱۹.۱)؛ نام کاربری
+           ثابت و پنهانه چون ورود فقط با رمز مشترکه -->
+      <form class="login-form-wrap" id="login-form" autocomplete="on" onsubmit="event.preventDefault(); handleLogin();">
+        <input type="text" name="username" autocomplete="username" value="جریان" tabindex="-1" aria-hidden="true" style="display:none">
         <div class="field">
           <label for="login-password">رمز عبور</label>
           <div style="position:relative;">
-            <input type="password" id="login-password" placeholder="••••••••" style="padding-left:40px;" onkeydown="if(event.key==='Enter') handleLogin()" />
+            <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="رمز عبور را وارد کنید" style="padding-left:40px;" />
             <button type="button" id="login-pw-toggle" aria-label="نمایش رمز عبور" onclick="togglePasswordVisibility()" style="position:absolute; left:6px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-faint); padding:6px; display:flex;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
         </div>
+        <p id="login-kb-hint" class="login-kb-hint" aria-live="polite" hidden></p>
         <p id="login-error" role="alert" style="display:none;color:var(--danger);font-size:12px;margin:-8px 0 14px;"></p>
         <button type="button" id="login-retry-btn" class="btn" style="display:none;width:100%;margin:-4px 0 14px;" onclick="retryLoadAll()">تلاش دوباره</button>
-        <button class="btn primary" id="login-btn" onclick="handleLogin()">
+        <button type="submit" class="btn primary" id="login-btn">
           <span class="login-btn-fill" aria-hidden="true"></span>
           <span class="login-btn-label">ورود</span>
         </button>
-      </div>
+      </form>
     </div>
   </div>
 </div>
@@ -1962,30 +1991,31 @@
             <div class="nav-menu-col">
               <div class="nav-menu-toplevel-title">عرصه‌های رصد</div>
 
-              <button class="nav-menu-group-title-btn" onclick="goToNewsTab('analytics'); closeNavMenu();">اخبار و رویدادها</button>
-              <button class="nav-menu-sub" onclick="goToNewsTab('analytics'); closeNavMenu();">در یک نگاه</button>
-              <button class="nav-menu-sub" onclick="goToNewsTab('claims'); closeNavMenu();">ادعاها و شایعات</button>
-              <button class="nav-menu-sub" onclick="goToNewsTab('study'); closeNavMenu();">شبکه‌های اجتماعی</button>
-              <button class="nav-menu-sub" onclick="goToNewsTab('website'); closeNavMenu();">وب‌سایت‌ها</button>
-              <button class="nav-menu-sub" onclick="goToNewsTab('newspapers'); closeNavMenu();">روزنامه‌ها</button>
-              <button class="nav-menu-sub" onclick="goToNewsTab('dossier'); closeNavMenu();">پرونده‌های موضوعی</button>
-              <button class="nav-menu-sub" onclick="goToNewsTab('newsletter'); closeNavMenu();">خبرنامه مدارس</button>
+              <button class="nav-menu-group-title-btn" data-nav="overview" onclick="goToNewsTab('analytics'); closeNavMenu();">اخبار و رویدادها</button>
+              <button class="nav-menu-sub" data-nav="overview/analytics" onclick="goToNewsTab('analytics'); closeNavMenu();">در یک نگاه</button>
+              <button class="nav-menu-sub" data-nav="overview/claims" onclick="goToNewsTab('claims'); closeNavMenu();">ادعاها و شایعات</button>
+              <button class="nav-menu-sub" data-nav="overview/study" onclick="goToNewsTab('study'); closeNavMenu();">شبکه‌های اجتماعی</button>
+              <button class="nav-menu-sub" data-nav="overview/website" onclick="goToNewsTab('website'); closeNavMenu();">وب‌سایت‌ها</button>
+              <button class="nav-menu-sub" data-nav="overview/newspapers" onclick="goToNewsTab('newspapers'); closeNavMenu();">روزنامه‌ها</button>
+              <button class="nav-menu-sub" data-nav="overview/dossier" onclick="goToNewsTab('dossier'); closeNavMenu();">پرونده‌های موضوعی</button>
+              <button class="nav-menu-sub" data-nav="overview/newsletter" onclick="goToNewsTab('newsletter'); closeNavMenu();">خبرنامه مدارس</button>
 
-              <button class="nav-menu-group-title-btn" onclick="switchSection('posts'); closeNavMenu();">کنشگری مجازی</button>
-              <button class="nav-menu-sub" onclick="switchSection('posts'); closeNavMenu();">پست‌های منتشر شده</button>
+              <button class="nav-menu-group-title-btn" data-nav="posts" onclick="switchSection('posts'); closeNavMenu();">کنشگری مجازی</button>
+              <button class="nav-menu-sub" data-nav="posts/feed" onclick="switchSection('posts'); closeNavMenu();">پست‌های منتشر شده</button>
 
-              <button class="nav-menu-group-title-btn" onclick="switchSection('schools'); closeNavMenu();">برنامه مدارس</button>
+              <button class="nav-menu-group-title-btn" data-nav="schools" onclick="switchSection('schools'); closeNavMenu();">برنامه مدارس</button>
 
-              <button class="nav-menu-group-title-btn" onclick="goToPeopleTab('figures'); closeNavMenu();">یادداشت‌ها</button>
-              <button class="nav-menu-sub" onclick="goToPeopleTab('orgs'); closeNavMenu();">تحلیل سازمان‌ها</button>
-              <button class="nav-menu-sub" onclick="goToPeopleTab('figures'); closeNavMenu();">چهره‌ها و فعالان سیاسی</button>
-              <button class="nav-menu-sub" onclick="goToPeopleTab('archive'); closeNavMenu();">بسته‌های تحلیلی</button>
+              <button class="nav-menu-group-title-btn" data-nav="people" onclick="goToPeopleTab('figures'); closeNavMenu();">یادداشت‌ها</button>
+              <button class="nav-menu-sub" data-nav="people/orgs" onclick="goToPeopleTab('orgs'); closeNavMenu();">تحلیل سازمان‌ها</button>
+              <button class="nav-menu-sub" data-nav="people/figures" onclick="goToPeopleTab('figures'); closeNavMenu();">چهره‌ها و فعالان سیاسی</button>
+              <button class="nav-menu-sub" data-nav="people/archive" onclick="goToPeopleTab('archive'); closeNavMenu();">بسته‌های تحلیلی</button>
 
-              <button class="nav-menu-group-title-btn" onclick="goToHawzaTab('news'); closeNavMenu();">درباره حوزه</button>
-              <button class="nav-menu-sub" onclick="goToHawzaTab('news'); closeNavMenu();">اخبار حوزه</button>
+              <button class="nav-menu-group-title-btn" data-nav="hawza" onclick="goToHawzaTab('news'); closeNavMenu();">درباره حوزه</button>
+              <button class="nav-menu-sub" data-nav="hawza/news" onclick="goToHawzaTab('news'); closeNavMenu();">اخبار حوزه</button>
             </div>
-            <div class="nav-menu-col">
-              <button class="nav-menu-toplevel-btn" onclick="switchSection('reports'); closeNavMenu();">بسته تحلیلی جریان</button>
+            <div class="nav-menu-col nav-menu-col-top">
+              <button class="nav-menu-toplevel-btn" data-nav="dashboard" onclick="switchSection('dashboard'); closeNavMenu();">صفحه نخست</button>
+              <button class="nav-menu-toplevel-btn" data-nav="reports" onclick="switchSection('reports'); closeNavMenu();">بسته تحلیلی جریان</button>
             </div>
           </div>
         </div>
@@ -2043,6 +2073,9 @@
       </div>
     </div>
     <div class="ann-bar" id="ann-bar" aria-live="polite"></div>
+    <button type="button" class="to-top" id="to-top" aria-label="بالای صفحه" title="بالای صفحه" onclick="scrollToPageTop()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </button>
 
     <div class="modal-overlay" id="intro-modal" onclick="if(event.target===this) closeIntro()">
       <div class="modal-card">
@@ -2213,23 +2246,23 @@
           <circle cx="-562" cy="124" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="-562" cy="124" r="2.2" fill="#EAB393" fill-opacity=".5"/>
           <circle cx="562" cy="124" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="562" cy="124" r="2.2" fill="#EAB393" fill-opacity=".5"/>
         </svg>
-        <div class="domain-card" onclick="switchSection('overview')">
+        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('overview')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-news.webp" alt="" /></div>
           <h3>اخبار و رویدادها</h3>
         </div>
-        <div class="domain-card" onclick="switchSection('people')">
+        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('people')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-people.webp" alt="" /></div>
           <h3>یادداشت‌ها</h3>
         </div>
-        <div class="domain-card" onclick="switchSection('hawza')">
+        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('hawza')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-hawza.webp" alt="" /></div>
           <h3>درباره حوزه</h3>
         </div>
-        <div class="domain-card" onclick="switchSection('posts')">
+        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('posts')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-cyberspace.webp" alt="" /></div>
           <h3>کنشگری مجازی</h3>
         </div>
-        <div class="domain-card" onclick="switchSection('schools')">
+        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('schools')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-schools.webp" alt="" /></div>
           <h3>برنامه مدارس</h3>
         </div>
@@ -2237,22 +2270,23 @@
       <p class="domain-caption">جریان این پنج عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، یادداشت‌های مربوط به افراد و مجموعه‌های تأثیرگذار، اخبار سیاسی‌اجتماعی پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود، کنشگری فضای مجازی و برنامه‌های آموزشی مدارس. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
 
       <div class="domain-shortcuts">
-        <a onclick="goToNewsTab('analytics')">در یک نگاه</a>
-        <a onclick="goToNewsTab('claims')">ادعاها و شایعات</a>
-        <a onclick="goToNewsTab('study')">شبکه‌های اجتماعی</a>
-        <a onclick="goToNewsTab('website')">وب‌سایت‌ها</a>
-        <a onclick="goToNewsTab('newspapers')">روزنامه‌ها</a>
-        <a onclick="goToNewsTab('dossier')">پرونده‌های موضوعی</a>
-        <a onclick="goToNewsTab('newsletter')">خبرنامه مدارس</a>
-        <a onclick="goToPeopleTab('orgs')">تحلیل سازمان‌ها</a>
-        <a onclick="goToPeopleTab('figures')">چهره‌ها و فعالان سیاسی</a>
-        <a onclick="goToPeopleTab('archive')">بسته‌های تحلیلی</a>
-        <a onclick="goToHawzaTab('news')">اخبار حوزه</a>
+        <a role="button" tabindex="0" onclick="goToNewsTab('analytics')">در یک نگاه</a>
+        <a role="button" tabindex="0" onclick="goToNewsTab('claims')">ادعاها و شایعات</a>
+        <a role="button" tabindex="0" onclick="goToNewsTab('study')">شبکه‌های اجتماعی</a>
+        <a role="button" tabindex="0" onclick="goToNewsTab('website')">وب‌سایت‌ها</a>
+        <a role="button" tabindex="0" onclick="goToNewsTab('newspapers')">روزنامه‌ها</a>
+        <a role="button" tabindex="0" onclick="goToNewsTab('dossier')">پرونده‌های موضوعی</a>
+        <a role="button" tabindex="0" onclick="goToNewsTab('newsletter')">خبرنامه مدارس</a>
+        <a role="button" tabindex="0" onclick="goToPeopleTab('orgs')">تحلیل سازمان‌ها</a>
+        <a role="button" tabindex="0" onclick="goToPeopleTab('figures')">چهره‌ها و فعالان سیاسی</a>
+        <a role="button" tabindex="0" onclick="goToPeopleTab('archive')">بسته‌های تحلیلی</a>
+        <a role="button" tabindex="0" onclick="goToHawzaTab('news')">اخبار حوزه</a>
+        <a role="button" tabindex="0" onclick="goToPostsTab('feed')">پست‌های منتشر شده</a>
+        <a role="button" tabindex="0" onclick="goToPostsTab('people')">افراد و مجموعه‌ها</a>
+        <!-- «به‌زودی»ها آخر ردیف (۵.۱۹.۱) -->
+        <span class="domain-shortcut-disabled">آنچه درباره حوزه گفته می‌شود<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled">شرکت‌کننده در برنامه‌ها<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled">جامعه مخاطب<span class="news-soon">به‌زودی</span></span>
-        <span class="domain-shortcut-disabled">درباره حوزه<span class="news-soon">به‌زودی</span></span>
-        <a onclick="goToPostsTab('feed')">پست‌های منتشر شده</a>
-        <a onclick="goToPostsTab('people')">افراد و مجموعه‌ها</a>
         <span class="domain-shortcut-disabled">آنالیز کنشگری<span class="news-soon">به‌زودی</span></span>
       </div>
 
@@ -2318,7 +2352,7 @@
             <p>شماره موبایل خود را ثبت کنید تا هر وقت شماره‌ی جدید «بسته تحلیلی جریان» منتشر شد، پیامک اطلاع‌رسانی برایتان ارسال شود.</p>
           </div>
           <div class="notify-card-form">
-            <input type="tel" id="notify-phone" class="mono" placeholder="09xxxxxxxxx" dir="ltr" maxlength="11" onkeydown="if(event.key==='Enter') subscribeNotify()" />
+            <input type="tel" id="notify-phone" class="mono" placeholder="09xxxxxxxxx" dir="ltr" maxlength="20" autocomplete="tel" inputmode="tel" onkeydown="if(event.key==='Enter') subscribeNotify()" />
             <button type="button" class="btn primary" id="notify-subscribe-btn" onclick="subscribeNotify()">ثبت</button>
           </div>
         </div>
@@ -3137,7 +3171,7 @@
           <div class="form-grid">
             <div class="field"><label for="usr-name">نام و نام خانوادگی</label><input type="text" id="usr-name" maxlength="120" required /></div>
             <div class="field"><label for="usr-title">سمت / توضیح کوتاه</label><input type="text" id="usr-title" maxlength="120" placeholder="مثلاً: مدیر مدرسه‌ی …" /></div>
-            <div class="field"><label for="usr-phone">شماره‌ی موبایل</label><input type="tel" id="usr-phone" class="mono" dir="ltr" maxlength="11" placeholder="09xxxxxxxxx" /></div>
+            <div class="field"><label for="usr-phone">شماره‌ی موبایل</label><input type="tel" id="usr-phone" class="mono" dir="ltr" maxlength="20" placeholder="09xxxxxxxxx" /></div>
             <div class="field"><label for="usr-eitaa">شناسه‌ی ایتا</label><input type="text" id="usr-eitaa" dir="ltr" maxlength="64" placeholder="@username" /></div>
             <div class="field">
               <label for="usr-level">سطح دسترسی</label>
@@ -3183,7 +3217,7 @@
         <div class="app-footer-brand">
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
-          <small>ویرایش <span class="app-version">۵.۱۹.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۱۹.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3444,6 +3478,15 @@
     goLogin();
   }
 
+  // شماره‌ی موبایل با فاصله/خط تیره/پرانتز و پیش‌شماره‌ی ۹۸+ یا ۰۰۹۸ → 09xxxxxxxxx (۵.۱۹.۱)
+  function normalizeIrMobile(v){
+    let d = faDigitsToEn(v || '').replace(/[^\d+]/g, '');
+    if(d.startsWith('+')) d = d.slice(1);
+    if(d.startsWith('0098')) d = d.slice(4);
+    else if(d.startsWith('98') && d.length === 12) d = d.slice(2);
+    if(/^9\d{9}$/.test(d)) d = '0' + d;
+    return d;
+  }
   function faDigitsToEn(s){
     const fa = '۰۱۲۳۴۵۶۷۸۹', ar = '٠١٢٣٤٥٦٧٨٩';
     return String(s).replace(/[۰-۹٠-٩]/g, ch => {
@@ -3456,7 +3499,7 @@
   async function subscribeNotify(){
     const input = document.getElementById('notify-phone');
     const btn = document.getElementById('notify-subscribe-btn');
-    const phone = faDigitsToEn(input.value || '').trim();
+    const phone = normalizeIrMobile(input.value);
     if(!/^09\d{9}$/.test(phone)){ showToast('شماره موبایل معتبر نیست — مثال: ۰۹۱۲xxxxxxx'); return; }
     btn.disabled = true;
     try{
@@ -3491,7 +3534,26 @@
   }
   const navMenuEl = document.getElementById('nav-menu');
   const navMenuBtn = document.getElementById('nav-menu-btn');
+  // پررنگ‌کردن جای فعلی کاربر در منو — فقط موقع باز شدن منو حساب می‌شه
+  function updateNavMenuCurrent(){
+    const st = navCurrentState();
+    const t = st.t || (st.s === 'hawza' ? 'news' : null);
+    const exact = t ? st.s + '/' + t : null;
+    let hasExact = false;
+    navMenuEl.querySelectorAll('button[data-nav]').forEach(b=>{
+      const isExact = b.dataset.nav === exact;
+      if(isExact) hasExact = true;
+      b.classList.toggle('is-current', isExact);
+      b.classList.toggle('is-current-group', b.dataset.nav === st.s);
+      b.removeAttribute('aria-current');
+    });
+    // بخشی که زیرشاخه‌ی منو نداره (صفحه نخست، برنامه مدارس، بسته تحلیلی...) خودش پررنگ می‌شه
+    navMenuEl.querySelectorAll('button[data-nav]').forEach(b=>{
+      if(b.classList.contains('is-current') || (!hasExact && b.dataset.nav === st.s)){ b.classList.add('is-current'); b.setAttribute('aria-current', 'page'); }
+    });
+  }
   function toggleNavMenu(){
+    if(!navMenuEl.classList.contains('open')) updateNavMenuCurrent();
     const open = navMenuEl.classList.toggle('open');
     navMenuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
@@ -3561,7 +3623,7 @@
         return;
       }
       applyRoleUI();
-      if(await loadAllAndEnter()) pwEl.value = '';
+      if(await loadAllAndEnter()){ pwEl.value = ''; updateLoginKbHint(); }
     }finally{
       btnEl.disabled = false;
       btnEl.classList.remove('is-loading');
@@ -3575,6 +3637,30 @@
     const show = pwEl.type === 'password';
     pwEl.type = show ? 'text' : 'password';
     btn.setAttribute('aria-label', show ? 'پنهان‌کردن رمز عبور' : 'نمایش رمز عبور');
+  }
+
+  // هشدار صفحه‌کلید (۵.۱۹.۱): رایج‌ترین علت «رمز اشتباه» صفحه‌کلید فارسی یا Caps Lock روشنه
+  function updateLoginKbHint(e){
+    const pwEl = document.getElementById('login-password');
+    const hint = document.getElementById('login-kb-hint');
+    if(!pwEl || !hint) return;
+    if(e && typeof e.getModifierState === 'function') LOGIN_CAPS = e.getModifierState('CapsLock');
+    const msgs = [];
+    if(/[\u0600-\u06FF]/.test(pwEl.value)) msgs.push('صفحه‌کلید روی فارسی است؛ اگر رمز انگلیسی است، زبان صفحه‌کلید را عوض کنید.');
+    if(LOGIN_CAPS) msgs.push('Caps Lock روشن است.');
+    hint.textContent = msgs.join(' ');
+    hint.hidden = !msgs.length;
+  }
+  let LOGIN_CAPS = false;
+  (function(){
+    const pwEl = document.getElementById('login-password');
+    ['keydown','keyup'].forEach(ev=>pwEl.addEventListener(ev, updateLoginKbHint));
+    pwEl.addEventListener('input', ()=>updateLoginKbHint());
+    pwEl.addEventListener('blur', ()=>{ LOGIN_CAPS = false; updateLoginKbHint(); });
+  })();
+  // روی رایانه مکان‌نما از اول توی کادر رمز باشه (روی گوشی نه، تا صفحه‌کلید ناخواسته باز نشه)
+  function focusLoginPassword(){
+    try{ if(window.matchMedia('(pointer:fine)').matches) document.getElementById('login-password').focus({ preventScroll:true }); }catch(e){}
   }
 
   function openIntro(){ document.getElementById('intro-modal').classList.add('active'); }
@@ -3600,7 +3686,7 @@
   });
 
   function show(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-  function goLogin(){ document.documentElement.classList.remove('has-session'); show('view-login'); }
+  function goLogin(){ document.documentElement.classList.remove('has-session'); show('view-login'); focusLoginPassword(); }
   function enterDash(sectionKey){
     if(!authToken){ goLogin(); return; }
     show('view-dash'); document.getElementById('view-dash').classList.add('active'); switchSection(sectionKey);
@@ -5673,6 +5759,7 @@
       try{ const arr = JSON.parse(store.getItem(key) || '[]'); arr.push(id); store.setItem(key, JSON.stringify(arr.slice(-50))); }catch(e){}
       renderAnnBar();
     }));
+    try{ updateToTop(); }catch(e){} // روی گوشی دکمه‌ی «بالای صفحه» بالای کارت‌ها می‌ره
   }
   function updateAnnPreview(){
     const msg = document.getElementById('ann-msg').value.trim();
@@ -5827,7 +5914,7 @@
   }
   function closeUserEditor(){ document.getElementById('usr-editor').style.display = 'none'; USR_EDIT_ID = null; }
   async function saveUser(){
-    const phone = faDigitsToEn(document.getElementById('usr-phone').value.trim());
+    const phone = normalizeIrMobile(document.getElementById('usr-phone').value);
     if(phone && !/^09\d{9}$/.test(phone)){ showToast('شماره‌ی موبایل باید ۱۱ رقم و با ۰۹ شروع شود'); return; }
     const body = {
       full_name: document.getElementById('usr-name').value.trim(),
@@ -8046,11 +8133,37 @@
     MAGAZINES.slice(0, 5).forEach(m=>{
       const files = Array.isArray(m.files) ? m.files : [];
       const tile = document.createElement('div'); tile.className = 'pkg-tile';
+      tile.setAttribute('role', 'button'); tile.tabIndex = 0;
       tile.innerHTML = `<div class="pkg-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
         <div class="pkg-title">${escHtml(m.title)}</div>`;
       tile.addEventListener('click', () => { if(files.length) openMagazineViewer(m); });
       wrap.appendChild(tile);
     });
+  }
+
+  // دکمه‌ی «بالای صفحه» (۵.۱۹.۱) — به‌روزرسانی فقط یک‌بار در هر فریم
+  const TO_TOP_EL = document.getElementById('to-top');
+  let TO_TOP_RAF = 0;
+  function updateToTop(){
+    TO_TOP_RAF = 0;
+    const show = window.scrollY > window.innerHeight * 1.5;
+    TO_TOP_EL.classList.toggle('show', show);
+    if(!show) return;
+    const ann = document.getElementById('ann-bar');
+    const lift = (window.innerWidth <= 640 && ann && ann.childElementCount) ? ann.offsetHeight + 26 : 0;
+    TO_TOP_EL.style.bottom = lift ? lift + 'px' : '';
+  }
+  window.addEventListener('scroll', ()=>{ if(!TO_TOP_RAF) TO_TOP_RAF = requestAnimationFrame(updateToTop); }, { passive:true });
+  window.addEventListener('resize', ()=>{ if(!TO_TOP_RAF) TO_TOP_RAF = requestAnimationFrame(updateToTop); }, { passive:true });
+  // Enter/فاصله روی کارت‌ها و میان‌برهای صفحه‌ی نخست (div/a با role=button) = کلیک
+  document.addEventListener('keydown', e=>{
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const el = e.target;
+    if(el && el.matches && el.matches('.domain-card[role="button"], .domain-shortcuts a[role="button"], .pkg-tile[role="button"]')){ e.preventDefault(); el.click(); }
+  });
+  function scrollToPageTop(){
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top:0, behavior: reduce ? 'auto' : 'smooth' });
   }
 
   // سه کارت راهنمای سریع زیر هرو — فقط اسکرول توی همون صفحه‌ی نخست،
@@ -9414,7 +9527,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.19.0';
+  const APP_VERSION = '5.19.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
@@ -9431,6 +9544,8 @@
     try{ show('view-dash'); switchSection(lastSectionKey()); }catch(e){ console.error(e); }
     document.documentElement.classList.remove('has-session');
     loadAllAndEnter();
+  }else{
+    focusLoginPassword();
   }
 </script>
 </body>
