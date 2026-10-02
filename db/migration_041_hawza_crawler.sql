@@ -152,8 +152,7 @@ insert into crawl_sites (name, url, sitemap_url) values
   ('یورونیوز فارسی', 'https://per.euronews.com', null),
   ('دویچه وله فارسی', 'https://www.dw.com/fa-ir', null),
   ('ایران‌وایر', 'https://iranwire.com/fa', null),
-  ('زیتون', 'https://www.zeitoons.com', null),
-  ('العربیه فارسی', 'https://www.alarabiya.net/farsi', null)
+  ('زیتون', 'https://www.zeitoons.com', null)
 on conflict (url) do nothing;
 
 -- دفتر تغییرات (migration_039): ویرایش‌های مدیر روی این دو جدول هم ثبت شود

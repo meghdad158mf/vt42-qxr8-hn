@@ -121,7 +121,6 @@ DEFAULT_SITES = [
     ("دویچه وله فارسی", "https://www.dw.com/fa-ir", None),
     ("ایران‌وایر", "https://iranwire.com/fa", None),
     ("زیتون", "https://www.zeitoons.com", None),
-    ("العربیه فارسی", "https://www.alarabiya.net/farsi", None),
 ]
 
 # عبارت‌های «درباره حوزه» — روی متن یکدست‌شده (norm) تطبیق داده می‌شن: نیم‌فاصله
