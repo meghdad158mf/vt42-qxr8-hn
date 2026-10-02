@@ -18,6 +18,20 @@
 
 import { fetchPostForUser } from "../_shared/auth.ts";
 
+// ۵.۲۳.۰: ترجمه‌ی خبرهای خارجی تب «آنچه درباره حوزه گفته می‌شود» — ورودی
+// mentionId (شناسه‌ی hawza_mentions) و فقط تیتر + گزیده (متن کامل ذخیره نمی‌شه)؛
+// همون الگوی امنیتی: متن با توکن خودِ کاربر از PostgREST خونده می‌شه، نه از ورودی.
+async function fetchMentionForUser(req: Request, id: number): Promise<{ title: string | null; text: string | null } | null> {
+  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!token) return null;
+  const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/hawza_mentions?id=eq.${id}&select=title,excerpt`, {
+    headers: { apikey: Deno.env.get("SUPABASE_ANON_KEY") ?? "", Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return null;
+  const rows = await res.json();
+  return Array.isArray(rows) && rows.length ? { title: rows[0].title, text: rows[0].excerpt } : null;
+}
+
 const LIARA_BASE_URL = "https://ai.liara.ir/api/6a9271a1d6564b043acdefe1/v1";
 const LIARA_MODEL = "openai/gpt-4o-mini";
 const MAX_TEXT_CHARS = 6000;
@@ -40,11 +54,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { postId } = await req.json();
+    const { postId, mentionId } = await req.json();
     // فقط عدد صحیح — چون مستقیم توی آدرس کوئری PostgREST می‌شینه
-    if (!Number.isSafeInteger(postId) || postId <= 0) return jsonResponse({ error: "postId is required" }, 400);
+    const isMention = mentionId !== undefined;
+    const id = isMention ? mentionId : postId;
+    if (!Number.isSafeInteger(id) || id <= 0) return jsonResponse({ error: "postId or mentionId is required" }, 400);
 
-    const post = await fetchPostForUser(req, postId);
+    const post = isMention ? await fetchMentionForUser(req, id) : await fetchPostForUser(req, id);
     if (!post) return jsonResponse({ error: "unauthorized or post not found" }, 401);
 
     const { title, text } = post;

@@ -4,3 +4,4 @@ beautifulsoup4>=4.12,<5
 telethon>=1.36,<2
 python-dotenv>=1.0,<2
 feedparser>=6.0,<7
+trafilatura>=2.0,<3
