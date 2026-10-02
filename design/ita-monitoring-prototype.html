@@ -2082,6 +2082,7 @@
   .hab-hl{ background: rgba(234,179,147,0.38); color: inherit; border-radius:4px; padding:0 2px; }
   .hab-flag{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:100px; background: rgba(234,179,147,0.18); color: var(--accent-strong); border:1px solid rgba(234,179,147,0.5); }
   .hab-terms{ display:flex; flex-wrap:wrap; gap:6px; }
+  .hab-flag.is-link{ background: var(--surface-2); color: var(--text-dim); border-color: var(--border-strong); }
   .hab-term{ font-size:11px; font-weight:600; padding:2px 9px; border-radius:100px; background: var(--surface-2); color: var(--text-dim); border:1px solid var(--border); }
   .hab-admin{ display:flex; margin-top:8px; }
   .hab-summary{ font-size:12px; color: rgba(255,255,255,0.7); margin:-12px 0 12px; min-height:1em; }
@@ -2109,6 +2110,12 @@
   .usr-act.is-del{ color: var(--danger); }
   #crawl-site-list{ max-height:520px; overflow:auto; }
   @media (max-width:640px){ .crawl-site{ flex-wrap:wrap; } .crawl-site-acts{ width:100%; justify-content:flex-end; } }
+  .crawl-sug-wrap{ margin-top:18px; padding-top:14px; border-top:1px dashed var(--border-strong); }
+  .crawl-sug-title{ font-size:14px; font-weight:800; color: var(--text); margin:0 0 6px; }
+  .crawl-sug-kind{ font-size:11px; font-weight:700; padding:2px 9px; border-radius:100px; background: rgba(234,179,147,0.18); color: var(--accent-strong); border:1px solid rgba(234,179,147,0.5); }
+  .crawl-sug .crawl-site-status::before{ display:none; }
+  .crawl-sug .crawl-site-status{ padding-inline-start:0; }
+  #crawl-sug-list{ max-height:420px; overflow:auto; }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -2907,6 +2914,11 @@
               <button data-t="yesterday">دیروز</button>
               <button data-t="week">هفته گذشته</button>
             </div>
+            <div class="news-seg m-collapse" id="hab-kind-seg">
+              <button class="active" data-k="">همه</button>
+              <button data-k="web">سایت‌های خبری</button>
+              <button data-k="social">شبکه‌های اجتماعی</button>
+            </div>
             <div class="news-seg m-collapse" id="hab-scope-seg" title="خبرهایی که در تیترشان به حوزه، روحانیت یا مراجع اشاره شده">
               <button class="active" data-s="">همه‌ی اشاره‌ها</button>
               <button data-s="title">اشاره در تیتر</button>
@@ -3245,6 +3257,11 @@
               <button class="btn primary" id="add-crawl-btn" type="button">افزودن سایت</button>
             </div>
             <div id="crawl-site-list"></div>
+            <div class="crawl-sug-wrap" id="crawl-sug-wrap" hidden>
+              <h4 class="crawl-sug-title">پیشنهاد منبع</h4>
+              <p class="settings-help">سایت‌ها و کانال‌های ایتا و تلگرامی که در مطالب مرتبط با حوزه به آن‌ها لینک داده شده، ولی هنوز در فهرست منابع نیستند؛ هرچه بیشتر تکرار شده باشند، بالاتر می‌آیند. با «افزودن»، سایت به همین فهرست خزنده و کانال به «مدیریت منابع» اضافه می‌شود و از اجرای بعدی جست‌وجو می‌شود.</p>
+              <div id="crawl-sug-list"></div>
+            </div>
           </details>
 
           <h3 class="settings-group-title">برچسب‌های منابع</h3>
@@ -4043,7 +4060,7 @@
     if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
     if(key === 'announce') renderAnnAdmin();
     if(key === 'activity') setActTab(ACT_TAB);
-    if(key === 'settings'){ renderBackupPanel(); loadCrawlSites(); }
+    if(key === 'settings'){ renderBackupPanel(); loadCrawlSites(); if(currentRole === 'app_admin') loadCrawlSuggestions(); }
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
     if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
     // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
@@ -4224,7 +4241,7 @@
   // گفته می‌شود» (خزنده، hawza_mentions — ۵.۲۳.۰)
   const HAWZA_TAB_INFO = {
     news: 'اخبار سیاسی و اجتماعی منتشرشده در پایگاه‌های خبری حوزوی.',
-    about: 'خبرهای سایت‌های خبری کشور و رسانه‌های فارسی‌زبان که درباره‌ی حوزه، روحانیت، مراجع تقلید و طلاب هستند؛ هر ۲ ساعت به‌صورت خودکار جست‌وجو می‌شوند.',
+    about: 'خبرهای سایت‌های خبری و پست‌های کانال‌های ایتا، تلگرام و بله که درباره‌ی حوزه، روحانیت، مراجع تقلید و طلاب هستند؛ هر ۲ ساعت به‌صورت خودکار جست‌وجو می‌شوند.',
   };
   let HAWZA_TAB = (t=>HAWZA_TAB_INFO[t] ? t : 'news')(lsGet('jarian_last_hawza_tab', 'news'));
   function setHawzaTab(tab){
@@ -4252,7 +4269,9 @@
   // داده: hawza_mentions (scripts/crawl_hawza.py، migration_041). فقط با باز شدن
   // همین تب گرفته می‌شه (نه در loadAll) و تا ۱۰ دقیقه کش می‌مونه.
   let HAB_ROWS = null, HAB_LOADED_AT = 0, HAB_LOADING = null, HAB_ERROR = '';
-  const HAB_STATE = { q:'', time:'', scope:'', site:'', page:1 };
+  const HAB_STATE = { q:'', time:'', kind:'', scope:'', site:'', page:1 };
+  // کلید منبع در فیلتر: سایت = دامنه، پست شبکه‌ی اجتماعی = نام کانال
+  const habSourceKey = x => x.kind === 'social' ? 'ch:' + (x.site_name || x.site) : x.site;
   const HAB_PAGE_SIZE = 12;
   // همون عبارت‌های TERMS در scripts/crawl_hawza.py — فقط برای پررنگ کردن در گزیده‌ی
   // متن؛ با تغییر فهرست خزنده، این هم هم‌سو بشه. [\s‌]+ = فاصله یا نیم‌فاصله
@@ -4270,7 +4289,7 @@
     if(HAB_LOADING) return HAB_LOADING;
     HAB_LOADING = (async()=>{
       try{
-        const r = await api('/hawza_mentions?select=id,url,site,site_name,title,excerpt,matched_terms,hits,in_title,published_at,scraped_at,hidden_at&order=scraped_at.desc&limit=600');
+        const r = await api('/hawza_mentions?select=id,url,site,site_name,title,excerpt,kind,matched_terms,hits,in_title,published_at,scraped_at,hidden_at&order=scraped_at.desc&limit=600');
         if(!r.ok){
           HAB_ERROR = (r.status === 404 || r.status === 400) ? 'missing' : 'error';
           HAB_ROWS = HAB_ROWS || [];
@@ -4295,7 +4314,11 @@
   function populateHabSites(){
     const sel = document.getElementById('hab-site');
     const counts = {};
-    (HAB_ROWS || []).forEach(x=>{ counts[x.site] = counts[x.site] || { name: x.site_name || x.site, n:0 }; counts[x.site].n++; });
+    (HAB_ROWS || []).filter(x=>!HAB_STATE.kind || (HAB_STATE.kind === 'social') === (x.kind === 'social')).forEach(x=>{
+      const k = habSourceKey(x);
+      counts[k] = counts[k] || { name: (x.site_name || x.site) + (x.kind === 'social' ? ' (' + (NEWS_PLATFORM_LABEL[x.site] || x.site) + ')' : ''), n:0 };
+      counts[k].n++;
+    });
     const opts = Object.entries(counts).sort((a,b)=>b[1].n - a[1].n);
     sel.innerHTML = '<option value="">همه‌ی منابع</option>' + opts.map(([k,v])=>`<option value="${escAttr(k)}">${escHtml(v.name)} (${toFaDigits(v.n)})</option>`).join('');
     sel.value = counts[HAB_STATE.site] ? HAB_STATE.site : '';
@@ -4304,7 +4327,8 @@
   function filteredHawzaMentions(){
     const terms = HAB_STATE.q.split(/[,،]/).map(searchNorm).filter(Boolean);
     return (HAB_ROWS || []).filter(x=>{
-      if(HAB_STATE.site && x.site !== HAB_STATE.site) return false;
+      if(HAB_STATE.kind && (HAB_STATE.kind === 'social') !== (x.kind === 'social')) return false;
+      if(HAB_STATE.site && habSourceKey(x) !== HAB_STATE.site) return false;
       if(HAB_STATE.scope === 'title' && !x.in_title) return false;
       if(HAB_STATE.time){
         const d = tehranDayDiff(habTime(x));
@@ -4323,7 +4347,7 @@
     const feed = document.getElementById('hab-feed');
     const empty = document.getElementById('hab-empty');
     const sum = document.getElementById('hab-summary');
-    setMobileFilterCount('#hawza-about-panel', (HAB_STATE.time ? 1 : 0) + (HAB_STATE.scope ? 1 : 0) + (HAB_STATE.site ? 1 : 0));
+    setMobileFilterCount('#hawza-about-panel', (HAB_STATE.time ? 1 : 0) + (HAB_STATE.kind ? 1 : 0) + (HAB_STATE.scope ? 1 : 0) + (HAB_STATE.site ? 1 : 0));
     if(HAB_ERROR === 'missing'){
       feed.innerHTML = ''; sum.textContent = ''; document.getElementById('hab-pagination').innerHTML = '';
       empty.style.display = 'block';
@@ -4337,14 +4361,14 @@
     const totalPages = Math.max(1, Math.ceil(list.length / HAB_PAGE_SIZE));
     HAB_STATE.page = Math.min(Math.max(1, HAB_STATE.page), totalPages);
     const page = list.slice((HAB_STATE.page - 1) * HAB_PAGE_SIZE, HAB_STATE.page * HAB_PAGE_SIZE);
-    const siteCount = new Set(list.map(x=>x.site)).size;
+    const siteCount = new Set(list.map(habSourceKey)).size;
     sum.textContent = list.length
-      ? toFaDigits(list.length) + ' خبر از ' + toFaDigits(siteCount) + ' منبع' + (list.length !== total ? ' (از ' + toFaDigits(total) + ' خبر)' : '')
+      ? toFaDigits(list.length) + ' مطلب از ' + toFaDigits(siteCount) + ' منبع' + (list.length !== total ? ' (از ' + toFaDigits(total) + ' مطلب)' : '')
       : '';
     empty.style.display = list.length ? 'none' : 'block';
     empty.textContent = HAB_ERROR === 'error' ? 'دریافت خبرها انجام نشد؛ اتصال اینترنت را بررسی و صفحه را دوباره باز کنید.'
       : total ? 'خبری با این فیلترها پیدا نشد.'
-      : 'هنوز خبری پیدا نشده است؛ خزنده هر ۲ ساعت سایت‌های خبری را جست‌وجو می‌کند.';
+      : 'هنوز خبری پیدا نشده است؛ خزنده هر ۲ ساعت سایت‌های خبری و کانال‌ها را جست‌وجو می‌کند.';
     const isAdmin = currentRole === 'app_admin';
     feed.innerHTML = page.map(x=>{
       const terms = (x.matched_terms || []).slice(0, 4);
@@ -4353,6 +4377,8 @@
         <div class="news-body">
           <div class="news-head">
             <span class="news-source">${escHtml(x.site_name || x.site)}</span>
+            ${x.kind === 'social' ? `<span class="news-platform">${NEWS_PLATFORM_ICON[x.site] || ''}${escHtml(NEWS_PLATFORM_LABEL[x.site] || x.site)}</span>` : ''}
+            ${x.kind === 'link' ? '<span class="hab-flag is-link" title="این سایت در فهرست منابع خزنده نیست؛ از لینک یک مطلب مرتبط پیدا شد">یافته از لینک</span>' : ''}
             <span class="news-time" title="${escAttr(habTime(x) ? new Date(habTime(x)).toLocaleString('fa-IR', { timeZone:'Asia/Tehran' }) : '')}">${newsRelTime(habTime(x))}</span>
             ${x.in_title ? '<span class="hab-flag">اشاره در تیتر</span>' : ''}
           </div>
@@ -4360,7 +4386,7 @@
           ${x.excerpt ? `<p class="hab-excerpt">${habHighlight(x.excerpt)}</p>` : ''}
           <div class="news-foot">
             <div class="hab-terms">${terms.map(t=>`<span class="hab-term">${escHtml(t)}</span>`).join('')}</div>
-            <a class="news-link" href="${safeUrl(x.url)}" target="_blank" rel="noopener">متن کامل در منبع ↗</a>
+            <a class="news-link" href="${safeUrl(x.url)}" target="_blank" rel="noopener">${x.kind === 'social' ? 'مشاهده‌ی پست ↗' : 'متن کامل در منبع ↗'}</a>
           </div>
           ${isAdmin ? `<div class="hab-admin"><button type="button" class="post-hide-btn" onclick="hideHawzaMention(${Number(x.id)})" title="این خبر برای همه‌ی بیننده‌ها پنهان می‌شود (مثلاً اگر واقعاً درباره‌ی حوزه نیست)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button></div>` : ''}
         </div>
@@ -4386,12 +4412,13 @@
     const search = document.getElementById('hab-search');
     let t = null;
     search.addEventListener('input', ()=>{ clearTimeout(t); t = setTimeout(()=>{ HAB_STATE.q = search.value.trim(); HAB_STATE.page = 1; renderHawzaAbout(); }, 200); });
-    [['hab-time-seg', 't', 'time'], ['hab-scope-seg', 's', 'scope']].forEach(([id, ds, key])=>{
+    [['hab-time-seg', 't', 'time'], ['hab-kind-seg', 'k', 'kind'], ['hab-scope-seg', 's', 'scope']].forEach(([id, ds, key])=>{
       document.getElementById(id).addEventListener('click', e=>{
         const b = e.target.closest('button');
         if(!b || b.dataset[ds] === undefined) return;
         document.querySelectorAll('#'+id+' > button').forEach(x=>x.classList.toggle('active', x === b));
         HAB_STATE[key] = b.dataset[ds]; HAB_STATE.page = 1;
+        if(key === 'kind') populateHabSites();
         renderHawzaAbout();
       });
     });
@@ -8665,6 +8692,64 @@
     if(!r.ok){ showToast('حذف انجام نشد؛ دوباره امتحان کنید.'); return; }
     CRAWL_SITES = CRAWL_SITES.filter(x=>x.id !== id);
     renderCrawlSites();
+  }
+  let CRAWL_SUGGEST = [];
+  const CRAWL_SUG_KIND = { site:'سایت', eitaa:'ایتا', telegram:'تلگرام' };
+  async function loadCrawlSuggestions(){
+    try{
+      const r = await api('/crawl_suggestions?select=*&status=eq.new&order=found.desc,hits.desc,last_seen_at.desc&limit=40');
+      CRAWL_SUGGEST = r.ok ? await r.json() : [];
+    }catch(e){ CRAWL_SUGGEST = []; }
+    renderCrawlSuggestions();
+  }
+  function crawlSugUrl(s){
+    return s.kind === 'site' ? 'https://' + s.key : s.kind === 'telegram' ? 'https://t.me/' + s.key : 'https://eitaa.com/' + s.key;
+  }
+  function renderCrawlSuggestions(){
+    const wrap = document.getElementById('crawl-sug-wrap');
+    const box = document.getElementById('crawl-sug-list');
+    if(!wrap || !box) return;
+    wrap.hidden = !CRAWL_SUGGEST.length;
+    box.innerHTML = CRAWL_SUGGEST.map(s=>{
+      const stat = toFaDigits(s.hits) + ' مطلب مرتبط به آن لینک داده' + (s.found ? '، ' + toFaDigits(s.found) + ' صفحه‌ی آن درباره‌ی حوزه بود' : '');
+      return `<div class="crawl-site crawl-sug">
+        <div class="crawl-site-main">
+          <div class="crawl-site-name"><span class="crawl-sug-kind">${escHtml(CRAWL_SUG_KIND[s.kind] || s.kind)}</span><a class="crawl-site-host" href="${safeUrl(crawlSugUrl(s))}" target="_blank" rel="noopener" dir="ltr">${escHtml(s.kind === 'site' ? s.key : '@' + s.key)}</a></div>
+          <div class="crawl-site-status">${escHtml(stat)}${s.sample_url ? ` — <a href="${safeUrl(s.sample_url)}" target="_blank" rel="noopener">نمونه</a>` : ''}</div>
+        </div>
+        <div class="crawl-site-acts">
+          <button type="button" class="usr-act" onclick="addCrawlSuggestion(${Number(s.id)})">افزودن</button>
+          <button type="button" class="usr-act" onclick="ignoreCrawlSuggestion(${Number(s.id)})">نادیده گرفتن</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  async function setCrawlSuggestionStatus(id, status){
+    const r = await api('/crawl_suggestions?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ status }) });
+    if(r.ok){ CRAWL_SUGGEST = CRAWL_SUGGEST.filter(x=>x.id !== id); renderCrawlSuggestions(); }
+    return r.ok;
+  }
+  async function ignoreCrawlSuggestion(id){
+    if(!await setCrawlSuggestionStatus(id, 'ignored')) showToast('انجام نشد؛ دوباره امتحان کنید.');
+  }
+  async function addCrawlSuggestion(id){
+    const s = CRAWL_SUGGEST.find(x=>x.id === id);
+    if(!s) return;
+    let r;
+    if(s.kind === 'site'){
+      r = await api('/crawl_sites', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ name: s.name || s.key, url: 'https://' + s.key }) });
+    }else{
+      r = await api('/channels', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ platform: s.kind, username: s.key, title: s.key, active: true }) });
+    }
+    if(!r.ok && r.status !== 409){ showToast('افزودن انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
+    await setCrawlSuggestionStatus(id, 'added');
+    if(s.kind === 'site'){
+      await loadCrawlSites();
+      showToast('«' + s.key + '» به منابع خزنده اضافه شد و در اجرای بعدی جست‌وجو می‌شود. نام فارسی آن را می‌توانید بعداً با حذف و افزودن دوباره اصلاح کنید.');
+    }else{
+      try{ await loadChannels(); renderChanList(); }catch(e){}
+      showToast('کانال @' + s.key + ' به «مدیریت منابع» اضافه شد؛ پست‌هایش از اجرای بعدی جمع و بررسی می‌شود. نام و بخش‌های نمایش آن را از همان‌جا تنظیم کنید.');
+    }
   }
   document.getElementById('add-crawl-btn').addEventListener('click', async ()=>{
     const nameEl = document.getElementById('new-crawl-name');

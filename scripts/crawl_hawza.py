@@ -10,7 +10,16 @@
      آدرس‌های رایج) — فهرست آماده‌ی خبرهای تازه با تاریخ، بدون فشار به سایت
   ۲. فید RSS (/rss، /feed)
   ۳. لینک‌های صفحه‌ی اول سایت (خزیدن یک‌سطحی)
-هر خبر فقط یک‌بار خوانده می‌شه (هش آدرس در crawl_seen، ۵ روز نگه داشته می‌شه).
+هر خبر فقط یک‌بار خوانده می‌شه (هش آدرس در crawl_seen، ۲ روز نگه داشته می‌شه).
+
+دو منبع دیگه (۵.۲۳.۰، خواست کاربر — «شبکه‌های اجتماعی را هم می‌خواهم»):
+  - پست‌های ۳ ساعت اخیر کانال‌های ایتا/تلگرام/بله‌ای که سامانه همین الان جمع
+    می‌کنه (جدول posts) با همین قاعده بررسی می‌شن (kind=social).
+  - دنبال کردن یک‌مرحله‌ای لینک‌های داخل خبرها/پست‌های مرتبط: صفحه‌ی لینک‌شده
+    خونده و بررسی می‌شه (kind=link اگه سایتش در فهرست نیست)، و سایت‌ها/کانال‌های
+    ایتا و تلگرامی که در فهرست نیستن در crawl_suggestions («پیشنهاد منبع» در
+    تنظیمات) با تعداد تکرار ثبت می‌شن تا مدیر با یه کلیک اضافه کنه.
+فقط تیتر و گزیده‌ی متن ذخیره می‌شه، نه متن کامل (سقف ۵۰۰ مگ پایگاه داده‌ی رایگان).
 
 تشخیص «درباره حوزه»: فهرست عبارت‌های TERMS (بعد از یکدست‌سازی حروف). خبری
 مرتبطه که دست‌کم یکی از عبارت‌ها در تیترش باشه، یا در متنش دست‌کم ۲ بار بیاد
@@ -53,9 +62,21 @@ DELAY_SECONDS = 1.0          # مکث بین دو درخواست به یک سا�
 WINDOW_HOURS = 30            # خبرهای قدیمی‌تر (اگه تاریخ معلومه) کنار گذاشته می‌شن
 MAX_PER_SITE = 40 if DRY_RUN else 100   # سقف خبرهای تازه‌ی هر سایت در هر اجرا
 MAX_WORKERS = 8              # چند سایت هم‌زمان (هر سایت فقط یک درخواست در لحظه)
-TIME_BUDGET_SECONDS = 22 * 60  # ورک‌فلو ۳۰ دقیقه وقت داره
-SEEN_KEEP_DAYS = 5
-MAX_BODY_CHARS = 8000
+TIME_BUDGET_SECONDS = 18 * 60   # خزیدن سایت‌ها؛ بعدش پست‌ها و لینک‌ها
+TOTAL_BUDGET_SECONDS = 25 * 60  # ورک‌فلو ۳۰ دقیقه وقت داره
+SEEN_KEEP_DAYS = 2              # پنجره‌ی خبر تازه ۳۰ ساعته، پس ۲ روز کافیه
+SOCIAL_LOOKBACK_HOURS = 3       # اجرا هر ۲ ساعته؛ هم‌پوشانی با url یکتا بی‌خطره
+LINK_MAX_PER_RUN = 60           # سقف صفحه‌های لینک‌شده‌ای که در هر اجرا خونده می‌شن
+LINK_MAX_PER_ITEM = 5
+# دامنه‌هایی که لینکشون نه خبره نه منبع پیشنهادی (شبکه‌های اجتماعی، ویدئو، فروشگاه اپ...)
+SKIP_LINK_DOMAINS = (
+    "instagram.com", "twitter.com", "x.com", "youtube.com", "youtu.be", "facebook.com", "wa.me", "whatsapp.com",
+    "linkedin.com", "aparat.com", "google.com", "goo.gl", "bit.ly", "telegram.org", "apple.com", "cafebazaar.ir",
+    "myket.ir", "rubika.ir", "splus.ir", "igap.net", "ble.ir", "bale.ai", "virasty.com", "wikipedia.org",
+    "t.co", "tiktok.com", "soroush-app.ir", "gap.im", "shad.ir", "eitaa.ir",
+)
+# سایت‌های خودِ حوزه (تب «اخبار حوزه») — نه خزیده می‌شن نه پیشنهاد
+OWN_HAWZA_DOMAINS = ("hawzahnews.com", "rasanews.ir", "hawzah.net", "howzeh-khorasan.ir", "ismc.ir")
 TEHRAN = timezone(timedelta(hours=3, minutes=30))
 
 # همون فهرستی که migration_041 در crawl_sites می‌ذاره (فقط برای --dry-run)؛
@@ -446,7 +467,63 @@ class Site:
         if not title:
             m = re.search(r"<title[^>]*>(.*?)</title>", r.text, re.S | re.I)
             title = unescape(m.group(1)).strip() if m else ""
-        return {"title": title, "text": (data.get("text") or "").strip(), "date": item.get("date") or parse_date(data.get("date"))}
+        return {"title": title, "text": (data.get("text") or "").strip(), "date": item.get("date") or parse_date(data.get("date")),
+                "html": r.content, "final_url": r.url}
+
+
+def extract_links(html: bytes, base: str) -> list[str]:
+    """لینک‌های داخل متن اصلی خبر (نه منو/ستون کناری) — trafilatura با include_links."""
+    try:
+        xml = trafilatura.extract(html, url=base, output_format="xml", include_links=True,
+                                  include_comments=False, favor_precision=True) or ""
+    except Exception:
+        return []
+    out = []
+    for t in re.findall(r'target="([^"]+)"', xml):
+        u = urljoin(base, unescape(t))
+        if u.startswith("http") and u not in out:
+            out.append(u)
+    return out
+
+
+URL_RE = re.compile(r"https?://[^\s<>\"'«»()\[\]،]+")
+BARE_SOCIAL_RE = re.compile(r"(?<![\w./])(?:t\.me|telegram\.me|eitaa\.com)/[A-Za-z0-9_]{4,40}")
+HANDLE_RE = re.compile(r"(?<![\w@])@([A-Za-z][A-Za-z0-9_]{3,39})")
+SOCIAL_HOSTS = {"t.me": "telegram", "telegram.me": "telegram", "eitaa.com": "eitaa"}
+
+
+def host_of(u: str) -> str:
+    return urlparse(u).netloc.lower().split(":")[0].removeprefix("www.")
+
+
+def domain_in(host: str, domains) -> bool:
+    return any(host == d or host.endswith("." + d) for d in domains)
+
+
+def link_target(u: str):
+    """(نوع، کلید، آدرس): ('telegram'|'eitaa', نام کانال، None) یا ('site', دامنه، آدرس) یا None."""
+    p = urlparse(u)
+    host = host_of(u)
+    if host in SOCIAL_HOSTS:
+        seg = p.path.strip("/").split("/")
+        h = seg[0] if seg else ""
+        if h.lower() in ("joinchat", "s", "c", "share", "addstickers", "proxy", "iv") or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{3,39}", h):
+            return None
+        return (SOCIAL_HOSTS[host], h.lower(), None)
+    if not host or "." not in host or domain_in(host, SKIP_LINK_DOMAINS):
+        return None
+    if re.search(r"\.(jpg|jpeg|png|gif|webp|svg|pdf|mp4|mp3|zip|rar|apk)$", p.path, re.I):
+        return None
+    return ("site", host, u)
+
+
+def social_links(text: str, platform: str) -> list[str | tuple]:
+    out = URL_RE.findall(text or "")
+    out += ["https://" + m for m in BARE_SOCIAL_RE.findall(text or "")]
+    # @نام در پست ایتا/تلگرام = کانالی در همون پیام‌رسان
+    if platform in ("eitaa", "telegram"):
+        out += [(platform, h.lower(), None) for h in HANDLE_RE.findall(text or "")]
+    return out
 
 
 def classify(title: str, text: str) -> dict | None:
@@ -550,24 +627,147 @@ def crawl_site(site: Site, token: str | None, deadline: float) -> dict:
         c = classify(art["title"], art["text"])
         if c:
             res["found"].append({
-                "url": it["loc"], "site": site.host, "site_name": site.name,
-                "title": art["title"][:500] or "(بدون عنوان)", "body": art["text"][:MAX_BODY_CHARS],
+                "url": it["loc"], "site": site.host, "site_name": site.name, "kind": "site",
+                "title": art["title"][:500] or "(بدون عنوان)",
                 "published_at": art["date"].isoformat() if art["date"] else None, **c,
+                "_links": extract_links(art["html"], art["final_url"])[:30],
             })
     return res
+
+
+# ---------- پست‌های شبکه‌های اجتماعی (کانال‌هایی که سامانه جمع می‌کنه) ----------
+
+def social_title(post: dict) -> str:
+    if post.get("title"):
+        return post["title"].strip()
+    first = next((ln.strip() for ln in (post.get("text") or "").split("\n") if ln.strip()), "")
+    return first if len(first) <= 150 else first[:150].rsplit(" ", 1)[0] + "…"
+
+
+def scan_social(token: str) -> tuple[list[dict], list[tuple[str, list]]]:
+    since = (datetime.now(timezone.utc) - timedelta(hours=SOCIAL_LOOKBACK_HOURS)).isoformat()
+    r = db(token, "GET", "channels", params={"select": "id,title,username,platform", "platform": "in.(eitaa,telegram,bale)"})
+    r.raise_for_status()
+    chans = {c["id"]: c for c in r.json()}
+    found, links = [], []
+    for page in range(6):
+        r = db(token, "GET", "posts", params={
+            "select": "id,channel_id,platform,title,text,link,posted_at,scraped_at",
+            "platform": "in.(eitaa,telegram,bale)", "scraped_at": f"gte.{since}", "hidden_at": "is.null",
+            "order": "id", "limit": "1000", "offset": str(page * 1000)})
+        r.raise_for_status()
+        rows = r.json()
+        for p in rows:
+            title = social_title(p)
+            text = p.get("text") or ""
+            # تیتر ساختگی = خط اول متن؛ برای اینکه یه اشاره دوبار شمرده نشه، از متن کم می‌شه
+            body = text if p.get("title") else (text.strip().split("\n", 1) + [""])[1]
+            c = classify(title, body)
+            if not c or not p.get("link"):
+                continue
+            ch = chans.get(p["channel_id"], {})
+            found.append({
+                "url": p["link"], "site": p["platform"], "site_name": ch.get("title") or ch.get("username") or p["platform"],
+                "kind": "social", "post_id": p["id"], "title": title or "(بدون عنوان)",
+                "published_at": p.get("posted_at") or p.get("scraped_at"), **c,
+            })
+            links.append((p["link"], social_links(p.get("text") or "", p["platform"])))
+        if len(rows) < 1000:
+            break
+    return found, links
+
+
+# ---------- دنبال کردن لینک‌ها و پیشنهاد منبع ----------
+
+def follow_links(sources: list[tuple[str, list]], token: str | None, site_names: dict, known_channels: set,
+                 deadline: float) -> tuple[list[dict], list[str], dict]:
+    """sources: (آدرس مطلب مرتبط، لینک‌های داخلش). خروجی: (خبرهای مرتبط تازه، هش‌های خونده‌شده، پیشنهادها)."""
+    suggest: dict[tuple, dict] = {}
+    to_fetch: dict[str, str] = {}  # url -> host
+    for src, raw_links in sources:
+        targets = {}
+        for l in raw_links[:200]:
+            t = l if isinstance(l, tuple) else link_target(l)
+            if t and (t[0], t[1]) not in targets:
+                targets[(t[0], t[1])] = t
+        n = 0
+        for (kind, key), t in targets.items():
+            if kind in ("telegram", "eitaa"):
+                if (kind, key) not in known_channels:
+                    s = suggest.setdefault((kind, key), {"kind": kind, "key": key, "name": "@" + key, "sample_url": src, "hits": 0, "found": 0})
+                    s["hits"] += 1
+                continue
+            if domain_in(key, OWN_HAWZA_DOMAINS) or host_of(src) == key:
+                continue  # سایت حوزوی، یا لینک داخلی همون خبر (منو/خبرهای مرتبط)
+            if key not in site_names:
+                s = suggest.setdefault(("site", key), {"kind": "site", "key": key, "name": key, "sample_url": t[2], "hits": 0, "found": 0})
+                s["hits"] += 1
+            path = urlparse(t[2]).path
+            if len(path) >= 8 and n < LINK_MAX_PER_ITEM and len(to_fetch) < LINK_MAX_PER_RUN:
+                to_fetch.setdefault(t[2], key)
+                n += 1
+    hashes = {u: url_hash(u) for u in to_fetch}
+    seen = already_seen(token, list(hashes.values()))
+    found, read = [], []
+    by_host: dict[str, list[str]] = {}
+    for u, h in to_fetch.items():
+        if hashes[u] not in seen:
+            by_host.setdefault(h, []).append(u)
+    for host, urls in by_host.items():
+        if time.time() > deadline:
+            break
+        p = urlparse(urls[0])
+        site = Site({"id": None, "name": site_names.get(host, host), "url": f"{p.scheme}://{p.netloc}"})
+        for u in urls:
+            if time.time() > deadline:
+                break
+            try:
+                if not site.allowed(u):
+                    continue
+                art = site.read_article({"loc": u, "date": None, "title": None})
+            except requests.RequestException:
+                continue
+            except Exception as e:
+                print(f"    [!] link {u[:90]}: {type(e).__name__}: {e}", file=sys.stderr)
+                continue
+            finally:
+                site.wait()
+            if art.get("permanent") is not None:
+                continue
+            read.append(hashes[u])
+            c = classify(art["title"], art["text"]) if (art["title"] or art["text"]) else None
+            if not c:
+                continue
+            known = host in site_names
+            found.append({
+                "url": u, "site": host, "site_name": site_names.get(host, host), "kind": "site" if known else "link",
+                "title": art["title"][:500] or "(بدون عنوان)",
+                "published_at": art["date"].isoformat() if art["date"] else None, **c,
+            })
+            if not known and ("site", host) in suggest:
+                suggest[("site", host)]["found"] += 1
+    return found, read, suggest
 
 
 def main() -> None:
     started = time.time()
     deadline = started + TIME_BUDGET_SECONDS
+    total_deadline = started + TOTAL_BUDGET_SECONDS
     token = None
+    known_channels: set = set()
     if DRY_RUN:
         rows = [{"id": None, "name": n, "url": u, "sitemap_url": s} for n, u, s in DEFAULT_SITES if not ONLY or n in ONLY]
     else:
         token = login()
-        r = db(token, "GET", "crawl_sites", params={"select": "id,name,url,sitemap_url", "active": "eq.true", "order": "id"})
+        r = db(token, "GET", "crawl_sites", params={"select": "id,name,url,sitemap_url,active", "order": "id"})
         r.raise_for_status()
-        rows = r.json()
+        all_sites = r.json()
+        rows = [x for x in all_sites if x.get("active")]
+        r = db(token, "GET", "channels", params={"select": "platform,username", "platform": "in.(eitaa,telegram)"})
+        r.raise_for_status()
+        known_channels = {(c["platform"], (c["username"] or "").lower().lstrip("@")) for c in r.json()}
+    # همه‌ی سایت‌های فهرست (حتی متوقف‌ها) «شناخته‌شده»ان — دوباره پیشنهاد نشن
+    site_names = {host_of(x["url"]): x["name"] for x in (rows if DRY_RUN else all_sites)}
     print(f"[*] {len(rows)} site(s) to crawl")
 
     with ThreadPoolExecutor(MAX_WORKERS) as ex:
@@ -588,11 +788,30 @@ def main() -> None:
                 "last_found": len(res["found"]), "last_error": res["error"], "last_via": s.via,
             })
 
-    print(f"[*] read {sum(r['pages'] for r in results)} page(s), {len(found)} about hawza, "
+    # پست‌های شبکه‌های اجتماعی
+    social, social_src = ([], [])
+    if not DRY_RUN:
+        try:
+            social, social_src = scan_social(token)
+        except requests.RequestException as e:
+            print(f"[!] social scan failed: {e}", file=sys.stderr)
+    print(f"[*] social posts about hawza: {len(social)}")
+
+    # لینک‌های مطالب مرتبط (یک مرحله) + پیشنهاد منبع
+    sources = [(f["url"], f.pop("_links", [])) for f in found] + social_src
+    linked, link_seen, suggest = follow_links(sources, token, site_names, known_channels, total_deadline)
+    print(f"[*] followed links: {len(linked)} about hawza, {len(link_seen)} page(s) read, {len(suggest)} suggestion(s)")
+    seen += link_seen
+    urls = {f["url"] for f in found + social}
+    found += social + [f for f in linked if f["url"] not in urls]
+
+    print(f"[*] read {sum(r['pages'] for r in results) + len(link_seen)} page(s), {len(found)} about hawza, "
           f"{failed}/{len(rows)} site(s) failed, {time.time() - started:.0f}s")
     if DRY_RUN:
         for f in sorted(found, key=lambda f: -f["hits"]):
-            print(f"\n- [{f['site_name']}] {f['title']}\n  {f['url']}\n  terms={'، '.join(f['matched_terms'])} hits={f['hits']} title={f['in_title']} date={f['published_at']}\n  {f['excerpt'][:300]}")
+            print(f"\n- [{f['site_name']}] ({f['kind']}) {f['title']}\n  {f['url']}\n  terms={'، '.join(f['matched_terms'])} hits={f['hits']} title={f['in_title']} date={f['published_at']}\n  {f['excerpt'][:300]}")
+        for s in sorted(suggest.values(), key=lambda s: (-s["found"], -s["hits"]))[:30]:
+            print(f"  suggest {s['kind']:8} {s['key']:40} hits={s['hits']} found={s['found']}")
         return
 
     ok = True
@@ -602,6 +821,10 @@ def main() -> None:
         if not r.ok:
             print(f"[!] insert hawza_mentions failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
             ok = False
+    if suggest:
+        r = db(token, "POST", "rpc/crawl_suggest", json={"items": list(suggest.values())})
+        if not r.ok:
+            print(f"[!] crawl_suggest failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
     for i in range(0, len(seen), 500):
         r = db(token, "POST", "crawl_seen", params={"on_conflict": "url_hash"},
                headers={"Prefer": "resolution=ignore-duplicates,return=minimal"},
