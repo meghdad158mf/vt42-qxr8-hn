@@ -68,6 +68,10 @@ SEEN_KEEP_DAYS = 2              # پنجره‌ی خبر تازه ۳۰ ساعت�
 SOCIAL_LOOKBACK_HOURS = 4       # اجرا هر ۳ ساعته؛ هم‌پوشانی با url یکتا بی‌خطره
 LINK_MAX_PER_RUN = 60           # سقف صفحه‌های لینک‌شده‌ای که در هر اجرا خونده می‌شن
 LINK_MAX_PER_ITEM = 5
+# سایت‌های پیشنهادی (لینک‌شده در مطالب مرتبط) خودکار خزیده می‌شن تا مدیر «تأیید» یا «توقف» کنه
+# (۵.۲۳.۱، خواست کاربر) — با سقف، تا وقت سایت‌های اصلی رو نگیرن
+SUGGEST_MAX_ACTIVE = 15         # حداکثر سایت پیشنهادیِ در حال بررسی
+SUGGEST_MAX_PER_SITE = 30       # سقف خبرهای تازه‌ی هر سایت پیشنهادی در هر اجرا
 # دامنه‌هایی که لینکشون نه خبره نه منبع پیشنهادی (شبکه‌های اجتماعی، ویدئو، فروشگاه اپ...)
 SKIP_LINK_DOMAINS = (
     "instagram.com", "twitter.com", "x.com", "youtube.com", "youtu.be", "facebook.com", "wa.me", "whatsapp.com",
@@ -348,6 +352,8 @@ class Site:
         self.prefix = p.path.rstrip("/").lower()
         self.rp = None
         self.via = None
+        self.suggested = row.get("source") == "suggest"
+        self.limit = min(MAX_PER_SITE, SUGGEST_MAX_PER_SITE) if self.suggested else MAX_PER_SITE
 
     def wait(self):
         time.sleep(DELAY_SECONDS)
@@ -639,7 +645,7 @@ def crawl_site(site: Site, token: str | None, deadline: float) -> dict:
     if DEBUG:
         print(f"    [{site.name}] via={site.via} items={len(items)} in-window={len(uniq)} dates={sorted(str(i['date'])[:16] for i in items if i['date'])[-3:]}")
     seen = already_seen(token, [i["hash"] for i in uniq])
-    todo = [i for i in uniq if i["hash"] not in seen][:MAX_PER_SITE]
+    todo = [i for i in uniq if i["hash"] not in seen][:site.limit]
     for it in todo:
         if time.time() > deadline:
             break
@@ -794,6 +800,37 @@ def follow_links(sources: list[tuple[str, list]], token: str | None, site_names:
     return found, read, suggest
 
 
+def promote_suggestions(token: str, all_sites: list[dict]) -> None:
+    """سایت‌های پیشنهادیِ پرتکرار (≥۲ لینک، یا صفحه‌ی مرتبط) → crawl_sites با source=suggest؛
+    از اجرای بعدی خزیده می‌شن و مدیر در جدول «منابع خزنده» تأیید یا متوقفشون می‌کنه."""
+    room = SUGGEST_MAX_ACTIVE - sum(1 for x in all_sites if x.get("source") == "suggest")
+    if room <= 0:
+        return
+    r = db(token, "GET", "crawl_suggestions", params={
+        "select": "key", "kind": "eq.site", "status": "eq.new", "or": "(found.gte.1,hits.gte.2)",
+        "order": "found.desc,hits.desc", "limit": "60"})
+    if not r.ok:
+        return
+    known = {host_of(x["url"]) for x in all_sites}
+    out = []
+    for s in r.json():
+        k = s["key"]
+        if k in known or domain_in(k, OWN_HAWZA_DOMAINS) or domain_in(k, SKIP_LINK_DOMAINS):
+            continue
+        out.append({"name": k[:80], "url": "https://" + k, "source": "suggest", "active": True})
+        if len(out) >= room:
+            break
+    if not out:
+        return
+    r = db(token, "POST", "crawl_sites", params={"on_conflict": "url"},
+           headers={"Prefer": "resolution=ignore-duplicates,return=minimal"}, json=out)
+    if r.ok:
+        print(f"[*] {len(out)} suggested site(s) queued for crawling: {', '.join(x['name'] for x in out)}")
+    else:
+        # source='suggest' به migration_042 نیاز داره
+        print(f"[!] queue suggested sites failed (migration_042?): {r.status_code} {r.text[:200]}", file=sys.stderr)
+
+
 def main() -> None:
     started = time.time()
     deadline = started + TIME_BUDGET_SECONDS
@@ -804,10 +841,11 @@ def main() -> None:
         rows = [{"id": None, "name": n, "url": u, "sitemap_url": s} for n, u, s in DEFAULT_SITES if not ONLY or n in ONLY]
     else:
         token = login()
-        r = db(token, "GET", "crawl_sites", params={"select": "id,name,url,sitemap_url,active", "order": "id"})
+        r = db(token, "GET", "crawl_sites", params={"select": "id,name,url,sitemap_url,active,source", "order": "id"})
         r.raise_for_status()
         all_sites = r.json()
-        rows = [x for x in all_sites if x.get("active")]
+        # پیشنهادی‌ها آخر صف — اگه وقت کم بیاد، سایت‌های اصلی اول خزیده شدن
+        rows = sorted((x for x in all_sites if x.get("active")), key=lambda x: x.get("source") == "suggest")
         r = db(token, "GET", "channels", params={"select": "platform,username", "platform": "in.(eitaa,telegram)"})
         r.raise_for_status()
         known_channels = {(c["platform"], (c["username"] or "").lower().lstrip("@")) for c in r.json()}
@@ -821,7 +859,7 @@ def main() -> None:
     found, seen, failed = [], [], 0
     for res in results:
         s = res["site"]
-        if res["error"]:
+        if res["error"] and not s.suggested:
             failed += 1
         found += res["found"]
         seen += res["seen"]
@@ -882,6 +920,7 @@ def main() -> None:
         r = db(token, "POST", "rpc/crawl_suggest", json={"items": list(suggest.values())})
         if not r.ok:
             print(f"[!] crawl_suggest failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
+    promote_suggestions(token, all_sites)
     for i in range(0, len(seen), 500):
         r = db(token, "POST", "crawl_seen", params={"on_conflict": "url_hash"},
                headers={"Prefer": "resolution=ignore-duplicates,return=minimal"},
@@ -895,7 +934,8 @@ def main() -> None:
 
     if not ok:
         sys.exit(1)
-    if rows and failed == len(rows):
+    base = [x for x in rows if x.get("source") != "suggest"]
+    if base and failed == len(base):
         print(f"[!] all {failed} site(s) failed", file=sys.stderr)
         sys.exit(1)
 

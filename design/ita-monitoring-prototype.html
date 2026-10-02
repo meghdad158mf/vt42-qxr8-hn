@@ -2095,30 +2095,11 @@
   .hab-card .news-foot{ margin-top:auto; }
   .hab-excerpt{ margin-bottom:12px !important; }
   @media (max-width:640px){ #hab-site{ max-width:none; width:100%; } }
-  .crawl-site{ display:flex; align-items:center; gap:12px; padding:10px 8px; border-bottom:1px solid var(--border); }
-  .crawl-site:last-child{ border-bottom:none; }
-  .crawl-site-main{ flex:1; min-width:0; }
-  .crawl-site-name{ font-size:13px; font-weight:700; color: var(--text); display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; }
   .crawl-site-host{ font-size:12px; font-weight:500; color: var(--text-faint); }
   .crawl-site-host:hover{ color: var(--accent-strong); }
-  .crawl-site-status{ font-size:12px; color: var(--text-faint); margin-top:3px; padding-inline-start:14px; position:relative; }
-  .crawl-site-status::before{ content:''; position:absolute; inset-inline-start:0; top:.55em; width:7px; height:7px; border-radius:50%; background: var(--border-strong); }
-  .crawl-site.is-ok .crawl-site-status::before{ background: var(--ok); }
-  .crawl-site.is-bad .crawl-site-status{ color: var(--danger); }
-  .crawl-site.is-bad .crawl-site-status::before{ background: var(--danger); }
-  .crawl-site.is-off{ opacity:.6; }
-  .crawl-site-acts{ display:flex; gap:6px; flex:none; }
   .usr-act.is-del{ color: var(--danger); }
-  @media (max-width:640px){ .crawl-site{ flex-wrap:wrap; } .crawl-site-acts{ width:100%; justify-content:flex-end; } }
-  .crawl-sug-wrap{ margin-top:18px; padding-top:14px; border-top:1px dashed var(--border-strong); }
-  .crawl-sug-title{ font-size:14px; font-weight:800; color: var(--text); margin:0 0 6px; }
-  .crawl-sug-kind{ font-size:11px; font-weight:700; padding:2px 9px; border-radius:100px; background: rgba(234,179,147,0.18); color: var(--accent-strong); border:1px solid rgba(234,179,147,0.5); }
-  .crawl-sug .crawl-site-status::before{ display:none; }
-  .crawl-sug .crawl-site-status{ padding-inline-start:0; }
-  #crawl-sug-list{ max-height:420px; overflow:auto; }
   .hab-foot-acts{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .hab-card .is-translated{ color: var(--accent-strong); }
-  .crawl-sug-kind.is-chan{ background: var(--surface-2); color: var(--text-dim); border-color: var(--border-strong); font-weight:600; }
   .crawl-scroll{ max-height:520px; }
   .crawl-table td.c-name{ font-weight:700; white-space:normal; min-width:120px; width:auto; }
   .crawl-table td.c-host{ max-width:220px; overflow:hidden; text-overflow:ellipsis; }
@@ -2129,17 +2110,23 @@
   .crawl-table tr.is-bad .crawl-st{ color: var(--danger); }
   .crawl-table tr.is-bad .crawl-st::before{ background: var(--danger); }
   .crawl-table tr.is-off td{ opacity:.6; }
+  .crawl-sug-badge{ font-size:11px; font-weight:800; padding:2px 9px; border-radius:100px; background: var(--navy); color:#fff; white-space:nowrap; }
+  .crawl-table tr.is-sug td{ background: rgba(234,179,147,0.08); }
+  .crawl-table td.c-act{ width:1%; }
+  .usr-act.is-ok{ color:#2f7d52; border-color: rgba(47,125,82,0.4); }
   .crawl-plat{ font-size:11px; font-weight:700; padding:2px 9px; border-radius:100px; background: var(--surface-2); color: var(--text-dim); border:1px solid var(--border); }
   .crawl-plat.is-website{ background: rgba(234,179,147,0.18); color: var(--accent-strong); border-color: rgba(234,179,147,0.5); }
   @media (max-width:640px){
     .crawl-scroll{ overflow-x:hidden; }
     .crawl-table thead{ display:none; }
     .crawl-table, .crawl-table tbody{ display:block; }
-    .crawl-table tr{ display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"name plat" "host from" "st st"; row-gap:4px; column-gap:8px; padding:10px 2px; border-bottom:1px solid var(--border); }
+    .crawl-table tr{ display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"name plat" "host from" "st st" "act act"; row-gap:4px; column-gap:8px; padding:10px 2px; border-bottom:1px solid var(--border); }
     .crawl-table td{ border:none; padding:0; min-width:0 !important; max-width:none !important; width:auto !important; }
     .crawl-table td.c-name{ grid-area:name; } .crawl-table td.c-plat{ grid-area:plat; justify-self:end; }
     .crawl-table td.c-host{ grid-area:host; } .crawl-table td.c-from{ grid-area:from; justify-self:end; }
     .crawl-table td.c-st{ grid-area:st; }
+    .crawl-table tr.is-sug{ background: rgba(234,179,147,0.08); } .crawl-table tr.is-sug td{ background:none; }
+    .crawl-table td.c-act{ grid-area:act; padding-top:4px; } .crawl-table td.c-act:empty{ display:none; }
     .crawl-table td.usr-empty{ display:block; }
   }
 </style>
@@ -3276,18 +3263,13 @@
 
           <details class="panel settings-accordion" id="crawl-sites-panel">
             <summary class="panel-head"><span class="panel-pill">منابع خزنده‌ی «درباره حوزه»</span><span class="settings-sum-desc" id="crawl-sites-sum">سایت‌ها و کانال‌هایی که خزنده هر ۳ ساعت برای پیدا کردن مطالب مربوط به حوزه بررسی می‌کند</span></summary>
-            <p class="settings-help">همه‌ی منابع «مدیریت منابع» خودکار در این فهرست هستند و افزودن، توقف و حذفشان از همان‌جا انجام می‌شود؛ برای منبعی که فقط خزنده باید بررسی کند، در «مدیریت منابع» <b>هیچ بخشی را تیک نزنید</b>. وب‌سایت‌ها با نشانی اصلی‌شان <b>کامل</b> گشته می‌شوند، حتی اگر RSS ثبت‌شده فقط مربوط به یک بخش سایت باشد. «فهرست پایه» سایت‌های خبری اصلی کشور است که بدون ثبت در «مدیریت منابع» هم گشته می‌شوند.</p>
+            <p class="settings-help">همه‌ی منابع «مدیریت منابع» خودکار در این فهرست هستند و افزودن، توقف و حذفشان از همان‌جا انجام می‌شود؛ برای منبعی که فقط خزنده باید بررسی کند، در «مدیریت منابع» <b>هیچ بخشی را تیک نزنید</b>. وب‌سایت‌ها با نشانی اصلی‌شان <b>کامل</b> گشته می‌شوند، حتی اگر RSS ثبت‌شده فقط مربوط به یک بخش سایت باشد. «فهرست پایه» سایت‌های خبری اصلی کشور است که بدون ثبت در «مدیریت منابع» هم گشته می‌شوند. سایت‌هایی که در مطالب مرتبط با حوزه بیشتر به آن‌ها لینک داده شده، با برچسب <b>«پیشنهادی»</b> خودکار بررسی می‌شوند؛ با «تأیید» به «مدیریت منابع» (بدون بخش) می‌روند و با «توقف» دیگر بررسی نمی‌شوند. کانال‌های ایتا و تلگرامِ پیشنهادی فقط بعد از «تأیید» جمع و بررسی می‌شوند.</p>
             <p class="settings-help">مطلبی مرتبط حساب می‌شود که یکی از این عبارت‌ها در تیترش باشد یا در متنش دست‌کم ۲ بار بیاید: حوزه علمیه، حوزویان، طلاب و طلبه، روحانیت و روحانیون، مراجع و مرجع تقلید، جامعه مدرسین، شورای عالی حوزه، مدیر حوزه‌ها، مدرسه و مدارس علمیه، معممین. سایت‌های خودِ حوزه (تب «اخبار حوزه») بررسی نمی‌شوند و از سایت‌های غیرفارسی فقط فید RSS بررسی می‌شود.</p>
             <div class="usr-toolbar">
               <div class="usr-filters" id="crawl-filter-chips"></div>
               <input type="search" class="usr-search" id="crawl-search" aria-label="جست‌وجوی منابع خزنده" placeholder="جست‌وجوی نام یا نشانی…" />
             </div>
             <div class="usr-scroll crawl-scroll" id="crawl-site-list"></div>
-            <div class="crawl-sug-wrap" id="crawl-sug-wrap" hidden>
-              <h4 class="crawl-sug-title">پیشنهاد منبع</h4>
-              <p class="settings-help">سایت‌ها و کانال‌های ایتا و تلگرامی که در مطالب مرتبط با حوزه به آن‌ها لینک داده شده، ولی هنوز در فهرست منابع نیستند؛ هرچه بیشتر تکرار شده باشند، بالاتر می‌آیند. با «افزودن»، منبع بدون هیچ بخشی به «مدیریت منابع» اضافه می‌شود (یعنی فقط خزنده آن را بررسی می‌کند) و از اجرای بعدی جست‌وجو می‌شود؛ نام و بخش‌هایش را از همان‌جا تنظیم کنید.</p>
-              <div id="crawl-sug-list"></div>
-            </div>
           </details>
 
           <h3 class="settings-group-title">برچسب‌های منابع</h3>
@@ -8783,8 +8765,21 @@
       // ردیف ساخته‌شده از مدیریت منابع که منبعش دیگه فعال نیست، تا همگام‌سازی بعدی پاک می‌شه
       if(c.source === 'channel' && !ch) return;
       let host = c.url; try{ const u = new URL(c.url); host = u.host.replace(/^www\./, '') + u.pathname.replace(/\/+$/, ''); }catch(e){}
+      if(c.source === 'suggest' && !ch){
+        const sg = CRAWL_SUGGEST.find(x=>x.kind === 'site' && x.key === host);
+        const st = crawlSiteStatus(c);
+        if(sg) st.text = toFaDigits(sg.hits) + ' مطلب مرتبط به آن لینک داده؛ ' + st.text;
+        rows.push({ kind:'site', name: c.name, plat:'website', host, url: c.url, from:'پیشنهادی', st, bad:false, sug:{ siteId: Number(c.id), key: host } });
+        return;
+      }
       const st = c.active ? crawlSiteStatus(c) : { cls:'is-off', text: ch ? 'غیرفارسی؛ فقط فید RSS آن بررسی می‌شود' : 'متوقف' };
       rows.push({ kind:'site', name: c.name, plat:'website', host, url: c.url, from: ch ? 'مدیریت منابع' : 'فهرست پایه', st, bad: !!(c.active && c.last_error) });
+    });
+    // کانال پیشنهادی بدون جمع‌آوری پستی ندارد — فقط بعد از تأیید بررسی می‌شود
+    const knownCh = new Set(CHANNELS.map(c=>c.platform + ':' + String(c.username || '').toLowerCase().replace(/^@/, '')));
+    CRAWL_SUGGEST.filter(x=>x.kind !== 'site' && !knownCh.has(x.kind + ':' + x.key)).forEach(x=>{
+      rows.push({ kind:'social', name:'@' + x.key, plat: x.kind, host:'@' + x.key, url: crawlSugUrl(x), from:'پیشنهادی',
+        st:{ cls:'', text: toFaDigits(x.hits) + ' مطلب مرتبط به آن لینک داده؛ پست‌هایش بعد از تأیید جمع و بررسی می‌شود' }, bad:false, sug:{ id: Number(x.id), key: x.key } });
     });
     CHANNELS.filter(c=>['eitaa','telegram','bale'].includes(c.platform) && c.active !== false).forEach(c=>{
       const u = c.platform === 'telegram' ? 'https://t.me/' + c.username : c.platform === 'eitaa' ? 'https://eitaa.com/' + c.username : 'https://ble.ir/' + c.username;
@@ -8805,25 +8800,32 @@
     if(CRAWL_SITES_ERR === 'error'){ chips.innerHTML = ''; box.innerHTML = '<p class="settings-help">دریافت فهرست انجام نشد؛ صفحه را دوباره باز کنید.</p>'; return; }
     const all = crawlRows();
     const sites = all.filter(r=>r.kind === 'site'), social = all.filter(r=>r.kind === 'social');
-    const activeSites = sites.filter(r=>r.st.cls !== 'is-off').length;
+    const activeSites = sites.filter(r=>r.st.cls !== 'is-off' && !r.sug).length;
     const bad = all.filter(r=>r.bad).length;
-    document.getElementById('crawl-sites-sum').textContent = toFaDigits(activeSites) + ' سایت و ' + toFaDigits(social.length) + ' کانال' + (bad ? '؛ ' + toFaDigits(bad) + ' سایت در آخرین اجرا خطا داشت' : '') + '؛ هر ۳ ساعت بررسی می‌شوند';
+    const sugAll = all.filter(r=>r.sug).length;
+    document.getElementById('crawl-sites-sum').textContent = toFaDigits(activeSites) + ' سایت و ' + toFaDigits(social.filter(r=>!r.sug).length) + ' کانال' + (sugAll ? '، ' + toFaDigits(sugAll) + ' مورد پیشنهادی' : '') + (bad ? '؛ ' + toFaDigits(bad) + ' سایت در آخرین اجرا خطا داشت' : '') + '؛ هر ۳ ساعت بررسی می‌شوند';
     if(CRAWL_FILTER === 'bad' && !bad) CRAWL_FILTER = '';
+    const sugN = all.filter(r=>r.sug).length;
+    if(CRAWL_FILTER === 'sug' && !sugN) CRAWL_FILTER = '';
     const F = [['', 'همه', all.length], ['site', 'سایت‌ها', sites.length], ['social', 'شبکه‌های اجتماعی', social.length]];
+    if(sugN) F.push(['sug', 'پیشنهادی', sugN]);
     if(bad) F.push(['bad', 'خطا در آخرین اجرا', bad]);
     chips.innerHTML = F.map(([k, t, n])=>`<button type="button" class="usr-chip${CRAWL_FILTER === k ? ' active' : ''}" data-crawl-f="${k}">${t}<span>${toFaDigits(n)}</span></button>`).join('');
     const q = searchNorm(CRAWL_Q);
-    const rows = all.filter(r=>(!CRAWL_FILTER || (CRAWL_FILTER === 'bad' ? r.bad : r.kind === CRAWL_FILTER)) && (!q || searchNorm(r.name + ' ' + r.host).includes(q)))
-      .sort((a,b)=>(b.bad - a.bad) || ((a.st.cls === 'is-off') - (b.st.cls === 'is-off')) || (a.kind === b.kind ? 0 : a.kind === 'site' ? -1 : 1) || String(a.name).localeCompare(String(b.name), 'fa'));
+    const rows = all.filter(r=>(!CRAWL_FILTER || (CRAWL_FILTER === 'bad' ? r.bad : CRAWL_FILTER === 'sug' ? r.sug : r.kind === CRAWL_FILTER)) && (!q || searchNorm(r.name + ' ' + r.host).includes(q)))
+      .sort((a,b)=>(!!b.sug - !!a.sug) || (b.bad - a.bad) || ((a.st.cls === 'is-off') - (b.st.cls === 'is-off')) || (a.kind === b.kind ? 0 : a.kind === 'site' ? -1 : 1) || String(a.name).localeCompare(String(b.name), 'fa'));
     box.innerHTML = `<table class="usr-table crawl-table">
-      <thead><tr><th>نام</th><th>بستر</th><th>نشانی</th><th>از کجا</th><th>وضعیت</th></tr></thead>
-      <tbody>${rows.map(r=>`<tr class="${r.st.cls}">
-        <td class="c-name">${escHtml(r.name)}</td>
+      <thead><tr><th>نام</th><th>بستر</th><th>نشانی</th><th>از کجا</th><th>وضعیت</th>${sugN ? '<th></th>' : ''}</tr></thead>
+      <tbody>${rows.map(r=>`<tr class="${r.st.cls}${r.sug ? ' is-sug' : ''}">
+        <td class="c-name"><bdi>${escHtml(r.name)}</bdi></td>
         <td class="c-plat"><span class="crawl-plat is-${r.plat}">${CRAWL_PLAT[r.plat] || r.plat}</span></td>
         <td class="c-host"><a class="crawl-site-host" href="${safeUrl(r.url)}" target="_blank" rel="noopener" dir="ltr">${escHtml(r.host)}</a></td>
-        <td class="c-from usr-dim">${r.from}</td>
+        <td class="c-from">${r.sug ? '<span class="crawl-sug-badge">پیشنهادی</span>' : '<span class="usr-dim">' + r.from + '</span>'}</td>
         <td class="c-st"><span class="crawl-st">${escHtml(r.st.text)}</span></td>
-      </tr>`).join('') || '<tr><td class="usr-empty" colspan="5">موردی پیدا نشد.</td></tr>'}</tbody>
+        ${sugN ? `<td class="c-act">${r.sug ? (r.sug.siteId
+          ? `<div class="usr-acts"><button type="button" class="usr-act is-ok" onclick="approveSuggestSite(${r.sug.siteId})">تأیید</button><button type="button" class="usr-act is-del" onclick="stopSuggestSite(${r.sug.siteId})">توقف</button></div>`
+          : `<div class="usr-acts"><button type="button" class="usr-act is-ok" onclick="addCrawlSuggestion(${r.sug.id})">تأیید</button><button type="button" class="usr-act is-del" onclick="ignoreCrawlSuggestion(${r.sug.id})">رد</button></div>`) : ''}</td>` : ''}
+      </tr>`).join('') || `<tr><td class="usr-empty" colspan="${sugN ? 6 : 5}">موردی پیدا نشد.</td></tr>`}</tbody>
     </table>`;
   }
   document.getElementById('crawl-filter-chips').addEventListener('click', e=>{
@@ -8837,7 +8839,7 @@
   const CRAWL_SUG_KIND = { site:'سایت', eitaa:'ایتا', telegram:'تلگرام' };
   async function loadCrawlSuggestions(){
     try{
-      const r = await api('/crawl_suggestions?select=*&status=eq.new&order=found.desc,hits.desc,last_seen_at.desc&limit=40');
+      const r = await api('/crawl_suggestions?select=*&status=eq.new&order=found.desc,hits.desc,last_seen_at.desc&limit=200');
       CRAWL_SUGGEST = r.ok ? await r.json() : [];
     }catch(e){ CRAWL_SUGGEST = []; }
     renderCrawlSuggestions();
@@ -8845,25 +8847,7 @@
   function crawlSugUrl(s){
     return s.kind === 'site' ? 'https://' + s.key : s.kind === 'telegram' ? 'https://t.me/' + s.key : 'https://eitaa.com/' + s.key;
   }
-  function renderCrawlSuggestions(){
-    const wrap = document.getElementById('crawl-sug-wrap');
-    const box = document.getElementById('crawl-sug-list');
-    if(!wrap || !box) return;
-    wrap.hidden = !CRAWL_SUGGEST.length;
-    box.innerHTML = CRAWL_SUGGEST.map(s=>{
-      const stat = toFaDigits(s.hits) + ' مطلب مرتبط به آن لینک داده' + (s.found ? '، ' + toFaDigits(s.found) + ' صفحه‌ی آن درباره‌ی حوزه بود' : '');
-      return `<div class="crawl-site crawl-sug">
-        <div class="crawl-site-main">
-          <div class="crawl-site-name"><span class="crawl-sug-kind">${escHtml(CRAWL_SUG_KIND[s.kind] || s.kind)}</span><a class="crawl-site-host" href="${safeUrl(crawlSugUrl(s))}" target="_blank" rel="noopener" dir="ltr">${escHtml(s.kind === 'site' ? s.key : '@' + s.key)}</a></div>
-          <div class="crawl-site-status">${escHtml(stat)}${s.sample_url ? ` — <a href="${safeUrl(s.sample_url)}" target="_blank" rel="noopener">نمونه</a>` : ''}</div>
-        </div>
-        <div class="crawl-site-acts">
-          <button type="button" class="usr-act" onclick="addCrawlSuggestion(${Number(s.id)})">افزودن</button>
-          <button type="button" class="usr-act" onclick="ignoreCrawlSuggestion(${Number(s.id)})">نادیده گرفتن</button>
-        </div>
-      </div>`;
-    }).join('');
-  }
+  function renderCrawlSuggestions(){ renderCrawlSites(); }
   async function setCrawlSuggestionStatus(id, status){
     const r = await api('/crawl_suggestions?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ status }) });
     if(r.ok){ CRAWL_SUGGEST = CRAWL_SUGGEST.filter(x=>x.id !== id); renderCrawlSuggestions(); }
@@ -8871,6 +8855,37 @@
   }
   async function ignoreCrawlSuggestion(id){
     if(!await setCrawlSuggestionStatus(id, 'ignored')) showToast('انجام نشد؛ دوباره امتحان کنید.');
+  }
+  // سایت پیشنهادی که خزنده خودکار بررسی می‌کند (crawl_sites با source=suggest، migration_042)
+  async function approveSuggestSite(siteId){
+    const c = (CRAWL_SITES || []).find(x=>Number(x.id) === siteId);
+    if(!c) return;
+    let key = ''; try{ key = new URL(c.url).host.replace(/^www\./, ''); }catch(e){}
+    const r = await api('/channels', { method:'POST', headers:{ Prefer:'return=minimal' },
+      body: JSON.stringify({ platform:'website', username: c.url, title: c.name, active: true }) });
+    if(!r.ok && r.status !== 409){ showToast('تأیید انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
+    // ردیف خزنده از این به بعد مال «مدیریت منابع» است (حذف/توقف از همان‌جا)
+    await api('/crawl_sites?id=eq.' + siteId, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ source:'channel' }) });
+    if(key) await api('/crawl_suggestions?kind=eq.site&key=eq.' + encodeURIComponent(key), { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ status:'added' }) });
+    CRAWL_SUGGEST = CRAWL_SUGGEST.filter(x=>!(x.kind === 'site' && x.key === key));
+    try{ await loadChannels(); renderChanList(); renderChanSectionChips(); }catch(e){}
+    await loadCrawlSites();
+    showToast('«' + c.name + '» تأیید شد و بدون بخش به «مدیریت منابع» اضافه شد؛ نام فارسی و بخش‌هایش را از همان‌جا تنظیم کنید.');
+  }
+  async function stopSuggestSite(siteId){
+    const c = (CRAWL_SITES || []).find(x=>Number(x.id) === siteId);
+    if(!c || !await uiConfirm('توقف بررسی «' + c.name + '»؟\nاین سایت دیگر بررسی و پیشنهاد نمی‌شود؛ مطالبی که تا الان از آن پیدا شده، باقی می‌مانند.')) return;
+    let key = ''; try{ key = new URL(c.url).host.replace(/^www\./, ''); }catch(e){}
+    if(key){
+      const r1 = await api('/crawl_suggestions?kind=eq.site&key=eq.' + encodeURIComponent(key), { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ status:'ignored' }) });
+      if(!r1.ok){ showToast('انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
+    }
+    const r = await api('/crawl_sites?id=eq.' + siteId, { method:'DELETE', headers:{ Prefer:'return=minimal' } });
+    if(!r.ok){ showToast('انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
+    CRAWL_SITES = CRAWL_SITES.filter(x=>Number(x.id) !== siteId);
+    CRAWL_SUGGEST = CRAWL_SUGGEST.filter(x=>!(x.kind === 'site' && x.key === key));
+    renderCrawlSites();
+    showToast('«' + c.name + '» دیگر بررسی نمی‌شود.');
   }
   async function addCrawlSuggestion(id){
     const s = CRAWL_SUGGEST.find(x=>x.id === id);
