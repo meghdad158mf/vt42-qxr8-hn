@@ -27,6 +27,9 @@ create table if not exists crawl_sites (
   last_found   int,
   last_error   text,
   last_via     text,
+  -- manual = افزوده‌شده در همین پنل؛ channel = خودکار از سایت‌های «مدیریت منابع» (فقط
+  -- قابل توقف، نه حذف — وگرنه دوباره اضافه می‌شه)
+  source       text not null default 'manual' check (source in ('manual', 'channel')),
   created_at   timestamptz not null default now()
 );
 

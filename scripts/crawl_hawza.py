@@ -121,6 +121,7 @@ DEFAULT_SITES = [
     ("دویچه وله فارسی", "https://www.dw.com/fa-ir", None),
     ("ایران‌وایر", "https://iranwire.com/fa", None),
     ("زیتون", "https://www.zeitoons.com", None),
+    ("العربیه فارسی", "https://www.alarabiya.net/farsi", None),
 ]
 
 # عبارت‌های «درباره حوزه» — روی متن یکدست‌شده (norm) تطبیق داده می‌شن: نیم‌فاصله
@@ -343,6 +344,9 @@ class Site:
         p = urlparse(self.url)
         self.root = f"{p.scheme}://{p.netloc}"
         self.host = p.netloc.lower().removeprefix("www.")
+        # بخش زبانی سایت (bbc.com/persian، alarabiya.net/farsi، dw.com/fa-ir): sitemap کل
+        # سایت رو می‌ده، ولی فقط خبرهای همین بخش خونده می‌شن
+        self.prefix = p.path.rstrip("/").lower()
         self.rp = None
         self.via = None
 
@@ -361,6 +365,12 @@ class Site:
                 self.robots_txt = ""
             self.rp = rp
         return self.rp.can_fetch(USER_AGENT, url)
+
+    def in_section(self, u: str) -> bool:
+        if not self.prefix:
+            return True
+        path = unquote(urlparse(u).path).lower()
+        return path == self.prefix or path.startswith(self.prefix + "/")
 
     def same_site(self, u: str, also: str | None = None) -> bool:
         h = urlparse(u).netloc.lower().removeprefix("www.")
@@ -433,7 +443,7 @@ class Site:
             u = urljoin(r.url, unescape(href))
             path = urlparse(u).path
             # آدرس خبر معمولاً شناسه‌ی عددی (۴ رقم به بالا) یا مسیر بلند داره
-            if not self.same_site(u) or not re.search(r"\d{4,}", path) or len(path) < 12:
+            if not self.same_site(u) or not self.in_section(u) or not re.search(r"\d{4,}", path) or len(path) < 12:
                 continue
             if re.search(r"\.(jpg|jpeg|png|gif|webp|pdf|mp4|mp3|css|js)$", path, re.I):
                 continue
@@ -454,7 +464,7 @@ class Site:
                 items = self.from_sitemap(u)
             except requests.RequestException:
                 continue
-            items = [i for i in items if self.same_site(i["loc"], i.get("src"))]
+            items = [i for i in items if self.same_site(i["loc"], i.get("src")) and self.in_section(i["loc"])]
             dated = [i for i in items if i["date"]]
             # sitemapی قبوله که خبر تازه داشته باشه (رکنا: sitemap ویدئوی قدیمی؛
             # فارس: فقط صفحه‌های بخش‌ها، بدون تاریخ)

@@ -2119,6 +2119,8 @@
   #crawl-sug-list{ max-height:420px; overflow:auto; }
   .hab-foot-acts{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .hab-card .is-translated{ color: var(--accent-strong); }
+  .crawl-sug-kind.is-chan{ background: var(--surface-2); color: var(--text-dim); border-color: var(--border-strong); font-weight:600; }
+  .crawl-edit .add-row{ margin:0; width:100%; }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -3252,7 +3254,7 @@
 
           <details class="panel settings-accordion" id="crawl-sites-panel">
             <summary class="panel-head"><span class="panel-pill">منابع خزنده‌ی «درباره حوزه»</span><span class="settings-sum-desc" id="crawl-sites-sum">سایت‌های خبری‌ای که خزنده هر ۲ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد</span></summary>
-            <p class="settings-help">خزنده خبرهای تازه‌ی هر سایت را از فهرست خبری آن (sitemap)، فید RSS یا صفحه‌ی اول پیدا می‌کند، متن کامل هر خبر را می‌خواند و خبرهایی را که درباره‌ی حوزه هستند در تب «آنچه درباره حوزه گفته می‌شود» نمایش می‌دهد. خبری مرتبط حساب می‌شود که یکی از این عبارت‌ها در تیترش باشد یا در متنش دست‌کم ۲ بار بیاید: حوزه علمیه، حوزویان، طلاب و طلبه، روحانیت و روحانیون، مراجع و مرجع تقلید، جامعه مدرسین، شورای عالی حوزه، مدیر حوزه‌ها، مدرسه و مدارس علمیه، معممین. پست‌های کانال‌های ایتا، تلگرام و بله‌ای که سامانه رصد می‌کند و صفحه‌هایی که مطالب مرتبط به آن‌ها لینک داده‌اند هم با همین قاعده بررسی می‌شوند. برای افزودن سایت، نشانی صفحه‌ی اول آن را وارد کنید؛ نشانی فهرست خبری (sitemap) اختیاری است و اگر خالی بماند، خودکار پیدا می‌شود.</p>
+            <p class="settings-help">سایت‌هایی که در «مدیریت منابع» (با RSS، حتی فقط یک بخش از سایت) تعریف شده‌اند، خودکار با نشانی اصلی‌شان به این فهرست اضافه و <b>کامل</b> گشته می‌شوند (سایت‌های غیرفارسی متوقف اضافه می‌شوند). کانال‌های ایتا، تلگرام و بله‌ی «مدیریت منابع» هم خودکار بررسی می‌شوند. خزنده خبرهای تازه‌ی هر سایت را از فهرست خبری آن (sitemap)، فید RSS یا صفحه‌ی اول پیدا می‌کند، متن کامل هر خبر را می‌خواند و خبرهایی را که درباره‌ی حوزه هستند در تب «آنچه درباره حوزه گفته می‌شود» نمایش می‌دهد. خبری مرتبط حساب می‌شود که یکی از این عبارت‌ها در تیترش باشد یا در متنش دست‌کم ۲ بار بیاید: حوزه علمیه، حوزویان، طلاب و طلبه، روحانیت و روحانیون، مراجع و مرجع تقلید، جامعه مدرسین، شورای عالی حوزه، مدیر حوزه‌ها، مدرسه و مدارس علمیه، معممین. پست‌های کانال‌های ایتا، تلگرام و بله‌ای که سامانه رصد می‌کند و صفحه‌هایی که مطالب مرتبط به آن‌ها لینک داده‌اند هم با همین قاعده بررسی می‌شوند. برای افزودن سایت، نشانی صفحه‌ی اول آن را وارد کنید؛ نشانی فهرست خبری (sitemap) اختیاری است و اگر خالی بماند، خودکار پیدا می‌شود.</p>
             <div class="add-row">
               <input type="text" id="new-crawl-name" aria-label="نام سایت" placeholder="نام سایت (مثلاً ایسنا)" />
               <input type="url" id="new-crawl-url" aria-label="نشانی سایت" placeholder="https://www.example.ir" dir="ltr" />
@@ -8610,6 +8612,7 @@
       closeChanEditor();
       renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
       renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures(); renderProfileGroupAdmin();
+      loadCrawlSites(); // سایت تازه‌ی مدیریت منابع → خودکار در فهرست خزنده‌ی «درباره حوزه»
       showToast(ch ? 'تغییرات ذخیره شد' : 'منبع جدید اضافه شد');
     }catch(e){
       showToast('ذخیره ناموفق بود؛ دوباره تلاش کنید');
@@ -8673,14 +8676,64 @@
   // ---- منابع خزنده‌ی «درباره حوزه» (crawl_sites، migration_041 — ۵.۲۳.۰) ----
   let CRAWL_SITES = null, CRAWL_SITES_ERR = '';
   const CRAWL_VIA = { sitemap:'فهرست خبری (sitemap)', rss:'فید RSS', homepage:'صفحه‌ی اول' };
-  async function loadCrawlSites(){
+  async function loadCrawlSites(sync = true){
     if(currentRole !== 'app_admin') return;
     try{
       const r = await api('/crawl_sites?select=*&order=name');
       CRAWL_SITES_ERR = r.ok ? '' : ((r.status === 404 || r.status === 400) ? 'missing' : 'error');
       CRAWL_SITES = r.ok ? await r.json() : [];
     }catch(e){ CRAWL_SITES_ERR = 'error'; CRAWL_SITES = []; }
+    if(sync && !CRAWL_SITES_ERR && await syncCrawlSitesFromChannels()) return loadCrawlSites(false);
     renderCrawlSites();
+  }
+  // ---- سایت‌های «مدیریت منابع» → خزش کامل (خواست کاربر: بعضی سایت‌ها فقط با RSS یه بخش
+  // در مدیریت منابع‌ان، ولی برای «درباره حوزه» کل سایت باید گشته بشه) ----
+  // نشانی اصلی سایت از آدرس RSS: isna.ir/rss/tp/5 → https://www.isna.ir؛ زیردامنه‌ی فید
+  // (feeds./rss./moxie.) برداشته می‌شه و بخش زبانی (/persian، /farsi، /fa-ir) می‌مونه
+  function rssSiteRoot(rss){
+    try{
+      const u = new URL(rss);
+      let h = u.hostname.toLowerCase(), stripped = false;
+      const MAP = { 'feeds.bbci.co.uk':'bbc.com', 'feeds.a.dj.com':'wsj.com' };
+      if(MAP[h]){ h = MAP[h]; stripped = true; }
+      else if(/^(feeds?|rss|moxie)\./.test(h)){ h = h.replace(/^(feeds?|rss|moxie)\./, ''); stripped = true; }
+      const seg = (u.pathname.split('/')[1] || '').toLowerCase();
+      const prefix = ['persian','farsi','fa-ir','fa'].includes(seg) && !/\.ir$/.test(h) ? '/' + seg : '';
+      const host = stripped && h.split('.').length === 2 ? 'www.' + h : h;
+      return 'https://' + host + prefix;
+    }catch(e){ return null; }
+  }
+  function crawlSiteKey(url){
+    try{ const u = new URL(url); return u.hostname.toLowerCase().replace(/^www\./, '') + u.pathname.replace(/\/+$/, ''); }catch(e){ return ''; }
+  }
+  function channelCrawlRoots(){
+    const out = {};
+    CHANNELS.filter(c=>c.platform === 'website' && c.active !== false && !c.show_in_hawza).forEach(c=>{
+      const root = rssSiteRoot(c.username);
+      if(!root) return;
+      const k = crawlSiteKey(root);
+      if(!out[k]) out[k] = { root, channels: [] };
+      out[k].channels.push(c);
+    });
+    return out;
+  }
+  async function syncCrawlSitesFromChannels(){
+    const have = new Set((CRAWL_SITES || []).map(c=>crawlSiteKey(c.url)));
+    const rows = [];
+    Object.entries(channelCrawlRoots()).forEach(([k, v])=>{
+      if(have.has(k)) return;
+      // سایت غیرفارسی (CNN، گاردین…): خزش کاملش سنگینه و بعضی‌ها ربات رو می‌بندن —
+      // متوقف اضافه می‌شه (فید RSSش همچنان بررسی می‌شه) و مدیر می‌تونه فعالش کنه
+      const sample = POSTS_CACHE.filter(p=>v.channels.some(c=>c.id === p.channel_id)).slice(0, 10);
+      const foreign = sample.length > 0 && sample.filter(needsTranslation).length > sample.length / 2;
+      const name = (v.channels[0].title || k).split(/\s+[-–—|]\s+/)[0].trim() || k;
+      rows.push({ name: name.slice(0, 80), url: v.root, active: !foreign, source: 'channel' });
+    });
+    if(!rows.length) return false;
+    try{
+      const r = await api('/crawl_sites?on_conflict=url', { method:'POST', headers:{ Prefer:'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify(rows) });
+      return r.ok;
+    }catch(e){ return false; }
   }
   function crawlSiteStatus(c){
     if(!c.active) return { cls:'is-off', text:'متوقف' };
@@ -8702,20 +8755,50 @@
     const bad = list.filter(c=>c.active && c.last_error).length;
     document.getElementById('crawl-sites-sum').textContent = toFaDigits(active) + ' سایت فعال' + (bad ? '، ' + toFaDigits(bad) + ' سایت در آخرین اجرا خطا داشت' : '') + '؛ سایت‌هایی که خزنده هر ۲ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد';
     const sorted = list.slice().sort((a,b)=>(b.active - a.active) || ((b.active && b.last_error ? 1 : 0) - (a.active && a.last_error ? 1 : 0)) || a.name.localeCompare(b.name, 'fa'));
+    const fromChannels = channelCrawlRoots();
     box.innerHTML = sorted.map(c=>{
       const st = crawlSiteStatus(c);
-      let host = c.url; try{ host = new URL(c.url).host.replace(/^www\./, ''); }catch(e){}
+      let host = c.url; try{ const u = new URL(c.url); host = u.host.replace(/^www\./, '') + u.pathname.replace(/\/+$/, ''); }catch(e){}
+      const linked = fromChannels[crawlSiteKey(c.url)];
+      if(CRAWL_EDIT_ID === c.id){
+        return `<div class="crawl-site crawl-edit">
+          <div class="add-row">
+            <input type="text" id="crawl-edit-name" aria-label="نام سایت" value="${escAttr(c.name)}" />
+            <input type="url" id="crawl-edit-sitemap" aria-label="نشانی فهرست خبری (اختیاری)" placeholder="sitemap (اختیاری؛ خالی = پیدا کردن خودکار)" dir="ltr" value="${escAttr(c.sitemap_url || '')}" />
+            <button type="button" class="btn primary btn-sm" onclick="saveCrawlSite(${Number(c.id)})">ذخیره</button>
+            <button type="button" class="btn btn-sm" onclick="CRAWL_EDIT_ID=null; renderCrawlSites()">انصراف</button>
+          </div>
+        </div>`;
+      }
       return `<div class="crawl-site ${st.cls}">
         <div class="crawl-site-main">
-          <div class="crawl-site-name">${escHtml(c.name)} <a class="crawl-site-host" href="${safeUrl(c.url)}" target="_blank" rel="noopener" dir="ltr">${escHtml(host)}</a></div>
+          <div class="crawl-site-name">${escHtml(c.name)} <a class="crawl-site-host" href="${safeUrl(c.url)}" target="_blank" rel="noopener" dir="ltr">${escHtml(host)}</a>${linked ? '<span class="crawl-sug-kind is-chan" title="این سایت در «مدیریت منابع» هم هست و خودکار به این فهرست اضافه شده است">از مدیریت منابع</span>' : ''}</div>
           <div class="crawl-site-status">${escHtml(st.text)}</div>
         </div>
         <div class="crawl-site-acts">
           <button type="button" class="usr-act" onclick="toggleCrawlSite(${Number(c.id)})">${c.active ? 'توقف' : 'فعال‌سازی'}</button>
-          <button type="button" class="usr-act is-del" onclick="deleteCrawlSite(${Number(c.id)})">حذف</button>
+          <button type="button" class="usr-act" onclick="CRAWL_EDIT_ID=${Number(c.id)}; renderCrawlSites()">ویرایش</button>
+          ${linked ? '' : `<button type="button" class="usr-act is-del" onclick="deleteCrawlSite(${Number(c.id)})">حذف</button>`}
         </div>
       </div>`;
     }).join('') || '<p class="settings-help">هنوز سایتی اضافه نشده است.</p>';
+  }
+  let CRAWL_EDIT_ID = null;
+  async function saveCrawlSite(id){
+    const name = document.getElementById('crawl-edit-name').value.trim();
+    let sitemap = document.getElementById('crawl-edit-sitemap').value.trim();
+    if(!name){ showToast('نام سایت را وارد کنید.'); return; }
+    if(sitemap){
+      try{ sitemap = new URL(/^https?:\/\//i.test(sitemap) ? sitemap : 'https://' + sitemap).href; }
+      catch(e){ showToast('نشانی فهرست خبری درست نیست؛ می‌توانید آن را خالی بگذارید.'); return; }
+    }
+    const r = await api('/crawl_sites?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ name, sitemap_url: sitemap || null }) });
+    if(!r.ok){ showToast('ذخیره انجام نشد؛ دوباره امتحان کنید.'); return; }
+    const c = (CRAWL_SITES || []).find(x=>x.id === id);
+    if(c){ c.name = name; c.sitemap_url = sitemap || null; }
+    CRAWL_EDIT_ID = null;
+    renderCrawlSites();
+    showToast('ذخیره شد');
   }
   async function toggleCrawlSite(id){
     const c = (CRAWL_SITES || []).find(x=>x.id === id);
@@ -8788,7 +8871,7 @@
       await loadCrawlSites();
       showToast('«' + s.key + '» به منابع خزنده اضافه شد و در اجرای بعدی جست‌وجو می‌شود. نام فارسی آن را می‌توانید بعداً با حذف و افزودن دوباره اصلاح کنید.');
     }else{
-      try{ await loadChannels(); renderChanList(); }catch(e){}
+      try{ await loadChannels(); renderChanList(); loadCrawlSites(); }catch(e){}
       showToast('کانال @' + s.key + ' به «مدیریت منابع» اضافه شد؛ پست‌هایش از اجرای بعدی جمع و بررسی می‌شود. نام و بخش‌های نمایش آن را از همان‌جا تنظیم کنید.');
     }
   }
