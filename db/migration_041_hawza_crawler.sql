@@ -166,8 +166,11 @@ begin
   end loop;
 end $$;
 
--- زمان‌بندی (migration_040): هر ۲ ساعت، دقیقه‌ی ۴۵ ساعت‌های زوج UTC
--- (۰۴:۱۵، ۰۶:۱۵، … به وقت تهران) — بعد از کالکتورهای ایتا/وب‌سایت/تلگرام.
+-- زمان‌بندی (migration_040): هر ۳ ساعت (خواست کاربر)، دقیقه‌ی ۴۵ ساعت‌های ۲، ۵، ۸، … ۲۳ UTC
+-- = ۰۳:۱۵، ۰۶:۱۵، ۰۹:۱۵، ۱۲:۱۵، ۱۵:۱۵، ۱۸:۱۵، ۲۱:۱۵ و ۰۰:۱۵ تهران. از بین سه چیدمان ممکنِ
+-- «هر ۳ ساعت»، این یکی کمترین هم‌پوشانی رو با کارهای دیگه داره (نه با تحلیل هوشمند، نه با
+-- پاک‌سازی رسانه، فقط یه‌بار با روزنامه‌ها)؛ و دقیقه‌ی ۴۵ وقتیه که کالکتورهای ساعت (۰۰/۰۵/۱۵)
+-- و کلیدواژه/بله (۳۰) تموم شدن.
 do $$
 begin
   if to_regnamespace('cron') is null or to_regprocedure('jarian_cron.dispatch(text)') is null then
@@ -175,5 +178,5 @@ begin
     return;
   end if;
   perform cron.unschedule(jobid) from cron.job where jobname = 'jarian-hawza';
-  perform cron.schedule('jarian-hawza', '45 */2 * * *', $cmd$select jarian_cron.dispatch('hawza')$cmd$);
+  perform cron.schedule('jarian-hawza', '45 2-23/3 * * *', $cmd$select jarian_cron.dispatch('hawza')$cmd$);
 end $$;

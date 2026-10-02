@@ -3253,7 +3253,7 @@
           </details>
 
           <details class="panel settings-accordion" id="crawl-sites-panel">
-            <summary class="panel-head"><span class="panel-pill">منابع خزنده‌ی «درباره حوزه»</span><span class="settings-sum-desc" id="crawl-sites-sum">سایت‌های خبری‌ای که خزنده هر ۲ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد</span></summary>
+            <summary class="panel-head"><span class="panel-pill">منابع خزنده‌ی «درباره حوزه»</span><span class="settings-sum-desc" id="crawl-sites-sum">سایت‌های خبری‌ای که خزنده هر ۳ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد</span></summary>
             <p class="settings-help">سایت‌هایی که در «مدیریت منابع» (با RSS، حتی فقط یک بخش از سایت) تعریف شده‌اند، خودکار با نشانی اصلی‌شان به این فهرست اضافه و <b>کامل</b> گشته می‌شوند (سایت‌های غیرفارسی متوقف اضافه می‌شوند). کانال‌های ایتا، تلگرام و بله‌ی «مدیریت منابع» هم خودکار بررسی می‌شوند. خزنده خبرهای تازه‌ی هر سایت را از فهرست خبری آن (sitemap)، فید RSS یا صفحه‌ی اول پیدا می‌کند، متن کامل هر خبر را می‌خواند و خبرهایی را که درباره‌ی حوزه هستند در تب «آنچه درباره حوزه گفته می‌شود» نمایش می‌دهد. خبری مرتبط حساب می‌شود که یکی از این عبارت‌ها در تیترش باشد یا در متنش دست‌کم ۲ بار بیاید: حوزه علمیه، حوزویان، طلاب و طلبه، روحانیت و روحانیون، مراجع و مرجع تقلید، جامعه مدرسین، شورای عالی حوزه، مدیر حوزه‌ها، مدرسه و مدارس علمیه، معممین. پست‌های کانال‌های ایتا، تلگرام و بله‌ای که سامانه رصد می‌کند و صفحه‌هایی که مطالب مرتبط به آن‌ها لینک داده‌اند هم با همین قاعده بررسی می‌شوند. برای افزودن سایت، نشانی صفحه‌ی اول آن را وارد کنید؛ نشانی فهرست خبری (sitemap) اختیاری است و اگر خالی بماند، خودکار پیدا می‌شود.</p>
             <div class="add-row">
               <input type="text" id="new-crawl-name" aria-label="نام سایت" placeholder="نام سایت (مثلاً ایسنا)" />
@@ -4246,7 +4246,7 @@
   // گفته می‌شود» (خزنده، hawza_mentions — ۵.۲۳.۰)
   const HAWZA_TAB_INFO = {
     news: 'اخبار سیاسی و اجتماعی منتشرشده در پایگاه‌های خبری حوزوی.',
-    about: 'خبرهای سایت‌های خبری و پست‌های کانال‌های ایتا، تلگرام و بله که درباره‌ی حوزه، روحانیت، مراجع تقلید و طلاب هستند؛ هر ۲ ساعت به‌صورت خودکار جست‌وجو می‌شوند.',
+    about: 'خبرهای سایت‌های خبری و پست‌های کانال‌های ایتا، تلگرام و بله که درباره‌ی حوزه، روحانیت، مراجع تقلید و طلاب هستند؛ هر ۳ ساعت به‌صورت خودکار جست‌وجو می‌شوند.',
   };
   let HAWZA_TAB = (t=>HAWZA_TAB_INFO[t] ? t : 'news')(lsGet('jarian_last_hawza_tab', 'news'));
   function setHawzaTab(tab){
@@ -4373,7 +4373,7 @@
     empty.style.display = list.length ? 'none' : 'block';
     empty.textContent = HAB_ERROR === 'error' ? 'دریافت خبرها انجام نشد؛ اتصال اینترنت را بررسی و صفحه را دوباره باز کنید.'
       : total ? 'خبری با این فیلترها پیدا نشد.'
-      : 'هنوز خبری پیدا نشده است؛ خزنده هر ۲ ساعت سایت‌های خبری و کانال‌ها را جست‌وجو می‌کند.';
+      : 'هنوز خبری پیدا نشده است؛ خزنده هر ۳ ساعت سایت‌های خبری و کانال‌ها را جست‌وجو می‌کند.';
     const isAdmin = currentRole === 'app_admin';
     feed.innerHTML = page.map(x=>{
       const terms = (x.matched_terms || []).slice(0, 4);
@@ -4589,7 +4589,7 @@
     { job:'cleanup', name:'پاک‌سازی رسانه‌های قدیمی', exp:'روزی ۲ بار', custom: sysCleanupCheck },
     // خروجی خزنده = آخرین خبری که خوانده (crawl_seen)، نه آخرین خبر مرتبط — ممکنه چند
     // ساعت خبری درباره‌ی حوزه نباشه و این خرابی نیست (migration_041)
-    { job:'hawza', name:'خزنده‌ی «درباره حوزه»', path:'/crawl_seen?select=seen_at&order=seen_at.desc&limit=1', col:'seen_at', exp:'هر ۲ ساعت', warn:5, bad:12 },
+    { job:'hawza', name:'خزنده‌ی «درباره حوزه»', path:'/crawl_seen?select=seen_at&order=seen_at.desc&limit=1', col:'seen_at', exp:'هر ۳ ساعت', warn:7, bad:14 },
   ];
   // تاریخ انقضای توکن‌ها — با ساخت توکن جدید، همین‌جا به‌روز بشه (CLAUDE.md)
   const SYS_TOKENS = [
@@ -4643,7 +4643,7 @@
   // زمان‌بندی‌ها (UTC) — باید با cron.schedule های db/migration_040_cron_scheduler.sql یکی بمونه
   const SYS_SCHEDULES = {
     eitaa: ['0 */2'], telegram: ['15 */2'], website: ['5 */2'], bale: ['30 1,5,7,9,11,13,15,17'],
-    newspapers: ['30 0,2,4,6,10'], insights: ['30 4,10,16,22'], keywords: ['30 1-23/2'], cleanup: ['15 6', '15 18'], hawza:['45 */2'],
+    newspapers: ['30 0,2,4,6,10'], insights: ['30 4,10,16,22'], keywords: ['30 1-23/2'], cleanup: ['15 6', '15 18'], hawza:['45 2-23/3'],
   };
   let SYS_GH_HISTORY = null;
   function cronHourList(f){
@@ -8753,7 +8753,7 @@
     const list = CRAWL_SITES || [];
     const active = list.filter(c=>c.active).length;
     const bad = list.filter(c=>c.active && c.last_error).length;
-    document.getElementById('crawl-sites-sum').textContent = toFaDigits(active) + ' سایت فعال' + (bad ? '، ' + toFaDigits(bad) + ' سایت در آخرین اجرا خطا داشت' : '') + '؛ سایت‌هایی که خزنده هر ۲ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد';
+    document.getElementById('crawl-sites-sum').textContent = toFaDigits(active) + ' سایت فعال' + (bad ? '، ' + toFaDigits(bad) + ' سایت در آخرین اجرا خطا داشت' : '') + '؛ سایت‌هایی که خزنده هر ۳ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد';
     const sorted = list.slice().sort((a,b)=>(b.active - a.active) || ((b.active && b.last_error ? 1 : 0) - (a.active && a.last_error ? 1 : 0)) || a.name.localeCompare(b.name, 'fa'));
     const fromChannels = channelCrawlRoots();
     box.innerHTML = sorted.map(c=>{
