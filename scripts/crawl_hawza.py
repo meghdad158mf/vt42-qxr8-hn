@@ -43,6 +43,9 @@ import requests
 import trafilatura
 
 DRY_RUN = "--dry-run" in sys.argv
+# فقط برای آزمایش: --only=نام۱,نام۲ (با --dry-run) و --debug (چاپ جزئیات کشف خبرها)
+ONLY = next((a.split("=", 1)[1].split(",") for a in sys.argv if a.startswith("--only=")), None)
+DEBUG = "--debug" in sys.argv
 
 USER_AGENT = "Mozilla/5.0 (compatible; JarianBot/1.0; +https://meghdad158mf.github.io/vt42-qxr8-hn/)"
 REQUEST_TIMEOUT = 20
@@ -290,9 +293,13 @@ class Site:
     def from_sitemap(self, url: str, depth: int = 0) -> list[dict]:
         r = http_get(url)
         self.wait()
-        if not r.ok or "<" not in r.text[:200]:
+        if DEBUG:
+            print(f"    [{self.name}] sitemap {url} -> {r.status_code} {r.headers.get('content-type','')} {len(r.content)}b start={r.text[:80]!r}")
+        if not r.ok or "<" not in r.text[:500]:
             return []
         urls, children = parse_sitemap(r.text)
+        if DEBUG:
+            print(f"    [{self.name}]   urls={len(urls)} children={len(children)} sample={[(u['loc'][-60:], str(u['date'])) for u in urls[:3]]} child_sample={[c['loc'] for c in children[:3]]} last={[c['loc'] for c in children[-2:]]}")
         if urls:
             return urls
         if children and depth == 0:
@@ -461,6 +468,8 @@ def crawl_site(site: Site, token: str | None, deadline: float) -> dict:
             uniq.append(it)
     uniq.sort(key=lambda i: i["date"] or datetime.now(timezone.utc), reverse=True)
     res["discovered"] = len(uniq)
+    if DEBUG:
+        print(f"    [{site.name}] via={site.via} items={len(items)} in-window={len(uniq)} dates={sorted(str(i['date'])[:16] for i in items if i['date'])[-3:]}")
     seen = already_seen(token, [i["hash"] for i in uniq])
     todo = [i for i in uniq if i["hash"] not in seen][:MAX_PER_SITE]
     for it in todo:
@@ -501,7 +510,7 @@ def main() -> None:
     deadline = started + TIME_BUDGET_SECONDS
     token = None
     if DRY_RUN:
-        rows = [{"id": None, "name": n, "url": u, "sitemap_url": s} for n, u, s in DEFAULT_SITES]
+        rows = [{"id": None, "name": n, "url": u, "sitemap_url": s} for n, u, s in DEFAULT_SITES if not ONLY or n in ONLY]
     else:
         token = login()
         r = db(token, "GET", "crawl_sites", params={"select": "id,name,url,sitemap_url", "active": "eq.true", "order": "id"})
