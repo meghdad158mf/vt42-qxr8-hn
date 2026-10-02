@@ -1,0 +1,32 @@
+name: Crawl news about hawza
+
+on:
+  # زمان‌بندی با pg_cron سوپابیس (db/migration_041_hawza_crawler.sql) — سر وقت دقیق
+  # همین workflow_dispatch رو صدا می‌زنه (مثل بقیه‌ی کارها، migration_040).
+  # برنامه (UTC) — موقع مهاجرت به VPS همین به crontab سرور منتقل بشه:
+  #   45 2-23/3 * * *   (هر ۳ ساعت)
+  workflow_dispatch: {}      # امکان اجرای دستی از تب Actions و صفحه‌ی «وضعیت سامانه»
+
+# اجرای دستی و زمان‌بندی هم‌زمان نشن (یه سایت دوبار هم‌زمان خزیده نشه)
+concurrency:
+  group: crawl-hawza
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r scripts/requirements.txt
+
+      - run: python scripts/crawl_hawza.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
