@@ -13,4 +13,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install requests feedparser "trafilatura>=2,<3"
-      - run: python scripts/crawl_hawza.py --dry-run --debug "--only=ایرنا,خبرآنلاین,رکنا,ایران‌وایر,خبرگزاری صداوسیما,زیتون,فارس"
+      - run: python scripts/crawl_hawza.py --dry-run --debug "--only=ایرنا,خبرآنلاین,رکنا,ایران‌وایر,خبرگزاری صداوسیما,فارس"

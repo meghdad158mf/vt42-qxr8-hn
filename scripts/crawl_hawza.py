@@ -213,9 +213,30 @@ def parse_date(s: str | None) -> datetime | None:
             d = datetime.strptime(s[:10], "%Y-%m-%d")
         except ValueError:
             return None
+    if len(s) <= 10:
+        d = d.replace(hour=23, minute=59)  # فقط تاریخ (مثل ایران‌وایر): آخر همون روز، وگرنه خبرهای دیروز بیرون می‌افتن
     if d.tzinfo is None:
         d = d.replace(tzinfo=TEHRAN)  # سایت‌های داخلی ساعت تهران رو بدون منطقه می‌نویسن
     return d
+
+
+def jalali_today() -> tuple[int, int, int]:
+    """تاریخ شمسی امروزِ تهران (برای پیدا کردن sitemap روزانه‌ی سایت‌هایی مثل خبرآنلاین)."""
+    g = datetime.now(TEHRAN).date()
+    gy, gm, gd = g.year, g.month, g.day
+    g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+    gy2 = gy + 1 if gm > 2 else gy
+    days = 355666 + 365 * gy + (gy2 + 3) // 4 - (gy2 + 99) // 100 + (gy2 + 399) // 400 + gd + g_d_m[gm - 1]
+    jy = -1595 + 33 * (days // 12053)
+    days %= 12053
+    jy += 4 * (days // 1461)
+    days %= 1461
+    if days > 365:
+        jy += (days - 1) // 365
+        days = (days - 1) % 365
+    jm = 1 + days // 31 if days < 186 else 7 + (days - 186) // 30
+    jd = 1 + (days % 31 if days < 186 else (days - 186) % 30)
+    return jy, jm, jd
 
 
 def tag(block: str, name: str) -> str | None:
@@ -243,19 +264,32 @@ def parse_sitemap(xml: str) -> tuple[list[dict], list[dict]]:
 
 
 def pick_children(children: list[dict]) -> list[dict]:
-    """از فهرست sitemapهای یک index، تازه‌ترین‌ها (حداکثر ۲)."""
-    news = [c for c in children if re.search(r"news|خبر", c["loc"], re.I)]
-    pool = news or children
-    dated = [c for c in pool if c["date"]]
-    if dated:
-        return sorted(dated, key=lambda c: c["date"], reverse=True)[:2]
-    today = datetime.now(TEHRAN)
-    for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y-%m", "%Y/%m"):
-        hit = [c for c in pool if today.strftime(fmt) in c["loc"]]
-        if hit:
-            return hit[-2:]
-    # بی‌تاریخ: بیشتر CMSها به ترتیب زمان (قدیمی→جدید یا برعکس) فهرست می‌کنن
-    return [pool[-1], pool[0]] if len(pool) > 1 else pool
+    """از فهرست sitemapهای یک index، تازه‌ترین‌ها (حداکثر ۲) — با امتیاز: تاریخ
+    امروز/این ماه (شمسی یا میلادی) در نام، lastmod تازه‌تر، و واژه‌ی news/article."""
+    jy, jm, jd = jalali_today()
+    g = datetime.now(TEHRAN)
+    day_keys = [f"{jy}/{jm:02d}/{jd:02d}", f"{jy}{jm:02d}{jd:02d}", f"{jy}-{jm}-{jd}", g.strftime("%Y-%m-%d"), g.strftime("%Y/%m/%d")]
+    month_keys = [f"{jy}/{jm:02d}", f"{jy}-{jm}-", f"{jy}{jm:02d}", f"{jy}-{jm:02d}", g.strftime("%Y-%m"), g.strftime("%Y/%m")]
+
+    def score(c: dict) -> float:
+        loc, sc = c["loc"], 0.0
+        if any(k in loc for k in day_keys):
+            sc += 8
+        elif any(k in loc for k in month_keys):
+            sc += 3
+        if re.search(r"news|article|post|خبر", loc, re.I) and not re.search(r"video|image|tag|author|categor", loc, re.I):
+            sc += 3
+        if c["date"]:
+            age_h = (g - c["date"]).total_seconds() / 3600
+            sc += 4 if age_h < 48 else (1 if age_h < 24 * 30 else 0)
+        return sc
+
+    scored = [(score(c), -i, c) for i, c in enumerate(children)]
+    if not any(sc for sc, _, _ in scored):
+        # هیچ نشانه‌ای نیست: بیشتر CMSها به ترتیب زمان (جدید→قدیم یا برعکس) فهرست می‌کنن
+        return [children[0], children[-1]] if len(children) > 1 else children
+    scored.sort(key=lambda t: (t[0], t[1]), reverse=True)
+    return [c for _, _, c in scored[:2]]
 
 
 class Site:
@@ -286,8 +320,11 @@ class Site:
             self.rp = rp
         return self.rp.can_fetch(USER_AGENT, url)
 
-    def same_site(self, u: str) -> bool:
-        return urlparse(u).netloc.lower().removeprefix("www.") == self.host
+    def same_site(self, u: str, also: str | None = None) -> bool:
+        h = urlparse(u).netloc.lower().removeprefix("www.")
+        # also: میزبان خودِ فایل sitemap — بعضی سایت‌ها (صداوسیما: iribnews.ir →
+        # irib-news.ir) فهرست خبرهاشون رو روی دامنه‌ی خواهر منتشر می‌کنن
+        return h == self.host or (also is not None and h == urlparse(also).netloc.lower().removeprefix("www."))
 
     # --- کشف خبرهای تازه ---
     def from_sitemap(self, url: str, depth: int = 0) -> list[dict]:
@@ -298,6 +335,8 @@ class Site:
         if not r.ok or "<" not in r.text[:500]:
             return []
         urls, children = parse_sitemap(r.text)
+        for u in urls:
+            u["src"] = r.url
         if DEBUG:
             print(f"    [{self.name}]   urls={len(urls)} children={len(children)} sample={[(u['loc'][-60:], str(u['date'])) for u in urls[:3]]} child_sample={[c['loc'] for c in children[:3]]} last={[c['loc'] for c in children[-2:]]}")
         if urls:
@@ -312,10 +351,13 @@ class Site:
     def sitemap_candidates(self) -> list[str]:
         self.allowed(self.root + "/")  # robots.txt رو می‌خونه
         listed = re.findall(r"(?im)^\s*sitemap:\s*(\S+)", getattr(self, "robots_txt", ""))
-        listed.sort(key=lambda u: 0 if re.search(r"news", u, re.I) else 1)
+        # خبری‌ها اول، ویدئو/عکس/آرشیو آخر
+        listed.sort(key=lambda u: (0 if re.search(r"news", u, re.I) else 1) + (2 if re.search(r"video|image|archive", u, re.I) else 0))
+        own = [u for u in listed if self.same_site(u)]
+        other = [u for u in listed if not self.same_site(u) and not re.match(r"https?://(english|arabic|en|ar)\.", u)]
         common = [self.root + p for p in ("/sitemap/news/sitemap.xml", "/fa-sitemap-news", "/news-sitemap.xml", "/sitemap_news.xml", "/sitemap.xml", "/sitemap_index.xml")]
         out = []
-        for u in listed[:4] + common:
+        for u in own[:4] + common + other[:2]:
             if u not in out:
                 out.append(u)
         return out
@@ -359,23 +401,33 @@ class Site:
         return out
 
     def discover(self) -> list[dict]:
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=WINDOW_HOURS)
         cands = []
         if self.row.get("sitemap_url"):
             cands.append(self.row["sitemap_url"])
         cands += [u for u in self.sitemap_candidates() if u not in cands]
-        for u in cands[:6]:
+        undated = None
+        for u in cands[:8]:
             try:
                 items = self.from_sitemap(u)
             except requests.RequestException:
                 continue
-            items = [i for i in items if self.same_site(i["loc"])]
-            if items:
+            items = [i for i in items if self.same_site(i["loc"], i.get("src"))]
+            dated = [i for i in items if i["date"]]
+            # sitemapی قبوله که خبر تازه داشته باشه (رکنا: sitemap ویدئوی قدیمی؛
+            # فارس: فقط صفحه‌های بخش‌ها، بدون تاریخ)
+            if any(i["date"] >= cutoff for i in dated):
                 self.via = "sitemap"
                 return items
+            if items and not dated and len(items) >= 20 and undated is None:
+                undated = items
         items = self.from_rss()
         if items:
             self.via = "rss"
             return items
+        if undated:
+            self.via = "sitemap"
+            return undated
         items = self.from_homepage()
         self.via = "homepage" if items else None
         return items
