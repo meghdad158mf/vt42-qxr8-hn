@@ -2076,7 +2076,8 @@
   /* ---- «آنچه درباره حوزه گفته می‌شود» (۵.۲۳.۰) ---- */
   .news-feed.hab-feed{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); max-width:100%; margin:0; }
   @media (max-width:900px){ .news-feed.hab-feed{ grid-template-columns: minmax(0,1fr); } }
-  .hab-card .news-title a{ color: inherit; }
+  .hab-card .news-title a{ color: inherit; display:block; text-align:start; }
+  .hab-excerpt{ text-align:start; }
   .hab-card .news-title a:hover{ color: var(--accent-strong); }
   .hab-excerpt{ font-size:13px; line-height:1.95; color: var(--text-dim); margin:0; overflow-wrap:anywhere; }
   .hab-hl{ background: rgba(234,179,147,0.38); color: inherit; border-radius:4px; padding:0 2px; }
@@ -2116,6 +2117,8 @@
   .crawl-sug .crawl-site-status::before{ display:none; }
   .crawl-sug .crawl-site-status{ padding-inline-start:0; }
   #crawl-sug-list{ max-height:420px; overflow:auto; }
+  .hab-foot-acts{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .hab-card .is-translated{ color: var(--accent-strong); }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -4382,17 +4385,55 @@
             <span class="news-time" title="${escAttr(habTime(x) ? new Date(habTime(x)).toLocaleString('fa-IR', { timeZone:'Asia/Tehran' }) : '')}">${newsRelTime(habTime(x))}</span>
             ${x.in_title ? '<span class="hab-flag">اشاره در تیتر</span>' : ''}
           </div>
-          <h3 class="news-title"><a href="${safeUrl(x.url)}" target="_blank" rel="noopener">${habHighlight(x.title || '')}</a></h3>
-          ${x.excerpt ? `<p class="hab-excerpt">${habHighlight(x.excerpt)}</p>` : ''}
+          <h3 class="news-title"><a id="hab-title-${Number(x.id)}" dir="auto" href="${safeUrl(x.url)}" target="_blank" rel="noopener">${habHighlight(x.title || '')}</a></h3>
+          ${x.excerpt ? `<p class="hab-excerpt" id="hab-ex-${Number(x.id)}" dir="auto">${habHighlight(x.excerpt)}</p>` : ''}
           <div class="news-foot">
             <div class="hab-terms">${terms.map(t=>`<span class="hab-term">${escHtml(t)}</span>`).join('')}</div>
-            <a class="news-link" href="${safeUrl(x.url)}" target="_blank" rel="noopener">${x.kind === 'social' ? 'مشاهده‌ی پست ↗' : 'متن کامل در منبع ↗'}</a>
+            <div class="hab-foot-acts">
+              ${needsTranslation({ title: x.title, text: x.excerpt }) ? `<button type="button" class="news-translate-btn" id="hab-tr-btn-${Number(x.id)}" onclick="translateMention(${Number(x.id)})">ترجمه به فارسی</button>` : ''}
+              <a class="news-link" href="${safeUrl(x.url)}" target="_blank" rel="noopener">${x.kind === 'social' ? 'مشاهده‌ی پست ↗' : 'متن کامل در منبع ↗'}</a>
+            </div>
           </div>
           ${isAdmin ? `<div class="hab-admin"><button type="button" class="post-hide-btn" onclick="hideHawzaMention(${Number(x.id)})" title="این خبر برای همه‌ی بیننده‌ها پنهان می‌شود (مثلاً اگر واقعاً درباره‌ی حوزه نیست)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button></div>` : ''}
         </div>
       </article>`;
     }).join('');
     renderPagination('hab-pagination', HAB_STATE.page, totalPages, 'goHabPage');
+  }
+  // ترجمه‌ی خبرهای خارجی (انگلیسی/عربی): فقط تیتر و گزیده — متن کامل ذخیره نمی‌شه.
+  // ورودی تابع translate فقط شناسه است (mentionId)، مثل aiTranslate پست‌ها
+  const HAB_TRANSLATION = {};
+  async function translateMention(id){
+    const x = (HAB_ROWS || []).find(r=>r.id === id);
+    const btn = document.getElementById('hab-tr-btn-' + id);
+    const tEl = document.getElementById('hab-title-' + id);
+    const eEl = document.getElementById('hab-ex-' + id);
+    if(!x || !btn || !tEl) return;
+    const show = tr=>{
+      tEl.innerHTML = habHighlight(tr ? (tr.title || x.title) : x.title);
+      tEl.classList.toggle('is-translated', !!tr);
+      if(eEl){ eEl.innerHTML = habHighlight(tr ? (tr.text || x.excerpt) : x.excerpt); eEl.classList.toggle('is-translated', !!tr); }
+      btn.textContent = tr ? 'بازگشت به متن اصلی' : 'ترجمه به فارسی';
+    };
+    if(tEl.classList.contains('is-translated')){ show(null); return; }
+    if(HAB_TRANSLATION[id]){ show(HAB_TRANSLATION[id]); return; }
+    btn.textContent = 'در حال ترجمه…';
+    btn.disabled = true;
+    try{
+      const r = await fetch(SUPABASE_URL + '/functions/v1/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+        body: JSON.stringify({ mentionId: id }),
+      });
+      if(!r.ok) throw new Error('translate failed');
+      HAB_TRANSLATION[id] = await r.json();
+      show(HAB_TRANSLATION[id]);
+    }catch(e){
+      btn.textContent = 'ترجمه به فارسی';
+      showToast('ترجمه انجام نشد؛ چند لحظه بعد دوباره امتحان کنید.');
+    }finally{
+      btn.disabled = false;
+    }
   }
   function goHabPage(p){
     HAB_STATE.page = p;

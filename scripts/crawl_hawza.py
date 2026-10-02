@@ -141,6 +141,20 @@ TERMS = [
     ("مدرسه علمیه", r"مدرسه(?: ی)? علمیه|مدارس علمیه"),
     ("معممین", r"معممین|عمامه"),
 ]
+# منابع خارجی (انگلیسی و عربی) — برچسب‌ها فارسی تا چیپ‌ها یکدست بمونن. الگوهای عربی
+# به شکل یکدست‌شده (ي→ی، ة→ه، أ/إ→ا)؛ انگلیسی بی‌حساسیت به بزرگی حروف. «seminary»
+# تنها نیست (مدارس دینی مسیحی در خبرهای جهان)، فقط با قم/نجف/شیعه.
+TERMS += [
+    ("حوزه علمیه", r"(?i:hawza|howzeh|(?:qom|najaf|shiite|shia|islamic|religious) seminar(?:y|ies)|seminar(?:y|ies) (?:in|of) (?:qom|najaf))"),
+    ("روحانیت*", r"(?i:clerics?|clergy(?:men)?|clerical establishment|mullahs?)"),
+    ("مراجع تقلید", r"(?i:grand ayatollahs?|marja(?:'|’)?(?:iyya|iyat)?|sources? of emulation)"),
+    ("طلاب", r"(?i:seminar(?:y|ian) students|seminarians)"),
+    ("جامعه مدرسین", r"(?i:society of (?:seminary|qom seminary) teachers)"),
+    ("حوزه علمیه", r"الحوزه(?: العلمیه)?|الحوزات العلمیه"),
+    ("مراجع تقلید", r"المرجعیه(?: الدینیه)?|مراجع التقلید|المراجع العظام"),
+    ("روحانیت*", r"رجال الدین|علماء الدین"),
+    ("طلاب", r"طلبه العلوم الدینیه|طلاب الحوزه"),
+]
 TERM_RES = [(label, re.compile(r"(?<!\w)(?:" + pat + r")(?!\w)")) for label, pat in TERMS]
 
 _CHAR_MAP = str.maketrans({
@@ -533,9 +547,18 @@ def social_links(text: str, platform: str) -> list[str | tuple]:
     return out
 
 
+# برچسب‌های «*»دار عام‌ان (cleric، رجال الدین — هر کشوری)؛ فقط وقتی شمرده می‌شن که
+# خودِ مطلب به ایران/شیعه/قم/نجف ربط داشته باشه
+IRAN_CONTEXT_RE = re.compile(r"(?i:iran|tehran|qom|mashhad|najaf|shia|shiite|khamenei|sistani)|ایران|قم|مشهد|النجف|نجف|الشیعه|شیعه|خامنه|السیستانی")
+
+
 def classify(title: str, text: str) -> dict | None:
     t_hits, _ = find_terms(title)
     b_hits, _ = find_terms(text)
+    if any(h[0].endswith("*") for h in t_hits + b_hits):
+        ctx = bool(IRAN_CONTEXT_RE.search(title or "") or IRAN_CONTEXT_RE.search(text or ""))
+        t_hits = [(l.rstrip("*"), a, b) for l, a, b in t_hits if ctx or not l.endswith("*")]
+        b_hits = [(l.rstrip("*"), a, b) for l, a, b in b_hits if ctx or not l.endswith("*")]
     if not t_hits and len(b_hits) < 2:
         return None
     labels = []
@@ -653,18 +676,22 @@ def social_title(post: dict) -> str:
 
 def scan_social(token: str) -> tuple[list[dict], list[tuple[str, list]]]:
     since = (datetime.now(timezone.utc) - timedelta(hours=SOCIAL_LOOKBACK_HOURS)).isoformat()
-    r = db(token, "GET", "channels", params={"select": "id,title,username,platform", "platform": "in.(eitaa,telegram,bale)"})
+    # وب‌سایت‌ها هم: کانال‌های RSS خارجی (CNN، گاردین…) در فهرست خزنده نیستن؛ سایت‌های
+    # خودِ حوزه (show_in_hawza) نه
+    r = db(token, "GET", "channels", params={"select": "id,title,username,platform,show_in_hawza", "platform": "in.(eitaa,telegram,bale,website)"})
     r.raise_for_status()
-    chans = {c["id"]: c for c in r.json()}
+    chans = {c["id"]: c for c in r.json() if not (c["platform"] == "website" and c.get("show_in_hawza"))}
     found, links = [], []
     for page in range(6):
         r = db(token, "GET", "posts", params={
             "select": "id,channel_id,platform,title,text,link,posted_at,scraped_at",
-            "platform": "in.(eitaa,telegram,bale)", "scraped_at": f"gte.{since}", "hidden_at": "is.null",
+            "platform": "in.(eitaa,telegram,bale,website)", "scraped_at": f"gte.{since}", "hidden_at": "is.null",
             "order": "id", "limit": "1000", "offset": str(page * 1000)})
         r.raise_for_status()
         rows = r.json()
         for p in rows:
+            if p["channel_id"] not in chans:
+                continue
             title = social_title(p)
             text = p.get("text") or ""
             # تیتر ساختگی = خط اول متن؛ برای اینکه یه اشاره دوبار شمرده نشه، از متن کم می‌شه
@@ -673,9 +700,11 @@ def scan_social(token: str) -> tuple[list[dict], list[tuple[str, list]]]:
             if not c or not p.get("link"):
                 continue
             ch = chans.get(p["channel_id"], {})
+            web = p["platform"] == "website"
             found.append({
-                "url": p["link"], "site": p["platform"], "site_name": ch.get("title") or ch.get("username") or p["platform"],
-                "kind": "social", "post_id": p["id"], "title": title or "(بدون عنوان)",
+                "url": p["link"], "site": host_of(p["link"]) if web else p["platform"],
+                "site_name": ch.get("title") or ch.get("username") or p["platform"],
+                "kind": "site" if web else "social", "post_id": p["id"], "title": title or "(بدون عنوان)",
                 "published_at": p.get("posted_at") or p.get("scraped_at"), **c,
             })
             links.append((p["link"], social_links(p.get("text") or "", p["platform"])))
@@ -802,15 +831,21 @@ def main() -> None:
             social, social_src = scan_social(token)
         except requests.RequestException as e:
             print(f"[!] social scan failed: {e}", file=sys.stderr)
-    print(f"[*] social posts about hawza: {len(social)}")
+    print(f"[*] social/RSS posts about hawza: {len(social)}")
 
     # لینک‌های مطالب مرتبط (یک مرحله) + پیشنهاد منبع
     sources = [(f["url"], f.pop("_links", [])) for f in found] + social_src
     linked, link_seen, suggest = follow_links(sources, token, site_names, known_channels, total_deadline)
     print(f"[*] followed links: {len(linked)} about hawza, {len(link_seen)} page(s) read, {len(suggest)} suggestion(s)")
     seen += link_seen
-    urls = {f["url"] for f in found + social}
-    found += social + [f for f in linked if f["url"] not in urls]
+    # یه خبر ممکنه هم از sitemap، هم از RSS (پست‌ها) و هم از لینک برسه — آدرس یکسان یکی می‌شه
+    merged, keys = [], set()
+    for f in found + social + linked:
+        k = url_hash(f["url"])
+        if k not in keys:
+            keys.add(k)
+            merged.append(f)
+    found = merged
 
     print(f"[*] read {sum(r['pages'] for r in results) + len(link_seen)} page(s), {len(found)} about hawza, "
           f"{failed}/{len(rows)} site(s) failed, {time.time() - started:.0f}s")
