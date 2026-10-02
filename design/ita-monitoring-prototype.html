@@ -1997,6 +1997,40 @@
     .news-region-chip{ min-height:40px; display:inline-flex; align-items:center; }
     .pagination button, #news-pagination button, #posts-pagination button{ min-height:44px; min-width:44px; }
   }
+  /* «برنامه‌ی اجرا» در وضعیت سامانه (۵.۲۲.۳): جدول ساعتی امروز — ستون = ساعت (۰۰ راست)، عدد خانه = دقیقه */
+  .hg-sum{ font-size:12px; font-weight:600; color: var(--text-dim); margin-bottom:10px; }
+  .hg-sum.warn{ color:#b45309; }
+  .hg-wrap{ overflow-x:auto; padding-bottom:4px; }
+  .hg{ display:grid; grid-template-columns: 160px repeat(24, minmax(30px,1fr)); gap:3px; align-items:center; min-width:900px; }
+  .hg-n{ font-size:12px; font-weight:700; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-inline-end:6px; position:sticky; right:0; background: var(--surface); z-index:2; align-self:stretch; display:flex; align-items:center; box-shadow:-4px 0 0 var(--surface); }
+  .hg-corner{ font-size:11px; font-weight:600; color: var(--text-faint); }
+  .hg-h{ font-size:11px; font-weight:700; color: var(--text-faint); text-align:center; padding:2px 0; border-radius:6px; }
+  .hg-h.cur{ color: var(--primary); background: var(--accent); }
+  .hg-load{ height:20px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color: var(--text-faint); border-radius:6px; }
+  .hg-load.multi{ color: var(--accent-strong); background: rgba(234,179,147,0.18); }
+  .hg-c{ height:26px; border-radius:6px; background: var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-style:normal; font-variant-numeric:tabular-nums; transition: box-shadow .12s ease; }
+  .hg-c.is-slot{ cursor:default; position:relative; }
+  /* هم‌زمان با کار دیگر در همان دقیقه: نقطه‌ی سرمه‌ای گوشه‌ی خانه */
+  .hg-c.same::after{ content:''; position:absolute; top:3px; left:3px; width:6px; height:6px; border-radius:50%; background: var(--primary); box-shadow:0 0 0 1.5px #fff; }
+  .hg-c.plan, .hg-c.wait{ background:#e5e7eb; color:#4b5563; }
+  .hg-c.ok{ background:#16a34a; color:#fff; }
+  .hg-c.late{ background:#eab308; color:#3f2d00; }
+  .hg-c.bad{ background: var(--danger); color:#fff; }
+  .hg-c.skip{ background:#9ca3af; color:#fff; }
+  .hg-c.run{ background: var(--accent-strong); color:#fff; }
+  .hg-c.miss{ background: repeating-linear-gradient(45deg, rgba(217,67,60,0.5) 0 3px, rgba(217,67,60,0.15) 3px 6px); color:#9a2a22; }
+  .hg-c.cur:not(.is-slot), .hg-load.cur{ box-shadow: inset 0 0 0 1.5px rgba(181,101,29,0.45); }
+  .hg-c.is-slot.cur{ box-shadow: 0 0 0 2px var(--accent-strong); }
+  .hg .col-hi.hg-c, .hg .col-hi.hg-load{ box-shadow: 0 0 0 2px var(--primary); }
+  .hg .col-hi.hg-h{ color:#fff; background: var(--primary); }
+  .hg-leg{ display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:12px; font-size:12px; color: var(--text-dim); align-items:center; }
+  .hg-leg span{ display:inline-flex; align-items:center; gap:6px; }
+  .hg-leg .hg-c{ width:28px; height:20px; font-size:10px; }
+  .hg-leg-note{ flex-basis:100%; color: var(--text-faint); }
+  @media (max-width:640px){
+    .hg{ grid-template-columns: 112px repeat(24, 30px); min-width:0; width:max-content; }
+    .hg-n{ font-size:11px; }
+  }
   /* ---- یکدست‌سازی رابط (۵.۲۲.۰) ---- */
   /* خانواده‌ی دکمه‌ها (۵.۲۲.۰): دکمه‌ی عمل = قرصی، کادر فرم = گوشه‌ی ۱۰، آیتم منو/فهرست = ۸؛
      ارتفاع استاندارد ۴۰ و برای عمل‌های ریز داخل ردیف/کارت ۳۲ — تب‌ها دست‌نخورده */
@@ -2051,7 +2085,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۲.۱</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۲.۴</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -3260,6 +3294,10 @@
           <div class="panel-head"><span class="panel-pill">کارهای خودکار</span><span class="settings-sum-desc">زمان آخرین خروجی هر کار و نتیجه‌ی آخرین اجرای آن در گیت‌هاب. زرد یا قرمز یعنی باید بررسی شود.</span></div>
           <div class="sys-status-list" id="sys-status-list"></div>
         </div>
+        <div class="panel" id="sys-timeline-panel">
+          <div class="panel-head"><span class="panel-pill">برنامه‌ی اجرا</span><span class="settings-sum-desc">نوبت‌های اجرای امروز هر کار، از ساعت ۰۰ تا ۲۴ به وقت تهران. رنگ هر خانه نتیجه‌ی اجرا و عدد آن دقیقه‌ی اجراست؛ ردیف «تعداد کار» نشان می‌دهد در هر ساعت چند کار هم‌زمان اجرا می‌شود.</span></div>
+          <div id="sys-timeline"></div>
+        </div>
         <div class="panel">
           <div class="panel-head"><span class="panel-pill">ورودها</span><span class="settings-sum-desc">ورودهای ۳۰ روز اخیر به سایت. چون رمز مشترک است، فقط نقش (مدیر/بیننده)، دستگاه و IP معلوم است، نه نام افراد. ورود خودکار کارهای گیت‌هاب نمایش داده نمی‌شود.</span></div>
           <div id="sys-logins"></div>
@@ -3376,7 +3414,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۲۲.۱</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۲.۴</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -4273,9 +4311,117 @@
         body: JSON.stringify({ action: 'status' }),
       });
       if(!r.ok) return null;
-      return (await r.json()).runs || null;
+      const data = await r.json();
+      SYS_GH_HISTORY = data.history || null; // اجراهای ۳۰ ساعت اخیر برای «برنامه‌ی اجرا»
+      return data.runs || null;
     }catch(e){ return null; }
   }
+
+  // ---- «برنامه‌ی اجرا» (۵.۲۲.۳، خواست کاربر): خط زمانی ۱۲ ساعت گذشته تا ۱۲ ساعت آینده ----
+  // زمان‌بندی‌ها (UTC) — باید با cron.schedule های db/migration_040_cron_scheduler.sql یکی بمونه
+  const SYS_SCHEDULES = {
+    eitaa: ['0 */2'], telegram: ['15 */2'], website: ['5 */2'], bale: ['30 1,5,7,9,11,13,15,17'],
+    newspapers: ['30 0,2,4,6,10'], insights: ['30 4,10,16,22'], keywords: ['30 1-23/2'], cleanup: ['15 6', '15 18'],
+  };
+  let SYS_GH_HISTORY = null;
+  function cronHourList(f){
+    const out = new Set();
+    f.split(',').forEach(part=>{
+      const [range, stepS] = part.split('/');
+      const step = Number(stepS) || 1;
+      let a = 0, b = 23;
+      if(range !== '*'){ const [x, y] = range.split('-').map(Number); a = x; b = isNaN(y) ? (stepS ? 23 : x) : y; }
+      for(let h = a; h <= b; h += step) out.add(h);
+    });
+    return [...out];
+  }
+  function sysPlannedTimes(job, from, to){
+    const times = [];
+    const day0 = Date.UTC(new Date(from).getUTCFullYear(), new Date(from).getUTCMonth(), new Date(from).getUTCDate()) - 864e5;
+    (SYS_SCHEDULES[job] || []).forEach(expr=>{
+      const [m, h] = expr.split(' ');
+      for(let d = day0; d <= to + 864e5; d += 864e5){
+        cronHourList(h).forEach(hr=>{
+          const t = d + hr * 3600e3 + Number(m) * 60e3;
+          if(t >= from && t <= to) times.push(t);
+        });
+      }
+    });
+    return times.sort((a,b)=>a-b);
+  }
+  function sysClock(t){ return new Date(t).toLocaleTimeString('fa-IR', { timeZone:'Asia/Tehran', hour:'2-digit', minute:'2-digit' }); }
+  // نسخه‌ی انتخاب کاربر: «جدول ساعتی امروز» — ستون = ساعت ۰۰ تا ۲۳ امروزِ تهران (راست به چپ)،
+  // ردیف = کار، عدد هر خانه = دقیقه‌ی برنامه‌ی اجرا؛ ردیف بالا = تعداد کارهای هم‌ساعت
+  function sysSlotStatus(job, from, to){
+    const planned = sysPlannedTimes(job, from, to);
+    const hist = (SYS_GH_HISTORY && SYS_GH_HISTORY[job] || []).map(r => Object.assign({ t: new Date(r.created_at).getTime() }, r));
+    const now = Date.now();
+    return planned.map((t, i)=>{
+      if(t > now) return { t, st:'plan' };
+      if(!SYS_GH_HISTORY) return { t, st:'wait' };
+      // اجرا شده؟ هر اجرایی از ۵ دقیقه قبل تا برنامه‌ی بعدی (حداکثر ۳ ساعت)
+      const until = Math.min(planned[i + 1] || t + 3 * 3600e3, t + 3 * 3600e3, now + 60e3);
+      const r = hist.find(x => x.t >= t - 5 * 60e3 && x.t < until);
+      if(!r) return { t, st: now - t < 15 * 60e3 ? 'wait' : 'miss' }; // ۱۵ دقیقه‌ی اول هنوز «اجرا نشد» حساب نمی‌شه
+      const late = Math.max(0, Math.round((r.t - t) / 60e3));
+      const st = r.status !== 'completed' ? 'run' : r.conclusion === 'success' ? (late > 10 ? 'late' : 'ok')
+        : (r.conclusion === 'cancelled' || r.conclusion === 'skipped') ? 'skip' : 'bad';
+      return { t, st, late, at: r.t };
+    });
+  }
+  function renderSysTimeline(){
+    const el = document.getElementById('sys-timeline');
+    if(!el) return;
+    const now = Date.now(), TEH = 3.5 * 3600e3;
+    const day0 = Math.floor((now + TEH) / 864e5) * 864e5 - TEH; // نیمه‌شب امروزِ تهران
+    const curH = Math.floor((now - day0) / 3600e3);
+    const ST_LABEL = { plan:'در برنامه', wait:'در انتظار شروع', ok:'انجام شد', late:'انجام شد با تأخیر', run:'در حال اجرا', bad:'ناموفق', skip:'لغو شد', miss:'اجرا نشد' };
+    const perHour = Array(24).fill(0);
+    let done = 0, due = 0;
+    // کارهایی که دقیقاً در همان دقیقه شروع می‌شن (برای نشانه‌ی «هم‌زمان»)
+    const allSlots = SYS_STATUS_JOBS.map(j => ({ j, slots: sysSlotStatus(j.job, day0, day0 + 864e5) }));
+    const sameMin = {};
+    allSlots.forEach(({ j, slots }) => slots.forEach(x => { (sameMin[x.t] = sameMin[x.t] || []).push(j.name); }));
+    const rows = allSlots.map(({ j, slots })=>{
+      let cells = '';
+      for(let h = 0; h < 24; h++){
+        const s = slots.find(x => Math.floor((x.t - day0) / 3600e3) === h);
+        if(!s){ cells += `<span class="hg-c${h === curH ? ' cur' : ''}" data-h="${h}"></span>`; continue; }
+        perHour[h]++;
+        if(s.st !== 'plan' && s.st !== 'wait'){ due++; if(s.st === 'ok' || s.st === 'late' || s.st === 'run') done++; }
+        const m = new Date(s.t).getUTCMinutes(); // دقیقه در تهران هم همینه (اختلاف ۳:۳۰)
+        let tip = j.name + ' — برنامه: ساعت ' + sysClock(s.t) + '، ' + ST_LABEL[s.st];
+        if(s.at) tip += ' (شروع ' + sysClock(s.at) + (s.late ? '، ' + faNum(s.late) + ' دقیقه تأخیر' : '') + ')';
+        const others = (sameMin[s.t] || []).filter(n => n !== j.name);
+        if(others.length) tip += ' — هم‌زمان با: ' + others.join('، ');
+        cells += `<span class="hg-c is-slot ${s.st}${others.length ? ' same' : ''}${h === curH ? ' cur' : ''}" data-h="${h}" title="${escAttr(tip)}">${toFaDigits(String(m).padStart(2, '0'))}</span>`;
+      }
+      return `<span class="hg-n">${escHtml(j.name)}</span>${cells}`;
+    }).join('');
+    let head = '<span class="hg-n hg-corner">ساعت</span>', load = '<span class="hg-n hg-corner">تعداد کار</span>';
+    for(let h = 0; h < 24; h++){
+      head += `<span class="hg-h${h === curH ? ' cur' : ''}" data-h="${h}">${toFaDigits(String(h).padStart(2, '0'))}</span>`;
+      load += `<span class="hg-load${perHour[h] > 1 ? ' multi' : ''}${h === curH ? ' cur' : ''}" data-h="${h}" title="${perHour[h] ? escAttr(faNum(perHour[h]) + ' کار در ساعت ' + toFaDigits(String(h).padStart(2, '0'))) : ''}">${perHour[h] ? toFaDigits(perHour[h]) : ''}</span>`;
+    }
+    const sum = !SYS_GH_HISTORY
+      ? '<div class="hg-sum">در حال دریافت اجراهای گیت‌هاب…</div>'
+      : `<div class="hg-sum${due - done ? ' warn' : ''}">امروز تا این لحظه: ${faNum(done)} از ${faNum(due)} اجرا انجام شد</div>`;
+    el.innerHTML = `${sum}<div class="hg-wrap"><div class="hg">${head}${load}${rows}</div></div>
+      <div class="hg-leg"><span><i class="hg-c is-slot ok">۰۰</i>انجام شد</span><span><i class="hg-c is-slot late">۰۰</i>با تأخیر بیش از ۱۰ دقیقه</span><span><i class="hg-c is-slot bad">۰۰</i>ناموفق</span><span><i class="hg-c is-slot miss">۰۰</i>اجرا نشد</span><span><i class="hg-c is-slot run">۰۰</i>در حال اجرا</span><span><i class="hg-c is-slot plan">۰۰</i>در برنامه</span><span><i class="hg-c is-slot plan same">۳۰</i>هم‌زمان با کار دیگر (همان دقیقه)</span><span class="hg-leg-note">عدد هر خانه = دقیقه‌ی اجرا؛ ستونی که ماوس رویش است پررنگ می‌شود تا کارهای هم‌ساعت دیده شوند.</span></div>`;
+    // پررنگ شدن ستون زیر ماوس/لمس — کارهای هم‌ساعت کنار هم دیده می‌شن
+    const grid = el.querySelector('.hg');
+    const mark = h => grid.querySelectorAll('[data-h]').forEach(c => c.classList.toggle('col-hi', c.dataset.h === h));
+    grid.addEventListener('mouseover', e => { const c = e.target.closest('[data-h]'); if(c) mark(c.dataset.h); });
+    grid.addEventListener('mouseleave', () => mark(null));
+    grid.addEventListener('click', e => { const c = e.target.closest('[data-h]'); if(c) mark(c.dataset.h); });
+    // گوشی: جدول افقی اسکرول می‌خوره — ساعت فعلی بیاد توی دید
+    const wrap = el.querySelector('.hg-wrap'), cur = grid.querySelector('.hg-h.cur');
+    if(wrap && cur && wrap.scrollWidth > wrap.clientWidth){
+      const wr = wrap.getBoundingClientRect(), cr = cur.getBoundingClientRect();
+      wrap.scrollLeft += (cr.left + cr.width / 2) - (wr.left + wr.width / 2);
+    }
+  }
+
   function sysGithubLine(run){
     if(!run) return { cls:'', text:'نتیجه‌ی گیت‌هاب: در دسترس نیست' };
     const when = newsRelTime(run.created_at);
@@ -4475,6 +4621,7 @@
     const parts = [renderSysStorage(), renderSysStale(), renderSysLogins()];
     if(auto !== true) parts.push(renderSysServices());
     renderSysSummary(true);
+    renderSysTimeline();
     wrap.innerHTML = SYS_STATUS_JOBS.map(j=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">در حال بررسی…</div></div></div>`).join('');
     const ghPromise = sysFetchGithubRuns();
     const results = await Promise.all(SYS_STATUS_JOBS.map(async j=>{
@@ -4488,6 +4635,7 @@
       }catch(e){ return { err:true }; }
     }));
     const ghRuns = await ghPromise;
+    renderSysTimeline();
     wrap.innerHTML = SYS_STATUS_JOBS.map((j,i)=>{
       const res = results[i];
       let cls = '', when;
@@ -9997,7 +10145,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.22.1';
+  const APP_VERSION = '5.22.4';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
