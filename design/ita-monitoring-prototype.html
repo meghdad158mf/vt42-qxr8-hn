@@ -1997,37 +1997,39 @@
     .news-region-chip{ min-height:40px; display:inline-flex; align-items:center; }
     .pagination button, #news-pagination button, #posts-pagination button{ min-height:44px; min-width:44px; }
   }
-  /* «برنامه‌ی اجرا» در وضعیت سامانه (۵.۲۲.۳): راست = گذشته، چپ = آینده */
-  .tl{ display:flex; flex-direction:column; gap:2px; }
-  .tl-row{ display:grid; grid-template-columns: 190px minmax(0,1fr); align-items:center; gap:14px; min-height:34px; }
-  .tl-row:not(.tl-head):nth-child(odd) .tl-track{ background: var(--surface-2); }
-  .tl-name{ font-size:13px; font-weight:700; color: var(--text); display:flex; flex-direction:column; gap:1px; }
-  .tl-name small{ font-size:11px; font-weight:600; color: var(--text-faint); }
-  .tl-track{ position:relative; height:30px; border-radius:8px; }
-  .tl-axis{ height:40px; border-bottom:1px solid var(--border); }
-  .tl-tick{ position:absolute; bottom:4px; transform:translateX(50%); font-size:11px; color: var(--text-faint); white-space:nowrap; }
-  .tl-tick::after{ content:''; position:absolute; left:50%; bottom:-5px; width:1px; height:5px; background: var(--border-strong); }
-  .tl-now-label{ position:absolute; top:0; transform:translateX(50%); font-size:11px; font-weight:800; color: var(--accent-strong); background: var(--surface); padding:0 4px; }
-  .tl-now{ position:absolute; top:-2px; bottom:-2px; width:2px; transform:translateX(50%); background: var(--accent-strong); opacity:.55; border-radius:2px; }
-  .tl-plan{ position:absolute; top:7px; height:16px; width:2px; transform:translateX(50%); background: var(--border-strong); border-radius:2px; display:block; }
-  .tl-plan.missed{ background: rgba(217,67,60,0.55); }
-  .tl-plan.next{ background: var(--accent-strong); width:3px; top:4px; height:22px; }
-  .tl-run{ position:absolute; top:9px; width:12px; height:12px; transform:translateX(50%); border-radius:50%; border:2px solid var(--surface); box-shadow:0 0 0 1px rgba(0,0,0,0.08); display:block; z-index:1; }
-  .tl-run.ok{ background:#16a34a; }
-  .tl-run.bad{ background: var(--danger); }
-  .tl-run.run{ background: var(--accent-strong); }
-  .tl-run.skip{ background: var(--text-faint); }
-  .tl-sum{ font-size:12px; font-weight:600; color: var(--text-dim); }
-  .tl-sum.warn{ color:#b45309; }
-  .tl-legend{ display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:12px; font-size:12px; color: var(--text-dim); }
-  .tl-legend span{ display:inline-flex; align-items:center; gap:6px; }
-  .tl-legend .tl-run, .tl-legend .tl-plan{ position:static; transform:none; }
-  .tl-legend .tl-plan{ height:12px; }
+  /* «برنامه‌ی اجرا» در وضعیت سامانه (۵.۲۲.۳): جدول ساعتی امروز — ستون = ساعت (۰۰ راست)، عدد خانه = دقیقه */
+  .hg-sum{ font-size:12px; font-weight:600; color: var(--text-dim); margin-bottom:10px; }
+  .hg-sum.warn{ color:#b45309; }
+  .hg-wrap{ overflow-x:auto; padding-bottom:4px; }
+  .hg{ display:grid; grid-template-columns: 160px repeat(24, minmax(30px,1fr)); gap:3px; align-items:center; min-width:900px; }
+  .hg-n{ font-size:12px; font-weight:700; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-inline-end:6px; position:sticky; right:0; background: var(--surface); z-index:2; align-self:stretch; display:flex; align-items:center; box-shadow:-4px 0 0 var(--surface); }
+  .hg-corner{ font-size:11px; font-weight:600; color: var(--text-faint); }
+  .hg-h{ font-size:11px; font-weight:700; color: var(--text-faint); text-align:center; padding:2px 0; border-radius:6px; }
+  .hg-h.cur{ color: var(--primary); background: var(--accent); }
+  .hg-load{ height:20px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color: var(--text-faint); border-radius:6px; }
+  .hg-load.multi{ color: var(--accent-strong); background: rgba(234,179,147,0.18); }
+  .hg-c{ height:26px; border-radius:6px; background: var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-style:normal; font-variant-numeric:tabular-nums; transition: box-shadow .12s ease; }
+  .hg-c.is-slot{ cursor:default; position:relative; }
+  /* هم‌زمان با کار دیگر در همان دقیقه: نقطه‌ی سرمه‌ای گوشه‌ی خانه */
+  .hg-c.same::after{ content:''; position:absolute; top:3px; left:3px; width:6px; height:6px; border-radius:50%; background: var(--primary); box-shadow:0 0 0 1.5px #fff; }
+  .hg-c.plan, .hg-c.wait{ background:#e5e7eb; color:#4b5563; }
+  .hg-c.ok{ background:#16a34a; color:#fff; }
+  .hg-c.late{ background:#eab308; color:#3f2d00; }
+  .hg-c.bad{ background: var(--danger); color:#fff; }
+  .hg-c.skip{ background:#9ca3af; color:#fff; }
+  .hg-c.run{ background: var(--accent-strong); color:#fff; }
+  .hg-c.miss{ background: repeating-linear-gradient(45deg, rgba(217,67,60,0.5) 0 3px, rgba(217,67,60,0.15) 3px 6px); color:#9a2a22; }
+  .hg-c.cur:not(.is-slot), .hg-load.cur{ box-shadow: inset 0 0 0 1.5px rgba(181,101,29,0.45); }
+  .hg-c.is-slot.cur{ box-shadow: 0 0 0 2px var(--accent-strong); }
+  .hg .col-hi.hg-c, .hg .col-hi.hg-load{ box-shadow: 0 0 0 2px var(--primary); }
+  .hg .col-hi.hg-h{ color:#fff; background: var(--primary); }
+  .hg-leg{ display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:12px; font-size:12px; color: var(--text-dim); align-items:center; }
+  .hg-leg span{ display:inline-flex; align-items:center; gap:6px; }
+  .hg-leg .hg-c{ width:28px; height:20px; font-size:10px; }
+  .hg-leg-note{ flex-basis:100%; color: var(--text-faint); }
   @media (max-width:640px){
-    .tl-row{ grid-template-columns: minmax(0,1fr); gap:4px; }
-    .tl-row:not(.tl-head){ margin-top:6px; }
-    .tl-name{ flex-direction:row; align-items:baseline; gap:8px; }
-    .tl-odd{ display:none; }
+    .hg{ grid-template-columns: 112px repeat(24, 30px); min-width:0; width:max-content; }
+    .hg-n{ font-size:11px; }
   }
   /* ---- یکدست‌سازی رابط (۵.۲۲.۰) ---- */
   /* خانواده‌ی دکمه‌ها (۵.۲۲.۰): دکمه‌ی عمل = قرصی، کادر فرم = گوشه‌ی ۱۰، آیتم منو/فهرست = ۸؛
@@ -3293,7 +3295,7 @@
           <div class="sys-status-list" id="sys-status-list"></div>
         </div>
         <div class="panel" id="sys-timeline-panel">
-          <div class="panel-head"><span class="panel-pill">برنامه‌ی اجرا</span><span class="settings-sum-desc">ساعت اجرای هر کار در ۱۲ ساعت گذشته و ۱۲ ساعت آینده، به وقت تهران. خط‌های کوچک زمان برنامه‌ریزی‌شده‌اند و دایره‌ها اجرای واقعی؛ فاصله‌ی دایره از خط یعنی تأخیر.</span></div>
+          <div class="panel-head"><span class="panel-pill">برنامه‌ی اجرا</span><span class="settings-sum-desc">نوبت‌های اجرای امروز هر کار، از ساعت ۰۰ تا ۲۴ به وقت تهران. رنگ هر خانه نتیجه‌ی اجرا و عدد آن دقیقه‌ی اجراست؛ ردیف «تعداد کار» نشان می‌دهد در هر ساعت چند کار هم‌زمان اجرا می‌شود.</span></div>
           <div id="sys-timeline"></div>
         </div>
         <div class="panel">
@@ -4348,54 +4350,78 @@
     return times.sort((a,b)=>a-b);
   }
   function sysClock(t){ return new Date(t).toLocaleTimeString('fa-IR', { timeZone:'Asia/Tehran', hour:'2-digit', minute:'2-digit' }); }
+  // نسخه‌ی انتخاب کاربر: «جدول ساعتی امروز» — ستون = ساعت ۰۰ تا ۲۳ امروزِ تهران (راست به چپ)،
+  // ردیف = کار، عدد هر خانه = دقیقه‌ی برنامه‌ی اجرا؛ ردیف بالا = تعداد کارهای هم‌ساعت
+  function sysSlotStatus(job, from, to){
+    const planned = sysPlannedTimes(job, from, to);
+    const hist = (SYS_GH_HISTORY && SYS_GH_HISTORY[job] || []).map(r => Object.assign({ t: new Date(r.created_at).getTime() }, r));
+    const now = Date.now();
+    return planned.map((t, i)=>{
+      if(t > now) return { t, st:'plan' };
+      if(!SYS_GH_HISTORY) return { t, st:'wait' };
+      // اجرا شده؟ هر اجرایی از ۵ دقیقه قبل تا برنامه‌ی بعدی (حداکثر ۳ ساعت)
+      const until = Math.min(planned[i + 1] || t + 3 * 3600e3, t + 3 * 3600e3, now + 60e3);
+      const r = hist.find(x => x.t >= t - 5 * 60e3 && x.t < until);
+      if(!r) return { t, st: now - t < 15 * 60e3 ? 'wait' : 'miss' }; // ۱۵ دقیقه‌ی اول هنوز «اجرا نشد» حساب نمی‌شه
+      const late = Math.max(0, Math.round((r.t - t) / 60e3));
+      const st = r.status !== 'completed' ? 'run' : r.conclusion === 'success' ? (late > 10 ? 'late' : 'ok')
+        : (r.conclusion === 'cancelled' || r.conclusion === 'skipped') ? 'skip' : 'bad';
+      return { t, st, late, at: r.t };
+    });
+  }
   function renderSysTimeline(){
     const el = document.getElementById('sys-timeline');
     if(!el) return;
-    const now = Date.now(), from = now - 12 * 3600e3, to = now + 12 * 3600e3;
-    // راست = گذشته، چپ = آینده (جهت خوندن فارسی)
-    const pos = t => ((t - from) / (to - from) * 100).toFixed(2) + '%';
-    const TEH = 3.5 * 3600e3, STEP = 3 * 3600e3;
-    let ticks = '';
-    for(let t = Math.ceil((from + TEH) / STEP) * STEP - TEH; t <= to; t += STEP){
-      const odd = Math.round((t + TEH) / STEP) % 2 ? ' tl-odd' : '';
-      ticks += `<span class="tl-tick${odd}" style="right:${pos(t)}">${sysClock(t)}</span>`;
-    }
-    const hist = SYS_GH_HISTORY;
-    let missedAll = 0, plannedPast = 0;
-    const rows = SYS_STATUS_JOBS.map(j=>{
-      const planned = sysPlannedTimes(j.job, from, to);
-      const runs = (hist && hist[j.job] || []).map(r => Object.assign({ t: new Date(r.created_at).getTime() }, r)).filter(r => r.t >= from && r.t <= now + 60e3);
-      const next = planned.find(t => t > now);
-      let marks = '';
-      planned.forEach((t, i)=>{
-        let cls = 'tl-plan';
-        let tip = 'برنامه: ساعت ' + sysClock(t);
-        if(t <= now && hist){
-          // اجرا شده؟ هر اجرایی از ۵ دقیقه قبل تا زمان برنامه‌ی بعدی (حداکثر ۳ ساعت)
-          const until = Math.min(planned[i + 1] || t + 3 * 3600e3, t + 3 * 3600e3, now + 60e3);
-          plannedPast++;
-          if(!runs.some(r => r.t >= t - 5 * 60e3 && r.t < until)){ cls += ' missed'; tip += ' — اجرا نشد'; missedAll++; }
-        }
-        if(t === next){ cls += ' next'; tip = 'اجرای بعدی: ساعت ' + sysClock(t); }
-        marks += `<i class="${cls}" style="right:${pos(t)}" title="${escAttr(j.name + ' — ' + tip)}"></i>`;
-      });
-      runs.forEach(r=>{
-        const st = r.status !== 'completed' ? 'run' : r.conclusion === 'success' ? 'ok' : (r.conclusion === 'cancelled' || r.conclusion === 'skipped') ? 'skip' : 'bad';
-        const label = { run:'در حال اجرا', ok:'موفق', bad:'ناموفق', skip:'لغوشده' }[st];
-        marks += `<b class="tl-run ${st}" style="right:${pos(r.t)}" title="${escAttr(j.name + ' — اجرا ساعت ' + sysClock(r.t) + '، ' + label)}"></b>`;
-      });
-      return `<div class="tl-row"><div class="tl-name">${escHtml(j.name)}<small>${next ? 'بعدی: ' + sysClock(next) : ''}</small></div>
-        <div class="tl-track">${marks}<span class="tl-now" style="right:50%"></span></div></div>`;
+    const now = Date.now(), TEH = 3.5 * 3600e3;
+    const day0 = Math.floor((now + TEH) / 864e5) * 864e5 - TEH; // نیمه‌شب امروزِ تهران
+    const curH = Math.floor((now - day0) / 3600e3);
+    const ST_LABEL = { plan:'در برنامه', wait:'در انتظار شروع', ok:'انجام شد', late:'انجام شد با تأخیر', run:'در حال اجرا', bad:'ناموفق', skip:'لغو شد', miss:'اجرا نشد' };
+    const perHour = Array(24).fill(0);
+    let done = 0, due = 0;
+    // کارهایی که دقیقاً در همان دقیقه شروع می‌شن (برای نشانه‌ی «هم‌زمان»)
+    const allSlots = SYS_STATUS_JOBS.map(j => ({ j, slots: sysSlotStatus(j.job, day0, day0 + 864e5) }));
+    const sameMin = {};
+    allSlots.forEach(({ j, slots }) => slots.forEach(x => { (sameMin[x.t] = sameMin[x.t] || []).push(j.name); }));
+    const rows = allSlots.map(({ j, slots })=>{
+      let cells = '';
+      for(let h = 0; h < 24; h++){
+        const s = slots.find(x => Math.floor((x.t - day0) / 3600e3) === h);
+        if(!s){ cells += `<span class="hg-c${h === curH ? ' cur' : ''}" data-h="${h}"></span>`; continue; }
+        perHour[h]++;
+        if(s.st !== 'plan' && s.st !== 'wait'){ due++; if(s.st === 'ok' || s.st === 'late' || s.st === 'run') done++; }
+        const m = new Date(s.t).getUTCMinutes(); // دقیقه در تهران هم همینه (اختلاف ۳:۳۰)
+        let tip = j.name + ' — برنامه: ساعت ' + sysClock(s.t) + '، ' + ST_LABEL[s.st];
+        if(s.at) tip += ' (شروع ' + sysClock(s.at) + (s.late ? '، ' + faNum(s.late) + ' دقیقه تأخیر' : '') + ')';
+        const others = (sameMin[s.t] || []).filter(n => n !== j.name);
+        if(others.length) tip += ' — هم‌زمان با: ' + others.join('، ');
+        cells += `<span class="hg-c is-slot ${s.st}${others.length ? ' same' : ''}${h === curH ? ' cur' : ''}" data-h="${h}" title="${escAttr(tip)}">${toFaDigits(String(m).padStart(2, '0'))}</span>`;
+      }
+      return `<span class="hg-n">${escHtml(j.name)}</span>${cells}`;
     }).join('');
-    const sum = !hist
-      ? '<span class="tl-sum">در حال دریافت اجراهای گیت‌هاب…</span>'
-      : `<span class="tl-sum${missedAll ? ' warn' : ''}">۱۲ ساعت گذشته: ${faNum(plannedPast - missedAll)} از ${faNum(plannedPast)} اجرا انجام شد</span>`;
-    el.innerHTML = `<div class="tl">
-        <div class="tl-row tl-head"><div class="tl-name">${sum}</div><div class="tl-track tl-axis">${ticks}<span class="tl-now-label" style="right:50%">اکنون</span></div></div>
-        ${rows}
-      </div>
-      <div class="tl-legend"><span><b class="tl-run ok"></b>موفق</span><span><b class="tl-run bad"></b>ناموفق</span><span><b class="tl-run run"></b>در حال اجرا</span><span><i class="tl-plan"></i>برنامه</span><span><i class="tl-plan missed"></i>اجرا نشد</span><span><i class="tl-plan next"></i>اجرای بعدی</span></div>`;
+    let head = '<span class="hg-n hg-corner">ساعت</span>', load = '<span class="hg-n hg-corner">تعداد کار</span>';
+    for(let h = 0; h < 24; h++){
+      head += `<span class="hg-h${h === curH ? ' cur' : ''}" data-h="${h}">${toFaDigits(String(h).padStart(2, '0'))}</span>`;
+      load += `<span class="hg-load${perHour[h] > 1 ? ' multi' : ''}${h === curH ? ' cur' : ''}" data-h="${h}" title="${perHour[h] ? escAttr(faNum(perHour[h]) + ' کار در ساعت ' + toFaDigits(String(h).padStart(2, '0'))) : ''}">${perHour[h] ? toFaDigits(perHour[h]) : ''}</span>`;
+    }
+    const sum = !SYS_GH_HISTORY
+      ? '<div class="hg-sum">در حال دریافت اجراهای گیت‌هاب…</div>'
+      : `<div class="hg-sum${due - done ? ' warn' : ''}">امروز تا این لحظه: ${faNum(done)} از ${faNum(due)} اجرا انجام شد</div>`;
+    el.innerHTML = `${sum}<div class="hg-wrap"><div class="hg">${head}${load}${rows}</div></div>
+      <div class="hg-leg"><span><i class="hg-c is-slot ok">۰۰</i>انجام شد</span><span><i class="hg-c is-slot late">۰۰</i>با تأخیر بیش از ۱۰ دقیقه</span><span><i class="hg-c is-slot bad">۰۰</i>ناموفق</span><span><i class="hg-c is-slot miss">۰۰</i>اجرا نشد</span><span><i class="hg-c is-slot run">۰۰</i>در حال اجرا</span><span><i class="hg-c is-slot plan">۰۰</i>در برنامه</span><span><i class="hg-c is-slot plan same">۳۰</i>هم‌زمان با کار دیگر (همان دقیقه)</span><span class="hg-leg-note">عدد هر خانه = دقیقه‌ی اجرا؛ ستونی که ماوس رویش است پررنگ می‌شود تا کارهای هم‌ساعت دیده شوند.</span></div>`;
+    // پررنگ شدن ستون زیر ماوس/لمس — کارهای هم‌ساعت کنار هم دیده می‌شن
+    const grid = el.querySelector('.hg');
+    const mark = h => grid.querySelectorAll('[data-h]').forEach(c => c.classList.toggle('col-hi', c.dataset.h === h));
+    grid.addEventListener('mouseover', e => { const c = e.target.closest('[data-h]'); if(c) mark(c.dataset.h); });
+    grid.addEventListener('mouseleave', () => mark(null));
+    grid.addEventListener('click', e => { const c = e.target.closest('[data-h]'); if(c) mark(c.dataset.h); });
+    // گوشی: جدول افقی اسکرول می‌خوره — ساعت فعلی بیاد توی دید
+    const wrap = el.querySelector('.hg-wrap'), cur = grid.querySelector('.hg-h.cur');
+    if(wrap && cur && wrap.scrollWidth > wrap.clientWidth){
+      const wr = wrap.getBoundingClientRect(), cr = cur.getBoundingClientRect();
+      wrap.scrollLeft += (cr.left + cr.width / 2) - (wr.left + wr.width / 2);
+    }
   }
+
   function sysGithubLine(run){
     if(!run) return { cls:'', text:'نتیجه‌ی گیت‌هاب: در دسترس نیست' };
     const when = newsRelTime(run.created_at);
