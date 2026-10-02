@@ -171,11 +171,18 @@ def norm_with_map(text: str) -> tuple[str, list[int]]:
     return "".join(out), idx
 
 
+# «کوی طلاب»، «خیابان طلاب»… نام محله/خیابان‌ان (مشهد و اهواز) — نه طلبه‌ها (آزمایش ۱۰ مهر:
+# اطلاعیه‌ی قطع برق اهواز اشتباهی «درباره حوزه» شده بود)
+PLACE_BEFORE_RE = re.compile(r"(?:کوی|کوچه|خیابان|میدان|بلوار|محله|منطقه|پل|چهارراه|سه راه|فلکه|ایستگاه|بازار|شهرک|بزرگراه|پایانه)\s*$")
+
+
 def find_terms(text: str) -> tuple[list[tuple[str, int, int]], list[int]]:
     n, idx = norm_with_map(text or "")
     hits = []
     for label, rx in TERM_RES:
         for m in rx.finditer(n):
+            if label in ("طلاب", "طلبه") and PLACE_BEFORE_RE.search(n[max(0, m.start() - 20):m.start()]):
+                continue
             hits.append((label, idx[m.start()], idx[m.end() - 1] + 1))
     # عبارت‌های هم‌پوشان («مدیر حوزه‌های علمیه» = «مدیر حوزه‌ها» + «حوزه علمیه») یک اشاره‌ان
     hits.sort(key=lambda h: (h[1], -(h[2] - h[1])))
