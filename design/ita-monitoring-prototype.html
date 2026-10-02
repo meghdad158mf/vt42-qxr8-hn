@@ -2072,6 +2072,55 @@
   .news-source-details[open] summary::after, .chan-domains-details[open] summary::after, .chan-row-domains-details[open] summary::after,
   .settings-accordion[open] > summary.panel-head::after{ transform:rotate(180deg); }
   .settings-accordion > summary.panel-head::after{ color: var(--text-faint); width:16px; height:16px; -webkit-mask-size:16px; mask-size:16px; }
+
+  /* ---- «آنچه درباره حوزه گفته می‌شود» (۵.۲۳.۰) ---- */
+  .news-feed.hab-feed{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); max-width:100%; margin:0; }
+  @media (max-width:900px){ .news-feed.hab-feed{ grid-template-columns: minmax(0,1fr); } }
+  .hab-card .news-title a{ color: inherit; display:block; text-align:start; }
+  .hab-excerpt{ text-align:start; }
+  .hab-card .news-title a:hover{ color: var(--accent-strong); }
+  .hab-excerpt{ font-size:13px; line-height:1.95; color: var(--text-dim); margin:0; overflow-wrap:anywhere; }
+  .hab-hl{ background: rgba(234,179,147,0.38); color: inherit; border-radius:4px; padding:0 2px; }
+  .hab-flag{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:100px; background: rgba(234,179,147,0.18); color: var(--accent-strong); border:1px solid rgba(234,179,147,0.5); }
+  .hab-terms{ display:flex; flex-wrap:wrap; gap:6px; }
+  .hab-flag.is-link{ background: var(--surface-2); color: var(--text-dim); border-color: var(--border-strong); }
+  .hab-term{ font-size:11px; font-weight:600; padding:2px 9px; border-radius:100px; background: var(--surface-2); color: var(--text-dim); border:1px solid var(--border); }
+  .hab-admin{ display:flex; margin-top:8px; }
+  .hab-summary{ font-size:12px; color: rgba(255,255,255,0.7); margin:-12px 0 12px; min-height:1em; }
+  .hab-loading{ color: rgba(255,255,255,0.7); font-size:13px; text-align:center; grid-column:1/-1; }
+  #hab-site{ max-width:220px; min-height:44px; padding:9px 12px; padding-inline-end:34px; border-radius: var(--radius-control); font-size:13px; font-family:inherit; background-color: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color:#fff; color-scheme:dark; }
+  #hab-site{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important; }
+  .news-feed.hab-feed{ align-items:stretch; }
+  .hab-card .news-body{ display:flex; flex-direction:column; }
+  .hab-card .news-foot{ margin-top:auto; }
+  .hab-excerpt{ margin-bottom:12px !important; }
+  @media (max-width:640px){ #hab-site{ max-width:none; width:100%; } }
+  .crawl-site{ display:flex; align-items:center; gap:12px; padding:10px 8px; border-bottom:1px solid var(--border); }
+  .crawl-site:last-child{ border-bottom:none; }
+  .crawl-site-main{ flex:1; min-width:0; }
+  .crawl-site-name{ font-size:13px; font-weight:700; color: var(--text); display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; }
+  .crawl-site-host{ font-size:12px; font-weight:500; color: var(--text-faint); }
+  .crawl-site-host:hover{ color: var(--accent-strong); }
+  .crawl-site-status{ font-size:12px; color: var(--text-faint); margin-top:3px; padding-inline-start:14px; position:relative; }
+  .crawl-site-status::before{ content:''; position:absolute; inset-inline-start:0; top:.55em; width:7px; height:7px; border-radius:50%; background: var(--border-strong); }
+  .crawl-site.is-ok .crawl-site-status::before{ background: var(--ok); }
+  .crawl-site.is-bad .crawl-site-status{ color: var(--danger); }
+  .crawl-site.is-bad .crawl-site-status::before{ background: var(--danger); }
+  .crawl-site.is-off{ opacity:.6; }
+  .crawl-site-acts{ display:flex; gap:6px; flex:none; }
+  .usr-act.is-del{ color: var(--danger); }
+  #crawl-site-list{ max-height:520px; overflow:auto; }
+  @media (max-width:640px){ .crawl-site{ flex-wrap:wrap; } .crawl-site-acts{ width:100%; justify-content:flex-end; } }
+  .crawl-sug-wrap{ margin-top:18px; padding-top:14px; border-top:1px dashed var(--border-strong); }
+  .crawl-sug-title{ font-size:14px; font-weight:800; color: var(--text); margin:0 0 6px; }
+  .crawl-sug-kind{ font-size:11px; font-weight:700; padding:2px 9px; border-radius:100px; background: rgba(234,179,147,0.18); color: var(--accent-strong); border:1px solid rgba(234,179,147,0.5); }
+  .crawl-sug .crawl-site-status::before{ display:none; }
+  .crawl-sug .crawl-site-status{ padding-inline-start:0; }
+  #crawl-sug-list{ max-height:420px; overflow:auto; }
+  .hab-foot-acts{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .hab-card .is-translated{ color: var(--accent-strong); }
+  .crawl-sug-kind.is-chan{ background: var(--surface-2); color: var(--text-dim); border-color: var(--border-strong); font-weight:600; }
+  .crawl-edit .add-row{ margin:0; width:100%; }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -2085,7 +2134,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۲.۴</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۳.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2148,6 +2197,7 @@
 
               <button class="nav-menu-group-title-btn" data-nav="hawza" onclick="goToHawzaTab('news'); closeNavMenu();">درباره حوزه</button>
               <button class="nav-menu-sub" data-nav="hawza/news" onclick="goToHawzaTab('news'); closeNavMenu();">اخبار حوزه</button>
+              <button class="nav-menu-sub" data-nav="hawza/about" onclick="goToHawzaTab('about'); closeNavMenu();">آنچه درباره حوزه گفته می‌شود</button>
             </div>
             <div class="nav-menu-col nav-menu-col-top">
               <button class="nav-menu-toplevel-btn" data-nav="dashboard" onclick="switchSection('dashboard'); closeNavMenu();">صفحه نخست</button>
@@ -2231,7 +2281,7 @@
           <ul class="intro-list">
             <li><b>اخبار و رویدادها</b> — خبرگزاری‌ها، سایت‌ها، روزنامه‌ها، ادعاها و شایعات</li>
             <li><b>یادداشت‌ها</b> — نوشته‌های چهره‌ها، فعالان سیاسی و سازمان‌ها</li>
-            <li><b>درباره حوزه</b> — اخبار سیاسی‌اجتماعی پایگاه‌های حوزوی</li>
+            <li><b>درباره حوزه</b> — اخبار پایگاه‌های حوزوی و آنچه رسانه‌ها درباره‌ی حوزه می‌گویند</li>
             <li><b>کنشگری مجازی</b> — پست‌های کنشگران و طلاب در فضای مجازی</li>
             <li><b>برنامه مدارس</b> — گزارش‌های برنامه‌های مدارس علمیه</li>
           </ul>
@@ -2458,10 +2508,10 @@
         <a role="button" tabindex="0" onclick="goToPeopleTab('figures')">چهره‌ها و فعالان سیاسی</a>
         <a role="button" tabindex="0" onclick="goToPeopleTab('archive')">بسته‌های تحلیلی</a>
         <a role="button" tabindex="0" onclick="goToHawzaTab('news')">اخبار حوزه</a>
+        <a role="button" tabindex="0" onclick="goToHawzaTab('about')">آنچه درباره حوزه گفته می‌شود</a>
         <a role="button" tabindex="0" onclick="goToPostsTab('feed')">پست‌های منتشر شده</a>
         <a role="button" tabindex="0" onclick="goToPostsTab('people')">افراد و مجموعه‌ها</a>
         <!-- «به‌زودی»ها آخر ردیف (۵.۲۰.۰) -->
-        <span class="domain-shortcut-disabled soon-item">آنچه درباره حوزه گفته می‌شود<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled soon-item">شرکت‌کننده در برنامه‌ها<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled soon-item">جامعه مخاطب<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled soon-item">آنالیز کنشگری<span class="news-soon">به‌زودی</span></span>
@@ -2849,10 +2899,43 @@
     <section class="section" id="sec-hawza">
       <div class="news-page-tabs" id="hawza-page-tabs">
         <button class="active" id="hawza-tab-news" data-ic="hawza" onclick="setHawzaTab('news')">اخبار حوزه</button>
-        <button disabled class="soon-item" data-ic="about">درباره حوزه<span class="news-soon">به‌زودی</span></button>
+        <button id="hawza-tab-about" data-ic="about" onclick="setHawzaTab('about')">آنچه درباره حوزه گفته می‌شود</button>
       </div>
       <p class="news-tab-subtitle" id="hawza-tab-subtitle"><span>اخبار سیاسی و اجتماعی منتشرشده در پایگاه‌های خبری حوزوی.</span></p>
       <div id="hawza-news-slot"></div>
+      <!-- تب «آنچه درباره حوزه گفته می‌شود» (۵.۲۳.۰): خبرهای سایت‌های خبری غیرحوزوی
+           که خزنده‌ی scripts/crawl_hawza.py (جدول hawza_mentions) پیدا کرده -->
+      <div id="hawza-about-panel" style="display:none;">
+        <div class="news-filters" data-mfilters>
+          <div class="news-filter-row">
+            <div class="news-search-box">
+              <input type="text" id="hab-search" aria-label="جست‌وجو در خبرهای درباره حوزه" placeholder="جستجو در عنوان و متن…" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            </div>
+            <button type="button" class="m-filter-btn" onclick="toggleMobileFilters(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>فیلترها<span class="m-filter-count"></span></button>
+            <div class="news-seg m-collapse" id="hab-time-seg">
+              <button class="active" data-t="">همه</button>
+              <button data-t="today">امروز</button>
+              <button data-t="yesterday">دیروز</button>
+              <button data-t="week">هفته گذشته</button>
+            </div>
+            <div class="news-seg m-collapse" id="hab-kind-seg">
+              <button class="active" data-k="">همه</button>
+              <button data-k="web">سایت‌های خبری</button>
+              <button data-k="social">شبکه‌های اجتماعی</button>
+            </div>
+            <div class="news-seg m-collapse" id="hab-scope-seg" title="خبرهایی که در تیترشان به حوزه، روحانیت یا مراجع اشاره شده">
+              <button class="active" data-s="">همه‌ی اشاره‌ها</button>
+              <button data-s="title">اشاره در تیتر</button>
+            </div>
+            <select id="hab-site" class="m-collapse" aria-label="منبع خبر"><option value="">همه‌ی منابع</option></select>
+          </div>
+        </div>
+        <p class="hab-summary" id="hab-summary"></p>
+        <div class="news-feed hab-feed" id="hab-feed"></div>
+        <p class="news-empty" id="hab-empty" style="display:none;"></p>
+        <div class="news-pagination" id="hab-pagination"></div>
+      </div>
     </section>
 
     <section class="section" id="sec-reports">
@@ -3169,6 +3252,23 @@
             <div id="chan-list"></div>
           </details>
 
+          <details class="panel settings-accordion" id="crawl-sites-panel">
+            <summary class="panel-head"><span class="panel-pill">منابع خزنده‌ی «درباره حوزه»</span><span class="settings-sum-desc" id="crawl-sites-sum">سایت‌های خبری‌ای که خزنده هر ۳ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد</span></summary>
+            <p class="settings-help">سایت‌هایی که در «مدیریت منابع» (با RSS، حتی فقط یک بخش از سایت) تعریف شده‌اند، خودکار با نشانی اصلی‌شان به این فهرست اضافه و <b>کامل</b> گشته می‌شوند (سایت‌های غیرفارسی متوقف اضافه می‌شوند). کانال‌های ایتا، تلگرام و بله‌ی «مدیریت منابع» هم خودکار بررسی می‌شوند. خزنده خبرهای تازه‌ی هر سایت را از فهرست خبری آن (sitemap)، فید RSS یا صفحه‌ی اول پیدا می‌کند، متن کامل هر خبر را می‌خواند و خبرهایی را که درباره‌ی حوزه هستند در تب «آنچه درباره حوزه گفته می‌شود» نمایش می‌دهد. خبری مرتبط حساب می‌شود که یکی از این عبارت‌ها در تیترش باشد یا در متنش دست‌کم ۲ بار بیاید: حوزه علمیه، حوزویان، طلاب و طلبه، روحانیت و روحانیون، مراجع و مرجع تقلید، جامعه مدرسین، شورای عالی حوزه، مدیر حوزه‌ها، مدرسه و مدارس علمیه، معممین. پست‌های کانال‌های ایتا، تلگرام و بله‌ای که سامانه رصد می‌کند و صفحه‌هایی که مطالب مرتبط به آن‌ها لینک داده‌اند هم با همین قاعده بررسی می‌شوند. برای افزودن سایت، نشانی صفحه‌ی اول آن را وارد کنید؛ نشانی فهرست خبری (sitemap) اختیاری است و اگر خالی بماند، خودکار پیدا می‌شود.</p>
+            <div class="add-row">
+              <input type="text" id="new-crawl-name" aria-label="نام سایت" placeholder="نام سایت (مثلاً ایسنا)" />
+              <input type="url" id="new-crawl-url" aria-label="نشانی سایت" placeholder="https://www.example.ir" dir="ltr" />
+              <input type="url" id="new-crawl-sitemap" aria-label="نشانی فهرست خبری (اختیاری)" placeholder="sitemap (اختیاری)" dir="ltr" />
+              <button class="btn primary" id="add-crawl-btn" type="button">افزودن سایت</button>
+            </div>
+            <div id="crawl-site-list"></div>
+            <div class="crawl-sug-wrap" id="crawl-sug-wrap" hidden>
+              <h4 class="crawl-sug-title">پیشنهاد منبع</h4>
+              <p class="settings-help">سایت‌ها و کانال‌های ایتا و تلگرامی که در مطالب مرتبط با حوزه به آن‌ها لینک داده شده، ولی هنوز در فهرست منابع نیستند؛ هرچه بیشتر تکرار شده باشند، بالاتر می‌آیند. با «افزودن»، سایت به همین فهرست خزنده و کانال به «مدیریت منابع» اضافه می‌شود و از اجرای بعدی جست‌وجو می‌شود.</p>
+              <div id="crawl-sug-list"></div>
+            </div>
+          </details>
+
           <h3 class="settings-group-title">برچسب‌های منابع</h3>
           <div class="settings-row-2col">
             <details class="panel settings-accordion">
@@ -3414,7 +3514,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۲۲.۴</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۳.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3958,14 +4058,14 @@
     // پنل مشترک ممکنه الان توی «درباره حوزه» باشه — تب فعلی دوباره اعمال می‌شه تا
     // پنل و newsState.platform به «اخبار و رویدادها» برگردن
     if(key === 'overview'){ setNewsPageTab(NEWS_CURRENT_TAB); renderNewsFeed(); renderNewsAnalytics(); }
-    if(key === 'hawza') setHawzaTab('news');
+    if(key === 'hawza') setHawzaTab(HAWZA_TAB);
     if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
     if(key === 'users') renderUsersSection();
     if(key === 'status'){ renderSystemStatus(); ackAdminAlerts(); }
     if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
     if(key === 'announce') renderAnnAdmin();
     if(key === 'activity') setActTab(ACT_TAB);
-    if(key === 'settings') renderBackupPanel();
+    if(key === 'settings'){ renderBackupPanel(); loadCrawlSites(); if(currentRole === 'app_admin') loadCrawlSuggestions(); }
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
     if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
     // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
@@ -3980,8 +4080,8 @@
     setNewsPageTab(tab);
   }
   function goToHawzaTab(tab){
-    switchSection('hawza'); // خودش تب پیش‌فرض («اخبار حوزه») رو باز می‌کنه
-    if(tab !== 'news') setHawzaTab(tab);
+    if(HAWZA_TAB_INFO[tab]){ HAWZA_TAB = tab; lsSet('jarian_last_hawza_tab', tab); }
+    switchSection('hawza'); // خودش تب HAWZA_TAB رو باز می‌کنه
   }
   function goToPostsTab(tab){
     switchSection('posts');
@@ -4142,13 +4242,232 @@
     populateNewsSourceOptions();
     renderNewsFeed();
   }
+  // «درباره حوزه» دو تب داره: «اخبار حوزه» (پنل مشترک اخبار) و «آنچه درباره حوزه
+  // گفته می‌شود» (خزنده، hawza_mentions — ۵.۲۳.۰)
+  const HAWZA_TAB_INFO = {
+    news: 'اخبار سیاسی و اجتماعی منتشرشده در پایگاه‌های خبری حوزوی.',
+    about: 'خبرهای سایت‌های خبری و پست‌های کانال‌های ایتا، تلگرام و بله که درباره‌ی حوزه، روحانیت، مراجع تقلید و طلاب هستند؛ هر ۳ ساعت به‌صورت خودکار جست‌وجو می‌شوند.',
+  };
+  let HAWZA_TAB = (t=>HAWZA_TAB_INFO[t] ? t : 'news')(lsGet('jarian_last_hawza_tab', 'news'));
   function setHawzaTab(tab){
-    // فعلاً فقط «اخبار حوزه»؛ «درباره حوزه» به‌زودی
+    if(!HAWZA_TAB_INFO[tab]) tab = 'news';
+    navMark();
+    HAWZA_TAB = tab;
+    lsSet('jarian_last_hawza_tab', tab);
+    document.getElementById('hawza-tab-news').classList.toggle('active', tab === 'news');
+    document.getElementById('hawza-tab-about').classList.toggle('active', tab === 'about');
+    const sub = document.querySelector('#hawza-tab-subtitle span');
+    if(sub) sub.textContent = HAWZA_TAB_INFO[tab];
+    document.getElementById('hawza-about-panel').style.display = tab === 'about' ? '' : 'none';
+    if(tab === 'about'){
+      placeNewsStudyPanel('overview'); // پنل مشترک اخبار سر جای خودش (و مخفی) برگرده
+      openHawzaAbout();
+      return;
+    }
     placeNewsStudyPanel('hawza');
     document.getElementById('news-study-panel').style.display = '';
     document.getElementById('news-feed').classList.remove('social-tab');
     activateNewsStudy('hawza');
   }
+
+  // ---- «آنچه درباره حوزه گفته می‌شود» (خزنده، ۵.۲۳.۰) ----
+  // داده: hawza_mentions (scripts/crawl_hawza.py، migration_041). فقط با باز شدن
+  // همین تب گرفته می‌شه (نه در loadAll) و تا ۱۰ دقیقه کش می‌مونه.
+  let HAB_ROWS = null, HAB_LOADED_AT = 0, HAB_LOADING = null, HAB_ERROR = '';
+  const HAB_STATE = { q:'', time:'', kind:'', scope:'', site:'', page:1 };
+  // کلید منبع در فیلتر: سایت = دامنه، پست شبکه‌ی اجتماعی = نام کانال
+  const habSourceKey = x => x.kind === 'social' ? 'ch:' + (x.site_name || x.site) : x.site;
+  const HAB_PAGE_SIZE = 12;
+  // همون عبارت‌های TERMS در scripts/crawl_hawza.py — فقط برای پررنگ کردن در گزیده‌ی
+  // متن؛ با تغییر فهرست خزنده، این هم هم‌سو بشه. [\s‌]+ = فاصله یا نیم‌فاصله
+  const HAB_HL_RX = (()=>{
+    const pats = ['حوزه(?:[\\s\\u200c]+(?:ی|های|ها)|\\u200c(?:ی|های|ها))?[\\s\\u200c]+علمیه', 'حوزوی(?:ان|ها)?', 'طلاب', 'طلبه(?:[\\s\\u200c]*(?:ها|ای))?',
+      'روحانیت', 'روحانیون', 'مراجع(?:[\\s\\u200c]+عظام)?(?:[\\s\\u200c]+تقلید)?', 'مرجع[\\s\\u200c]+تقلید', 'جامعه[\\s\\u200c]+مدرسین',
+      'شورای[\\s\\u200c]+عالی[\\s\\u200c]+حوزه(?:[\\s\\u200c]*(?:های|ها))?', 'مدارس[\\s\\u200c]+علمیه', 'مدرسه(?:[\\s\\u200c]*ی)?[\\s\\u200c]+علمیه', 'معممین', 'عمامه'];
+    return new RegExp('(?<![\\p{L}\\p{N}])(?:' + pats.join('|').replace(/ی/g, '[یي]').replace(/ک/g, '[کك]') + ')(?![\\p{L}\\p{N}])', 'gu');
+  })();
+  function habHighlight(text){
+    return escHtml(text).replace(HAB_HL_RX, m=>`<mark class="hab-hl">${m}</mark>`);
+  }
+  async function loadHawzaMentions(force){
+    if(!force && HAB_ROWS && Date.now() - HAB_LOADED_AT < 600000) return;
+    if(HAB_LOADING) return HAB_LOADING;
+    HAB_LOADING = (async()=>{
+      try{
+        const r = await api('/hawza_mentions?select=id,url,site,site_name,title,excerpt,kind,matched_terms,hits,in_title,published_at,scraped_at,hidden_at&order=scraped_at.desc&limit=600');
+        if(!r.ok){
+          HAB_ERROR = (r.status === 404 || r.status === 400) ? 'missing' : 'error';
+          HAB_ROWS = HAB_ROWS || [];
+          return;
+        }
+        HAB_ERROR = '';
+        HAB_ROWS = (await r.json()).filter(x=>!x.hidden_at);
+        HAB_LOADED_AT = Date.now();
+      }catch(e){
+        HAB_ERROR = 'error'; HAB_ROWS = HAB_ROWS || [];
+      }finally{ HAB_LOADING = null; }
+    })();
+    return HAB_LOADING;
+  }
+  function habTime(x){ return x.published_at || x.scraped_at; }
+  async function openHawzaAbout(){
+    if(!HAB_ROWS) document.getElementById('hab-feed').innerHTML = '<p class="hab-loading">در حال دریافت خبرها…</p>';
+    await loadHawzaMentions();
+    populateHabSites();
+    renderHawzaAbout();
+  }
+  function populateHabSites(){
+    const sel = document.getElementById('hab-site');
+    const counts = {};
+    (HAB_ROWS || []).filter(x=>!HAB_STATE.kind || (HAB_STATE.kind === 'social') === (x.kind === 'social')).forEach(x=>{
+      const k = habSourceKey(x);
+      counts[k] = counts[k] || { name: (x.site_name || x.site) + (x.kind === 'social' ? ' (' + (NEWS_PLATFORM_LABEL[x.site] || x.site) + ')' : ''), n:0 };
+      counts[k].n++;
+    });
+    const opts = Object.entries(counts).sort((a,b)=>b[1].n - a[1].n);
+    sel.innerHTML = '<option value="">همه‌ی منابع</option>' + opts.map(([k,v])=>`<option value="${escAttr(k)}">${escHtml(v.name)} (${toFaDigits(v.n)})</option>`).join('');
+    sel.value = counts[HAB_STATE.site] ? HAB_STATE.site : '';
+    HAB_STATE.site = sel.value;
+  }
+  function filteredHawzaMentions(){
+    const terms = HAB_STATE.q.split(/[,،]/).map(searchNorm).filter(Boolean);
+    return (HAB_ROWS || []).filter(x=>{
+      if(HAB_STATE.kind && (HAB_STATE.kind === 'social') !== (x.kind === 'social')) return false;
+      if(HAB_STATE.site && habSourceKey(x) !== HAB_STATE.site) return false;
+      if(HAB_STATE.scope === 'title' && !x.in_title) return false;
+      if(HAB_STATE.time){
+        const d = tehranDayDiff(habTime(x));
+        if(HAB_STATE.time === 'today' && d !== 0) return false;
+        if(HAB_STATE.time === 'yesterday' && d !== 1) return false;
+        if(HAB_STATE.time === 'week' && d > 6) return false;
+      }
+      if(terms.length){
+        const hay = searchNorm((x.title || '') + ' ' + (x.excerpt || '') + ' ' + (x.site_name || ''));
+        if(!terms.some(t=>hay.includes(t))) return false;
+      }
+      return true;
+    }).sort((a,b)=>String(habTime(b) || '').localeCompare(String(habTime(a) || '')));
+  }
+  function renderHawzaAbout(){
+    const feed = document.getElementById('hab-feed');
+    const empty = document.getElementById('hab-empty');
+    const sum = document.getElementById('hab-summary');
+    setMobileFilterCount('#hawza-about-panel', (HAB_STATE.time ? 1 : 0) + (HAB_STATE.kind ? 1 : 0) + (HAB_STATE.scope ? 1 : 0) + (HAB_STATE.site ? 1 : 0));
+    if(HAB_ERROR === 'missing'){
+      feed.innerHTML = ''; sum.textContent = ''; document.getElementById('hab-pagination').innerHTML = '';
+      empty.style.display = 'block';
+      empty.textContent = currentRole === 'app_admin'
+        ? 'جدول این بخش هنوز ساخته نشده است؛ فایل db/migration_041_hawza_crawler.sql را در SQL Editor سوپابیس اجرا کنید.'
+        : 'این بخش به‌زودی راه‌اندازی می‌شود.';
+      return;
+    }
+    const list = filteredHawzaMentions();
+    const total = (HAB_ROWS || []).length;
+    const totalPages = Math.max(1, Math.ceil(list.length / HAB_PAGE_SIZE));
+    HAB_STATE.page = Math.min(Math.max(1, HAB_STATE.page), totalPages);
+    const page = list.slice((HAB_STATE.page - 1) * HAB_PAGE_SIZE, HAB_STATE.page * HAB_PAGE_SIZE);
+    const siteCount = new Set(list.map(habSourceKey)).size;
+    sum.textContent = list.length
+      ? toFaDigits(list.length) + ' مطلب از ' + toFaDigits(siteCount) + ' منبع' + (list.length !== total ? ' (از ' + toFaDigits(total) + ' مطلب)' : '')
+      : '';
+    empty.style.display = list.length ? 'none' : 'block';
+    empty.textContent = HAB_ERROR === 'error' ? 'دریافت خبرها انجام نشد؛ اتصال اینترنت را بررسی و صفحه را دوباره باز کنید.'
+      : total ? 'خبری با این فیلترها پیدا نشد.'
+      : 'هنوز خبری پیدا نشده است؛ خزنده هر ۳ ساعت سایت‌های خبری و کانال‌ها را جست‌وجو می‌کند.';
+    const isAdmin = currentRole === 'app_admin';
+    feed.innerHTML = page.map(x=>{
+      const terms = (x.matched_terms || []).slice(0, 4);
+      return `
+      <article class="news-card hab-card">
+        <div class="news-body">
+          <div class="news-head">
+            <span class="news-source">${escHtml(x.site_name || x.site)}</span>
+            ${x.kind === 'social' ? `<span class="news-platform">${NEWS_PLATFORM_ICON[x.site] || ''}${escHtml(NEWS_PLATFORM_LABEL[x.site] || x.site)}</span>` : ''}
+            ${x.kind === 'link' ? '<span class="hab-flag is-link" title="این سایت در فهرست منابع خزنده نیست؛ از لینک یک مطلب مرتبط پیدا شد">یافته از لینک</span>' : ''}
+            <span class="news-time" title="${escAttr(habTime(x) ? new Date(habTime(x)).toLocaleString('fa-IR', { timeZone:'Asia/Tehran' }) : '')}">${newsRelTime(habTime(x))}</span>
+            ${x.in_title ? '<span class="hab-flag">اشاره در تیتر</span>' : ''}
+          </div>
+          <h3 class="news-title"><a id="hab-title-${Number(x.id)}" dir="auto" href="${safeUrl(x.url)}" target="_blank" rel="noopener">${habHighlight(x.title || '')}</a></h3>
+          ${x.excerpt ? `<p class="hab-excerpt" id="hab-ex-${Number(x.id)}" dir="auto">${habHighlight(x.excerpt)}</p>` : ''}
+          <div class="news-foot">
+            <div class="hab-terms">${terms.map(t=>`<span class="hab-term">${escHtml(t)}</span>`).join('')}</div>
+            <div class="hab-foot-acts">
+              ${needsTranslation({ title: x.title, text: x.excerpt }) ? `<button type="button" class="news-translate-btn" id="hab-tr-btn-${Number(x.id)}" onclick="translateMention(${Number(x.id)})">ترجمه به فارسی</button>` : ''}
+              <a class="news-link" href="${safeUrl(x.url)}" target="_blank" rel="noopener">${x.kind === 'social' ? 'مشاهده‌ی پست ↗' : 'متن کامل در منبع ↗'}</a>
+            </div>
+          </div>
+          ${isAdmin ? `<div class="hab-admin"><button type="button" class="post-hide-btn" onclick="hideHawzaMention(${Number(x.id)})" title="این خبر برای همه‌ی بیننده‌ها پنهان می‌شود (مثلاً اگر واقعاً درباره‌ی حوزه نیست)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button></div>` : ''}
+        </div>
+      </article>`;
+    }).join('');
+    renderPagination('hab-pagination', HAB_STATE.page, totalPages, 'goHabPage');
+  }
+  // ترجمه‌ی خبرهای خارجی (انگلیسی/عربی): فقط تیتر و گزیده — متن کامل ذخیره نمی‌شه.
+  // ورودی تابع translate فقط شناسه است (mentionId)، مثل aiTranslate پست‌ها
+  const HAB_TRANSLATION = {};
+  async function translateMention(id){
+    const x = (HAB_ROWS || []).find(r=>r.id === id);
+    const btn = document.getElementById('hab-tr-btn-' + id);
+    const tEl = document.getElementById('hab-title-' + id);
+    const eEl = document.getElementById('hab-ex-' + id);
+    if(!x || !btn || !tEl) return;
+    const show = tr=>{
+      tEl.innerHTML = habHighlight(tr ? (tr.title || x.title) : x.title);
+      tEl.classList.toggle('is-translated', !!tr);
+      if(eEl){ eEl.innerHTML = habHighlight(tr ? (tr.text || x.excerpt) : x.excerpt); eEl.classList.toggle('is-translated', !!tr); }
+      btn.textContent = tr ? 'بازگشت به متن اصلی' : 'ترجمه به فارسی';
+    };
+    if(tEl.classList.contains('is-translated')){ show(null); return; }
+    if(HAB_TRANSLATION[id]){ show(HAB_TRANSLATION[id]); return; }
+    btn.textContent = 'در حال ترجمه…';
+    btn.disabled = true;
+    try{
+      const r = await fetch(SUPABASE_URL + '/functions/v1/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+        body: JSON.stringify({ mentionId: id }),
+      });
+      if(!r.ok) throw new Error('translate failed');
+      HAB_TRANSLATION[id] = await r.json();
+      show(HAB_TRANSLATION[id]);
+    }catch(e){
+      btn.textContent = 'ترجمه به فارسی';
+      showToast('ترجمه انجام نشد؛ چند لحظه بعد دوباره امتحان کنید.');
+    }finally{
+      btn.disabled = false;
+    }
+  }
+  function goHabPage(p){
+    HAB_STATE.page = p;
+    renderHawzaAbout();
+    scrollToListTop(document.querySelector('#hawza-about-panel .news-filters'));
+  }
+  async function hideHawzaMention(id){
+    if(!await uiConfirm('این خبر برای همه‌ی بیننده‌ها پنهان شود؟\nبرای خبرهایی که خزنده اشتباهی «درباره حوزه» تشخیص داده است.')) return;
+    const r = await api('/hawza_mentions?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ hidden_at: new Date().toISOString() }) });
+    if(!r.ok){ showToast('پنهان کردن خبر انجام نشد؛ دوباره امتحان کنید.'); return; }
+    HAB_ROWS = (HAB_ROWS || []).filter(x=>x.id !== id);
+    populateHabSites();
+    renderHawzaAbout();
+    showToast('خبر پنهان شد');
+  }
+  function setupHawzaAbout(){
+    const search = document.getElementById('hab-search');
+    let t = null;
+    search.addEventListener('input', ()=>{ clearTimeout(t); t = setTimeout(()=>{ HAB_STATE.q = search.value.trim(); HAB_STATE.page = 1; renderHawzaAbout(); }, 200); });
+    [['hab-time-seg', 't', 'time'], ['hab-kind-seg', 'k', 'kind'], ['hab-scope-seg', 's', 'scope']].forEach(([id, ds, key])=>{
+      document.getElementById(id).addEventListener('click', e=>{
+        const b = e.target.closest('button');
+        if(!b || b.dataset[ds] === undefined) return;
+        document.querySelectorAll('#'+id+' > button').forEach(x=>x.classList.toggle('active', x === b));
+        HAB_STATE[key] = b.dataset[ds]; HAB_STATE.page = 1;
+        if(key === 'kind') populateHabSites();
+        renderHawzaAbout();
+      });
+    });
+    document.getElementById('hab-site').addEventListener('change', e=>{ HAB_STATE.site = e.target.value; HAB_STATE.page = 1; renderHawzaAbout(); });
+  }
+  setupHawzaAbout();
 
   function setNewsPageTab(tab){
     navMark();
@@ -4268,6 +4587,9 @@
     // پاک‌سازی خروجی داده‌ای نداره؛ به‌جاش شمار رسانه‌هایی که باید پاک می‌شدن و
     // نشدن (قدیمی‌تر از ۳۰ ساعت، با RETENTION_DAYS=0.5 و اجرای روزی ۲ بار)
     { job:'cleanup', name:'پاک‌سازی رسانه‌های قدیمی', exp:'روزی ۲ بار', custom: sysCleanupCheck },
+    // خروجی خزنده = آخرین خبری که خوانده (crawl_seen)، نه آخرین خبر مرتبط — ممکنه چند
+    // ساعت خبری درباره‌ی حوزه نباشه و این خرابی نیست (migration_041)
+    { job:'hawza', name:'خزنده‌ی «درباره حوزه»', path:'/crawl_seen?select=seen_at&order=seen_at.desc&limit=1', col:'seen_at', exp:'هر ۳ ساعت', warn:7, bad:14 },
   ];
   // تاریخ انقضای توکن‌ها — با ساخت توکن جدید، همین‌جا به‌روز بشه (CLAUDE.md)
   const SYS_TOKENS = [
@@ -4321,7 +4643,7 @@
   // زمان‌بندی‌ها (UTC) — باید با cron.schedule های db/migration_040_cron_scheduler.sql یکی بمونه
   const SYS_SCHEDULES = {
     eitaa: ['0 */2'], telegram: ['15 */2'], website: ['5 */2'], bale: ['30 1,5,7,9,11,13,15,17'],
-    newspapers: ['30 0,2,4,6,10'], insights: ['30 4,10,16,22'], keywords: ['30 1-23/2'], cleanup: ['15 6', '15 18'],
+    newspapers: ['30 0,2,4,6,10'], insights: ['30 4,10,16,22'], keywords: ['30 1-23/2'], cleanup: ['15 6', '15 18'], hawza:['45 2-23/3'],
   };
   let SYS_GH_HISTORY = null;
   function cronHourList(f){
@@ -8290,6 +8612,7 @@
       closeChanEditor();
       renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
       renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures(); renderProfileGroupAdmin();
+      loadCrawlSites(); // سایت تازه‌ی مدیریت منابع → خودکار در فهرست خزنده‌ی «درباره حوزه»
       showToast(ch ? 'تغییرات ذخیره شد' : 'منبع جدید اضافه شد');
     }catch(e){
       showToast('ذخیره ناموفق بود؛ دوباره تلاش کنید');
@@ -8348,6 +8671,225 @@
     }else{
       showToast('انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.');
     }
+  });
+
+  // ---- منابع خزنده‌ی «درباره حوزه» (crawl_sites، migration_041 — ۵.۲۳.۰) ----
+  let CRAWL_SITES = null, CRAWL_SITES_ERR = '';
+  const CRAWL_VIA = { sitemap:'فهرست خبری (sitemap)', rss:'فید RSS', homepage:'صفحه‌ی اول' };
+  async function loadCrawlSites(sync = true){
+    if(currentRole !== 'app_admin') return;
+    try{
+      const r = await api('/crawl_sites?select=*&order=name');
+      CRAWL_SITES_ERR = r.ok ? '' : ((r.status === 404 || r.status === 400) ? 'missing' : 'error');
+      CRAWL_SITES = r.ok ? await r.json() : [];
+    }catch(e){ CRAWL_SITES_ERR = 'error'; CRAWL_SITES = []; }
+    if(sync && !CRAWL_SITES_ERR && await syncCrawlSitesFromChannels()) return loadCrawlSites(false);
+    renderCrawlSites();
+  }
+  // ---- سایت‌های «مدیریت منابع» → خزش کامل (خواست کاربر: بعضی سایت‌ها فقط با RSS یه بخش
+  // در مدیریت منابع‌ان، ولی برای «درباره حوزه» کل سایت باید گشته بشه) ----
+  // نشانی اصلی سایت از آدرس RSS: isna.ir/rss/tp/5 → https://www.isna.ir؛ زیردامنه‌ی فید
+  // (feeds./rss./moxie.) برداشته می‌شه و بخش زبانی (/persian، /farsi، /fa-ir) می‌مونه
+  function rssSiteRoot(rss){
+    try{
+      const u = new URL(rss);
+      let h = u.hostname.toLowerCase(), stripped = false;
+      const MAP = { 'feeds.bbci.co.uk':'bbc.com', 'feeds.a.dj.com':'wsj.com' };
+      if(MAP[h]){ h = MAP[h]; stripped = true; }
+      else if(/^(feeds?|rss|moxie)\./.test(h)){ h = h.replace(/^(feeds?|rss|moxie)\./, ''); stripped = true; }
+      const seg = (u.pathname.split('/')[1] || '').toLowerCase();
+      const prefix = ['persian','farsi','fa-ir','fa'].includes(seg) && !/\.ir$/.test(h) ? '/' + seg : '';
+      const host = stripped && h.split('.').length === 2 ? 'www.' + h : h;
+      return 'https://' + host + prefix;
+    }catch(e){ return null; }
+  }
+  function crawlSiteKey(url){
+    try{ const u = new URL(url); return u.hostname.toLowerCase().replace(/^www\./, '') + u.pathname.replace(/\/+$/, ''); }catch(e){ return ''; }
+  }
+  function channelCrawlRoots(){
+    const out = {};
+    CHANNELS.filter(c=>c.platform === 'website' && c.active !== false && !c.show_in_hawza).forEach(c=>{
+      const root = rssSiteRoot(c.username);
+      if(!root) return;
+      const k = crawlSiteKey(root);
+      if(!out[k]) out[k] = { root, channels: [] };
+      out[k].channels.push(c);
+    });
+    return out;
+  }
+  async function syncCrawlSitesFromChannels(){
+    const have = new Set((CRAWL_SITES || []).map(c=>crawlSiteKey(c.url)));
+    const rows = [];
+    Object.entries(channelCrawlRoots()).forEach(([k, v])=>{
+      if(have.has(k)) return;
+      // سایت غیرفارسی (CNN، گاردین…): خزش کاملش سنگینه و بعضی‌ها ربات رو می‌بندن —
+      // متوقف اضافه می‌شه (فید RSSش همچنان بررسی می‌شه) و مدیر می‌تونه فعالش کنه
+      const sample = POSTS_CACHE.filter(p=>v.channels.some(c=>c.id === p.channel_id)).slice(0, 10);
+      const foreign = sample.length > 0 && sample.filter(needsTranslation).length > sample.length / 2;
+      const name = (v.channels[0].title || k).split(/\s+[-–—|]\s+/)[0].trim() || k;
+      rows.push({ name: name.slice(0, 80), url: v.root, active: !foreign, source: 'channel' });
+    });
+    if(!rows.length) return false;
+    try{
+      const r = await api('/crawl_sites?on_conflict=url', { method:'POST', headers:{ Prefer:'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify(rows) });
+      return r.ok;
+    }catch(e){ return false; }
+  }
+  function crawlSiteStatus(c){
+    if(!c.active) return { cls:'is-off', text:'متوقف' };
+    if(!c.last_run_at) return { cls:'', text:'هنوز اجرا نشده است' };
+    const when = newsRelTime(c.last_run_at);
+    if(c.last_error) return { cls:'is-bad', text: when + '، ' + c.last_error };
+    return { cls:'is-ok', text: when + '، ' + toFaDigits(c.last_pages || 0) + ' خبر تازه خوانده شد، ' + toFaDigits(c.last_found || 0) + ' خبر مرتبط' + (c.last_via ? '، از ' + (CRAWL_VIA[c.last_via] || c.last_via) : '') };
+  }
+  function renderCrawlSites(){
+    const box = document.getElementById('crawl-site-list');
+    if(!box) return;
+    if(CRAWL_SITES_ERR === 'missing'){
+      box.innerHTML = '<p class="settings-help">جدول این بخش هنوز ساخته نشده است؛ فایل db/migration_041_hawza_crawler.sql را در SQL Editor سوپابیس اجرا کنید.</p>';
+      return;
+    }
+    if(CRAWL_SITES_ERR === 'error'){ box.innerHTML = '<p class="settings-help">دریافت فهرست انجام نشد؛ صفحه را دوباره باز کنید.</p>'; return; }
+    const list = CRAWL_SITES || [];
+    const active = list.filter(c=>c.active).length;
+    const bad = list.filter(c=>c.active && c.last_error).length;
+    document.getElementById('crawl-sites-sum').textContent = toFaDigits(active) + ' سایت فعال' + (bad ? '، ' + toFaDigits(bad) + ' سایت در آخرین اجرا خطا داشت' : '') + '؛ سایت‌هایی که خزنده هر ۳ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد';
+    const sorted = list.slice().sort((a,b)=>(b.active - a.active) || ((b.active && b.last_error ? 1 : 0) - (a.active && a.last_error ? 1 : 0)) || a.name.localeCompare(b.name, 'fa'));
+    const fromChannels = channelCrawlRoots();
+    box.innerHTML = sorted.map(c=>{
+      const st = crawlSiteStatus(c);
+      let host = c.url; try{ const u = new URL(c.url); host = u.host.replace(/^www\./, '') + u.pathname.replace(/\/+$/, ''); }catch(e){}
+      const linked = fromChannels[crawlSiteKey(c.url)];
+      if(CRAWL_EDIT_ID === c.id){
+        return `<div class="crawl-site crawl-edit">
+          <div class="add-row">
+            <input type="text" id="crawl-edit-name" aria-label="نام سایت" value="${escAttr(c.name)}" />
+            <input type="url" id="crawl-edit-sitemap" aria-label="نشانی فهرست خبری (اختیاری)" placeholder="sitemap (اختیاری؛ خالی = پیدا کردن خودکار)" dir="ltr" value="${escAttr(c.sitemap_url || '')}" />
+            <button type="button" class="btn primary btn-sm" onclick="saveCrawlSite(${Number(c.id)})">ذخیره</button>
+            <button type="button" class="btn btn-sm" onclick="CRAWL_EDIT_ID=null; renderCrawlSites()">انصراف</button>
+          </div>
+        </div>`;
+      }
+      return `<div class="crawl-site ${st.cls}">
+        <div class="crawl-site-main">
+          <div class="crawl-site-name">${escHtml(c.name)} <a class="crawl-site-host" href="${safeUrl(c.url)}" target="_blank" rel="noopener" dir="ltr">${escHtml(host)}</a>${linked ? '<span class="crawl-sug-kind is-chan" title="این سایت در «مدیریت منابع» هم هست و خودکار به این فهرست اضافه شده است">از مدیریت منابع</span>' : ''}</div>
+          <div class="crawl-site-status">${escHtml(st.text)}</div>
+        </div>
+        <div class="crawl-site-acts">
+          <button type="button" class="usr-act" onclick="toggleCrawlSite(${Number(c.id)})">${c.active ? 'توقف' : 'فعال‌سازی'}</button>
+          <button type="button" class="usr-act" onclick="CRAWL_EDIT_ID=${Number(c.id)}; renderCrawlSites()">ویرایش</button>
+          ${linked ? '' : `<button type="button" class="usr-act is-del" onclick="deleteCrawlSite(${Number(c.id)})">حذف</button>`}
+        </div>
+      </div>`;
+    }).join('') || '<p class="settings-help">هنوز سایتی اضافه نشده است.</p>';
+  }
+  let CRAWL_EDIT_ID = null;
+  async function saveCrawlSite(id){
+    const name = document.getElementById('crawl-edit-name').value.trim();
+    let sitemap = document.getElementById('crawl-edit-sitemap').value.trim();
+    if(!name){ showToast('نام سایت را وارد کنید.'); return; }
+    if(sitemap){
+      try{ sitemap = new URL(/^https?:\/\//i.test(sitemap) ? sitemap : 'https://' + sitemap).href; }
+      catch(e){ showToast('نشانی فهرست خبری درست نیست؛ می‌توانید آن را خالی بگذارید.'); return; }
+    }
+    const r = await api('/crawl_sites?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ name, sitemap_url: sitemap || null }) });
+    if(!r.ok){ showToast('ذخیره انجام نشد؛ دوباره امتحان کنید.'); return; }
+    const c = (CRAWL_SITES || []).find(x=>x.id === id);
+    if(c){ c.name = name; c.sitemap_url = sitemap || null; }
+    CRAWL_EDIT_ID = null;
+    renderCrawlSites();
+    showToast('ذخیره شد');
+  }
+  async function toggleCrawlSite(id){
+    const c = (CRAWL_SITES || []).find(x=>x.id === id);
+    if(!c) return;
+    const r = await api('/crawl_sites?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ active: !c.active }) });
+    if(!r.ok){ showToast('انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
+    c.active = !c.active;
+    renderCrawlSites();
+    showToast(c.active ? '«' + c.name + '» در اجرای بعدی خزنده جست‌وجو می‌شود' : '«' + c.name + '» دیگر جست‌وجو نمی‌شود');
+  }
+  async function deleteCrawlSite(id){
+    const c = (CRAWL_SITES || []).find(x=>x.id === id);
+    if(!c || !await uiConfirm('حذف «' + c.name + '» از منابع خزنده؟\nخبرهایی که تا الان از این سایت پیدا شده، باقی می‌مانند.')) return;
+    const r = await api('/crawl_sites?id=eq.' + id, { method:'DELETE', headers:{ Prefer:'return=minimal' } });
+    if(!r.ok){ showToast('حذف انجام نشد؛ دوباره امتحان کنید.'); return; }
+    CRAWL_SITES = CRAWL_SITES.filter(x=>x.id !== id);
+    renderCrawlSites();
+  }
+  let CRAWL_SUGGEST = [];
+  const CRAWL_SUG_KIND = { site:'سایت', eitaa:'ایتا', telegram:'تلگرام' };
+  async function loadCrawlSuggestions(){
+    try{
+      const r = await api('/crawl_suggestions?select=*&status=eq.new&order=found.desc,hits.desc,last_seen_at.desc&limit=40');
+      CRAWL_SUGGEST = r.ok ? await r.json() : [];
+    }catch(e){ CRAWL_SUGGEST = []; }
+    renderCrawlSuggestions();
+  }
+  function crawlSugUrl(s){
+    return s.kind === 'site' ? 'https://' + s.key : s.kind === 'telegram' ? 'https://t.me/' + s.key : 'https://eitaa.com/' + s.key;
+  }
+  function renderCrawlSuggestions(){
+    const wrap = document.getElementById('crawl-sug-wrap');
+    const box = document.getElementById('crawl-sug-list');
+    if(!wrap || !box) return;
+    wrap.hidden = !CRAWL_SUGGEST.length;
+    box.innerHTML = CRAWL_SUGGEST.map(s=>{
+      const stat = toFaDigits(s.hits) + ' مطلب مرتبط به آن لینک داده' + (s.found ? '، ' + toFaDigits(s.found) + ' صفحه‌ی آن درباره‌ی حوزه بود' : '');
+      return `<div class="crawl-site crawl-sug">
+        <div class="crawl-site-main">
+          <div class="crawl-site-name"><span class="crawl-sug-kind">${escHtml(CRAWL_SUG_KIND[s.kind] || s.kind)}</span><a class="crawl-site-host" href="${safeUrl(crawlSugUrl(s))}" target="_blank" rel="noopener" dir="ltr">${escHtml(s.kind === 'site' ? s.key : '@' + s.key)}</a></div>
+          <div class="crawl-site-status">${escHtml(stat)}${s.sample_url ? ` — <a href="${safeUrl(s.sample_url)}" target="_blank" rel="noopener">نمونه</a>` : ''}</div>
+        </div>
+        <div class="crawl-site-acts">
+          <button type="button" class="usr-act" onclick="addCrawlSuggestion(${Number(s.id)})">افزودن</button>
+          <button type="button" class="usr-act" onclick="ignoreCrawlSuggestion(${Number(s.id)})">نادیده گرفتن</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  async function setCrawlSuggestionStatus(id, status){
+    const r = await api('/crawl_suggestions?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ status }) });
+    if(r.ok){ CRAWL_SUGGEST = CRAWL_SUGGEST.filter(x=>x.id !== id); renderCrawlSuggestions(); }
+    return r.ok;
+  }
+  async function ignoreCrawlSuggestion(id){
+    if(!await setCrawlSuggestionStatus(id, 'ignored')) showToast('انجام نشد؛ دوباره امتحان کنید.');
+  }
+  async function addCrawlSuggestion(id){
+    const s = CRAWL_SUGGEST.find(x=>x.id === id);
+    if(!s) return;
+    let r;
+    if(s.kind === 'site'){
+      r = await api('/crawl_sites', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ name: s.name || s.key, url: 'https://' + s.key }) });
+    }else{
+      r = await api('/channels', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ platform: s.kind, username: s.key, title: s.key, active: true }) });
+    }
+    if(!r.ok && r.status !== 409){ showToast('افزودن انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
+    await setCrawlSuggestionStatus(id, 'added');
+    if(s.kind === 'site'){
+      await loadCrawlSites();
+      showToast('«' + s.key + '» به منابع خزنده اضافه شد و در اجرای بعدی جست‌وجو می‌شود. نام فارسی آن را می‌توانید بعداً با حذف و افزودن دوباره اصلاح کنید.');
+    }else{
+      try{ await loadChannels(); renderChanList(); loadCrawlSites(); }catch(e){}
+      showToast('کانال @' + s.key + ' به «مدیریت منابع» اضافه شد؛ پست‌هایش از اجرای بعدی جمع و بررسی می‌شود. نام و بخش‌های نمایش آن را از همان‌جا تنظیم کنید.');
+    }
+  }
+  document.getElementById('add-crawl-btn').addEventListener('click', async ()=>{
+    const nameEl = document.getElementById('new-crawl-name');
+    const urlEl = document.getElementById('new-crawl-url');
+    const smEl = document.getElementById('new-crawl-sitemap');
+    const name = nameEl.value.trim();
+    const norm = v=>{ v = v.trim(); if(!v) return ''; if(!/^https?:\/\//i.test(v)) v = 'https://' + v; try{ const u = new URL(v); return u.origin + u.pathname.replace(/\/+$/, ''); }catch(e){ return null; } };
+    const url = norm(urlEl.value);
+    const sitemap = smEl.value.trim() ? (()=>{ try{ return new URL(/^https?:\/\//i.test(smEl.value.trim()) ? smEl.value.trim() : 'https://' + smEl.value.trim()).href; }catch(e){ return null; } })() : '';
+    if(!name || !url){ showToast(url === null ? 'نشانی سایت درست نیست؛ مثلاً https://www.isna.ir' : 'نام و نشانی سایت را وارد کنید.'); return; }
+    if(sitemap === null){ showToast('نشانی فهرست خبری درست نیست؛ می‌توانید آن را خالی بگذارید.'); return; }
+    const r = await api('/crawl_sites', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ name, url, sitemap_url: sitemap || null }) });
+    if(!r.ok){ showToast(r.status === 409 ? 'این سایت قبلاً اضافه شده است.' : 'افزودن انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
+    nameEl.value = ''; urlEl.value = ''; smEl.value = '';
+    await loadCrawlSites();
+    showToast('«' + name + '» اضافه شد و در اجرای بعدی خزنده جست‌وجو می‌شود.');
   });
 
   // ---- گروه‌های گالری «یادداشت‌ها» (چهره‌ها / سازمان‌ها) ----
@@ -9336,6 +9878,7 @@
     ['news_topics', 'میان‌برهای جست‌وجوی وب‌سایت‌ها'], ['dossier_topics', 'پرونده‌های موضوعی'],
     ['app_users', 'فهرست کاربران'], ['notify_subscribers', 'مشترکین اطلاع از انتشار'],
     ['announcements', 'اطلاعیه‌ها'], ['feedback', 'نظرات کاربران'],
+    ['crawl_sites', 'منابع خزنده‌ی «درباره حوزه»'],
   ];
   function renderBackupPanel(){
     const list = document.getElementById('backup-list');
@@ -9938,6 +10481,7 @@
     archive_reports:['بسته‌ی سایر نهادها','content'], school_reports:['گزارش برنامه مدارس','content'], announcements:['اطلاعیه','content'],
     app_users:['کاربر','users'], feedback:['نظر کاربر','users'], notify_subscribers:['مشترک اطلاع‌رسانی','users'],
     posts:['پست','posts'], app_config:['رمز عبور','security'],
+    crawl_sites:['منبع خزنده','sources'], hawza_mentions:['خبر «درباره حوزه»','content'],
   };
   const AUDIT_GROUPS = [['all','همه'],['sources','منابع'],['content','محتوا'],['posts','پست‌ها'],['users','کاربران'],['security','امنیت']];
   const AUDIT_OP = { insert:['افزودن','add'], update:['ویرایش',''], delete:['حذف','del'], hide:['پنهان کردن','del'], unhide:['بازگرداندن','add'], password:['تغییر رمز','sec'], publish:['انتشار','add'] };
@@ -10059,6 +10603,7 @@
     }
     else if(s === 'uploads') t = UPLOADS_TAB;
     else if(s === 'activity') t = ACT_TAB;
+    else if(s === 'hawza') t = HAWZA_TAB;
     const key = [s, t, ch].filter(x=>x !== null && x !== undefined && x !== '').join('/');
     return { jarian:1, key, s, t, ch };
   }
@@ -10110,6 +10655,7 @@
     }
     if(st.s === 'uploads' && st.t && ['magazines','archive','schools'].includes(st.t) && st.t !== UPLOADS_TAB) setUploadsTab(st.t);
     if(st.s === 'activity' && st.t && ACT_TAB_INFO[st.t] && st.t !== ACT_TAB) setActTab(st.t);
+    if(st.s === 'hawza' && st.t && HAWZA_TAB_INFO[st.t] && st.t !== HAWZA_TAB) setHawzaTab(st.t);
   }
   window.addEventListener('popstate', e=>{
     // اول پنجره‌ی باز (عکس/فیلم، ویرایش منبع...) بسته می‌شه، نه خودِ بخش
@@ -10145,7 +10691,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.22.4';
+  const APP_VERSION = '5.23.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----

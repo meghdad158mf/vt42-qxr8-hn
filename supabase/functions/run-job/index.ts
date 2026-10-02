@@ -32,6 +32,7 @@ const JOBS: Record<string, string> = {
   insights: "analyze-news-insights.yml",
   keywords: "extract-keywords.yml",
   cleanup: "cleanup-media.yml",
+  hawza: "crawl-hawza.yml",
 };
 
 const corsHeaders = {
