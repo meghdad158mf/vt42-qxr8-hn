@@ -2109,7 +2109,6 @@
   .crawl-site.is-off{ opacity:.6; }
   .crawl-site-acts{ display:flex; gap:6px; flex:none; }
   .usr-act.is-del{ color: var(--danger); }
-  #crawl-site-list{ max-height:520px; overflow:auto; }
   @media (max-width:640px){ .crawl-site{ flex-wrap:wrap; } .crawl-site-acts{ width:100%; justify-content:flex-end; } }
   .crawl-sug-wrap{ margin-top:18px; padding-top:14px; border-top:1px dashed var(--border-strong); }
   .crawl-sug-title{ font-size:14px; font-weight:800; color: var(--text); margin:0 0 6px; }
@@ -2120,7 +2119,29 @@
   .hab-foot-acts{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .hab-card .is-translated{ color: var(--accent-strong); }
   .crawl-sug-kind.is-chan{ background: var(--surface-2); color: var(--text-dim); border-color: var(--border-strong); font-weight:600; }
-  .crawl-edit .add-row{ margin:0; width:100%; }
+  .crawl-scroll{ max-height:520px; }
+  .crawl-table td.c-name{ font-weight:700; white-space:normal; min-width:120px; width:auto; }
+  .crawl-table td.c-host{ max-width:220px; overflow:hidden; text-overflow:ellipsis; }
+  .crawl-table td.c-st{ white-space:normal; min-width:200px; font-size:12px; color: var(--text-dim); }
+  .crawl-st{ position:relative; padding-inline-start:14px; display:inline-block; }
+  .crawl-st::before{ content:''; position:absolute; inset-inline-start:0; top:.5em; width:7px; height:7px; border-radius:50%; background: var(--border-strong); }
+  .crawl-table tr.is-ok .crawl-st::before{ background: var(--ok); }
+  .crawl-table tr.is-bad .crawl-st{ color: var(--danger); }
+  .crawl-table tr.is-bad .crawl-st::before{ background: var(--danger); }
+  .crawl-table tr.is-off td{ opacity:.6; }
+  .crawl-plat{ font-size:11px; font-weight:700; padding:2px 9px; border-radius:100px; background: var(--surface-2); color: var(--text-dim); border:1px solid var(--border); }
+  .crawl-plat.is-website{ background: rgba(234,179,147,0.18); color: var(--accent-strong); border-color: rgba(234,179,147,0.5); }
+  @media (max-width:640px){
+    .crawl-scroll{ overflow-x:hidden; }
+    .crawl-table thead{ display:none; }
+    .crawl-table, .crawl-table tbody{ display:block; }
+    .crawl-table tr{ display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"name plat" "host from" "st st"; row-gap:4px; column-gap:8px; padding:10px 2px; border-bottom:1px solid var(--border); }
+    .crawl-table td{ border:none; padding:0; min-width:0 !important; max-width:none !important; width:auto !important; }
+    .crawl-table td.c-name{ grid-area:name; } .crawl-table td.c-plat{ grid-area:plat; justify-self:end; }
+    .crawl-table td.c-host{ grid-area:host; } .crawl-table td.c-from{ grid-area:from; justify-self:end; }
+    .crawl-table td.c-st{ grid-area:st; }
+    .crawl-table td.usr-empty{ display:block; }
+  }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -2134,7 +2155,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۳.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۳.۱</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2389,6 +2410,7 @@
         <div class="ce-step">
           <div class="ce-step-head"><span class="ce-num">۳</span>در کدام بخش‌های سایت نمایش داده شود؟</div>
           <div id="ce-sections"></div>
+          <p class="ce-hint">همه‌ی منابع خودکار برای «آنچه درباره حوزه گفته می‌شود» هم بررسی می‌شوند؛ اگر هیچ بخشی را انتخاب نکنید، منبع فقط برای همین خزنده بررسی می‌شود.</p>
         </div>
 
         <div class="ce-actions">
@@ -3253,18 +3275,17 @@
           </details>
 
           <details class="panel settings-accordion" id="crawl-sites-panel">
-            <summary class="panel-head"><span class="panel-pill">منابع خزنده‌ی «درباره حوزه»</span><span class="settings-sum-desc" id="crawl-sites-sum">سایت‌های خبری‌ای که خزنده هر ۳ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد</span></summary>
-            <p class="settings-help">سایت‌هایی که در «مدیریت منابع» (با RSS، حتی فقط یک بخش از سایت) تعریف شده‌اند، خودکار با نشانی اصلی‌شان به این فهرست اضافه و <b>کامل</b> گشته می‌شوند (سایت‌های غیرفارسی متوقف اضافه می‌شوند). کانال‌های ایتا، تلگرام و بله‌ی «مدیریت منابع» هم خودکار بررسی می‌شوند. خزنده خبرهای تازه‌ی هر سایت را از فهرست خبری آن (sitemap)، فید RSS یا صفحه‌ی اول پیدا می‌کند، متن کامل هر خبر را می‌خواند و خبرهایی را که درباره‌ی حوزه هستند در تب «آنچه درباره حوزه گفته می‌شود» نمایش می‌دهد. خبری مرتبط حساب می‌شود که یکی از این عبارت‌ها در تیترش باشد یا در متنش دست‌کم ۲ بار بیاید: حوزه علمیه، حوزویان، طلاب و طلبه، روحانیت و روحانیون، مراجع و مرجع تقلید، جامعه مدرسین، شورای عالی حوزه، مدیر حوزه‌ها، مدرسه و مدارس علمیه، معممین. پست‌های کانال‌های ایتا، تلگرام و بله‌ای که سامانه رصد می‌کند و صفحه‌هایی که مطالب مرتبط به آن‌ها لینک داده‌اند هم با همین قاعده بررسی می‌شوند. برای افزودن سایت، نشانی صفحه‌ی اول آن را وارد کنید؛ نشانی فهرست خبری (sitemap) اختیاری است و اگر خالی بماند، خودکار پیدا می‌شود.</p>
-            <div class="add-row">
-              <input type="text" id="new-crawl-name" aria-label="نام سایت" placeholder="نام سایت (مثلاً ایسنا)" />
-              <input type="url" id="new-crawl-url" aria-label="نشانی سایت" placeholder="https://www.example.ir" dir="ltr" />
-              <input type="url" id="new-crawl-sitemap" aria-label="نشانی فهرست خبری (اختیاری)" placeholder="sitemap (اختیاری)" dir="ltr" />
-              <button class="btn primary" id="add-crawl-btn" type="button">افزودن سایت</button>
+            <summary class="panel-head"><span class="panel-pill">منابع خزنده‌ی «درباره حوزه»</span><span class="settings-sum-desc" id="crawl-sites-sum">سایت‌ها و کانال‌هایی که خزنده هر ۳ ساعت برای پیدا کردن مطالب مربوط به حوزه بررسی می‌کند</span></summary>
+            <p class="settings-help">همه‌ی منابع «مدیریت منابع» خودکار در این فهرست هستند و افزودن، توقف و حذفشان از همان‌جا انجام می‌شود؛ برای منبعی که فقط خزنده باید بررسی کند، در «مدیریت منابع» <b>هیچ بخشی را تیک نزنید</b>. وب‌سایت‌ها با نشانی اصلی‌شان <b>کامل</b> گشته می‌شوند، حتی اگر RSS ثبت‌شده فقط مربوط به یک بخش سایت باشد. «فهرست پایه» سایت‌های خبری اصلی کشور است که بدون ثبت در «مدیریت منابع» هم گشته می‌شوند.</p>
+            <p class="settings-help">مطلبی مرتبط حساب می‌شود که یکی از این عبارت‌ها در تیترش باشد یا در متنش دست‌کم ۲ بار بیاید: حوزه علمیه، حوزویان، طلاب و طلبه، روحانیت و روحانیون، مراجع و مرجع تقلید، جامعه مدرسین، شورای عالی حوزه، مدیر حوزه‌ها، مدرسه و مدارس علمیه، معممین. سایت‌های خودِ حوزه (تب «اخبار حوزه») بررسی نمی‌شوند و از سایت‌های غیرفارسی فقط فید RSS بررسی می‌شود.</p>
+            <div class="usr-toolbar">
+              <div class="usr-filters" id="crawl-filter-chips"></div>
+              <input type="search" class="usr-search" id="crawl-search" aria-label="جست‌وجوی منابع خزنده" placeholder="جست‌وجوی نام یا نشانی…" />
             </div>
-            <div id="crawl-site-list"></div>
+            <div class="usr-scroll crawl-scroll" id="crawl-site-list"></div>
             <div class="crawl-sug-wrap" id="crawl-sug-wrap" hidden>
               <h4 class="crawl-sug-title">پیشنهاد منبع</h4>
-              <p class="settings-help">سایت‌ها و کانال‌های ایتا و تلگرامی که در مطالب مرتبط با حوزه به آن‌ها لینک داده شده، ولی هنوز در فهرست منابع نیستند؛ هرچه بیشتر تکرار شده باشند، بالاتر می‌آیند. با «افزودن»، سایت به همین فهرست خزنده و کانال به «مدیریت منابع» اضافه می‌شود و از اجرای بعدی جست‌وجو می‌شود.</p>
+              <p class="settings-help">سایت‌ها و کانال‌های ایتا و تلگرامی که در مطالب مرتبط با حوزه به آن‌ها لینک داده شده، ولی هنوز در فهرست منابع نیستند؛ هرچه بیشتر تکرار شده باشند، بالاتر می‌آیند. با «افزودن»، منبع بدون هیچ بخشی به «مدیریت منابع» اضافه می‌شود (یعنی فقط خزنده آن را بررسی می‌کند) و از اجرای بعدی جست‌وجو می‌شود؛ نام و بخش‌هایش را از همان‌جا تنظیم کنید.</p>
               <div id="crawl-sug-list"></div>
             </div>
           </details>
@@ -3514,7 +3535,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۲۳.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۳.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -4010,6 +4031,7 @@
     await api('/channels?id=eq.'+ch.id, {method:'DELETE'});
     await loadChannels(); await loadPosts();
     renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters(); renderNewsFeed(); renderPosts(); renderCyberPeopleGrid();
+    loadCrawlSites(); // سایت حذف‌شده از فهرست خزنده هم برداشته شود
   });
 
   function show(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
@@ -4869,7 +4891,8 @@
       (await r.json()).forEach(x=>{ last[x.channel_id] = x.last_scraped_at; });
       const LIMIT = 3*86400000;
       const PLAT = { eitaa:'ایتا', telegram:'تلگرام', website:'وب‌سایت', bale:'بله' };
-      const stale = CHANNELS.filter(c=>c.active !== false)
+      // سایتِ «فقط خزنده» (بدون بخش) ممکن است RSS نداشته باشد و هیچ‌وقت مطلبی در posts نیاورد
+      const stale = CHANNELS.filter(c=>c.active !== false && !(c.platform === 'website' && !chanSectionsOf(c).length))
         .map(c=>({ c, at: last[c.id] ? new Date(last[c.id]).getTime() : 0 }))
         .filter(x=>Date.now() - x.at > LIMIT)
         .sort((a,b)=>a.at - b.at);
@@ -8459,7 +8482,7 @@
         </div>
         <div class="chan-item-badges">${sections.length
           ? sections.map(t=>`<span class="chan-badge">${t}</span>`).join('')
-          : '<span class="chan-badge none">در هیچ بخشی نمایش داده نمی‌شود</span>'}</div>
+          : '<span class="chan-badge none" title="در هیچ بخشی نمایش داده نمی‌شود؛ فقط خزنده‌ی «درباره حوزه» آن را بررسی می‌کند">فقط خزنده‌ی درباره حوزه</span>'}</div>
         <button type="button" class="chan-item-edit">ویرایش</button>`;
       row.addEventListener('click', ()=> openChanEditor(ch));
       const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف منبع'; del.setAttribute('aria-label','حذف منبع '+(ch.title||ch.username));
@@ -8476,7 +8499,7 @@
 
   function ceUpdateHandleLabel(){
     const isWeb = ceEl('ce-platform').value === 'website';
-    ceEl('ce-handle-label').textContent = isWeb ? 'آدرس فید RSS' : 'یوزرنیم کانال (بدون @)';
+    ceEl('ce-handle-label').textContent = isWeb ? 'آدرس فید RSS (یا صفحه‌ی اول سایت، اگر فقط برای خزنده است)' : 'یوزرنیم کانال (بدون @)';
     ceEl('ce-handle').placeholder = isWeb ? 'https://example.com/rss' : 'channel_name';
     ceRenderSections();
   }
@@ -8568,7 +8591,7 @@
     const rawHandle = ceEl('ce-handle').value.trim();
     const handle = platform === 'website' ? rawHandle : rawHandle.replace(/^@/,'');
     if(!name){ showToast('نام منبع را وارد کنید'); ceEl('ce-name').focus(); return; }
-    if(!handle){ showToast(platform==='website' ? 'آدرس فید RSS را وارد کنید' : 'یوزرنیم کانال را وارد کنید'); ceEl('ce-handle').focus(); return; }
+    if(!handle){ showToast(platform==='website' ? 'آدرس فید RSS یا صفحه‌ی اول سایت را وارد کنید' : 'یوزرنیم کانال را وارد کنید'); ceEl('ce-handle').focus(); return; }
     const get = key=>{ const el = ceEl('ce-sections').querySelector(`[data-ce="${key}"]`); return el ? (el.type==='checkbox' ? el.checked : el.value) : undefined; };
     const catVal = ceEl('ce-cat').value;
     const body = { title:name, username:handle, category_id: catVal ? Number(catVal) : null };
@@ -8719,8 +8742,16 @@
   }
   async function syncCrawlSitesFromChannels(){
     const have = new Set((CRAWL_SITES || []).map(c=>crawlSiteKey(c.url)));
+    const roots = channelCrawlRoots();
+    // منبعی که از مدیریت منابع حذف یا متوقف شده، از فهرست خزنده هم برداشته می‌شه
+    // (فقط ردیف‌های ساخته‌شده از مدیریت منابع؛ «فهرست پایه» دست نمی‌خوره)
+    const gone = (CRAWL_SITES || []).filter(c=>c.source === 'channel' && !roots[crawlSiteKey(c.url)]).map(c=>Number(c.id));
+    let changed = false;
+    if(gone.length){
+      try{ changed = (await api('/crawl_sites?id=in.(' + gone.join(',') + ')', { method:'DELETE', headers:{ Prefer:'return=minimal' } })).ok; }catch(e){}
+    }
     const rows = [];
-    Object.entries(channelCrawlRoots()).forEach(([k, v])=>{
+    Object.entries(roots).forEach(([k, v])=>{
       if(have.has(k)) return;
       // سایت غیرفارسی (CNN، گاردین…): خزش کاملش سنگینه و بعضی‌ها ربات رو می‌بندن —
       // متوقف اضافه می‌شه (فید RSSش همچنان بررسی می‌شه) و مدیر می‌تونه فعالش کنه
@@ -8729,94 +8760,79 @@
       const name = (v.channels[0].title || k).split(/\s+[-–—|]\s+/)[0].trim() || k;
       rows.push({ name: name.slice(0, 80), url: v.root, active: !foreign, source: 'channel' });
     });
-    if(!rows.length) return false;
+    if(!rows.length) return changed;
     try{
       const r = await api('/crawl_sites?on_conflict=url', { method:'POST', headers:{ Prefer:'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify(rows) });
-      return r.ok;
-    }catch(e){ return false; }
+      return r.ok || changed;
+    }catch(e){ return changed; }
   }
   function crawlSiteStatus(c){
-    if(!c.active) return { cls:'is-off', text:'متوقف' };
     if(!c.last_run_at) return { cls:'', text:'هنوز اجرا نشده است' };
     const when = newsRelTime(c.last_run_at);
     if(c.last_error) return { cls:'is-bad', text: when + '، ' + c.last_error };
-    return { cls:'is-ok', text: when + '، ' + toFaDigits(c.last_pages || 0) + ' خبر تازه خوانده شد، ' + toFaDigits(c.last_found || 0) + ' خبر مرتبط' + (c.last_via ? '، از ' + (CRAWL_VIA[c.last_via] || c.last_via) : '') };
+    return { cls:'is-ok', text: when + '، ' + toFaDigits(c.last_pages || 0) + ' خبر تازه، ' + toFaDigits(c.last_found || 0) + ' مرتبط' + (c.last_via ? '، از ' + (CRAWL_VIA[c.last_via] || c.last_via) : '') };
+  }
+  // فهرست نمایشی (۵.۲۳.۱ — خواست کاربر: مدیریت فقط از «مدیریت منابع»، اینجا فقط جدول)
+  const CRAWL_PLAT = { website:'سایت', eitaa:'ایتا', telegram:'تلگرام', bale:'بله' };
+  let CRAWL_FILTER = '', CRAWL_Q = '';
+  function crawlRows(){
+    const linked = channelCrawlRoots();
+    const rows = [];
+    (CRAWL_SITES || []).forEach(c=>{
+      const ch = linked[crawlSiteKey(c.url)];
+      // ردیف ساخته‌شده از مدیریت منابع که منبعش دیگه فعال نیست، تا همگام‌سازی بعدی پاک می‌شه
+      if(c.source === 'channel' && !ch) return;
+      let host = c.url; try{ const u = new URL(c.url); host = u.host.replace(/^www\./, '') + u.pathname.replace(/\/+$/, ''); }catch(e){}
+      const st = c.active ? crawlSiteStatus(c) : { cls:'is-off', text: ch ? 'غیرفارسی؛ فقط فید RSS آن بررسی می‌شود' : 'متوقف' };
+      rows.push({ kind:'site', name: c.name, plat:'website', host, url: c.url, from: ch ? 'مدیریت منابع' : 'فهرست پایه', st, bad: !!(c.active && c.last_error) });
+    });
+    CHANNELS.filter(c=>['eitaa','telegram','bale'].includes(c.platform) && c.active !== false).forEach(c=>{
+      const u = c.platform === 'telegram' ? 'https://t.me/' + c.username : c.platform === 'eitaa' ? 'https://eitaa.com/' + c.username : 'https://ble.ir/' + c.username;
+      rows.push({ kind:'social', name: c.title || c.username, plat: c.platform, host: '@' + c.username, url: u, from:'مدیریت منابع',
+        st: { cls:'is-ok', text: chanSectionsOf(c).length ? 'پست‌هایش بررسی می‌شود' : 'پست‌هایش بررسی می‌شود (فقط برای خزنده)' }, bad:false });
+    });
+    return rows;
   }
   function renderCrawlSites(){
     const box = document.getElementById('crawl-site-list');
     if(!box) return;
+    const chips = document.getElementById('crawl-filter-chips');
     if(CRAWL_SITES_ERR === 'missing'){
+      chips.innerHTML = '';
       box.innerHTML = '<p class="settings-help">جدول این بخش هنوز ساخته نشده است؛ فایل db/migration_041_hawza_crawler.sql را در SQL Editor سوپابیس اجرا کنید.</p>';
       return;
     }
-    if(CRAWL_SITES_ERR === 'error'){ box.innerHTML = '<p class="settings-help">دریافت فهرست انجام نشد؛ صفحه را دوباره باز کنید.</p>'; return; }
-    const list = CRAWL_SITES || [];
-    const active = list.filter(c=>c.active).length;
-    const bad = list.filter(c=>c.active && c.last_error).length;
-    document.getElementById('crawl-sites-sum').textContent = toFaDigits(active) + ' سایت فعال' + (bad ? '، ' + toFaDigits(bad) + ' سایت در آخرین اجرا خطا داشت' : '') + '؛ سایت‌هایی که خزنده هر ۳ ساعت برای پیدا کردن خبرهای مربوط به حوزه می‌گردد';
-    const sorted = list.slice().sort((a,b)=>(b.active - a.active) || ((b.active && b.last_error ? 1 : 0) - (a.active && a.last_error ? 1 : 0)) || a.name.localeCompare(b.name, 'fa'));
-    const fromChannels = channelCrawlRoots();
-    box.innerHTML = sorted.map(c=>{
-      const st = crawlSiteStatus(c);
-      let host = c.url; try{ const u = new URL(c.url); host = u.host.replace(/^www\./, '') + u.pathname.replace(/\/+$/, ''); }catch(e){}
-      const linked = fromChannels[crawlSiteKey(c.url)];
-      if(CRAWL_EDIT_ID === c.id){
-        return `<div class="crawl-site crawl-edit">
-          <div class="add-row">
-            <input type="text" id="crawl-edit-name" aria-label="نام سایت" value="${escAttr(c.name)}" />
-            <input type="url" id="crawl-edit-sitemap" aria-label="نشانی فهرست خبری (اختیاری)" placeholder="sitemap (اختیاری؛ خالی = پیدا کردن خودکار)" dir="ltr" value="${escAttr(c.sitemap_url || '')}" />
-            <button type="button" class="btn primary btn-sm" onclick="saveCrawlSite(${Number(c.id)})">ذخیره</button>
-            <button type="button" class="btn btn-sm" onclick="CRAWL_EDIT_ID=null; renderCrawlSites()">انصراف</button>
-          </div>
-        </div>`;
-      }
-      return `<div class="crawl-site ${st.cls}">
-        <div class="crawl-site-main">
-          <div class="crawl-site-name">${escHtml(c.name)} <a class="crawl-site-host" href="${safeUrl(c.url)}" target="_blank" rel="noopener" dir="ltr">${escHtml(host)}</a>${linked ? '<span class="crawl-sug-kind is-chan" title="این سایت در «مدیریت منابع» هم هست و خودکار به این فهرست اضافه شده است">از مدیریت منابع</span>' : ''}</div>
-          <div class="crawl-site-status">${escHtml(st.text)}</div>
-        </div>
-        <div class="crawl-site-acts">
-          <button type="button" class="usr-act" onclick="toggleCrawlSite(${Number(c.id)})">${c.active ? 'توقف' : 'فعال‌سازی'}</button>
-          <button type="button" class="usr-act" onclick="CRAWL_EDIT_ID=${Number(c.id)}; renderCrawlSites()">ویرایش</button>
-          ${linked ? '' : `<button type="button" class="usr-act is-del" onclick="deleteCrawlSite(${Number(c.id)})">حذف</button>`}
-        </div>
-      </div>`;
-    }).join('') || '<p class="settings-help">هنوز سایتی اضافه نشده است.</p>';
+    if(CRAWL_SITES_ERR === 'error'){ chips.innerHTML = ''; box.innerHTML = '<p class="settings-help">دریافت فهرست انجام نشد؛ صفحه را دوباره باز کنید.</p>'; return; }
+    const all = crawlRows();
+    const sites = all.filter(r=>r.kind === 'site'), social = all.filter(r=>r.kind === 'social');
+    const activeSites = sites.filter(r=>r.st.cls !== 'is-off').length;
+    const bad = all.filter(r=>r.bad).length;
+    document.getElementById('crawl-sites-sum').textContent = toFaDigits(activeSites) + ' سایت و ' + toFaDigits(social.length) + ' کانال' + (bad ? '؛ ' + toFaDigits(bad) + ' سایت در آخرین اجرا خطا داشت' : '') + '؛ هر ۳ ساعت بررسی می‌شوند';
+    if(CRAWL_FILTER === 'bad' && !bad) CRAWL_FILTER = '';
+    const F = [['', 'همه', all.length], ['site', 'سایت‌ها', sites.length], ['social', 'شبکه‌های اجتماعی', social.length]];
+    if(bad) F.push(['bad', 'خطا در آخرین اجرا', bad]);
+    chips.innerHTML = F.map(([k, t, n])=>`<button type="button" class="usr-chip${CRAWL_FILTER === k ? ' active' : ''}" data-crawl-f="${k}">${t}<span>${toFaDigits(n)}</span></button>`).join('');
+    const q = searchNorm(CRAWL_Q);
+    const rows = all.filter(r=>(!CRAWL_FILTER || (CRAWL_FILTER === 'bad' ? r.bad : r.kind === CRAWL_FILTER)) && (!q || searchNorm(r.name + ' ' + r.host).includes(q)))
+      .sort((a,b)=>(b.bad - a.bad) || ((a.st.cls === 'is-off') - (b.st.cls === 'is-off')) || (a.kind === b.kind ? 0 : a.kind === 'site' ? -1 : 1) || String(a.name).localeCompare(String(b.name), 'fa'));
+    box.innerHTML = `<table class="usr-table crawl-table">
+      <thead><tr><th>نام</th><th>بستر</th><th>نشانی</th><th>از کجا</th><th>وضعیت</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr class="${r.st.cls}">
+        <td class="c-name">${escHtml(r.name)}</td>
+        <td class="c-plat"><span class="crawl-plat is-${r.plat}">${CRAWL_PLAT[r.plat] || r.plat}</span></td>
+        <td class="c-host"><a class="crawl-site-host" href="${safeUrl(r.url)}" target="_blank" rel="noopener" dir="ltr">${escHtml(r.host)}</a></td>
+        <td class="c-from usr-dim">${r.from}</td>
+        <td class="c-st"><span class="crawl-st">${escHtml(r.st.text)}</span></td>
+      </tr>`).join('') || '<tr><td class="usr-empty" colspan="5">موردی پیدا نشد.</td></tr>'}</tbody>
+    </table>`;
   }
-  let CRAWL_EDIT_ID = null;
-  async function saveCrawlSite(id){
-    const name = document.getElementById('crawl-edit-name').value.trim();
-    let sitemap = document.getElementById('crawl-edit-sitemap').value.trim();
-    if(!name){ showToast('نام سایت را وارد کنید.'); return; }
-    if(sitemap){
-      try{ sitemap = new URL(/^https?:\/\//i.test(sitemap) ? sitemap : 'https://' + sitemap).href; }
-      catch(e){ showToast('نشانی فهرست خبری درست نیست؛ می‌توانید آن را خالی بگذارید.'); return; }
-    }
-    const r = await api('/crawl_sites?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ name, sitemap_url: sitemap || null }) });
-    if(!r.ok){ showToast('ذخیره انجام نشد؛ دوباره امتحان کنید.'); return; }
-    const c = (CRAWL_SITES || []).find(x=>x.id === id);
-    if(c){ c.name = name; c.sitemap_url = sitemap || null; }
-    CRAWL_EDIT_ID = null;
+  document.getElementById('crawl-filter-chips').addEventListener('click', e=>{
+    const b = e.target.closest('[data-crawl-f]');
+    if(!b) return;
+    CRAWL_FILTER = b.dataset.crawlF;
     renderCrawlSites();
-    showToast('ذخیره شد');
-  }
-  async function toggleCrawlSite(id){
-    const c = (CRAWL_SITES || []).find(x=>x.id === id);
-    if(!c) return;
-    const r = await api('/crawl_sites?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ active: !c.active }) });
-    if(!r.ok){ showToast('انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
-    c.active = !c.active;
-    renderCrawlSites();
-    showToast(c.active ? '«' + c.name + '» در اجرای بعدی خزنده جست‌وجو می‌شود' : '«' + c.name + '» دیگر جست‌وجو نمی‌شود');
-  }
-  async function deleteCrawlSite(id){
-    const c = (CRAWL_SITES || []).find(x=>x.id === id);
-    if(!c || !await uiConfirm('حذف «' + c.name + '» از منابع خزنده؟\nخبرهایی که تا الان از این سایت پیدا شده، باقی می‌مانند.')) return;
-    const r = await api('/crawl_sites?id=eq.' + id, { method:'DELETE', headers:{ Prefer:'return=minimal' } });
-    if(!r.ok){ showToast('حذف انجام نشد؛ دوباره امتحان کنید.'); return; }
-    CRAWL_SITES = CRAWL_SITES.filter(x=>x.id !== id);
-    renderCrawlSites();
-  }
+  });
+  document.getElementById('crawl-search').addEventListener('input', e=>{ CRAWL_Q = e.target.value; renderCrawlSites(); });
   let CRAWL_SUGGEST = [];
   const CRAWL_SUG_KIND = { site:'سایت', eitaa:'ایتا', telegram:'تلگرام' };
   async function loadCrawlSuggestions(){
@@ -8859,39 +8875,15 @@
   async function addCrawlSuggestion(id){
     const s = CRAWL_SUGGEST.find(x=>x.id === id);
     if(!s) return;
-    let r;
-    if(s.kind === 'site'){
-      r = await api('/crawl_sites', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ name: s.name || s.key, url: 'https://' + s.key }) });
-    }else{
-      r = await api('/channels', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ platform: s.kind, username: s.key, title: s.key, active: true }) });
-    }
+    // همه‌چیز از «مدیریت منابع» (۵.۲۳.۱): سایت با نشانی صفحه‌ی اول و بدون بخش = فقط خزنده
+    const site = s.kind === 'site';
+    const r = await api('/channels', { method:'POST', headers:{ Prefer:'return=minimal' },
+      body: JSON.stringify({ platform: site ? 'website' : s.kind, username: site ? 'https://' + s.key : s.key, title: s.key, active: true }) });
     if(!r.ok && r.status !== 409){ showToast('افزودن انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
     await setCrawlSuggestionStatus(id, 'added');
-    if(s.kind === 'site'){
-      await loadCrawlSites();
-      showToast('«' + s.key + '» به منابع خزنده اضافه شد و در اجرای بعدی جست‌وجو می‌شود. نام فارسی آن را می‌توانید بعداً با حذف و افزودن دوباره اصلاح کنید.');
-    }else{
-      try{ await loadChannels(); renderChanList(); loadCrawlSites(); }catch(e){}
-      showToast('کانال @' + s.key + ' به «مدیریت منابع» اضافه شد؛ پست‌هایش از اجرای بعدی جمع و بررسی می‌شود. نام و بخش‌های نمایش آن را از همان‌جا تنظیم کنید.');
-    }
+    try{ await loadChannels(); renderChanList(); renderChanSectionChips(); await loadCrawlSites(); }catch(e){}
+    showToast((site ? '«' + s.key + '»' : 'کانال @' + s.key) + ' بدون بخش به «مدیریت منابع» اضافه شد و از اجرای بعدی خزنده بررسی می‌شود. نام فارسی و بخش‌های نمایشش را از همان‌جا تنظیم کنید.');
   }
-  document.getElementById('add-crawl-btn').addEventListener('click', async ()=>{
-    const nameEl = document.getElementById('new-crawl-name');
-    const urlEl = document.getElementById('new-crawl-url');
-    const smEl = document.getElementById('new-crawl-sitemap');
-    const name = nameEl.value.trim();
-    const norm = v=>{ v = v.trim(); if(!v) return ''; if(!/^https?:\/\//i.test(v)) v = 'https://' + v; try{ const u = new URL(v); return u.origin + u.pathname.replace(/\/+$/, ''); }catch(e){ return null; } };
-    const url = norm(urlEl.value);
-    const sitemap = smEl.value.trim() ? (()=>{ try{ return new URL(/^https?:\/\//i.test(smEl.value.trim()) ? smEl.value.trim() : 'https://' + smEl.value.trim()).href; }catch(e){ return null; } })() : '';
-    if(!name || !url){ showToast(url === null ? 'نشانی سایت درست نیست؛ مثلاً https://www.isna.ir' : 'نام و نشانی سایت را وارد کنید.'); return; }
-    if(sitemap === null){ showToast('نشانی فهرست خبری درست نیست؛ می‌توانید آن را خالی بگذارید.'); return; }
-    const r = await api('/crawl_sites', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ name, url, sitemap_url: sitemap || null }) });
-    if(!r.ok){ showToast(r.status === 409 ? 'این سایت قبلاً اضافه شده است.' : 'افزودن انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
-    nameEl.value = ''; urlEl.value = ''; smEl.value = '';
-    await loadCrawlSites();
-    showToast('«' + name + '» اضافه شد و در اجرای بعدی خزنده جست‌وجو می‌شود.');
-  });
-
   // ---- گروه‌های گالری «یادداشت‌ها» (چهره‌ها / سازمان‌ها) ----
   const PROFILE_GROUP_KIND_LABEL = { figures:'چهره‌ها', orgs:'سازمان‌ها' };
   function renderProfileGroupAdmin(){
@@ -10691,7 +10683,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.23.0';
+  const APP_VERSION = '5.23.1';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----

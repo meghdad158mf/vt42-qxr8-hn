@@ -867,11 +867,17 @@ def main() -> None:
 
     ok = True
     if found:
+        # PostgREST در درج گروهی همه‌ی ردیف‌ها رو با کلیدهای یکسان می‌خواد (PGRST102) — post_id فقط
+        # در ردیف‌های شبکه‌های اجتماعی هست؛ بقیه با null پر می‌شن
+        cols = sorted({k for f in found for k in f if not k.startswith("_")})
+        rows_out = [{k: f.get(k) for k in cols} for f in found]
         r = db(token, "POST", "hawza_mentions", params={"on_conflict": "url"},
-               headers={"Prefer": "resolution=ignore-duplicates,return=minimal"}, json=found)
+               headers={"Prefer": "resolution=ignore-duplicates,return=minimal"}, json=rows_out)
         if not r.ok:
             print(f"[!] insert hawza_mentions failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
             ok = False
+            # خبرها ذخیره نشدن — «دیده‌شده» هم ثبت نشه تا اجرای بعدی دوباره پیداشون کنه
+            seen = []
     if suggest:
         r = db(token, "POST", "rpc/crawl_suggest", json={"items": list(suggest.values())})
         if not r.ok:
