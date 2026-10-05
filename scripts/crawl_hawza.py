@@ -855,6 +855,10 @@ def main() -> None:
             keys.add(k)
             merged.append(f)
     found = merged
+    # PostgREST درج گروهی با کلیدهای ناهمسان رو کامل رد می‌کنه (PGRST102) — پست‌های
+    # شبکه‌ی اجتماعی post_id دارن و خبر سایت/لینک نه؛ همه یه مجموعه کلید بگیرن
+    for f in found:
+        f.setdefault("post_id", None)
 
     print(f"[*] read {sum(r['pages'] for r in results) + len(link_seen)} page(s), {len(found)} about hawza, "
           f"{failed}/{len(rows)} site(s) failed, {time.time() - started:.0f}s")
@@ -876,7 +880,8 @@ def main() -> None:
         r = db(token, "POST", "rpc/crawl_suggest", json={"items": list(suggest.values())})
         if not r.ok:
             print(f"[!] crawl_suggest failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
-    for i in range(0, len(seen), 500):
+    # اگه ذخیره‌ی خبرها شکست خورد، «دیده‌شده» علامت نخورن تا اجرای بعدی دوباره امتحانشون کنه
+    for i in range(0, len(seen) if ok else 0, 500):
         r = db(token, "POST", "crawl_seen", params={"on_conflict": "url_hash"},
                headers={"Prefer": "resolution=ignore-duplicates,return=minimal"},
                json=[{"url_hash": h} for h in seen[i:i + 500]])
