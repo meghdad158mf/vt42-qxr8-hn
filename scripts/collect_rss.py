@@ -100,6 +100,14 @@ def entry_posted_at(entry) -> str | None:
     parsed = entry.get("published_parsed") or entry.get("updated_parsed")
     if not parsed:
         return None
+    y, mo, d = parsed[:3]
+    # بعضی فیدها (مثل حوزه خراسان) روز و ماه میلادی ولی سال شمسی می‌نویسن
+    # («01 Oct 1405») — سال میلادی = شمسی + ۶۲۱ (از ۱ فروردین/۲۱ مارس به بعد) یا + ۶۲۲
+    if 1300 <= y < 1500:
+        y += 621 if (mo, d) >= (3, 21) else 622
+        parsed = (y, *parsed[1:])
+    elif y < 1900:
+        return None
     dt = datetime.fromtimestamp(calendar.timegm(parsed), tz=timezone.utc)
     return dt.isoformat()
 
