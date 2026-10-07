@@ -23,11 +23,14 @@ const fa = s => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code dir="ltr">$1</code>');
 
+// markdown → HTML: «# بخش …» = نوار بخش (از صفحه‌ی تازه)، پاراگراف بعدش = توضیح بخش؛
+// «## ۱. عنوان» = کارت با شماره‌ی هلویی؛ بقیه فهرست و پاراگراف
 function mdToHtml(md){
   const out = [];
   const stack = []; // تورفتگی‌های <ul> باز
   const closeTo = depth => { while(stack.length > depth){ out.push('</li></ul>'); stack.pop(); } };
-  let first = true;
+  let first = true, inCard = false, partOpen = false;
+  const closeCard = () => { closeTo(0); if(inCard){ out.push('</div></section>'); inCard = false; } };
   for(const raw of md.split('\n')){
     const line = raw.replace(/\s+$/, '');
     const li = line.match(/^(\s*)- (.*)$/);
@@ -39,22 +42,34 @@ function mdToHtml(md){
       continue;
     }
     closeTo(0);
-    if(!line.trim()) continue;
-    if(line === '---'){ out.push('<hr>'); continue; }
+    if(!line.trim() || line === '---') continue;
     const h = line.match(/^(#{1,3}) (.*)$/);
-    if(h){
-      const n = h[1].length;
-      if(n === 1 && first){ first = false; continue; } // تیتر اصلی روی جلد می‌آد
-      out.push(`<h${n}${n === 1 ? ' class="part"' : ''}>${inline(h[2])}</h${n}>`);
+    if(h && h[1].length === 1){
+      if(first){ first = false; continue; } // تیتر اصلی روی جلد می‌آد
+      closeCard();
+      const [label, ...rest] = h[2].split(':');
+      const n = partOpen ? '۲' : '۱'; partOpen = true;
+      out.push(`<header class="part"><span class="part-n">${n}</span><div><span class="part-label">${inline(label.trim())}</span><h1>${inline(rest.join(':').trim() || label)}</h1>`);
+      out.push('<!--part-desc--></div></header>');
       continue;
     }
+    if(h){
+      closeCard();
+      const m = h[2].match(/^([۰-۹0-9]+)\.\s*(.*)$/);
+      out.push(`<section class="card"><header class="card-h"><span class="num">${m ? m[1] : '•'}</span><h2>${inline(m ? m[2] : h[2])}</h2></header><div class="card-b">`);
+      inCard = true;
+      continue;
+    }
+    // پاراگراف درست بعد از نوار بخش = توضیح همان بخش
+    const last = out.length - 1;
+    if(last >= 0 && out[last] === '<!--part-desc--></div></header>'){ out[last] = `<p class="part-desc">${inline(line)}</p></div></header>`; continue; }
     out.push('<p>' + inline(line) + '</p>');
   }
-  closeTo(0);
-  return out.join('\n');
+  closeCard();
+  return out.join('\n').replace(/<!--part-desc-->/g, '');
 }
 
-// فهرست مطالب جلد: هر «#» یک ستون، «##»های زیرش ردیف‌ها
+// فهرست مطالب: هر «#» یک کارت، «##»های زیرش ردیف‌ها
 function tocHtml(md){
   const parts = [];
   let first = true;
@@ -63,7 +78,10 @@ function tocHtml(md){
     if(h1){ if(first){ first = false; continue; } parts.push({ t: h1[1], items: [] }); }
     else if(h2 && parts.length) parts[parts.length - 1].items.push(h2[1]);
   }
-  return '<nav class="toc">' + parts.map(p => `<div><div class="toc-h">${inline(p.t)}</div><ol>${p.items.map(i => `<li>${inline(i.replace(/^[۰-۹0-9]+\.\s*/, ''))}</li>`).join('')}</ol></div>`).join('') + '</nav>';
+  return '<nav class="toc">' + parts.map(p => {
+    const [label, ...rest] = p.t.split(':');
+    return `<div class="toc-card"><div class="toc-h"><span>${inline(label.trim())}</span>${inline(rest.join(':').trim())}</div><ol>${p.items.map(i => `<li>${inline(i.replace(/^[۰-۹0-9]+\.\s*/, ''))}</li>`).join('')}</ol></div>`;
+  }).join('') + '</nav>';
 }
 
 function build(logoPng){
@@ -76,51 +94,86 @@ function build(logoPng){
   const body = mdToHtml(md.split('\n').filter(l => l !== subtitle).join('\n'));
   const font = fs.readFileSync(path.join(ROOT, 'design', 'fonts', 'IRANSansXV.woff2')).toString('base64');
   // لوگو به‌صورت PNG (ماسک SVG در PDF کروم یه قاب نازک دورش می‌کشید)
-  const logo = `<img src="data:image/png;base64,${logoPng}" alt="">`;
+  const logo = `<img class="logo" src="data:image/png;base64,${logoPng}" alt="">`;
+  // قوس هلویی جلد — هم‌خانواده‌ی «مدار» صفحه‌ی نخست سایت
+  const orbit = `<svg class="orbit" viewBox="0 0 800 400" preserveAspectRatio="none" aria-hidden="true"><path d="M -40 330 Q 400 40 840 330" fill="none" stroke="#EAB393" stroke-opacity=".35" stroke-width="1.6"/><path d="M -40 372 Q 400 120 840 372" fill="none" stroke="#EAB393" stroke-opacity=".16" stroke-width="1.2"/><circle cx="400" cy="185" r="4" fill="#EAB393" fill-opacity=".7"/></svg>`;
   const doc = `<!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
 <style>
 @font-face{ font-family:'IRANSansX'; src:url(data:font/woff2;base64,${font}) format('woff2'); font-weight:100 900; }
-:root{ --navy:#16202a; --peach:#EAB393; --brown:#B5651D; --text:#16202a; --dim:#4b5563; --line:#e6e9ee; }
+:root{ --navy:#16202a; --navy2:#223040; --peach:#EAB393; --peach-soft:#fbefe7; --brown:#B5651D; --text:#16202a; --dim:#4b5563; --faint:#7b8494; --line:#e6e9ee; --card:#f8f9fb; }
 *{ box-sizing:border-box; }
-html{ background:#eef1f5; }
-body{ margin:0; font-family:'IRANSansX',Tahoma,sans-serif; color:var(--text); line-height:2; font-size:14px; }
-.page{ max-width:820px; margin:0 auto; background:#fff; padding:0 56px 48px; }
-.cover{ background:var(--navy); color:#fff; margin:0 -56px 28px; padding:72px 56px 56px; text-align:center; }
-.cover img{ width:96px; height:auto; display:block; margin:0 auto 18px; }
-.toc{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:8px 0 12px; }
-.toc-h{ font-weight:800; color:var(--navy); border-bottom:2px solid var(--peach); padding-bottom:4px; margin-bottom:6px; }
-.toc ol{ list-style-type:persian; margin:0; padding-right:22px; color:var(--dim); font-size:13px; line-height:2.1; }
-.toc ol li::marker{ color:var(--brown); font-weight:700; }
-.cover h1{ font-size:30px; font-weight:800; margin:0 0 6px; color:#fff; }
-.cover .tag{ color:var(--peach); font-size:15px; margin:0 0 18px; }
-.cover .ver{ display:inline-block; font-size:13px; color:var(--peach); border:1px solid rgba(234,179,147,.4); border-radius:999px; padding:3px 16px; }
-h1.part{ font-size:22px; font-weight:800; margin:34px 0 8px; padding:10px 16px; background:var(--navy); color:var(--peach); border-radius:10px; }
-h2{ font-size:17px; font-weight:800; margin:24px 0 6px; padding-bottom:4px; border-bottom:2px solid var(--peach); color:var(--navy); }
-ul{ margin:4px 0; padding-right:22px; }
-li{ margin:2px 0; }
-li::marker{ color:var(--brown); }
-ul ul{ padding-right:20px; } ul ul li::marker{ color:#c9a184; }
-b{ color:var(--navy); }
-code{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#f3f4f6; padding:0 4px; border-radius:4px; }
-hr{ border:none; height:0; margin:0; }
+html{ background:#e9edf2; }
+body{ margin:0; font-family:'IRANSansX',Tahoma,sans-serif; color:var(--text); line-height:2; font-size:13.5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.doc{ max-width:860px; margin:0 auto; background:#fff; }
+/* جلد */
+.cover{ position:relative; overflow:hidden; background:radial-gradient(120% 80% at 50% 0%, #2a3a4c 0%, var(--navy) 60%); color:#fff; text-align:center; min-height:640px; padding:120px 48px 64px; display:flex; flex-direction:column; align-items:center; }
+.cover .orbit{ position:absolute; inset:auto 0 0 0; width:100%; height:62%; }
+.cover .logo{ width:120px; height:auto; position:relative; margin-bottom:26px; }
+.cover h1{ position:relative; font-size:34px; font-weight:800; margin:0 0 8px; }
+.cover .tag{ position:relative; color:var(--peach); font-size:16px; margin:0 0 26px; }
+.cover .ver{ position:relative; font-size:13px; color:var(--peach); border:1px solid rgba(234,179,147,.45); border-radius:999px; padding:4px 18px; }
+.cover .org{ position:relative; margin-top:auto; font-size:13px; color:rgba(255,255,255,.6); }
+.cover .org b{ color:#fff; font-weight:700; }
+/* محتوا */
+.inner{ padding:40px 48px 48px; }
+.toc-title{ font-size:20px; font-weight:800; margin:0 0 16px; color:var(--navy); display:flex; align-items:center; gap:10px; }
+.toc-title::before{ content:''; width:6px; height:22px; border-radius:3px; background:var(--peach); }
+.toc{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.toc-card{ border:1px solid var(--line); border-radius:16px; overflow:hidden; background:var(--card); break-inside:avoid; }
+.toc-h{ background:var(--navy); color:#fff; font-weight:800; font-size:15px; padding:12px 18px; }
+.toc-h span{ display:block; font-size:12px; font-weight:600; color:var(--peach); }
+.toc ol{ list-style-type:persian; margin:0; padding:12px 40px 14px 18px; color:var(--text); font-size:13.5px; line-height:2.2; }
+.toc ol li::marker{ color:var(--brown); font-weight:800; }
+.part{ display:flex; align-items:center; gap:20px; background:var(--navy); color:#fff; border-radius:18px; padding:22px 26px; margin:36px 0 18px; position:relative; overflow:hidden; }
+.part::after{ content:''; position:absolute; left:-60px; top:-60px; width:200px; height:200px; border-radius:50%; border:1.5px solid rgba(234,179,147,.25); }
+.part-n{ flex:none; width:64px; height:64px; border-radius:16px; background:var(--peach); color:var(--navy); font-size:34px; font-weight:900; display:flex; align-items:center; justify-content:center; }
+.part-label{ display:block; font-size:12px; color:var(--peach); font-weight:700; }
+.part h1{ margin:0; font-size:24px; font-weight:800; line-height:1.6; }
+.part-desc{ margin:2px 0 0; color:rgba(255,255,255,.72); font-size:13px; }
+.card{ border:1px solid var(--line); border-radius:16px; background:var(--card); margin:0 0 14px; }
+.card-h{ display:flex; align-items:center; gap:12px; padding:12px 18px; background:#fff; border-bottom:1px solid var(--line); border-radius:16px 16px 0 0; }
+.card-h .num{ flex:none; width:30px; height:30px; border-radius:9px; background:var(--peach-soft); color:var(--brown); font-weight:900; font-size:15px; display:flex; align-items:center; justify-content:center; border:1px solid #f1d5c2; }
+.card-h h2{ margin:0; font-size:16px; font-weight:800; color:var(--navy); }
+.card-b{ padding:8px 18px 12px; }
+.card-b > ul{ list-style:none; margin:0; padding:0; }
+.card-b > ul > li{ position:relative; padding:5px 18px 5px 0; border-bottom:1px dashed #e3e6eb; }
+.card-b > ul > li:last-child{ border-bottom:none; }
+.card-b > ul > li::before{ content:''; position:absolute; right:2px; top:15px; width:7px; height:7px; border-radius:2px; background:var(--peach); transform:rotate(45deg); }
+.card-b ul ul{ margin:2px 0 0; padding-right:18px; color:var(--dim); }
+.card-b ul ul li{ margin:0; }
+.card-b ul ul li::marker{ color:#cfa98d; }
+b{ color:var(--navy); font-weight:800; }
+code{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:#eef0f3; padding:0 4px; border-radius:4px; }
 p{ margin:6px 0; color:var(--dim); }
-.foot{ margin-top:36px; padding-top:12px; border-top:1px solid var(--line); font-size:12px; color:#6b7280; text-align:center; }
+.foot{ padding:18px 48px 28px; border-top:1px solid var(--line); font-size:12px; color:var(--faint); text-align:center; }
+@page{ size:A4; margin:14mm 13mm 15mm; }
+@page :first{ margin:0; }
 @media print{
-  html{ background:#fff; } .page{ max-width:none; padding:0 4mm; }
-  .cover{ margin:0 -4mm 10mm; padding:30mm 10mm 26mm; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  h1.part{ break-before:page; margin-top:0; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  h2{ break-after:avoid; } li{ break-inside:avoid; }
-  .foot{ display:none; } /* شماره‌ی صفحه و نسخه روی جلد هست؛ پانویس صفحه‌ی خالی می‌ساخت */
+  html{ background:#fff; } .doc{ max-width:none; }
+  .cover{ height:297mm; min-height:0; padding:70mm 20mm 18mm; break-after:page; }
+  .inner{ padding:0; }
+  .part{ break-before:page; margin-top:0; }
+  .toc + .part{ break-before:auto; margin-top:28px; } /* بخش اول درست زیر فهرست مطالب، نه صفحه‌ی تازه */
+  .card-h{ break-after:avoid; } .card-b > ul > li:not(:has(ul)), .card-b ul ul li{ break-inside:avoid; }
+  .card{ break-inside:auto; }
+  .foot{ display:none; }
 }
-@media (max-width:640px){ .toc{ grid-template-columns:1fr; } .page{ padding:0 16px 32px; } .cover{ margin:0 -16px 20px; padding:48px 16px 36px; } }
+@media (max-width:640px){
+  .cover{ min-height:520px; padding:80px 16px 40px; } .cover h1{ font-size:26px; }
+  .inner{ padding:24px 16px 32px; } .toc{ grid-template-columns:1fr; }
+  .part{ padding:16px; gap:14px; } .part-n{ width:48px; height:48px; font-size:26px; } .part h1{ font-size:19px; }
+  .card-b{ padding:6px 12px 10px; } .card-h{ padding:10px 12px; }
+}
 </style></head>
-<body><div class="page">
-<header class="cover">${logo}<h1>${esc(title)}</h1><p class="tag">رصد و تحلیل فضای سیاسی‌اجتماعی</p><span class="ver">${esc(subtitle)}</span></header>
-<h2 class="toc-title">فهرست</h2>
+<body><div class="doc">
+<header class="cover">${orbit}${logo}<h1>${esc(title)}</h1><p class="tag">رصد و تحلیل فضای سیاسی‌اجتماعی</p><span class="ver">${esc(subtitle)}</span><p class="org"><b>سامانه‌ی هوشمند جریان</b> — به روایت حوزه علمیه خراسان</p></header>
+<main class="inner">
+<h2 class="toc-title">فهرست مطالب</h2>
 ${tocHtml(md)}
 ${body}
+</main>
 <div class="foot">سامانه‌ی هوشمند جریان — ${esc(subtitle)}</div>
 </div></body></html>`;
   return { doc, md, version };
@@ -129,7 +182,7 @@ ${body}
 (async () => {
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   const lp = await browser.newPage({ deviceScaleFactor: 4 });
-  await lp.setContent('<body style="margin:0;background:transparent">' + fs.readFileSync(path.join(ROOT, 'design', 'icons', 'jarian-mark.svg'), 'utf8').replace('<svg ', '<svg width="96" ') + '</body>');
+  await lp.setContent('<body style="margin:0;background:transparent">' + fs.readFileSync(path.join(ROOT, 'design', 'icons', 'jarian-mark.svg'), 'utf8').replace('<svg ', '<svg width="120" ') + '</body>');
   const logoPng = (await (await lp.$('svg')).screenshot({ omitBackground: true })).toString('base64');
   await lp.close();
   const { doc, md, version } = build(logoPng);
@@ -155,10 +208,8 @@ ${body}
   await page.setContent(doc, { waitUntil: 'load' });
   await page.evaluate(() => document.fonts.ready);
   await page.pdf({
-    path: path.join(dir, NAME + '.pdf'), format: 'A4', printBackground: true,
-    margin: { top: '14mm', bottom: '16mm', left: '14mm', right: '14mm' },
-    displayHeaderFooter: true, headerTemplate: '<div></div>',
-    footerTemplate: '<div style="width:100%;text-align:center;font-size:9px;color:#9ca3af;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+    // اندازه و حاشیه از @page خودِ سند (جلد بدون حاشیه: @page :first)
+    path: path.join(dir, NAME + '.pdf'), printBackground: true, preferCSSPageSize: true,
   });
   await browser.close();
   if(process.env.OUT){
