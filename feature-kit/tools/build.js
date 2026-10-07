@@ -157,7 +157,8 @@ p{ margin:6px 0; color:var(--dim); }
   .part{ break-before:page; margin-top:0; }
   .toc + .part{ break-before:auto; margin-top:28px; } /* بخش اول درست زیر فهرست مطالب، نه صفحه‌ی تازه */
   .card-h{ break-after:avoid; } .card-b > ul > li:not(:has(ul)), .card-b ul ul li{ break-inside:avoid; }
-  .card{ break-inside:auto; }
+  .card{ break-inside:auto; margin-bottom:12px; }
+  .card-b > ul > li{ padding-top:4px; padding-bottom:4px; } .card-b > ul > li::before{ top:14px; }
   .foot{ display:none; }
 }
 @media (max-width:640px){
