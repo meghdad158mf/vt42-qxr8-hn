@@ -8,7 +8,7 @@
 - ریپو (۲ مهر ۱۴۰۵، بعد از دسترسی غیرمجاز به لینک قدیمی) از `meghdad158mf/meghdad` به **`meghdad158mf/vt42-qxr8-hn`** تغییر نام داد. ابزارهای MCP گیت‌هاب بسته به سشن با یکی از دو نام کار می‌کنن: سشن‌های قبلی با `repo=meghdad` (ریدایرکت)، سشن ۹ مهر ۱۴۰۵ فقط با `repo=vt42-qxr8-hn` (و `meghdad` رد شد) — اول `vt42-qxr8-hn` رو امتحان کن.
 - هارنس معمولاً یه شاخه‌ی قدیمی رو لوکال چک‌اوت می‌کنه — همیشه اول `git fetch origin claude/new-project-8ekywm` و کار رو از `origin/claude/new-project-8ekywm` شروع کن.
 - **روش کار همیشگی**: شاخه‌ی کاری از `origin/claude/new-project-8ekywm` → تغییر → پیش‌نمایش Playwright با داده‌ی موک (پایین‌تر) → اسکرین‌شات با `SendUserFile` و **پرسیدن صریح تأیید** → فقط بعد از تأیید: commit + push + PR به `claude/new-project-8ekywm` (نه `main`) → `pull_request_read`/`get_commits` → merge → `git fetch` + `git diff` صفر → به کاربر بگو Ctrl+F5. **push مستقیم به `claude/new-project-8ekywm` مسدوده**.
-- **شماره‌ی ویرایش (درخواست صریح کاربر)**: هر PR به شاخه‌ی زنده ثابت `APP_VERSION` (درست قبل از `// ---- boot ----` در فرانت‌اند؛ بج صفحه‌ی ورود و فوتر از کلاس `.app-version` پر می‌شن) رو بالا می‌بره. تشخیص اندازه با Claude: تغییر کوچیک (باگ، متن/ظاهر، تنظیم جزئی، فقط مستندات/اسکریپت) → عدد آخر +۱؛ تغییر بزرگ (قابلیت/تب/بخش جدید، بازطراحی صفحه، جدول/migration جدید) → عدد وسط +۱ و آخر صفر؛ عدد اول فقط با درخواست کاربر. ⚠️ نسخه‌ی فارسیِ داخل دو `<span class="app-version">` هم باید هم‌زمان عوض بشه (fallback قبل از اجرای JS). بعد از مرج شماره‌ی جدید رو به کاربر بگو. آخرین: **۵.۲۴.۰**.
+- **شماره‌ی ویرایش (درخواست صریح کاربر)**: هر PR به شاخه‌ی زنده ثابت `APP_VERSION` (درست قبل از `// ---- boot ----` در فرانت‌اند؛ بج صفحه‌ی ورود و فوتر از کلاس `.app-version` پر می‌شن) رو بالا می‌بره. تشخیص اندازه با Claude: تغییر کوچیک (باگ، متن/ظاهر، تنظیم جزئی، فقط مستندات/اسکریپت) → عدد آخر +۱؛ تغییر بزرگ (قابلیت/تب/بخش جدید، بازطراحی صفحه، جدول/migration جدید) → عدد وسط +۱ و آخر صفر؛ عدد اول فقط با درخواست کاربر. ⚠️ نسخه‌ی فارسیِ داخل دو `<span class="app-version">` هم باید هم‌زمان عوض بشه (fallback قبل از اجرای JS). بعد از مرج شماره‌ی جدید رو به کاربر بگو. آخرین: **۵.۲۵.۰**.
 - کاربر با گیت/GitHub راحت نیست — هر کار دستی (SQL Editor، ساخت توکن، secret) رو قدم‌به‌قدم و با مسیر دقیق منو توضیح بده.
 - دیباگ خطاهای سمت کاربر: F12 → Network → درخواست قرمز → تب Response (اگه DevTools زود پاک کرد، Clear و یه‌بار دیگه امتحان). اگه کاربر عکسی رو مستقیم در چت paste کرد و به دستت نرسید، اول ترنسکریپت سشن (`.jsonl`، بلوک‌های base64) رو بگرد، بعد درخواست پیوست کن.
 
@@ -164,6 +164,7 @@ design/ita-monitoring-prototype.html — فرانت‌اند تک‌فایلی (
 - **منابع بی‌خبر** (RPC `channel_last_post()`): منابع `active` بدون مطلب در ۳ روز اخیر؛ ۵.۲۰.۰: کلیک روی ردیف = `openChanEditor` همون منبع.
 - **خلاصه‌ی بالای صفحه** (`#sys-summary`، `renderSysSummary()`، ۵.۲۰.۰): بعد از تموم شدن همه‌ی کارت‌ها، موارد زرد/قرمز رو از خودِ DOM صفحه جمع می‌کنه (`.sys-bar`، `.svc-row`، `.sys-status-item`، `.sys-login-stat`، `#sys-stale .sys-row`، `#sys-tokens .sys-row`) — «همه‌چیز سالم است» یا «N مورد نیازمند توجه» با چیپ‌هایی که به همون کارت اسکرول می‌کنن. کارت/کلاس جدید در این صفحه → به `renderSysSummary` هم اضافه‌ش کن.
 - **انقضای توکن‌ها** (`SYS_TOKENS`): زرد ≤۲۱ روز، قرمز ≤۷.
+- **۵.۲۵.۰ (مرحله‌ی ۲ ابزارهای مدیر، migration_043)**: (۱) **مدت نگهداری رسانه** زیر نوار فضا (`renderSysRetention`، `site_settings.media_retention_hours` ∈ ۱۲/۲۴/۴۸/۷۲، `mediaRetentionHours()`): تخمین حجم هر گزینه = post-media × (h+12)/(فعلی+12)؛ بالای ۸۵٪ ذخیره نمی‌شه. `cleanup_media.py` (`load_retention_setting`) همینو می‌خونه (`RETENTION_DAYS_OVERRIDE` هنوز اولویت داره)؛ تعداد برچسب‌های تاریخ روزنامه و آستانه‌ی کارت پاک‌سازی (نگهداری + ۱۸ ساعت) هم ازش. (۲) **سابقه‌ی ظرفیت** (`#sys-capacity-panel`، `renderSysCapacity`/`drawSysCapacity`): جدول `capacity_snapshots` (روز، storage|db، دسته، بایت) از `capacity_snapshot_job()` هر شب ۲۰:۵۰ UTC (`jarian-capacity` در pg_cron) + `capacity_snapshot()` با باز کردن صفحه؛ دسته‌های پایگاه داده posts/hawza/logs/other (`CAP_DB_NAMES`، سقف `DB_LIMIT_MB=500`)؛ کاشی‌های امروز/اول این ماه/ماه گذشته/تغییر (ماه شمسی، `jalaliMonthStarts`)، تفکیک، روند ۳۰ روز/۱۲ ماه، پیش‌بینی با رشد ۱۴ روز اخیر (زرد <۹۰ روز، قرمز <۳۰). (۳) **خطاهای مرورگر کاربران** (`#sys-cerr-panel`): `reportClientError()` (بعد از `api()`) از `window.onerror`، `unhandledrejection`، هر `console.error` و پاسخ ۵xx در `api()` → RPC `log_client_error` (جدول `client_errors`، یک ردیف برای هر خطا/روز با شمارش نشست؛ سمت کاربر هر متن یک‌بار در هر زبانه و حداکثر ۲۰ در ساعت؛ آدرس‌ها بدون query؛ سقف ۵۰۰ ردیف/روز؛ ۳۰ روز)؛ «رفع شد» = حذف. (۴) **گزارش اجرا**: دکمه‌ی «مشاهده‌ی گزارش» (`.sys-log-btn`، نه `.sys-run-btn` تنها — هندلر اجرای دستی `:not(.sys-log-btn)`) → `run-job` با `{action:'logs', job}` (۶۰ خط آخر آخرین اجرای تمام‌شده، قدم‌های پایانی گیت‌هاب حذف) → `#job-log-modal` با «کپی متن گزارش».
 
 ### امنیت، خطایابی و سرعت در فرانت
 
@@ -203,7 +204,7 @@ design/ita-monitoring-prototype.html — فرانت‌اند تک‌فایلی (
 ## Storage و پاک‌سازی رسانه
 
 - سقف پلن رایگان ۱ گیگه؛ `post-media` بیشترین حجم رو داره. آخرین عدد واقعی: ~۳۰۰–۴۶۰ مگ. حالا از صفحه‌ی «وضعیت سامانه» دیده می‌شه.
-- `RETENTION_DAYS=0.5` (موقتی — بعد از تصمیم Pro/VPS به ۳ برگرده، همراه `slots` روزنامه‌ها). ⚠️ فرکانس پاک‌سازی (`jarian-cleanup-*` در migration_040، الان روزی ۲ بار ۰۶:۱۵/۱۸:۱۵ UTC) باید با `RETENTION_DAYS` هماهنگ بمونه.
+- `RETENTION_DAYS=0.5` پیش‌فرض؛ از ۵.۲۵.۰ مدیر از «وضعیت سامانه» عوضش می‌کنه (`site_settings.media_retention_hours`؛ برچسب‌های تاریخ روزنامه خودکار). ⚠️ فرکانس پاک‌سازی (`jarian-cleanup-*` در migration_040، الان روزی ۲ بار ۰۶:۱۵/۱۸:۱۵ UTC) باید با `RETENTION_DAYS` هماهنگ بمونه.
 - ⚠️ **API حذف گروهی Storage حتی وقتی چیزی حذف نشه ۲۰۰ برمی‌گردونه** — `remove_storage_objects()` در هر دو `cleanup_media.py` و `purge_orphaned_media.py` تعداد واقعی رو از بدنه‌ی پاسخ چک می‌کنه (یه‌بار ۲۴۶ فایل orphan به‌خاطر همین جمع شد). کد کپی‌شده در دو فایل رو همیشه هر دو جا رفع کن.
 - ⚠️ کالکتور ایتا هر اجرا کل صفحه‌ی کانال رو دوباره اسکن می‌کنه؛ برای همین فقط برای پست‌های **جدید** رسانه دانلود می‌کنه (`fetch_existing_post_ids()`)، و پست‌های قبلاً ثبت‌شده بدون فیلدهای رسانه upsert می‌شن — قبلاً عکس پست‌های قدیمی هر ۲ ساعت دوباره دانلود و `media_fetched_at` تازه می‌شد و پاک‌سازی ۱۲ ساعته برای ایتا کار نمی‌کرد (۵ مهر ۱۴۰۵). کارت «پاک‌سازی» صفحه‌ی وضعیت هم با همون معیار `media_fetched_at` (+ رسانه‌ی بدون `media_fetched_at`) می‌شمره.
 - `MESSAGES_PER_CHANNEL_LIMIT=100` در کالکتور تلگرام (بک‌فیل کانال تازه). اگه یه کانال جدید حجم زیادی رسانه آورد: `purge-channel-backfill.yml` (دستی، ورودی یوزرنیم + تعداد).
@@ -248,13 +249,13 @@ scripts/                                کالکتورها و جاب‌ها (ب�
 .github/workflows/                      یک ورک‌فلو برای هر اسکریپت + deploy-edge-functions.yml
 supabase/functions/                     translate، news-insights، extract-post-keywords، run-job، _shared/{auth,liara,cluster}.ts
 db/schema.sql                           اسکیمای پایه — روی پروژه‌ی زنده دوباره اجرا نکن (رمزها ریست می‌شن)
-db/migration_002 … 042                  به ترتیب شماره؛ مهم‌های اخیر:
+db/migration_002 … 043                  به ترتیب شماره؛ مهم‌های اخیر:
   021 کانال‌های پیش‌فرض فعلی (برای بازسازی پروژه)   022 news_ai_insights   023 dossier + ai_keywords
   024 newsletter   025/026 پروفایل کانال و طلاب   027/028/029 اخبار حوزه   030 view شمارش روزنامه‌ها
   031 ایندکس posts.scraped_at   032 show_in_orgs   033 profile_groups   034 storage_usage/channel_last_post
   035 login_events + login() جدید   036 announcements (اطلاعیه برای کاربران)   037 app_users (دفترچه‌ی کاربران)
   038 خصوصی کردن bucket گزارش‌های مدارس   039 گزارش فعالیت (posts.hidden_at + page_views + admin_audit و triggerها)
-  040 زمان‌بندی موقت کارهای خودکار با pg_cron + pg_net (تا مهاجرت به VPS)   041 خزنده‌ی «درباره حوزه» (crawl_sites + hawza_mentions + crawl_seen + jarian-hawza)   042 قفل ورود + site_settings (حالت تعمیر، بخش‌های پنهان)
+  040 زمان‌بندی موقت کارهای خودکار با pg_cron + pg_net (تا مهاجرت به VPS)   041 خزنده‌ی «درباره حوزه» (crawl_sites + hawza_mentions + crawl_seen + jarian-hawza)   042 قفل ورود + site_settings (حالت تعمیر، بخش‌های پنهان)   043 سابقه‌ی ظرفیت + خطاهای مرورگر + مدت نگهداری رسانه
 brand-kit/                              بسته گرافیکی (زیپ) + tools/ اسکریپت‌های سازنده — بخش «بسته گرافیکی و لوگو»
 .claude/skills/                         اسکیل‌های نصب‌شده (پایین)
 ```
