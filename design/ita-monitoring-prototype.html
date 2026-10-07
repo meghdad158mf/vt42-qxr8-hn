@@ -19,7 +19,91 @@
   try{ if(sessionStorage.getItem('jarian_token')) document.documentElement.classList.add('has-session'); }catch(e){}
   try{ history.scrollRestoration = 'manual'; }catch(e){}
 </script>
-<style>html.has-session #view-login{ display:none !important; }</style>
+<style>html.has-session #view-login{ display:none !important; }
+  /* ===== نمایش سایت + قفل ورود (۵.۲۴.۰، migration_042) ===== */
+  body:not(.is-admin) .vis-off{ display:none !important; }
+  body.is-admin .vis-off{ opacity:.6; }
+  .vis-badge{ display:inline-flex; align-items:center; margin-inline-start:6px; padding:1px 7px; border-radius:999px; font-size:11px; font-weight:700; line-height:1.6; color:#fff; background: var(--danger); vertical-align:middle; white-space:nowrap; }
+  .domain-grid.vis-partial .dom-orbit{ display:none; }
+  .login-maint{ display:flex; flex-direction:column; gap:3px; margin:0 0 16px; padding:10px 12px; border-radius:10px; border:1px solid rgba(217,154,30,0.5); background: rgba(217,154,30,0.1); font-size:12px; line-height:1.8; color: var(--text); }
+  .login-maint b{ font-size:13px; color:#9a6a0c; }
+  .login-maint .login-maint-admin{ color: var(--text-faint); }
+  .login-maint[hidden]{ display:none; }
+  .maint-wrap{ min-height:100vh; box-sizing:border-box; display:flex; align-items:center; justify-content:center; padding:24px 16px;
+    background: radial-gradient(120% 90% at 25% 0%, rgba(234,179,147,0.08), transparent 55%), radial-gradient(90% 70% at 100% 100%, rgba(142,163,184,0.11), transparent 55%), linear-gradient(160deg, var(--primary), var(--primary-2)); }
+  #ss-maint-msg{ width:100%; resize:vertical; font:inherit; font-size:14px; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius: var(--radius-control); box-sizing:border-box; line-height:1.9; }
+  .maint-card{ width:100%; max-width:460px; text-align:center; padding:36px 28px 28px; background: var(--surface); border-radius: var(--radius-card); box-shadow: 0 30px 70px -24px rgba(0,0,0,0.5); }
+  .maint-logo{ width:76px; height:76px; margin:0 auto 14px; display:block; }
+  .maint-card h1{ font-size:20px; font-weight:800; color: var(--text); margin:0 0 10px; }
+  .maint-msg{ font-size:14px; line-height:2; color: var(--text-dim); margin:0 0 8px; white-space:pre-line; }
+  .maint-until{ display:inline-block; font-size:13px; font-weight:700; color:#b5651d; background: rgba(234,179,147,0.16); border-radius:999px; padding:4px 14px; margin:4px 0 0; }
+  .maint-until[hidden]{ display:none; }
+  .maint-actions{ display:flex; gap:10px; justify-content:center; margin-top:22px; }
+  .maint-admin-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:0 0 16px; padding:10px 14px; border-radius:12px; border:1px solid rgba(217,154,30,0.6); background: rgba(217,154,30,0.14); color:#fff; font-size:13px; line-height:1.8; }
+  .maint-admin-bar[hidden]{ display:none; }
+  .maint-admin-bar b{ color:#f2c46b; }
+  #ss-missing{ font-size:13px; color: var(--text-dim); background: var(--surface); border-radius:12px; padding:10px 14px; margin:0; }
+  #ss-missing[hidden]{ display:none; }
+  #ss-vis-list{ margin-bottom:12px; }
+  #ss-vis-list .ce-section.on .ce-section-extra{ grid-template-columns:1fr 1fr; }
+  #ss-maint-box{ margin-bottom:12px; }
+  .settings-sum-desc.ss-sum-on{ color:#b7800f; font-weight:700; }
+  .sys-lock-note{ margin-bottom:12px; }
+  .sys-lock-box{ border:1px solid #d99a1e; background: rgba(217,154,30,0.08); border-radius:12px; padding:12px 14px; margin-bottom:12px; }
+  .sys-lock-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+  .sys-lock-head b{ font-size:14px; color:#9a6a0c; }
+  .sys-lock-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:8px 0; border-top:1px solid var(--border); }
+  .sys-lock-ip{ font-weight:700; color: var(--text); min-width:120px; text-align:right; }
+  .sys-lock-meta{ flex:1; font-size:12px; color: var(--text-dim); }
+  .sys-lock-help{ font-size:12px; color: var(--text-faint); line-height:1.8; margin:6px 0 0; }
+  @media (max-width:640px){
+    #ss-vis-list .ce-section.on .ce-section-extra{ grid-template-columns:1fr; }
+    .sys-lock-row .btn{ width:100%; }
+  }
+
+  /* ===== وضعیت سامانه: نگهداری رسانه، سابقه‌ی ظرفیت، خطاهای مرورگر، گزارش اجرا (۵.۲۵.۰) ===== */
+  .sys-btn-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .sys-ret{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+  .sys-ret label{ display:flex; flex-direction:column; gap:2px; font-size:13px; color: var(--text); }
+  .sys-ret label span{ font-size:12px; color: var(--text-faint); }
+  .sys-ret-ctl{ display:flex; gap:8px; align-items:center; }
+  .sys-ret-ctl select{ font:inherit; font-size:13px; padding:7px 12px; border-radius: var(--radius-control); border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); max-width:100%; }
+  .sys-cap-tabs{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .sys-cap-seg{ display:flex; gap:6px; flex-wrap:wrap; }
+  .sys-cap-tiles{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+  .sys-cap-tile{ border:1px solid var(--border); border-radius:12px; background: var(--surface-2); padding:10px 12px; display:flex; flex-direction:column; gap:2px; }
+  .sys-cap-tile span{ font-size:12px; color: var(--text-dim); }
+  .sys-cap-tile b{ font-size:17px; color: var(--text); }
+  .sys-cap-tile small{ font-size:11px; color: var(--text-faint); }
+  .sys-cap-grid{ display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:20px; }
+  .sys-cap-sub{ font-size:12px; font-weight:700; color: var(--text-dim); margin-bottom:8px; }
+  .sys-cap-cat{ display:grid; grid-template-columns: 150px minmax(0,1fr) 150px; align-items:center; gap:10px; font-size:12px; padding:5px 0; }
+  .sys-cap-cat-name{ color: var(--text); }
+  .sys-cap-cat-bar{ height:8px; background: var(--surface-2); border-radius:999px; overflow:hidden; }
+  .sys-cap-cat-bar i{ display:block; height:100%; background: var(--accent); border-radius:999px; }
+  .sys-cap-cat-val{ color: var(--text-dim); white-space:nowrap; text-align:left; }
+  .sys-cap-cat-val em{ display:block; font-style:normal; font-size:11px; color: var(--text-faint); }
+  .sys-cap-chart{ height:120px; }
+  .sys-cap-proj{ margin:14px 0 0; font-size:13px; color: var(--text-dim); line-height:1.8; padding:8px 12px; border-radius:10px; background: var(--surface-2); }
+  .sys-cap-proj.warn{ background: rgba(217,154,30,0.12); color:#8a5d06; }
+  .sys-cap-proj.bad{ background: rgba(220,60,60,0.1); color: var(--danger); }
+  .sys-cerr-row{ display:grid; grid-template-columns: minmax(0,1fr) auto; gap:4px 12px; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+  .sys-cerr-row:last-child{ border-bottom:none; }
+  .sys-cerr-row.warn{ border-inline-start:3px solid #d99a1e; padding-inline-start:10px; }
+  .sys-cerr-msg{ font-size:13px; font-weight:700; color: var(--text); overflow-wrap:anywhere; text-align:start; }
+  .sys-cerr-meta{ grid-column:1; font-size:12px; color: var(--text-faint); }
+  .sys-cerr-row .btn{ grid-row:1 / span 2; grid-column:2; }
+  .job-log-card{ max-width:760px; }
+  .job-log-meta{ font-size:13px; color: var(--text-dim); line-height:1.8; margin:0 0 10px; }
+  .job-log-meta b.ok{ color: var(--ok); } .job-log-meta b.bad{ color: var(--danger); }
+  .job-log-body{ background:#0f1720; color:#d7dee8; border-radius:10px; padding:10px 12px; max-height:52vh; overflow:auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; line-height:1.7; text-align:left; margin-bottom:14px; }
+  .job-log-line{ display:flex; gap:10px; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .job-log-line.step{ color:#EAB393; font-weight:700; margin-top:6px; }
+  .job-log-line.err{ color:#ff8a80; font-weight:700; }
+  .job-log-t{ color:#6f7d8f; flex:none; }
+  @media (max-width:900px){ .sys-cap-tiles{ grid-template-columns:repeat(2, minmax(0,1fr)); } .sys-cap-grid{ grid-template-columns:1fr; } }
+  @media (max-width:640px){ .sys-cap-cat{ grid-template-columns: 100px minmax(0,1fr) 120px; } .sys-ret-ctl{ width:100%; } .sys-ret-ctl select{ flex:1; min-width:0; } .job-log-t{ display:none; } }
+</style>
 </head>
 <body>
 <style>
@@ -2134,7 +2218,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۳.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۵.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2142,6 +2226,7 @@
            ثابت و پنهانه چون ورود فقط با رمز مشترکه -->
       <form class="login-form-wrap" id="login-form" autocomplete="on" onsubmit="event.preventDefault(); handleLogin();">
         <input type="text" name="username" autocomplete="username" value="جریان" tabindex="-1" aria-hidden="true" style="display:none">
+        <div id="login-maint" class="login-maint" role="status" hidden></div>
         <div class="field">
           <label for="login-password">رمز عبور</label>
           <div style="position:relative;">
@@ -2159,6 +2244,22 @@
           <span class="login-btn-label">ورود</span>
         </button>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- =================== حالت تعمیر (migration_042) — فقط بیننده‌ها؛ مدیر وارد سایت می‌شود =================== -->
+<div id="view-maint" class="view">
+  <div class="maint-wrap">
+    <div class="maint-card" role="status">
+      <img class="maint-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true">
+      <h1>سامانه در حال به‌روزرسانی است</h1>
+      <p class="maint-msg" id="maint-msg"></p>
+      <p class="maint-until" id="maint-until" hidden></p>
+      <div class="maint-actions">
+        <button type="button" class="btn primary" id="maint-retry-btn" onclick="retryMaintenance()">بررسی دوباره</button>
+        <button type="button" class="btn" onclick="logout()">خروج</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2258,6 +2359,10 @@
         <button class="chip-btn ghost" onclick="logout()">خروج</button>
       </div>
     </div>
+    <div class="maint-admin-bar" id="maint-admin-bar" role="status" hidden>
+      <span><b>حالت تعمیر فعال است.</b> بیننده‌ها به‌جای سایت پیام به‌روزرسانی را می‌بینند؛ شما به‌عنوان مدیر وارد شده‌اید.</span>
+      <button type="button" class="btn btn-sm" onclick="openSiteSettingsPanel('maint')">تنظیم یا خاموش کردن</button>
+    </div>
     <div class="ann-bar" id="ann-bar" aria-live="polite"></div>
     <button type="button" class="to-top" id="to-top" aria-label="بالای صفحه" title="بالای صفحه" onclick="scrollToPageTop()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -2330,6 +2435,21 @@
       </div>
     </div>
 
+    <!-- گزارش اجرای کارهای خودکار (۵.۲۵.۰): ۶۰ خط آخر آخرین اجرای تمام‌شده، از run-job -->
+    <div class="modal-overlay" id="job-log-modal" onclick="if(event.target===this) closeJobLog()">
+      <div class="modal-card job-log-card">
+        <button class="modal-close" onclick="closeJobLog()" aria-label="بستن">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <h3 id="job-log-title">گزارش اجرا</h3>
+        <p class="job-log-meta" id="job-log-meta"></p>
+        <div class="job-log-body" id="job-log-body" dir="ltr"></div>
+        <div class="ce-actions">
+          <a class="btn" id="job-log-gh" target="_blank" rel="noopener" hidden>مشاهده در گیت‌هاب</a>
+          <button class="btn primary" type="button" id="job-log-copy" onclick="copyJobLog()">کپی متن گزارش</button>
+        </div>
+      </div>
+    </div>
     <div class="modal-overlay" id="pw-modal" onclick="if(event.target===this) closePwModal()">
       <div class="modal-card pw-modal-card">
         <button class="modal-close" onclick="closePwModal()" aria-label="بستن">
@@ -2473,23 +2593,23 @@
           <circle cx="-562" cy="124" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="-562" cy="124" r="2.2" fill="#EAB393" fill-opacity=".5"/>
           <circle cx="562" cy="124" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="562" cy="124" r="2.2" fill="#EAB393" fill-opacity=".5"/>
         </svg>
-        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('overview')">
+        <div class="domain-card" data-vis="overview" role="button" tabindex="0" onclick="switchSection('overview')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-news.webp" alt="" loading="lazy" decoding="async" /></div>
           <h3>اخبار و رویدادها</h3>
         </div>
-        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('people')">
+        <div class="domain-card" data-vis="people" role="button" tabindex="0" onclick="switchSection('people')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-people.webp" alt="" loading="lazy" decoding="async" /></div>
           <h3>یادداشت‌ها</h3>
         </div>
-        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('hawza')">
+        <div class="domain-card" data-vis="hawza" role="button" tabindex="0" onclick="switchSection('hawza')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-hawza.webp" alt="" loading="lazy" decoding="async" /></div>
           <h3>درباره حوزه</h3>
         </div>
-        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('posts')">
+        <div class="domain-card" data-vis="posts" role="button" tabindex="0" onclick="switchSection('posts')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-cyberspace.webp" alt="" loading="lazy" decoding="async" /></div>
           <h3>کنشگری مجازی</h3>
         </div>
-        <div class="domain-card" role="button" tabindex="0" onclick="switchSection('schools')">
+        <div class="domain-card" data-vis="schools" role="button" tabindex="0" onclick="switchSection('schools')">
           <div class="domain-icon is-illustrated"><img src="images/domain-icon-schools.webp" alt="" loading="lazy" decoding="async" /></div>
           <h3>برنامه مدارس</h3>
         </div>
@@ -2497,20 +2617,20 @@
       <p class="domain-caption">جریان این پنج عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، یادداشت‌های مربوط به افراد و مجموعه‌های تأثیرگذار، اخبار سیاسی‌اجتماعی پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود، کنشگری فضای مجازی و برنامه‌های آموزشی مدارس. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
 
       <div class="domain-shortcuts">
-        <a role="button" tabindex="0" onclick="goToNewsTab('analytics')">در یک نگاه</a>
-        <a role="button" tabindex="0" onclick="goToNewsTab('claims')">ادعاها و شایعات</a>
-        <a role="button" tabindex="0" onclick="goToNewsTab('study')">شبکه‌های اجتماعی</a>
-        <a role="button" tabindex="0" onclick="goToNewsTab('website')">وب‌سایت‌ها</a>
-        <a role="button" tabindex="0" onclick="goToNewsTab('newspapers')">روزنامه‌ها</a>
-        <a role="button" tabindex="0" onclick="goToNewsTab('dossier')">پرونده‌های موضوعی</a>
-        <a role="button" tabindex="0" onclick="goToNewsTab('newsletter')">خبرنامه مدارس</a>
-        <a role="button" tabindex="0" onclick="goToPeopleTab('orgs')">تحلیل سازمان‌ها</a>
-        <a role="button" tabindex="0" onclick="goToPeopleTab('figures')">چهره‌ها و فعالان سیاسی</a>
-        <a role="button" tabindex="0" onclick="goToPeopleTab('archive')">بسته‌های تحلیلی</a>
-        <a role="button" tabindex="0" onclick="goToHawzaTab('news')">اخبار حوزه</a>
-        <a role="button" tabindex="0" onclick="goToHawzaTab('about')">آنچه درباره حوزه گفته می‌شود</a>
-        <a role="button" tabindex="0" onclick="goToPostsTab('feed')">پست‌های منتشر شده</a>
-        <a role="button" tabindex="0" onclick="goToPostsTab('people')">افراد و مجموعه‌ها</a>
+        <a role="button" tabindex="0" data-vis="overview/analytics" onclick="goToNewsTab('analytics')">در یک نگاه</a>
+        <a role="button" tabindex="0" data-vis="overview/claims" onclick="goToNewsTab('claims')">ادعاها و شایعات</a>
+        <a role="button" tabindex="0" data-vis="overview/study" onclick="goToNewsTab('study')">شبکه‌های اجتماعی</a>
+        <a role="button" tabindex="0" data-vis="overview/website" onclick="goToNewsTab('website')">وب‌سایت‌ها</a>
+        <a role="button" tabindex="0" data-vis="overview/newspapers" onclick="goToNewsTab('newspapers')">روزنامه‌ها</a>
+        <a role="button" tabindex="0" data-vis="overview/dossier" onclick="goToNewsTab('dossier')">پرونده‌های موضوعی</a>
+        <a role="button" tabindex="0" data-vis="overview/newsletter" onclick="goToNewsTab('newsletter')">خبرنامه مدارس</a>
+        <a role="button" tabindex="0" data-vis="people/orgs" onclick="goToPeopleTab('orgs')">تحلیل سازمان‌ها</a>
+        <a role="button" tabindex="0" data-vis="people/figures" onclick="goToPeopleTab('figures')">چهره‌ها و فعالان سیاسی</a>
+        <a role="button" tabindex="0" data-vis="people/archive" onclick="goToPeopleTab('archive')">بسته‌های تحلیلی</a>
+        <a role="button" tabindex="0" data-vis="hawza/news" onclick="goToHawzaTab('news')">اخبار حوزه</a>
+        <a role="button" tabindex="0" data-vis="hawza/about" onclick="goToHawzaTab('about')">آنچه درباره حوزه گفته می‌شود</a>
+        <a role="button" tabindex="0" data-vis="posts/feed" onclick="goToPostsTab('feed')">پست‌های منتشر شده</a>
+        <a role="button" tabindex="0" data-vis="posts/people" onclick="goToPostsTab('people')">افراد و مجموعه‌ها</a>
         <!-- «به‌زودی»ها آخر ردیف (۵.۲۰.۰) -->
         <span class="domain-shortcut-disabled soon-item">شرکت‌کننده در برنامه‌ها<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled soon-item">جامعه مخاطب<span class="news-soon">به‌زودی</span></span>
@@ -2569,7 +2689,7 @@
         </svg>
         <div class="pkg-covers" id="pkg-covers"></div>
       </div>
-      <div class="pkg-more"><button type="button" class="pkg-more-btn" onclick="switchSection('reports')">مشاهده‌ی همه‌ی شماره‌ها<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button></div>
+      <div class="pkg-more" data-vis="reports"><button type="button" class="pkg-more-btn" onclick="switchSection('reports')">مشاهده‌ی همه‌ی شماره‌ها<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button></div>
 
       <div class="home-bottom-row">
         <div class="notify-card">
@@ -3327,6 +3447,33 @@
           </div>
 
 
+          <!-- نمایش سایت (migration_042): حالت تعمیر + روشن/خاموش کردن بخش‌ها برای بیننده‌ها -->
+          <h3 class="settings-group-title">نمایش سایت</h3>
+          <p class="ss-missing" id="ss-missing" hidden>برای فعال شدن این دو بخش، فایل <b>db/migration_042_login_lock_site_settings.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</p>
+          <div class="settings-row-2col">
+            <details class="panel settings-accordion" id="ss-maint-panel">
+              <summary class="panel-head"><span class="panel-pill">حالت تعمیر و نگهداری</span><span class="settings-sum-desc" id="ss-maint-sum">بستن موقت سایت برای بیننده‌ها، با یک پیام</span></summary>
+              <p class="settings-help">وقتی روشن باشد، بیننده‌ها پس از ورود به‌جای سایت فقط پیام زیر را می‌بینند (روی صفحه‌ی ورود هم نمایش داده می‌شود). مدیر مثل همیشه وارد سایت می‌شود. کاربرانی که سایت برایشان باز است، حداکثر تا ۵ دقیقه بعد پیام را می‌بینند.</p>
+              <div class="ce-section" id="ss-maint-box">
+                <label class="ce-section-toggle"><input type="checkbox" id="ss-maint-on"/>
+                  <span><b>حالت تعمیر روشن است</b><span>سایت برای بیننده‌ها بسته می‌شود.</span></span></label>
+                <div class="ce-section-extra">
+                  <div class="field ce-full"><label for="ss-maint-msg">پیام برای بیننده‌ها <span class="ann-counter" id="ss-maint-counter">۰ / ۲۰۰</span></label>
+                    <textarea id="ss-maint-msg" maxlength="200" rows="2" placeholder="سامانه در حال به‌روزرسانی است و به‌زودی در دسترس خواهد بود."></textarea></div>
+                  <div class="field ce-full"><label for="ss-maint-until">زمان تقریبی بازگشت (اختیاری)</label>
+                    <input type="text" id="ss-maint-until" maxlength="60" placeholder="مثلاً: امروز ساعت ۱۴"/></div>
+                </div>
+              </div>
+              <button type="button" class="btn primary" id="ss-maint-save" onclick="saveMaintenance()">ذخیره</button>
+            </details>
+            <details class="panel settings-accordion" id="ss-vis-panel">
+              <summary class="panel-head"><span class="panel-pill">بخش‌های قابل‌مشاهده برای بیننده‌ها</span><span class="settings-sum-desc" id="ss-vis-sum">روشن و خاموش کردن هر بخش یا تب</span></summary>
+              <p class="settings-help">بخش یا تب خاموش، برای بیننده‌ها از منو، صفحه‌ی نخست و تب‌بار برداشته می‌شود. شما به‌عنوان مدیر همچنان آن را با برچسب «پنهان» می‌بینید. داده‌ها پاک نمی‌شوند و با روشن کردن دوباره برمی‌گردند.</p>
+              <div id="ss-vis-list"></div>
+              <button type="button" class="btn primary" id="ss-vis-save" onclick="saveHiddenSections()">ذخیره</button>
+            </details>
+          </div>
+
           <h3 class="settings-group-title">امنیت</h3>
           <div class="settings-row-2col">
           <details class="panel settings-accordion">
@@ -3385,6 +3532,11 @@
         <div class="panel">
           <div class="panel-head"><span class="panel-pill">فضای ذخیره‌سازی</span><span class="settings-sum-desc">سقف پلن رایگان سوپابیس ۱ گیگابایت است؛ اگر پر شود، سایت قفل می‌شود.</span><button type="button" class="btn" id="sys-status-refresh" onclick="renderSystemStatus()">به‌روزرسانی همه</button></div>
           <div id="sys-storage"></div>
+          <div id="sys-retention"></div>
+        </div>
+        <div class="panel" id="sys-capacity-panel">
+          <div class="panel-head"><span class="panel-pill">سابقه‌ی ظرفیت</span><span class="settings-sum-desc">حجم فضای فایل و پایگاه داده در هر روز، به تفکیک دسته؛ هر شب ساعت ۰۰:۲۰ ثبت می‌شود.</span></div>
+          <div id="sys-capacity"></div>
         </div>
         <div class="panel">
           <div class="panel-head"><span class="panel-pill">سرویس‌های مرتبط</span><span class="settings-sum-desc">سایت‌ها و سرویس‌هایی که «جریان» برای کار به آن‌ها وابسته است. سبز یعنی در دسترس، زرد یعنی کُند، قرمز یعنی قطع یا خطا.</span></div>
@@ -3401,6 +3553,10 @@
         <div class="panel">
           <div class="panel-head"><span class="panel-pill">ورودها</span><span class="settings-sum-desc">ورودهای ۳۰ روز اخیر به سایت. چون رمز مشترک است، فقط نقش (مدیر/بیننده)، دستگاه و IP معلوم است، نه نام افراد. ورود خودکار کارهای گیت‌هاب نمایش داده نمی‌شود.</span></div>
           <div id="sys-logins"></div>
+        </div>
+        <div class="panel" id="sys-cerr-panel">
+          <div class="panel-head"><span class="panel-pill">خطاهای مرورگر کاربران</span><span class="settings-sum-desc">خطاهایی که در ۷ روز اخیر در مرورگر کاربران رخ داده است. هر خطا در هر نشست یک‌بار شمرده می‌شود؛ متن پست‌ها و رمزها ثبت نمی‌شوند.</span></div>
+          <div id="sys-client-errors"></div>
         </div>
         <div class="sys-page-row">
           <div class="panel">
@@ -3514,7 +3670,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۲۳.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۵.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -3639,10 +3795,52 @@
     return fetch(SUPABASE_URL + '/rest/v1' + path, Object.assign({}, opts, { headers })).then(r=>{
       // ۴۰۱ با توکن = نشست منقضی‌شده (توکن ۲۴ ساعت اعتبار داره)
       if(r.status === 401 && authToken) SESSION_EXPIRED = true;
+      if(r.status >= 500) reportClientError('خطای سرور ' + r.status + ' در ' + path.split('?')[0]);
       return r;
     });
   }
   let SESSION_EXPIRED = false;
+
+  // ---- ثبت خودکار خطاهای مرورگر کاربران (۵.۲۵.۰، migration_043) ----
+  // خطاهای جاوااسکریپت، promiseهای ردشده، هر console.error و پاسخ‌های ۵xx سرور → RPC
+  // log_client_error. هر متن خطا در هر زبانه یک‌بار (پس شمارش سمت سرور = تعداد نشست‌ها)،
+  // حداکثر ۲۰ در ساعت؛ آدرس‌ها بدون query (ممکنه عبارت جست‌وجو داشته باشن)؛ متن پست/رمز
+  // هیچ‌جا فرستاده نمی‌شه. با fetch خام (نه api()) تا خطای خودش دوباره ثبت نشه.
+  var CLIENT_ERR_SENT = new Set(), CLIENT_ERR_TIMES = [];
+  function reportClientError(msg){
+    try{
+      if(!authToken) return;
+      msg = String(msg || '').replace(/https?:\/\/[^\s'"]+/g, u=>u.split('?')[0]).replace(/\s+/g, ' ').trim().slice(0, 300);
+      if(!msg || CLIENT_ERR_SENT.has(msg)) return;
+      if(/ResizeObserver loop|^Script error\.?$|AbortError|aborted/i.test(msg)) return;
+      const now = Date.now();
+      CLIENT_ERR_TIMES = CLIENT_ERR_TIMES.filter(t=>now - t < 3600000);
+      if(CLIENT_ERR_TIMES.length >= 20) return;
+      CLIENT_ERR_SENT.add(msg); CLIENT_ERR_TIMES.push(now);
+      let ver = '', place = '', device = '';
+      try{ ver = APP_VERSION; }catch(e){}
+      try{ place = navCurrentState().key; }catch(e){}
+      try{ device = sysDeviceLabel(navigator.userAgent); }catch(e){}
+      fetch(SUPABASE_URL + '/rest/v1/rpc/log_client_error', {
+        method:'POST', keepalive:true,
+        headers:{ apikey: SUPABASE_ANON_KEY, 'Content-Type':'application/json', Authorization:'Bearer ' + authToken },
+        body: JSON.stringify({ p_msg: msg, p_place: place, p_version: ver, p_device: device }),
+      }).catch(()=>{});
+    }catch(e){}
+  }
+  window.addEventListener('error', e=>reportClientError((e.error && e.error.message) || e.message));
+  window.addEventListener('unhandledrejection', e=>{ const r = e.reason; reportClientError(r && r.message ? r.message : String(r)); });
+  (function(){
+    const orig = console.error.bind(console);
+    console.error = function(...args){
+      orig(...args);
+      try{
+        const err = args.find(x=>x instanceof Error);
+        const label = typeof args[0] === 'string' ? args[0] : '';
+        reportClientError(err ? (label ? label + ': ' : '') + err.message : args.map(x=>typeof x === 'string' ? x : (x && x.message) || '').join(' '));
+      }catch(e){}
+    };
+  })();
 
   // خطای ورود/بارگذاری روی صفحه‌ی ورود؛ withRetry دکمه‌ی «تلاش دوباره» رو هم نشون می‌ده
   function showLoginError(msg, withRetry){
@@ -3658,6 +3856,9 @@
     try{
       await loadAll();
       if(SESSION_EXPIRED) throw new Error('session expired');
+      startSitePoll();
+      // حالت تعمیر (migration_042): بیننده به‌جای سایت فقط پیام به‌روزرسانی رو می‌بینه
+      if(currentRole !== 'app_admin' && maintOn()){ showMaintView(); return true; }
       NAV_RESTORING = true;
       enterDash(lastSectionKey());
       const hashSt = navParse(location.hash);
@@ -3746,6 +3947,11 @@
       headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
     });
+    if(r.status === 429){
+      // قفل موقت ورود (migration_042): ۵ رمز اشتباه در ۱۵ دقیقه از همین اتصال
+      const d = await r.json().catch(()=>({}));
+      const e = new Error('locked'); e.retryAfter = Number(d.retry_after) || 900; throw e;
+    }
     if(!r.ok) throw new Error('invalid');
     const data = await r.json();
     authToken = data.token; currentRole = data.role;
@@ -3773,8 +3979,10 @@
     try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); sessionStorage.removeItem('jarian_ann_dismissed_s'); sessionStorage.removeItem('jarian_pv_session'); }catch(e){}
     PV_LAST = '';
     clearTimeout(ADMIN_ALERT_TIMER);
+    clearInterval(SITE_POLL_TIMER);
     try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
     goLogin();
+    loadLoginMaintNotice();
   }
 
   // شماره‌ی موبایل با فاصله/خط تیره/پرانتز و پیش‌شماره‌ی ۹۸+ یا ۰۰۹۸ → 09xxxxxxxxx (۵.۲۰.۰)
@@ -3916,7 +4124,9 @@
         await doLogin(pwEl.value);
       }catch(e){
         // TypeError یعنی اصلاً به سرور نرسیدیم، نه رمز اشتباه
-        showLoginError(e instanceof TypeError ? 'اتصال به سرور برقرار نشد. اتصال اینترنت را بررسی کنید.' : 'رمز عبور اشتباه است.', false);
+        showLoginError(e instanceof TypeError ? 'اتصال به سرور برقرار نشد. اتصال اینترنت را بررسی کنید.'
+          : e.message === 'locked' ? 'به‌دلیل چند بار وارد کردن رمز اشتباه، ورود از این اتصال موقتاً بسته شده است. حدود ' + faNum(Math.max(1, Math.ceil(e.retryAfter / 60))) + ' دقیقه‌ی دیگر دوباره امتحان کنید.'
+          : 'رمز عبور اشتباه است.', false);
         pwEl.focus();
         pwEl.select();
         return;
@@ -4042,6 +4252,7 @@
   function switchSection(key){
     navMark();
     if(key === 'feedback'){ key = 'users'; setTimeout(()=>document.getElementById('usr-feedback-panel').scrollIntoView({ block:'start' }), 400); } // بخش قدیمی، حالا قسمت دوم «کاربران»
+    if(viewerHidden(key)) key = 'dashboard'; // بخش پنهان از بیننده‌ها (تنظیمات بخش‌ها ← نمایش سایت)
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
     document.getElementById('sec-'+key).classList.add('active');
     document.getElementById('sec-title').textContent = TITLES[key];
@@ -4065,9 +4276,10 @@
     if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
     if(key === 'announce') renderAnnAdmin();
     if(key === 'activity') setActTab(ACT_TAB);
-    if(key === 'settings'){ renderBackupPanel(); loadCrawlSites(); if(currentRole === 'app_admin') loadCrawlSuggestions(); }
+    if(key === 'settings'){ renderBackupPanel(); renderSiteSettingsAdmin(); loadCrawlSites(); if(currentRole === 'app_admin') loadCrawlSuggestions(); }
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
     if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
+    if(key === 'posts' || key === 'people') ensureVisibleTab(key);
     // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
     requestAnimationFrame(()=>document.querySelectorAll('#sec-'+key+' .news-page-tabs').forEach(bar=>updateTabInk(bar, true)));
     peekTabBar(key);
@@ -4251,6 +4463,7 @@
   let HAWZA_TAB = (t=>HAWZA_TAB_INFO[t] ? t : 'news')(lsGet('jarian_last_hawza_tab', 'news'));
   function setHawzaTab(tab){
     if(!HAWZA_TAB_INFO[tab]) tab = 'news';
+    if(viewerHidden('hawza/' + tab)) tab = firstVisibleTab('hawza') || tab;
     navMark();
     HAWZA_TAB = tab;
     lsSet('jarian_last_hawza_tab', tab);
@@ -4470,6 +4683,7 @@
   setupHawzaAbout();
 
   function setNewsPageTab(tab){
+    if(viewerHidden('overview/' + tab)) tab = firstVisibleTab('overview') || tab;
     navMark();
     NEWS_CURRENT_TAB = tab;
     lsSet('jarian_last_news_tab', tab);
@@ -4619,7 +4833,8 @@
     return 'صف بررسی‌نشده: ' + faNum(n) + ' پست' + trend;
   }
   async function sysCleanupCheck(){
-    const cutoff = new Date(Date.now() - 30*3600000).toISOString();
+    // مدت نگهداری + ۱۸ ساعت (فاصله‌ی دو پاک‌سازی + حاشیه)؛ پیش‌فرض ۱۲ → ۳۰ ساعت
+    const cutoff = new Date(Date.now() - (mediaRetentionHours() + 18)*3600000).toISOString();
     // همون معیار خودِ cleanup_media.py (زمان دانلود فایل، media_fetched_at) — نه زمان
     // جمع‌آوری پست؛ رسانه‌ی بدون media_fetched_at هم هیچ‌وقت پاک نمی‌شه، پس شمرده می‌شه
     const n = await fetchExactCount('/posts?media_storage_path=not.is.null&or=' + encodeURIComponent('(media_fetched_at.lt.' + cutoff + ',media_fetched_at.is.null)'));
@@ -4848,6 +5063,8 @@
       if(!r.ok) throw new Error('storage_usage ' + r.status);
       const rows = (await r.json()).sort((a,b)=>b.size_bytes - a.size_bytes);
       const total = rows.reduce((t,x)=>t + Number(x.size_bytes||0), 0);
+      SYS_STORAGE = { total, postMedia: Number((rows.find(x=>x.bucket_id === 'post-media') || {}).size_bytes || 0) };
+      renderSysRetention();
       const pct = Math.min(100, total / (STORAGE_LIMIT_MB*1048576) * 100);
       const cls = pct >= 85 ? 'bad' : pct >= 65 ? 'warn' : '';
       el.innerHTML = `<div class="sys-storage-head"><span><b>${faMb(total)}</b> از ${faNum(STORAGE_LIMIT_MB)} مگابایت</span><span>${toFaDigits(pct.toFixed(0))}٪</span></div>
@@ -4858,6 +5075,274 @@
       el.innerHTML = '<div class="sys-note">خطا در دریافت حجم فضای ذخیره‌سازی.</div>';
     }
   }
+  // ---- مدت نگهداری عکس/فیلم پست‌ها (۵.۲۵.۰، site_settings.media_retention_hours) ----
+  // cleanup_media.py همین مقدار رو می‌خونه (روزی ۲ بار). تخمین حجم: حجم post-media تقریباً
+  // متناسب با بیشترین عمر فایل‌هاست = مدت نگهداری + ۱۲ ساعت فاصله‌ی دو پاک‌سازی.
+  var RETENTION_OPTIONS = [[12,'۱۲ ساعت'],[24,'۱ روز'],[48,'۲ روز'],[72,'۳ روز']];
+  const RETENTION_MAX_PCT = 85;
+  let SYS_STORAGE = null; // {total, postMedia}
+  function mediaRetentionHours(){
+    const h = Number(SITE_SETTINGS.media_retention_hours);
+    return RETENTION_OPTIONS.some(([x])=>x === h) ? h : 12;
+  }
+  function retentionProjectedPct(h){
+    if(!SYS_STORAGE) return null;
+    const cur = mediaRetentionHours();
+    const pm = SYS_STORAGE.postMedia * (h + 12) / (cur + 12);
+    return (SYS_STORAGE.total - SYS_STORAGE.postMedia + pm) / (STORAGE_LIMIT_MB*1048576) * 100;
+  }
+  function renderSysRetention(){
+    const el = document.getElementById('sys-retention');
+    if(!el) return;
+    const cur = mediaRetentionHours();
+    el.innerHTML = `<div class="sys-ret">
+      <label for="sys-ret-sel"><b>مدت نگهداری عکس و فیلم پست‌ها</b><span>قدیمی‌ترها هر روز ساعت ۹:۴۵ و ۲۱:۴۵ پاک می‌شوند؛ متن پست‌ها همیشه می‌ماند.</span></label>
+      <div class="sys-ret-ctl">
+        <select id="sys-ret-sel">${RETENTION_OPTIONS.map(([h, l])=>{
+          const pct = retentionProjectedPct(h);
+          const est = pct === null ? '' : ' — حدود ' + toFaDigits(Math.round(pct)) + '٪ فضا' + (pct > RETENTION_MAX_PCT ? ' (بیش از حد مجاز)' : '');
+          return `<option value="${h}" ${h === cur ? 'selected' : ''}>${l}${h === cur ? ' (فعلی)' : est}</option>`;
+        }).join('')}</select>
+        <button type="button" class="btn btn-sm" id="sys-ret-save" onclick="saveMediaRetention()">ذخیره</button>
+      </div>
+    </div>`;
+  }
+  async function saveMediaRetention(){
+    const h = Number(document.getElementById('sys-ret-sel').value);
+    const cur = mediaRetentionHours();
+    if(h === cur){ showToast('مدت نگهداری همان مقدار فعلی است.'); return; }
+    const pct = retentionProjectedPct(h);
+    if(pct !== null && pct > RETENTION_MAX_PCT){
+      showToast('با این مدت، فضای ذخیره‌سازی حدود ' + toFaDigits(Math.round(pct)) + '٪ پر می‌شود و ممکن است سایت قفل شود؛ مدت کوتاه‌تری انتخاب کنید.');
+      return;
+    }
+    const label = (RETENTION_OPTIONS.find(([x])=>x === h) || [0, ''])[1];
+    if(!await uiConfirm('تغییر مدت نگهداری رسانه به ' + label + '\n' + (h > cur ? 'از این پس عکس‌ها و فیلم‌ها بیشتر می‌مانند و فضای بیشتری می‌گیرند؛ عکس‌هایی که تا الان پاک شده‌اند برنمی‌گردند.' : 'در اجرای بعدی پاک‌سازی، عکس‌ها و فیلم‌های قدیمی‌تر از ' + label + ' پاک می‌شوند.'))) return;
+    const btn = document.getElementById('sys-ret-save');
+    btn.disabled = true;
+    try{
+      await saveSiteSetting('media_retention_hours', h);
+      showToast('ذخیره شد؛ از اجرای بعدی پاک‌سازی اعمال می‌شود.');
+      renderNewspaperDateTabs();
+    }catch(e){
+      console.error(e);
+      showToast('ذخیره نشد. اتصال اینترنت را بررسی کنید؛ اگر مشکل ماند، migration_043 را در SQL Editor اجرا کنید.');
+    }finally{ btn.disabled = false; }
+    renderSysRetention();
+  }
+
+  // ---- سابقه‌ی ظرفیت (۵.۲۵.۰، capacity_snapshots — migration_043) ----
+  const DB_LIMIT_MB = 500;
+  const CAP_DB_NAMES = { posts:'پست‌ها', hawza:'«درباره حوزه» (خزنده)', logs:'لاگ‌ها و آمار', other:'بقیه (منابع، روزنامه‌ها، تنظیمات…)' };
+  let CAP_ROWS = null, CAP_KIND = 'storage', CAP_RANGE = 30, CAP_MISSING = false;
+  function capLimitBytes(kind){ return (kind === 'db' ? DB_LIMIT_MB : STORAGE_LIMIT_MB) * 1048576; }
+  function capCatName(kind, c){ return kind === 'db' ? (CAP_DB_NAMES[c] || c) : (SYS_BUCKET_NAMES[c] || c); }
+  // اول ماه شمسی جاری و قبلی، به‌صورت YYYY-MM-DD میلادی
+  function jalaliMonthStarts(){
+    const t = calParts(new Date(), 'persian');
+    const iso = a => a[0] + '-' + String(a[1]).padStart(2, '0') + '-' + String(a[2]).padStart(2, '0');
+    const py = t.month === 1 ? t.year - 1 : t.year, pm = t.month === 1 ? 12 : t.month - 1;
+    return { cur: iso(jalaliToGregorian(t.year, t.month, 1)), prev: iso(jalaliToGregorian(py, pm, 1)) };
+  }
+  function capDayLabel(day){ return new Date(day + 'T12:00:00Z').toLocaleDateString('fa-IR', { timeZone:'Asia/Tehran', day:'numeric', month:'long' }); }
+  async function renderSysCapacity(){
+    const el = document.getElementById('sys-capacity');
+    if(!el) return;
+    el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
+    try{
+      // عکس امروز (اگه pg_cron هنوز نگرفته) — idempotent
+      const snap = await api('/rpc/capacity_snapshot', { method:'POST', body:'{}' });
+      const since = tehranDateStr(Date.now() - 400*86400000);
+      const r = await api('/capacity_snapshots?select=day,kind,category,bytes,files&day=gte.' + since + '&order=day.asc');
+      CAP_MISSING = snap.status === 404 || r.status === 404 || r.status === 400;
+      if(CAP_MISSING){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_043_capacity_errors.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</div>'; return; }
+      if(!r.ok) throw new Error('capacity_snapshots ' + r.status);
+      CAP_ROWS = await r.json();
+      drawSysCapacity();
+    }catch(e){
+      console.error(e);
+      el.innerHTML = '<div class="sys-note">خطا در دریافت سابقه‌ی ظرفیت.</div>';
+    }
+  }
+  function drawSysCapacity(){
+    const el = document.getElementById('sys-capacity');
+    const rows = (CAP_ROWS || []).filter(x=>x.kind === CAP_KIND);
+    const byDay = new Map();
+    rows.forEach(x=>{ if(!byDay.has(x.day)) byDay.set(x.day, {}); byDay.get(x.day)[x.category] = Number(x.bytes) || 0; });
+    const days = [...byDay.keys()].sort();
+    const total = d => Object.values(byDay.get(d) || {}).reduce((a, b)=>a + b, 0);
+    const limit = capLimitBytes(CAP_KIND);
+    const toggles = `<div class="sys-cap-tabs">
+        <div class="sys-cap-seg">${[['storage','فضای فایل (۱ گیگ)'],['db','پایگاه داده (۵۰۰ مگ)']].map(([k, l])=>`<button type="button" class="usr-chip ${CAP_KIND===k?'active':''}" data-cap-kind="${k}">${l}</button>`).join('')}</div>
+        <div class="sys-cap-seg">${[[30,'۳۰ روز'],[365,'۱۲ ماه']].map(([k, l])=>`<button type="button" class="usr-chip ${CAP_RANGE===k?'active':''}" data-cap-range="${k}">${l}</button>`).join('')}</div>
+      </div>`;
+    if(!days.length){ el.innerHTML = toggles + '<div class="sys-note">هنوز سابقه‌ای ثبت نشده است.</div>'; return; }
+    const today = days[days.length - 1];
+    const ms = jalaliMonthStarts();
+    const firstFrom = from => days.find(d=>d >= from) || null;
+    const curStart = firstFrom(ms.cur), prevStart = days.find(d=>d >= ms.prev && d < ms.cur) || null;
+    const mb = b => faMb(b) + ' مگ';
+    const pct = b => toFaDigits(Math.round(b / limit * 100)) + '٪';
+    const tTot = total(today);
+    // علامت +/− در متن راست‌به‌چپ جابه‌جا دیده می‌شه — با واژه
+    const delta = (a, b) => { const d = a - b; return Math.abs(d) < 52429 ? 'بدون تغییر' : faMb(Math.abs(d)) + ' مگ ' + (d > 0 ? 'افزایش' : 'کاهش'); };
+    const tile = (label, val, sub) => `<div class="sys-cap-tile"><span>${label}</span><b>${val}</b><small>${sub}</small></div>`;
+    const tiles = [
+      tile('امروز', mb(tTot), pct(tTot) + ' از سقف'),
+      tile('اول این ماه', curStart ? mb(total(curStart)) : '—', curStart ? capDayLabel(curStart) : 'هنوز ثبت نشده'),
+      tile('ماه گذشته', prevStart ? mb(total(prevStart)) : '—', prevStart ? 'از ' + capDayLabel(prevStart) : 'هنوز ثبت نشده'),
+      tile('تغییر این ماه', curStart ? delta(tTot, total(curStart)) : '—', curStart ? 'نسبت به ' + capDayLabel(curStart) : 'سابقه از امروز ثبت می‌شود'),
+    ].join('');
+    // تفکیک دسته‌ها
+    const cats = Object.entries(byDay.get(today)).sort((a, b)=>b[1] - a[1]);
+    const base = curStart ? byDay.get(curStart) : null;
+    const breakdown = cats.map(([c, b])=>{
+      const w = tTot ? Math.max(1, b / tTot * 100) : 0;
+      const ch = base && base[c] !== undefined ? '<em>این ماه: ' + delta(b, base[c]) + '</em>' : '';
+      return `<div class="sys-cap-cat"><span class="sys-cap-cat-name">${escHtml(capCatName(CAP_KIND, c))}</span><span class="sys-cap-cat-bar"><i style="width:${w.toFixed(1)}%"></i></span><span class="sys-cap-cat-val">${mb(b)}${ch}</span></div>`;
+    }).join('');
+    // روند: ۳۰ روز = هر روز؛ ۱۲ ماه = آخرین عکس هر ماه شمسی
+    let points;
+    if(CAP_RANGE === 30){
+      const from = tehranDateStr(Date.now() - 29*86400000);
+      points = days.filter(d=>d >= from).map(d=>({ d, v: total(d), label: capDayLabel(d) }));
+    }else{
+      const byMonth = new Map();
+      days.forEach(d=>{ const p = calParts(new Date(d + 'T12:00:00Z'), 'persian'); byMonth.set(p.year * 100 + p.month, d); });
+      points = [...byMonth.values()].slice(-12).map(d=>({ d, v: total(d), label: new Date(d + 'T12:00:00Z').toLocaleDateString('fa-IR', { timeZone:'Asia/Tehran', month:'long' }) }));
+    }
+    const maxV = Math.max(limit * 0.25, ...points.map(p=>p.v));
+    const chart = `<div class="act-days sys-cap-chart">${points.map(p=>`<div class="act-day" title="${escAttr(p.label + ': ' + mb(p.v))}"><i style="height:${Math.max(2, p.v / maxV * 100).toFixed(1)}%"></i></div>`).join('')}</div>
+      <div class="act-days-axis"><span>${escHtml(points[0].label)}</span><span>${escHtml(points[points.length - 1].label)}</span></div>`;
+    // پیش‌بینی: رشد روزانه‌ی میانگین ۱۴ روز اخیر (حداقل ۷ روز سابقه)
+    let proj = '', projCls = '';
+    const back = days.filter(d=>d >= tehranDateStr(Date.now() - 14*86400000));
+    if(back.length < 7 || days.length < 7){
+      proj = 'برای پیش‌بینی، دست‌کم ۷ روز سابقه لازم است (از ' + capDayLabel(days[0]) + ' ثبت می‌شود).';
+    }else{
+      const first = back[0];
+      const span = Math.max(1, (new Date(today) - new Date(first)) / 86400000);
+      const perDay = (tTot - total(first)) / span;
+      if(perDay <= 1048576 * 0.05){
+        proj = 'روند ۱۴ روز اخیر: بدون رشد محسوس؛ با این روند پر نمی‌شود.';
+      }else{
+        const left = Math.max(0, (limit - tTot) / perDay);
+        projCls = left < 30 ? 'bad' : left < 90 ? 'warn' : '';
+        const when = left < 60 ? toFaDigits(Math.round(left)) + ' روز' : toFaDigits(Math.round(left / 30)) + ' ماه';
+        proj = 'با روند ۱۴ روز اخیر (روزانه حدود ' + faMb(perDay) + ' مگ افزایش)، ' + (CAP_KIND === 'db' ? 'پایگاه داده' : 'فضای فایل') + ' حدود ' + when + ' دیگر پر می‌شود.';
+      }
+    }
+    el.innerHTML = toggles + `<div class="sys-cap-tiles">${tiles}</div>
+      <div class="sys-cap-grid"><div><div class="sys-cap-sub">تفکیک امروز</div>${breakdown}</div>
+      <div><div class="sys-cap-sub">روند ${CAP_RANGE === 30 ? '۳۰ روز اخیر' : '۱۲ ماه اخیر'}</div>${chart}</div></div>
+      <p class="sys-cap-proj ${projCls}">${proj}</p>`;
+  }
+  document.getElementById('sys-capacity').addEventListener('click', e=>{
+    const k = e.target.closest('[data-cap-kind]'), r = e.target.closest('[data-cap-range]');
+    if(k){ CAP_KIND = k.dataset.capKind; drawSysCapacity(); }
+    if(r){ CAP_RANGE = Number(r.dataset.capRange); drawSysCapacity(); }
+  });
+
+  // ---- خطاهای مرورگر کاربران (۵.۲۵.۰، client_errors — migration_043) ----
+  async function renderSysClientErrors(){
+    const el = document.getElementById('sys-client-errors');
+    if(!el) return;
+    el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
+    try{
+      const r = await api('/client_errors?select=*&day=gte.' + tehranDateStr(Date.now() - 6*86400000) + '&order=last_at.desc&limit=500');
+      if(r.status === 404 || r.status === 400){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_043_capacity_errors.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</div>'; return; }
+      if(!r.ok) throw new Error('client_errors ' + r.status);
+      const groups = new Map();
+      (await r.json()).forEach(x=>{
+        const g = groups.get(x.sig) || { sig:x.sig, message:x.message, sessions:0, last:x.last_at, place:x.place, device:x.device, version:x.version, recent:0 };
+        g.sessions += x.sessions;
+        if(Date.now() - new Date(x.last_at).getTime() < 86400000) g.recent += x.sessions;
+        if(x.last_at > g.last){ g.last = x.last_at; g.place = x.place; g.device = x.device; g.version = x.version; }
+        groups.set(x.sig, g);
+      });
+      const list = [...groups.values()].sort((a, b)=>b.last.localeCompare(a.last));
+      if(!list.length){ el.innerHTML = '<div class="sys-note">در ۷ روز اخیر هیچ خطایی در مرورگر کاربران ثبت نشده است.</div>'; return; }
+      const placeName = k => {
+        if(!k) return '—';
+        const [sec, tab] = k.split('/');
+        return (TITLES[sec] || sec) + (tab ? ' ← ' + actTabName(sec, tab) : '');
+      };
+      el.innerHTML = list.slice(0, 30).map(g=>{
+        const cls = g.recent >= 3 ? 'warn' : '';
+        return `<div class="sys-cerr-row ${cls}">
+          <div class="sys-cerr-msg" dir="auto">${escHtml(g.message)}</div>
+          <div class="sys-cerr-meta">در ${faNum(g.sessions)} نشست، آخرین بار ${escHtml(newsRelTime(g.last))}، ${escHtml(placeName(g.place))}، ${escHtml(g.device || 'دستگاه نامشخص')}، نسخه‌ی ${escHtml(toFaDigits(g.version || '—'))}</div>
+          <button type="button" class="btn btn-sm" data-cerr="${escAttr(g.sig)}">رفع شد</button>
+        </div>`;
+      }).join('') + (list.length > 30 ? `<div class="sys-note">و ${faNum(list.length - 30)} خطای دیگر.</div>` : '');
+    }catch(e){
+      console.error(e);
+      el.innerHTML = '<div class="sys-note">خطا در دریافت فهرست خطاها.</div>';
+    }
+  }
+  document.getElementById('sys-client-errors').addEventListener('click', async e=>{
+    const b = e.target.closest('[data-cerr]'); if(!b) return;
+    if(!await uiConfirm('حذف این خطا از فهرست\nاگر دوباره رخ دهد، باز در فهرست ظاهر می‌شود.')) return;
+    const r = await api('/client_errors?sig=eq.' + encodeURIComponent(b.dataset.cerr), { method:'DELETE' });
+    if(!r.ok){ showToast('حذف ناموفق بود؛ اتصال اینترنت را بررسی کنید.'); return; }
+    renderSysClientErrors().then(renderSysSummary);
+  });
+
+  // ---- گزارش اجرای کارهای خودکار (۵.۲۵.۰، run-job با {action:'logs'}) ----
+  let JOB_LOG_TEXT = '';
+  const JOB_LOG_ERR_RX = /##\[error\]|traceback|error|exception|failed|\[!\]|❌/i;
+  async function openJobLog(job){
+    const j = SYS_STATUS_JOBS.find(x=>x.job === job);
+    document.getElementById('job-log-title').textContent = 'گزارش آخرین اجرا: ' + (j ? j.name : job);
+    document.getElementById('job-log-meta').textContent = 'در حال دریافت از گیت‌هاب…';
+    document.getElementById('job-log-body').innerHTML = '';
+    document.getElementById('job-log-gh').hidden = true;
+    document.getElementById('job-log-copy').disabled = true;
+    JOB_LOG_TEXT = '';
+    document.getElementById('job-log-modal').classList.add('active');
+    try{
+      const r = await fetch(SUPABASE_URL + '/functions/v1/run-job', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + authToken },
+        body: JSON.stringify({ action:'logs', job }),
+      });
+      if(!r.ok) throw new Error('run-job logs ' + r.status);
+      const d = await r.json();
+      if(d.error && !d.lines) throw new Error(d.error);
+      const meta = document.getElementById('job-log-meta');
+      if(!d.run){ meta.textContent = d.running ? 'اولین اجرا هنوز در جریان است؛ گزارش بعد از پایان آن آماده می‌شود.' : 'هنوز اجرایی ثبت نشده است.'; return; }
+      const res = d.run.conclusion === 'success' ? 'موفق' : d.run.conclusion === 'failure' ? 'ناموفق' : d.run.conclusion === 'cancelled' ? 'لغو شده' : (d.run.conclusion || 'نامشخص');
+      const when = new Date(d.run.created_at).toLocaleString('fa-IR', { timeZone:'Asia/Tehran', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      meta.innerHTML = `اجرای ${escHtml(when)} — نتیجه: <b class="${d.run.conclusion === 'success' ? 'ok' : 'bad'}">${escHtml(res)}</b>${d.running ? '؛ یک اجرای تازه‌تر هم در جریان است.' : ''}${d.truncated ? '<br>فقط ۶۰ خط آخر نمایش داده می‌شود.' : ''}`;
+      const gh = document.getElementById('job-log-gh');
+      const url = safeUrl(d.run.html_url);
+      if(url){ gh.href = url; gh.hidden = false; }
+      const lines = d.lines || [];
+      if(!lines.length){ document.getElementById('job-log-body').innerHTML = '<div class="job-log-line">گزارشی برای این اجرا در دسترس نیست.</div>'; return; }
+      const fmtT = t => t ? new Date(t).toLocaleTimeString('en-GB', { timeZone:'Asia/Tehran', hour12:false }) : '';
+      JOB_LOG_TEXT = lines.map(l=>(l.t ? fmtT(l.t) + '  ' : '') + l.text).join('\n');
+      document.getElementById('job-log-body').innerHTML = lines.map(l=>{
+        const err = JOB_LOG_ERR_RX.test(l.text);
+        return `<div class="job-log-line ${err ? 'err' : ''} ${l.text.startsWith('▶') ? 'step' : ''}"><span class="job-log-t">${escHtml(fmtT(l.t))}</span><span>${escHtml(l.text.replace('##[error]', '✖ '))}</span></div>`;
+      }).join('');
+      document.getElementById('job-log-copy').disabled = false;
+      const body = document.getElementById('job-log-body');
+      body.scrollTop = body.scrollHeight;
+    }catch(e){
+      console.error(e);
+      document.getElementById('job-log-meta').textContent = 'دریافت گزارش ناموفق بود. اگر تازه منتشر شده، چند دقیقه بعد دوباره امتحان کنید (تابع run-job باید دوباره نصب شود).';
+    }
+  }
+  function closeJobLog(){ document.getElementById('job-log-modal').classList.remove('active'); }
+  async function copyJobLog(){
+    try{ await navigator.clipboard.writeText(JOB_LOG_TEXT); showToast('متن گزارش کپی شد؛ می‌توانید آن را برای پشتیبانی بفرستید.'); }
+    catch(e){ showToast('کپی ممکن نشد؛ متن را دستی انتخاب و کپی کنید.'); }
+  }
+  document.addEventListener('click', e=>{
+    const b = e.target.closest('.sys-log-btn');
+    if(b) openJobLog(b.dataset.log);
+  });
+
   async function renderSysStale(){
     const el = document.getElementById('sys-stale');
     el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
@@ -4895,7 +5380,10 @@
     const el = document.getElementById('sys-logins');
     el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
     try{
-      const r = await api('/login_events?select=created_at,success,role,user_agent,ip&order=created_at.desc&limit=300');
+      const [r, locks] = await Promise.all([
+        api('/login_events?select=*&order=created_at.desc&limit=300'),
+        fetchLoginLocks().catch(()=>null),
+      ]);
       if(r.status === 404 || r.status === 400){ el.innerHTML = '<div class="sys-note">برای نمایش این بخش، فایل <b>db/migration_035_login_events.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</div>'; return; }
       if(!r.ok) throw new Error('login_events ' + r.status);
       const rows = await r.json();
@@ -4903,20 +5391,30 @@
       const day = rows.filter(x=>new Date(x.created_at).getTime() > dayAgo);
       const okAdmin = day.filter(x=>x.success && x.role==='app_admin').length;
       const okViewer = day.filter(x=>x.success && x.role==='app_viewer').length;
-      const fails = day.filter(x=>!x.success);
+      const fails = day.filter(x=>!x.success && !x.blocked);
       const failCls = fails.length >= 20 ? 'bad' : fails.length >= 5 ? 'warn' : '';
       const byIp = {};
       fails.forEach(x=>{ const k = x.ip || 'نامشخص'; byIp[k] = (byIp[k]||0) + 1; });
       const topIps = Object.entries(byIp).sort((a,b)=>b[1]-a[1]).slice(0,3);
       const list = SYS_LOGINS_SHOW_ALL ? rows : rows.slice(0, 15);
-      el.innerHTML = `<div class="sys-login-sum">
+      // قفل موقت ورود (migration_042)
+      const lockHtml = locks === null
+        ? '<div class="sys-note sys-lock-note">قفل خودکار ورود هنوز فعال نیست؛ برای فعال شدن، فایل <b>db/migration_042_login_lock_site_settings.sql</b> را یک‌بار در SQL Editor سوپابیس اجرا کنید.</div>'
+        : locks.length
+          ? `<div class="sys-lock-box warn"><div class="sys-lock-head"><b>ورود از ${faNum(locks.length)} اتصال موقتاً بسته است</b>${locks.length > 1 ? '<button type="button" class="btn btn-sm" onclick="unlockLogin(null)">باز کردن همه</button>' : ''}</div>${locks.map(x=>{
+              const until = new Date(x.locked_until);
+              const mins = Math.max(1, Math.ceil((until.getTime() - Date.now()) / 60000));
+              return `<div class="sys-lock-row"><span dir="ltr" class="sys-lock-ip">${escHtml(x.ip || 'نامشخص')}</span><span class="sys-lock-meta">${faNum(x.attempts)} تلاش ناموفق، باز شدن خودکار تا ${faNum(mins)} دقیقه‌ی دیگر</span><button type="button" class="btn btn-sm" data-unlock="${escAttr(x.ip || '')}">باز کردن قفل</button></div>`;
+            }).join('')}<p class="sys-lock-help">اگر همکاران پشت یک اینترنت مشترک هستند، قفل برای همه‌ی آن‌ها اعمال می‌شود. اگر مطمئن هستید تلاش‌ها از طرف خودتان بوده، قفل را باز کنید.</p></div>`
+          : '<div class="sys-note sys-lock-note">قفل خودکار فعال است: با ۵ رمز اشتباه در ۱۵ دقیقه از یک اتصال، ورود از آن اتصال ۱۵ دقیقه بسته می‌شود. الان هیچ اتصالی قفل نیست.</div>';
+      el.innerHTML = lockHtml + `<div class="sys-login-sum">
           <div class="sys-login-stat"><b>${faNum(okAdmin)}</b><span>ورود مدیر در ۲۴ ساعت اخیر</span></div>
           <div class="sys-login-stat"><b>${faNum(okViewer)}</b><span>ورود بیننده در ۲۴ ساعت اخیر</span></div>
           <div class="sys-login-stat ${failCls}"><b>${faNum(fails.length)}</b><span>تلاش ناموفق (رمز اشتباه) در ۲۴ ساعت اخیر${topIps.length ? '<br>بیشترین از: ' + topIps.map(([ip,n])=>escHtml(ip) + ' (' + faNum(n) + ')').join('، ') : ''}</span></div>
         </div>` + (rows.length ? `<div class="sys-login-wrap"><table class="sys-login-table"><thead><tr><th>زمان</th><th>نتیجه</th><th>نقش</th><th>دستگاه</th><th>IP</th></tr></thead><tbody>${list.map(x=>{
           const d = new Date(x.created_at);
           const full = d.toLocaleString('fa-IR', { timeZone:'Asia/Tehran', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
-          return `<tr class="${x.success ? '' : 'fail'}"><td title="${escAttr(full)}">${escHtml(full)}</td><td><span class="sys-login-badge ${x.success ? '' : 'fail'}">${x.success ? 'موفق' : 'رمز اشتباه'}</span></td><td>${x.role==='app_admin' ? 'مدیر' : x.role==='app_viewer' ? 'بیننده' : '—'}</td><td title="${escAttr(x.user_agent||'')}">${escHtml(sysDeviceLabel(x.user_agent))}</td><td dir="ltr">${escHtml(x.ip||'—')}</td></tr>`;
+          return `<tr class="${x.success ? '' : 'fail'}"><td title="${escAttr(full)}">${escHtml(full)}</td><td><span class="sys-login-badge ${x.success ? '' : 'fail'}">${x.success ? 'موفق' : x.blocked ? 'رد شد (قفل)' : 'رمز اشتباه'}</span></td><td>${x.role==='app_admin' ? 'مدیر' : x.role==='app_viewer' ? 'بیننده' : '—'}</td><td title="${escAttr(x.user_agent||'')}">${escHtml(sysDeviceLabel(x.user_agent))}</td><td dir="ltr">${escHtml(x.ip||'—')}</td></tr>`;
         }).join('')}</tbody></table></div>${rows.length > 15 ? `<button type="button" class="btn sys-login-more" onclick="SYS_LOGINS_SHOW_ALL=!SYS_LOGINS_SHOW_ALL;renderSysLogins()">${SYS_LOGINS_SHOW_ALL ? 'نمایش کمتر' : 'نمایش همه (' + faNum(rows.length) + ')'}</button>` : ''}` : '<div class="sys-note">هنوز ورودی ثبت نشده.</div>');
     }catch(e){
       console.error(e);
@@ -4940,8 +5438,8 @@
     const wrap = document.getElementById('sys-status-list');
     if(!wrap) return;
     renderSysTokens();
-    const parts = [renderSysStorage(), renderSysStale(), renderSysLogins()];
-    if(auto !== true) parts.push(renderSysServices());
+    const parts = [renderSysStorage(), renderSysStale(), renderSysLogins(), renderSysClientErrors()];
+    if(auto !== true) parts.push(renderSysServices(), renderSysCapacity());
     renderSysSummary(true);
     renderSysTimeline();
     wrap.innerHTML = SYS_STATUS_JOBS.map(j=>`<div class="sys-status-item"><span class="sys-status-dot"></span><div><div class="sys-status-name">${j.name}</div><div class="sys-status-when">در حال بررسی…</div></div></div>`).join('');
@@ -4983,7 +5481,8 @@
       if(gh.cls === 'bad') cls = 'bad';
       const runBtn = currentRole === 'app_admin'
         ? `<button type="button" class="sys-run-btn" data-job="${j.job}" ${pending ? 'disabled' : ''}>${pending ? 'در حال اجرا…' : 'اجرای دستی'}</button>` : '';
-      return `<div class="sys-status-item ${cls}"><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${j.name}</div><div class="sys-status-when">${when}</div>${res.extra ? `<div class="sys-extra">${res.extra}</div>` : ''}<div class="sys-gh ${gh.cls}">${gh.text}</div><div class="sys-status-exp">زمان‌بندی: ${j.exp}</div>${runBtn}</div></div>`;
+      const logBtn = currentRole === 'app_admin' && run ? `<button type="button" class="sys-run-btn sys-log-btn" data-log="${j.job}">مشاهده‌ی گزارش</button>` : '';
+      return `<div class="sys-status-item ${cls}"><span class="sys-status-dot"></span><div class="sys-status-body"><div class="sys-status-name">${j.name}</div><div class="sys-status-when">${when}</div>${res.extra ? `<div class="sys-extra">${res.extra}</div>` : ''}<div class="sys-gh ${gh.cls}">${gh.text}</div><div class="sys-status-exp">زمان‌بندی: ${j.exp}</div><div class="sys-btn-row">${runBtn}${logBtn}</div></div></div>`;
     }).join('');
     await Promise.all(parts.map(x=>Promise.resolve(x).catch(()=>{})));
     renderSysSummary();
@@ -5016,9 +5515,15 @@
     document.querySelectorAll('#sys-status-list .sys-status-item.bad, #sys-status-list .sys-status-item.warn').forEach(r=>{
       add(lvl(r), (r.querySelector('.sys-status-name') || {}).textContent || '', r);
     });
+    const lockBox = document.querySelector('#sys-logins .sys-lock-box');
+    if(lockBox) add('warn', 'ورود از ' + faNum(lockBox.querySelectorAll('.sys-lock-row').length) + ' اتصال قفل است', lockBox);
     document.querySelectorAll('#sys-logins .sys-login-stat.bad, #sys-logins .sys-login-stat.warn').forEach(r=>{
       add(lvl(r), 'تلاش ناموفق ورود زیاد', r);
     });
+    const proj = document.querySelector('#sys-capacity .sys-cap-proj.bad, #sys-capacity .sys-cap-proj.warn');
+    if(proj) add(lvl(proj), (CAP_KIND === 'db' ? 'پایگاه داده' : 'فضای فایل') + ' رو به پر شدن', proj);
+    const cerr = document.querySelectorAll('#sys-client-errors .sys-cerr-row.warn');
+    if(cerr.length) add('warn', faNum(cerr.length) + ' خطای پرتکرار در مرورگر کاربران', cerr[0]);
     const stale = document.querySelectorAll('#sys-stale .sys-row');
     if(stale.length) add([...stale].some(r=>r.classList.contains('bad')) ? 'bad' : 'warn', faNum(stale.length) + ' منبع بی‌خبر', stale[0].closest('.panel'));
     document.querySelectorAll('#sys-tokens .sys-row.bad, #sys-tokens .sys-row.warn').forEach(r=>{
@@ -5048,6 +5553,9 @@
     const ch = CHANNELS.find(c=>String(c.id) === row.dataset.chan);
     if(ch) openChanEditor(ch);
   }
+  document.getElementById('sys-logins').addEventListener('click', e=>{
+    const b = e.target.closest('[data-unlock]'); if(b) unlockLogin(b.dataset.unlock);
+  });
   document.getElementById('sys-stale').addEventListener('click', openStaleChannel);
   document.getElementById('sys-stale').addEventListener('keydown', openStaleChannel);
 
@@ -5096,6 +5604,8 @@
       try{
         const since = new Date(Date.now() - 86400000).toISOString();
         const n = await fetchExactCount('/login_events?success=is.false&created_at=gt.' + since);
+        const locks = await fetchLoginLocks().catch(()=>null);
+        if(locks && locks.length) note('warn', 'ورود از ' + faNum(locks.length) + ' اتصال قفل است', 'login-lock');
         note(n >= 20 ? 'bad' : n >= 5 ? 'warn' : 'ok', 'تلاش ناموفق ورود در ۲۴ ساعت: ' + faNum(n), 'logins');
       }catch(e){}
     })();
@@ -5185,7 +5695,7 @@
     }
   }
   document.addEventListener('click', e=>{
-    const b = e.target.closest('.sys-run-btn');
+    const b = e.target.closest('.sys-run-btn:not(.sys-log-btn)');
     if(b && !b.disabled) runJobManually(b.dataset.job, b);
   });
 
@@ -6407,7 +6917,7 @@
     // کوئری اضافه‌ی پشت‌سرهم داخل خودِ loadPosts (loadHawzaPosts/
     // loadClaimsPosts) این تأخیر برای زمان ورود به سایت محسوس شده بود
     // (بخش «سرعت ورود» CLAUDE.md رو ببین).
-    await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadProfileGroups(), loadChannelProfileGroups(), loadPosts(), loadAnnouncements(), loadHiddenPostIds()]);
+    await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadProfileGroups(), loadChannelProfileGroups(), loadPosts(), loadAnnouncements(), loadHiddenPostIds(), loadSiteSettings()]);
     renderAnnBar();
     renderDashHeroStats();
     renderChannelCards();
@@ -6433,9 +6943,244 @@
     populateNewsSourceOptions();
     renderNewsFeed();
     renderSchoolReports();
+    applySiteVisibility();
   }
 
   // ---- schools page: گزارش‌های تحلیل Power BI — هر عکس تمام‌عرض، پشت‌سرهم ----
+
+  // ---- نمایش سایت: حالت تعمیر + روشن/خاموش کردن بخش‌ها (migration_042) ----
+  // جدول site_settings: key='maintenance' → {on, message, until}، key='hidden_sections' →
+  // آرایه‌ی «بخش» یا «بخش/تب» پنهان از بیننده‌ها. مدیر همه‌چیز رو با برچسب «پنهان» می‌بینه.
+  // این فقط پنهان‌کردن رابطه (داده‌ها با RLS همچنان خواندنی‌ان) — برای «در دست ساخت»/مشکل موقت.
+  // بخش/تب جدید → به SITE_VIS_ITEMS (و اگه تب‌بار تازه‌ست، به visTargets) اضافه بشه.
+  // var (نه const/let): switchSection و setNewsPageTab ممکنه پیش از رسیدن اجرا به این خط صدا زده بشن
+  var SITE_VIS_ITEMS = [
+    { key:'overview', name:'اخبار و رویدادها', tabs:[['analytics','در یک نگاه'],['claims','ادعاها و شایعات'],['study','شبکه‌های اجتماعی'],['website','وب‌سایت‌ها'],['newspapers','روزنامه‌ها'],['dossier','پرونده‌های موضوعی'],['newsletter','خبرنامه مدارس']] },
+    { key:'people', name:'یادداشت‌ها', tabs:[['orgs','تحلیل سازمان‌ها'],['figures','چهره‌ها و فعالان سیاسی'],['archive','بسته‌های تحلیلی']] },
+    { key:'hawza', name:'درباره حوزه', tabs:[['news','اخبار حوزه'],['about','آنچه درباره حوزه گفته می‌شود']] },
+    { key:'posts', name:'کنشگری مجازی', tabs:[['feed','پست‌های منتشر شده'],['people','افراد و مجموعه‌ها']] },
+    { key:'schools', name:'برنامه مدارس', tabs:[] },
+    { key:'reports', name:'بسته تحلیلی جریان', tabs:[] },
+  ];
+  const MAINT_DEFAULT_MSG = 'سامانه در حال به‌روزرسانی است و به‌زودی در دسترس خواهد بود.';
+  var SITE_SETTINGS = { maintenance:{ on:false, message:'', until:'' }, hidden_sections:[] };
+  var SITE_SETTINGS_MISSING = false;
+  var SITE_POLL_TIMER = null;
+  async function loadSiteSettings(){
+    try{
+      const r = await api('/site_settings?select=key,value');
+      SITE_SETTINGS_MISSING = r.status === 404 || r.status === 400;
+      if(!r.ok) return;
+      (await r.json()).forEach(x=>{ SITE_SETTINGS[x.key] = x.value; });
+    }catch(e){}
+  }
+  function maintOn(){ return !!(SITE_SETTINGS.maintenance && SITE_SETTINGS.maintenance.on); }
+  function siteHiddenSet(){ const h = SITE_SETTINGS.hidden_sections; return new Set(Array.isArray(h) ? h : []); }
+  // key = «بخش» یا «بخش/تب»؛ بخشی که همه‌ی تب‌هاش خاموشه هم پنهان حساب می‌شه
+  function visHidden(key){
+    if(!key || key === 'dashboard') return false;
+    const h = siteHiddenSet(), sec = key.split('/')[0];
+    if(h.has(sec) || h.has(key)) return true;
+    const it = SITE_VIS_ITEMS.find(x=>x.key === sec);
+    return !key.includes('/') && !!it && it.tabs.length > 0 && it.tabs.every(([t])=>h.has(sec + '/' + t));
+  }
+  function viewerHidden(key){ return currentRole !== 'app_admin' && visHidden(key); }
+  function firstVisibleTab(sec){
+    const it = SITE_VIS_ITEMS.find(x=>x.key === sec);
+    const t = it && it.tabs.find(([t])=>!visHidden(sec + '/' + t));
+    return t ? t[0] : null;
+  }
+  // کنشگری/یادداشت‌ها تب پیش‌فرض دارن که ممکنه پنهان باشه → اولین تب قابل‌مشاهده
+  function ensureVisibleTab(sec){
+    if(currentRole === 'app_admin') return;
+    const bar = sec === 'posts' ? ['#posts-page-tabs', 'posts-tab', 'postsTab'] : sec === 'people' ? ['#people-page-tabs', 'people-tab', 'peopleTab'] : null;
+    if(!bar) return;
+    const act = document.querySelector(bar[0] + ' button.active');
+    if(act && viewerHidden(sec + '/' + act.dataset[bar[2]])){ const t = firstVisibleTab(sec); if(t) navClickTab(bar[0], bar[1], t); }
+  }
+  function visTargets(){
+    const out = [];
+    document.querySelectorAll('[data-nav], [data-vis]').forEach(el=>out.push([el, el.dataset.vis || el.dataset.nav]));
+    document.querySelectorAll('#sec-overview .news-page-tabs button[id^="news-tab-"]').forEach(b=>out.push([b, 'overview/' + b.id.slice(9)]));
+    document.querySelectorAll('#people-page-tabs button[data-people-tab]').forEach(b=>out.push([b, 'people/' + b.dataset.peopleTab]));
+    document.querySelectorAll('#hawza-page-tabs button[id^="hawza-tab-"]').forEach(b=>out.push([b, 'hawza/' + b.id.slice(10)]));
+    document.querySelectorAll('#posts-page-tabs button[data-posts-tab]').forEach(b=>out.push([b, 'posts/' + b.dataset.postsTab]));
+    return out;
+  }
+  function applySiteVisibility(){
+    const admin = currentRole === 'app_admin';
+    visTargets().forEach(([el, key])=>{
+      const off = visHidden(key);
+      el.classList.toggle('vis-off', off);
+      el.querySelectorAll(':scope > .vis-badge').forEach(b=>b.remove());
+      if(off && admin){
+        const b = document.createElement('span');
+        b.className = 'vis-badge'; b.textContent = 'پنهان'; b.title = 'برای بیننده‌ها پنهان است (تنظیمات بخش‌ها ← نمایش سایت)';
+        el.appendChild(b);
+      }
+    });
+    // قوس «مدار» برای دقیقاً پنج کارت جای‌گذاری شده — با کارت پنهان کنار می‌ره
+    const grid = document.querySelector('.domain-grid');
+    if(grid) grid.classList.toggle('vis-partial', !admin && !!grid.querySelector('.domain-card.vis-off'));
+    document.getElementById('maint-admin-bar').hidden = !(admin && maintOn());
+    requestAnimationFrame(()=>document.querySelectorAll('.section.active .news-page-tabs').forEach(bar=>updateTabInk(bar, true)));
+  }
+  function showMaintView(){
+    const m = SITE_SETTINGS.maintenance || {};
+    document.getElementById('maint-msg').textContent = String(m.message || '').trim() || MAINT_DEFAULT_MSG;
+    const u = document.getElementById('maint-until'), until = String(m.until || '').trim();
+    u.hidden = !until; u.textContent = 'زمان تقریبی بازگشت: ' + until;
+    document.body.classList.remove('app-loading');
+    document.documentElement.classList.remove('has-session');
+    show('view-maint');
+  }
+  async function retryMaintenance(){
+    const btn = document.getElementById('maint-retry-btn');
+    btn.disabled = true; btn.textContent = 'در حال بررسی…';
+    try{
+      await loadSiteSettings();
+      if(maintOn()){ showMaintView(); showToast('سامانه هنوز در حال به‌روزرسانی است؛ کمی بعد دوباره امتحان کنید.'); }
+      else await loadAllAndEnter();
+    }finally{ btn.disabled = false; btn.textContent = 'بررسی دوباره'; }
+  }
+  // هر ۵ دقیقه (فقط با نشست باز): روشن شدن حالت تعمیر یا پنهان شدن بخشی که کاربر داخلشه
+  function startSitePoll(){
+    clearInterval(SITE_POLL_TIMER);
+    SITE_POLL_TIMER = setInterval(async ()=>{
+      if(!authToken) return;
+      await loadSiteSettings();
+      const admin = currentRole === 'app_admin';
+      const inDash = document.getElementById('view-dash').classList.contains('active');
+      if(!admin && maintOn()){ if(inDash) showMaintView(); return; }
+      if(document.getElementById('view-maint').classList.contains('active')){ loadAllAndEnter(); return; }
+      applySiteVisibility();
+      if(inDash && !admin){
+        const st = navCurrentState();
+        if(viewerHidden(st.s)) switchSection('dashboard');
+        else if(st.t && viewerHidden(st.s + '/' + st.t)) navApply({ s: st.s, t: firstVisibleTab(st.s) });
+      }
+    }, 5*60000);
+  }
+  // پیام حالت تعمیر روی صفحه‌ی ورود (anon فقط همین ردیف رو می‌خونه)
+  async function loadLoginMaintNotice(){
+    const el = document.getElementById('login-maint');
+    try{
+      const r = await fetch(SUPABASE_URL + '/rest/v1/site_settings?select=value&key=eq.maintenance', { headers:{ apikey: SUPABASE_ANON_KEY } });
+      const rows = r.ok ? await r.json() : [];
+      const m = rows[0] && rows[0].value;
+      if(!m || !m.on){ el.hidden = true; return; }
+      const until = String(m.until || '').trim();
+      el.innerHTML = '<b>سامانه در حال به‌روزرسانی است</b><span>' + escHtml(String(m.message || '').trim() || MAINT_DEFAULT_MSG) + (until ? ' زمان تقریبی بازگشت: ' + escHtml(until) : '') + '</span><span class="login-maint-admin">ورود مدیر امکان‌پذیر است.</span>';
+      el.hidden = false;
+    }catch(e){ el.hidden = true; }
+  }
+
+  // ---- بخش «نمایش سایت» در تنظیمات (فقط مدیر) ----
+  function openSiteSettingsPanel(which){
+    switchSection('settings');
+    const d = document.getElementById(which === 'maint' ? 'ss-maint-panel' : 'ss-vis-panel');
+    d.open = true;
+    setTimeout(()=>d.scrollIntoView({ behavior:'smooth', block:'start' }), 60);
+  }
+  function renderSiteSettingsAdmin(){
+    document.getElementById('ss-missing').hidden = !SITE_SETTINGS_MISSING;
+    ['ss-maint-save', 'ss-vis-save'].forEach(id=>{ document.getElementById(id).disabled = SITE_SETTINGS_MISSING; });
+    const m = SITE_SETTINGS.maintenance || {};
+    const on = document.getElementById('ss-maint-on');
+    on.checked = !!m.on;
+    document.getElementById('ss-maint-box').classList.toggle('on', !!m.on);
+    document.getElementById('ss-maint-msg').value = m.message || '';
+    document.getElementById('ss-maint-until').value = m.until || '';
+    updateMaintCounter();
+    document.getElementById('ss-maint-sum').textContent = m.on ? 'روشن است — سایت برای بیننده‌ها بسته است' : 'خاموش — سایت برای همه باز است';
+    document.getElementById('ss-maint-sum').classList.toggle('ss-sum-on', !!m.on);
+    const h = siteHiddenSet();
+    document.getElementById('ss-vis-list').innerHTML = SITE_VIS_ITEMS.map(it=>{
+      const secOn = !h.has(it.key);
+      return `<div class="ce-section ${secOn ? 'on' : ''}" data-ss-sec="${it.key}">
+        <label class="ce-section-toggle"><input type="checkbox" data-ss="${it.key}" ${secOn ? 'checked' : ''}/>
+          <span><b>${escHtml(it.name)}</b><span>${it.tabs.length ? 'تیک تب‌هایی را که نباید دیده شوند بردارید.' : 'این بخش تب ندارد.'}</span></span></label>
+        ${it.tabs.length ? `<div class="ce-section-extra">${it.tabs.map(([t, n])=>`<label class="ce-check"><input type="checkbox" data-ss="${it.key}/${t}" ${h.has(it.key + '/' + t) ? '' : 'checked'}/>${escHtml(n)}</label>`).join('')}</div>` : ''}
+      </div>`;
+    }).join('');
+    const n = SITE_VIS_ITEMS.filter(it=>visHidden(it.key)).length + SITE_VIS_ITEMS.reduce((a, it)=>a + (visHidden(it.key) ? 0 : it.tabs.filter(([t])=>h.has(it.key + '/' + t)).length), 0);
+    document.getElementById('ss-vis-sum').textContent = n ? faNum(n) + ' بخش یا تب برای بیننده‌ها پنهان است' : 'همه‌ی بخش‌ها برای بیننده‌ها نمایش داده می‌شوند';
+    document.getElementById('ss-vis-sum').classList.toggle('ss-sum-on', n > 0);
+  }
+  function updateMaintCounter(){
+    document.getElementById('ss-maint-counter').textContent = faNum(document.getElementById('ss-maint-msg').value.length) + ' / ۲۰۰';
+  }
+  document.getElementById('ss-maint-msg').addEventListener('input', updateMaintCounter);
+  document.getElementById('ss-maint-on').addEventListener('change', e=>document.getElementById('ss-maint-box').classList.toggle('on', e.target.checked));
+  document.getElementById('ss-vis-list').addEventListener('change', e=>{
+    const inp = e.target.closest('input[data-ss]'); if(!inp || inp.dataset.ss.includes('/')) return;
+    inp.closest('.ce-section').classList.toggle('on', inp.checked);
+  });
+  async function saveSiteSetting(key, value){
+    const r = await api('/site_settings?key=eq.' + key, { method:'PATCH', headers:{ Prefer:'return=representation' }, body: JSON.stringify({ value, updated_at: new Date().toISOString() }) });
+    if(!r.ok) throw new Error('site_settings ' + r.status);
+    if(!(await r.json()).length){
+      const r2 = await api('/site_settings', { method:'POST', body: JSON.stringify({ key, value }) });
+      if(!r2.ok) throw new Error('site_settings insert ' + r2.status);
+    }
+    SITE_SETTINGS[key] = value;
+  }
+  async function saveMaintenance(){
+    const value = {
+      on: document.getElementById('ss-maint-on').checked,
+      message: document.getElementById('ss-maint-msg').value.trim().slice(0, 200),
+      until: document.getElementById('ss-maint-until').value.trim().slice(0, 60),
+    };
+    const was = maintOn();
+    if(value.on && !was && !await uiConfirm('روشن کردن حالت تعمیر\nبیننده‌ها تا وقتی آن را خاموش کنید، به‌جای سایت فقط پیام به‌روزرسانی را می‌بینند. شما به‌عنوان مدیر همچنان وارد می‌شوید.')) return;
+    const btn = document.getElementById('ss-maint-save');
+    btn.disabled = true;
+    try{
+      await saveSiteSetting('maintenance', value);
+      showToast(value.on ? (was ? 'پیام حالت تعمیر به‌روز شد.' : 'حالت تعمیر روشن شد؛ سایت برای بیننده‌ها بسته است.') : was ? 'حالت تعمیر خاموش شد؛ سایت برای همه باز است.' : 'ذخیره شد.');
+    }catch(e){
+      console.error(e);
+      showToast('ذخیره نشد. اتصال اینترنت را بررسی کنید؛ اگر مشکل ماند، migration_042 را در SQL Editor اجرا کنید.');
+    }finally{ btn.disabled = false; }
+    renderSiteSettingsAdmin();
+    applySiteVisibility();
+  }
+  async function saveHiddenSections(){
+    const hidden = [];
+    SITE_VIS_ITEMS.forEach(it=>{
+      if(!document.querySelector(`#ss-vis-list input[data-ss="${it.key}"]`).checked){ hidden.push(it.key); return; }
+      it.tabs.forEach(([t])=>{ if(!document.querySelector(`#ss-vis-list input[data-ss="${it.key}/${t}"]`).checked) hidden.push(it.key + '/' + t); });
+    });
+    const btn = document.getElementById('ss-vis-save');
+    btn.disabled = true;
+    try{
+      await saveSiteSetting('hidden_sections', hidden);
+      showToast(hidden.length ? 'ذخیره شد؛ ' + faNum(hidden.length) + ' مورد برای بیننده‌ها پنهان است.' : 'ذخیره شد؛ همه‌ی بخش‌ها برای بیننده‌ها نمایش داده می‌شوند.');
+    }catch(e){
+      console.error(e);
+      showToast('ذخیره نشد. اتصال اینترنت را بررسی کنید؛ اگر مشکل ماند، migration_042 را در SQL Editor اجرا کنید.');
+    }finally{ btn.disabled = false; }
+    renderSiteSettingsAdmin();
+    applySiteVisibility();
+  }
+
+  // ---- قفل ورود (migration_042): IPهای قفل‌شده در «وضعیت سامانه ← ورودها» ----
+  async function fetchLoginLocks(){
+    const r = await api('/rpc/login_lock_status', { method:'POST', body:'{}' });
+    if(!r.ok) return null; // migration اجرا نشده
+    return await r.json();
+  }
+  async function unlockLogin(ip){
+    const all = ip === null;
+    if(!await uiConfirm(all ? 'باز کردن قفل همه‌ی اتصال‌ها\nورود از همه‌ی IPهای قفل‌شده دوباره ممکن می‌شود.' : 'باز کردن قفل ورود\nورود از IP ' + (ip || 'نامشخص') + ' دوباره ممکن می‌شود.')) return;
+    try{
+      const r = await api('/rpc/login_unlock', { method:'POST', body: JSON.stringify({ p_ip: ip }) });
+      if(!r.ok) throw new Error('unlock ' + r.status);
+      showToast('قفل باز شد.');
+    }catch(e){ console.error(e); showToast('باز کردن قفل ناموفق بود؛ اتصال اینترنت را بررسی کنید.'); }
+    renderSysLogins();
+    refreshAdminAlerts();
+  }
 
   // ---- «اطلاعیه برای کاربران» (migration_036) ----
   // نوار بالای همه‌ی صفحه‌ها (#ann-bar). «عادی»: کاربر می‌بنده و دیگه نمی‌بینه
@@ -7044,6 +7789,7 @@
   const postsPageTabsEl = document.getElementById('posts-page-tabs');
   if(postsPageTabsEl) postsPageTabsEl.addEventListener('click', e=>{
     const b = e.target.closest('button'); if(!b || !b.dataset.postsTab) return;
+    if(viewerHidden('posts/' + b.dataset.postsTab)){ ensureVisibleTab('posts'); return; }
     navMark();
     lsSet('jarian_last_posts_tab', b.dataset.postsTab);
     postsPageTabsEl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
@@ -7065,6 +7811,7 @@
   const peoplePageTabsEl = document.getElementById('people-page-tabs');
   if(peoplePageTabsEl) peoplePageTabsEl.addEventListener('click', e=>{
     const b = e.target.closest('button'); if(!b || !b.dataset.peopleTab) return;
+    if(viewerHidden('people/' + b.dataset.peopleTab)){ ensureVisibleTab('people'); return; }
     navMark();
     lsSet('jarian_last_people_tab', b.dataset.peopleTab);
     peoplePageTabsEl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
@@ -9263,7 +10010,9 @@
     // فعلاً ۱ روزه، «۲ روز قبل» همیشه خالیه و حذف شد. فقط اونی که واقعاً
     // توی NEWSPAPER_DATES داده داره کلیک‌پذیره، بقیه غیرفعالن
     const todayStr = new Date().toLocaleDateString('en-CA', { timeZone:'Asia/Tehran' });
-    const slots = [0, 1].map(offset => {
+    // تعداد روزها از مدت نگهداری رسانه (۱۲/۲۴ ساعت → ۲، ۲ روز → ۳، ۳ روز → ۴)
+    const nSlots = Math.max(2, Math.ceil(mediaRetentionHours() / 24) + 1);
+    const slots = Array.from({ length: nSlots }, (_, i) => i).map(offset => {
       const d = new Date(todayStr + 'T00:00:00Z');
       d.setUTCDate(d.getUTCDate() - offset);
       return d.toISOString().slice(0, 10);
@@ -9879,6 +10628,7 @@
     ['app_users', 'فهرست کاربران'], ['notify_subscribers', 'مشترکین اطلاع از انتشار'],
     ['announcements', 'اطلاعیه‌ها'], ['feedback', 'نظرات کاربران'],
     ['crawl_sites', 'منابع خزنده‌ی «درباره حوزه»'],
+    ['site_settings', 'نمایش سایت (حالت تعمیر، بخش‌های پنهان)'],
   ];
   function renderBackupPanel(){
     const list = document.getElementById('backup-list');
@@ -10482,16 +11232,17 @@
     app_users:['کاربر','users'], feedback:['نظر کاربر','users'], notify_subscribers:['مشترک اطلاع‌رسانی','users'],
     posts:['پست','posts'], app_config:['رمز عبور','security'],
     crawl_sites:['منبع خزنده','sources'], hawza_mentions:['خبر «درباره حوزه»','content'],
+    site_settings:['نمایش سایت','content'], login_events:['قفل ورود','security'],
   };
   const AUDIT_GROUPS = [['all','همه'],['sources','منابع'],['content','محتوا'],['posts','پست‌ها'],['users','کاربران'],['security','امنیت']];
-  const AUDIT_OP = { insert:['افزودن','add'], update:['ویرایش',''], delete:['حذف','del'], hide:['پنهان کردن','del'], unhide:['بازگرداندن','add'], password:['تغییر رمز','sec'], publish:['انتشار','add'] };
+  const AUDIT_OP = { insert:['افزودن','add'], update:['ویرایش',''], delete:['حذف','del'], hide:['پنهان کردن','del'], unhide:['بازگرداندن','add'], password:['تغییر رمز','sec'], publish:['انتشار','add'], unlock:['باز کردن قفل ورود','add'] };
   const AUDIT_FIELD = {
     title:'عنوان', name:'نام', username:'آدرس / شناسه', platform:'بستر', active:'فعال', category_id:'موضوع', region_id:'منطقه', hawza_region_id:'منطقه‌ی حوزه',
     show_in_news:'بخش اخبار و رویدادها', show_in_cyberspace:'بخش کنشگری مجازی', show_in_people:'بخش چهره‌ها', show_in_orgs:'بخش سازمان‌ها', show_in_hawza:'بخش درباره حوزه',
     avatar_url:'عکس', owner_name:'صاحب کانال', subscriber_count:'مخاطب', is_khorasan_talabeh:'طلاب خراسان', keywords:'کلیدواژه‌ها', color:'رنگ', kind:'نوع',
     excluded:'پنهان در پرونده', message:'متن', level:'اهمیت', expires_at:'انقضا', full_name:'نام', phone:'موبایل', eitaa_id:'شناسه‌ی ایتا',
     access_level:'سطح دسترسی', notes:'یادداشت', issue_no:'شماره', publish_date:'تاریخ انتشار', file_type:'نوع فایل', files:'فایل‌ها', cover_url:'جلد',
-    source_org:'نهاد', image_url:'تصویر', media_storage_path:'فایل', notified_at:'زمان اطلاع‌رسانی', type:'نوع منبع',
+    source_org:'نهاد', image_url:'تصویر', media_storage_path:'فایل', notified_at:'زمان اطلاع‌رسانی', type:'نوع منبع', value:'مقدار',
   };
   const AUDIT_FILE_FIELDS = ['avatar_url','files','cover_url','image_url','media_storage_path'];
   function auditVal(k, v){
@@ -10691,7 +11442,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.23.2';
+  const APP_VERSION = '5.25.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
@@ -10710,6 +11461,7 @@
     loadAllAndEnter();
   }else{
     focusLoginPassword();
+    loadLoginMaintNotice();
   }
 </script>
 </body>

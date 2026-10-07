@@ -8,7 +8,9 @@
 // دو حالت: { job } → اجرای دستی یه ورک‌فلو؛ { action: "status" } → نتیجه‌ی
 // آخرین اجرای واقعی هر ورک‌فلوی JOBS از خودِ گیت‌هاب (موفق/ناموفق) برای
 // صفحه‌ی «وضعیت سامانه»؛ { action: "health" } → دسترس‌پذیری سرویس‌های بیرونی
-// که سایت و کارهای خودکارش بهشون وابسته‌ان (بخش «سرویس‌های مرتبط»).
+// که سایت و کارهای خودکارش بهشون وابسته‌ان (بخش «سرویس‌های مرتبط»)؛
+// { action: "logs", job } → خطوط آخر گزارش آخرین اجرای تمام‌شده‌ی همون کار
+// (دکمه‌ی «مشاهده‌ی گزارش»، ۵.۲۵.۰ — تا مدیر برای دیدن علت خطا به گیت‌هاب نره).
 //
 // ورودی فقط یه کلید از فهرست ثابت JOBS‌ه، نه اسم دلخواه ورک‌فلو — پس حتی با
 // یه توکن مدیر هم نمی‌شه هر ورک‌فلویی (مثلاً پاک‌سازی/purge) رو اجرا کرد.
@@ -97,6 +99,49 @@ async function healthChecks(ghHeaders: Record<string, string>) {
   return { liara, github, eitaa, bale, jaaar, telegram };
 }
 
+// گزارش آخرین اجرای تمام‌شده: ۶۰ خط آخر قدم‌های خودِ کار (بدون قدم‌های پایانی گیت‌هاب)
+const LOG_LINES = 60;
+async function jobLogs(file: string, ghHeaders: Record<string, string>) {
+  const r = await fetch(
+    `https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${file}/runs?per_page=10&branch=${GITHUB_REF}`,
+    { headers: ghHeaders },
+  );
+  if (!r.ok) return { error: "runs " + r.status };
+  const list = (await r.json())?.workflow_runs || [];
+  const running = list[0] && list[0].status !== "completed";
+  const run = list.find((x: Record<string, string>) => x.status === "completed");
+  if (!run) return { running, run: null, lines: [] };
+  const jr = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/actions/runs/${run.id}/jobs`, { headers: ghHeaders });
+  if (!jr.ok) return { error: "jobs " + jr.status };
+  const jobs = (await jr.json())?.jobs || [];
+  const job = jobs.find((j: Record<string, string>) => j.conclusion === "failure") || jobs[0];
+  const info = {
+    status: run.status, conclusion: run.conclusion, event: run.event,
+    created_at: run.run_started_at || run.created_at, updated_at: run.updated_at, html_url: run.html_url,
+  };
+  if (!job) return { running, run: info, lines: [] };
+  // پاسخ یه redirect به فایل متنیه؛ fetch دنبالش می‌ره (و Authorization رو به دامنه‌ی دیگه نمی‌فرسته)
+  const lr = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/actions/jobs/${job.id}/logs`, { headers: ghHeaders });
+  if (!lr.ok) return { running, run: info, job: job.name, lines: [], error: "logs " + lr.status };
+  let lines = (await lr.text()).split(/\r?\n/)
+    // ANSI رنگ‌ها
+    .map((l) => l.replace(/\x1b\[[0-9;]*m/g, ""));
+  // قدم‌های پایانی خودِ گیت‌هاب (Post …/Complete job) خطای کار نیستن
+  const cut = lines.findIndex((l) => /##\[group\](Post |Complete job|Cleaning up orphan)|Post job cleanup\./.test(l));
+  if (cut > 0) lines = lines.slice(0, cut);
+  // سرتیتر هر قدم («##[group]Run python …») به «▶ Run python …»؛ پایان گروه حذف
+  lines = lines.filter((l) => l.trim() && !/##\[endgroup\]/.test(l)).map((l) => l.replace("##[group]", "▶ "));
+  const truncated = lines.length > LOG_LINES;
+  return {
+    running, run: info, job: job.name, truncated,
+    // «2026-10-07T12:00:00.1234567Z متن» → {t, text}
+    lines: lines.slice(-LOG_LINES).map((l) => {
+      const m = l.match(/^(\d{4}-\d\d-\d\dT[\d:.]+Z)\s?(.*)$/);
+      return m ? { t: m[1], text: m[2].slice(0, 500) } : { t: null, text: l.slice(0, 500) };
+    }),
+  };
+}
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -113,6 +158,7 @@ Deno.serve(async (req) => {
     const { job, action } = await req.json();
     // Object.hasOwn: کلیدهایی مثل «constructor» از prototype رد بشن، نه فقط کلیدهای JOBS
     if (action !== "status" && action !== "health" && !(typeof job === "string" && Object.hasOwn(JOBS, job))) {
+      // { action: "logs" } هم job معتبر لازم داره
       return jsonResponse({ error: "unknown job" }, 400);
     }
 
@@ -126,6 +172,10 @@ Deno.serve(async (req) => {
       "X-GitHub-Api-Version": "2022-11-28",
       "User-Agent": "jarian-run-job",
     };
+
+    if (action === "logs") {
+      return jsonResponse(await jobLogs(JOBS[job], ghHeaders));
+    }
 
     if (action === "health") {
       return jsonResponse({ services: await healthChecks(ghHeaders) });

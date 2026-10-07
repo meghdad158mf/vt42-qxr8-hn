@@ -53,6 +53,10 @@ NEWSPAPER_BUCKET = "newspaper-covers"
 # مقدار RETENTION_DAYS بالا دست‌نخورده می‌مونه، فقط همون یه اجرا رو
 # تهاجمی‌تر می‌کنه.
 RETENTION_DAYS = float(os.environ.get("RETENTION_DAYS_OVERRIDE") or 0.5)
+# ۵.۲۵.۰: مدیر از «وضعیت سامانه» مدت نگهداری رو عوض می‌کنه (site_settings
+# key=media_retention_hours، migration_043) — اگه RETENTION_DAYS_OVERRIDE ست نشده باشه،
+# اول همون خونده می‌شه؛ اگه نبود/خوانده نشد همون ۰.۵ روز بالا می‌مونه.
+ALLOWED_RETENTION_HOURS = (12, 24, 48, 72)
 
 
 def login() -> str:
@@ -255,8 +259,30 @@ def cleanup_newspaper_covers(token: str) -> None:
     print(f"[done] cleaned up {len(ids)}/{len(expired)} newspaper edition(s)")
 
 
+def load_retention_setting(token: str) -> None:
+    global RETENTION_DAYS
+    if os.environ.get("RETENTION_DAYS_OVERRIDE"):
+        return
+    try:
+        r = requests.get(
+            f"{SUPABASE_URL}/rest/v1/site_settings",
+            headers=auth_headers(token),
+            params={"key": "eq.media_retention_hours", "select": "value"},
+            timeout=REQUEST_TIMEOUT,
+        )
+        rows = r.json() if r.ok else []
+        hours = int(rows[0]["value"]) if rows else None
+    except (requests.RequestException, ValueError, TypeError, KeyError) as e:
+        print(f"[!] could not read media_retention_hours, using default: {e}", file=sys.stderr)
+        return
+    if hours in ALLOWED_RETENTION_HOURS:
+        RETENTION_DAYS = hours / 24
+        print(f"[*] retention from site settings: {hours}h")
+
+
 def main() -> None:
     token = login()
+    load_retention_setting(token)
     cleanup_post_media(token)
     cleanup_newspaper_covers(token)
 
