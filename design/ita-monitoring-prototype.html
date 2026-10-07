@@ -2245,6 +2245,18 @@
   .bulk-secs small{ font-size:11px; color: var(--text-faint); margin-inline-start:4px; }
   .bulk-note{ font-size:12px; color: var(--text-faint); margin:10px 0 0; }
   @media (max-width:640px){ .bulk-table th:first-child, .bulk-table td:first-child{ display:none; } .bulk-handle{ max-width:120px; } }
+
+  /* ===== هشدار ایمیلی (۵.۲۷.۰) ===== */
+  .sys-alerts-grid{ display:grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap:20px; align-items:start; }
+  .sys-alerts-form{ display:flex; flex-direction:column; gap:10px; }
+  .sys-alerts-form .field{ margin-bottom:0; }
+  .sys-alerts-form .ce-check small{ font-size:11px; color: var(--text-faint); margin-inline-start:4px; }
+  .sys-alerts-stat{ display:flex; flex-direction:column; gap:8px; }
+  .sys-alerts-stat > div{ display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:8px 12px; border-radius:10px; background: var(--surface-2); }
+  .sys-alerts-stat span{ color: var(--text-dim); }
+  .sys-alerts-stat b{ color: var(--text); }
+  .sys-alert-err{ font-size:13px; line-height:1.8; margin:0; padding:8px 12px; border-radius:10px; background: rgba(217,154,30,0.12); color:#8a5d06; }
+  @media (max-width:760px){ .sys-alerts-grid{ grid-template-columns:1fr; } }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -2258,7 +2270,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۶.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۷.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -3635,6 +3647,10 @@
           <div class="panel-head"><span class="panel-pill">ورودها</span><span class="settings-sum-desc">ورودهای ۳۰ روز اخیر به سایت. چون رمز مشترک است، فقط نقش (مدیر/بیننده)، دستگاه و IP معلوم است، نه نام افراد. ورود خودکار کارهای گیت‌هاب نمایش داده نمی‌شود.</span></div>
           <div id="sys-logins"></div>
         </div>
+        <div class="panel" id="sys-alerts-panel">
+          <div class="panel-head"><span class="panel-pill">هشدار ایمیلی</span><span class="settings-sum-desc">ایمیل فوری وقتی کاری خراب شود یا فضا و توکن‌ها به حد خطر برسند، و گزارش روزانه‌ی سلامت سامانه.</span></div>
+          <div id="sys-alerts"></div>
+        </div>
         <div class="panel" id="sys-cerr-panel">
           <div class="panel-head"><span class="panel-pill">خطاهای مرورگر کاربران</span><span class="settings-sum-desc">خطاهایی که در ۷ روز اخیر در مرورگر کاربران رخ داده است. هر خطا در هر نشست یک‌بار شمرده می‌شود؛ متن پست‌ها و رمزها ثبت نمی‌شوند.</span></div>
           <div id="sys-client-errors"></div>
@@ -3751,7 +3767,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۲۶.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۷.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -5324,6 +5340,75 @@
     if(r){ CAP_RANGE = Number(r.dataset.capRange); drawSysCapacity(); }
   });
 
+
+  // ---- هشدار ایمیلی (۵.۲۷.۰، alert_settings — migration_045، Edge Function notify) ----
+  let ALERT_SETTINGS = null;
+  function alertErrHint(err){
+    if(!err) return '';
+    if(/RESEND_API_KEY/.test(err)) return 'کلید Resend هنوز در سوپابیس تنظیم نشده است (Edge Functions ← Secrets ← RESEND_API_KEY).';
+    if(/Resend 403|testing emails|verify a domain/i.test(err)) return 'Resend بدون دامنه‌ی تأییدشده فقط به ایمیلی می‌فرستد که با آن در Resend ثبت‌نام کرده‌اید؛ همان نشانی را اینجا وارد کنید.';
+    if(/Resend 401|Resend 400/.test(err)) return 'کلید Resend نامعتبر است؛ کلید تازه بسازید و در سوپابیس جایگزین کنید.';
+    return 'خطا در ارسال: ' + err;
+  }
+  async function renderSysAlerts(){
+    const el = document.getElementById('sys-alerts');
+    if(!el) return;
+    el.innerHTML = '<div class="sys-note">در حال بررسی…</div>';
+    try{
+      const r = await api('/alert_settings?id=eq.1&select=*');
+      if(r.status === 404 || r.status === 400){ el.innerHTML = '<div class="sys-note">برای فعال شدن این بخش، فایل <b>db/migration_045_email_alerts.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</div>'; return; }
+      if(!r.ok) throw new Error('alert_settings ' + r.status);
+      ALERT_SETTINGS = (await r.json())[0] || { email:'', alerts_on:true, daily_on:true };
+      const a = ALERT_SETTINGS;
+      const when = t => t ? escHtml(newsRelTime(t)) : 'هنوز نه';
+      el.innerHTML = `<div class="sys-alerts-grid">
+          <div class="sys-alerts-form">
+            <div class="field"><label for="sys-alert-email">نشانی ایمیل گیرنده</label><input type="email" id="sys-alert-email" dir="ltr" value="${escAttr(a.email || '')}" placeholder="name@example.com" autocomplete="email"></div>
+            <label class="ce-check"><input type="checkbox" id="sys-alert-on" ${a.alerts_on ? 'checked' : ''}>ایمیل فوری هنگام خرابی <small>(بررسی هر ۳۰ دقیقه؛ یادآوری هر ۱۲ ساعت تا برطرف شود)</small></label>
+            <label class="ce-check"><input type="checkbox" id="sys-alert-daily" ${a.daily_on ? 'checked' : ''}>گزارش روزانه <small>(هر روز ساعت ۷:۲۲ صبح، حتی اگر همه‌چیز سالم باشد)</small></label>
+            <div class="sys-btn-row"><button type="button" class="btn btn-sm primary" id="sys-alert-save" onclick="saveAlertSettings()">ذخیره</button><button type="button" class="btn btn-sm" id="sys-alert-test" onclick="testAlertEmail()" ${a.email ? '' : 'disabled'}>ارسال ایمیل آزمایشی</button></div>
+          </div>
+          <div class="sys-alerts-stat">
+            <div><span>آخرین بررسی</span><b>${when(a.last_check_at)}</b></div>
+            <div><span>آخرین هشدار ارسال‌شده</span><b>${when(a.last_alert_at)}</b></div>
+            <div><span>آخرین گزارش روزانه</span><b>${when(a.last_daily_at)}</b></div>
+            ${a.last_error ? `<p class="sys-alert-err warn">${escHtml(alertErrHint(a.last_error))}</p>` : ''}
+            ${!a.email ? '<p class="sys-note">تا نشانی ایمیل وارد نشود، هیچ ایمیلی فرستاده نمی‌شود.</p>' : ''}
+          </div>
+        </div>`;
+    }catch(e){
+      console.error(e);
+      el.innerHTML = '<div class="sys-note">خطا در دریافت تنظیمات هشدار ایمیلی.</div>';
+    }
+  }
+  async function saveAlertSettings(silent){
+    const email = document.getElementById('sys-alert-email').value.trim();
+    if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showToast('نشانی ایمیل درست نیست؛ مثل name@example.com وارد کنید.'); return false; }
+    const body = { email: email || null, alerts_on: document.getElementById('sys-alert-on').checked, daily_on: document.getElementById('sys-alert-daily').checked };
+    const r = await api('/alert_settings?id=eq.1', { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify(body) });
+    if(!r.ok){ showToast('ذخیره نشد؛ اتصال اینترنت را بررسی کنید.'); return false; }
+    Object.assign(ALERT_SETTINGS || {}, body);
+    if(!silent){ showToast(email ? 'ذخیره شد.' : 'ذخیره شد؛ بدون نشانی ایمیل، چیزی فرستاده نمی‌شود.'); renderSysAlerts(); }
+    return true;
+  }
+  async function testAlertEmail(){
+    const btn = document.getElementById('sys-alert-test');
+    btn.disabled = true; btn.textContent = 'در حال ارسال…';
+    try{
+      if(!await saveAlertSettings(true)) return;
+      const r = await fetch(SUPABASE_URL + '/functions/v1/notify', {
+        method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + authToken }, body: JSON.stringify({ mode:'test' }),
+      });
+      const d = await r.json().catch(()=>({}));
+      if(r.ok && d.ok) showToast('ایمیل آزمایشی فرستاده شد؛ صندوق ورودی (و پوشه‌ی هرزنامه) را ببینید.');
+      else if(r.status === 404) showToast('تابع ارسال هنوز نصب نشده است؛ چند دقیقه بعد از انتشار دوباره امتحان کنید.');
+      else showToast(alertErrHint(d.error || ('خطای ' + r.status)));
+    }catch(e){
+      console.error(e);
+      showToast('ارسال ناموفق بود؛ اتصال اینترنت را بررسی کنید.');
+    }finally{ renderSysAlerts(); }
+  }
+
   // ---- خطاهای مرورگر کاربران (۵.۲۵.۰، client_errors — migration_043) ----
   async function renderSysClientErrors(){
     const el = document.getElementById('sys-client-errors');
@@ -5520,6 +5605,7 @@
     if(!wrap) return;
     renderSysTokens();
     const parts = [renderSysStorage(), renderSysStale(), renderSysLogins(), renderSysClientErrors()];
+    if(auto !== true) parts.push(renderSysAlerts());
     if(auto !== true) parts.push(renderSysServices(), renderSysCapacity());
     renderSysSummary(true);
     renderSysTimeline();
@@ -5603,6 +5689,8 @@
     });
     const proj = document.querySelector('#sys-capacity .sys-cap-proj.bad, #sys-capacity .sys-cap-proj.warn');
     if(proj) add(lvl(proj), (CAP_KIND === 'db' ? 'پایگاه داده' : 'فضای فایل') + ' رو به پر شدن', proj);
+    const aerr = document.querySelector('#sys-alerts .sys-alert-err');
+    if(aerr) add('warn', 'ارسال ایمیل هشدار ناموفق', aerr);
     const cerr = document.querySelectorAll('#sys-client-errors .sys-cerr-row.warn');
     if(cerr.length) add('warn', faNum(cerr.length) + ' خطای پرتکرار در مرورگر کاربران', cerr[0]);
     const stale = document.querySelectorAll('#sys-stale .sys-row');
@@ -11746,7 +11834,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.26.0';
+  const APP_VERSION = '5.27.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
