@@ -8,7 +8,7 @@
 - ریپو (۲ مهر ۱۴۰۵، بعد از دسترسی غیرمجاز به لینک قدیمی) از `meghdad158mf/meghdad` به **`meghdad158mf/vt42-qxr8-hn`** تغییر نام داد. ابزارهای MCP گیت‌هاب بسته به سشن با یکی از دو نام کار می‌کنن: سشن‌های قبلی با `repo=meghdad` (ریدایرکت)، سشن ۹ مهر ۱۴۰۵ فقط با `repo=vt42-qxr8-hn` (و `meghdad` رد شد) — اول `vt42-qxr8-hn` رو امتحان کن.
 - هارنس معمولاً یه شاخه‌ی قدیمی رو لوکال چک‌اوت می‌کنه — همیشه اول `git fetch origin claude/new-project-8ekywm` و کار رو از `origin/claude/new-project-8ekywm` شروع کن.
 - **روش کار همیشگی**: شاخه‌ی کاری از `origin/claude/new-project-8ekywm` → تغییر → پیش‌نمایش Playwright با داده‌ی موک (پایین‌تر) → اسکرین‌شات با `SendUserFile` و **پرسیدن صریح تأیید** → فقط بعد از تأیید: commit + push + PR به `claude/new-project-8ekywm` (نه `main`) → `pull_request_read`/`get_commits` → merge → `git fetch` + `git diff` صفر → به کاربر بگو Ctrl+F5. **push مستقیم به `claude/new-project-8ekywm` مسدوده**.
-- **شماره‌ی ویرایش (درخواست صریح کاربر)**: هر PR به شاخه‌ی زنده ثابت `APP_VERSION` (درست قبل از `// ---- boot ----` در فرانت‌اند؛ بج صفحه‌ی ورود و فوتر از کلاس `.app-version` پر می‌شن) رو بالا می‌بره. تشخیص اندازه با Claude: تغییر کوچیک (باگ، متن/ظاهر، تنظیم جزئی، فقط مستندات/اسکریپت) → عدد آخر +۱؛ تغییر بزرگ (قابلیت/تب/بخش جدید، بازطراحی صفحه، جدول/migration جدید) → عدد وسط +۱ و آخر صفر؛ عدد اول فقط با درخواست کاربر. ⚠️ نسخه‌ی فارسیِ داخل دو `<span class="app-version">` هم باید هم‌زمان عوض بشه (fallback قبل از اجرای JS). بعد از مرج شماره‌ی جدید رو به کاربر بگو. آخرین: **۵.۲۶.۰**.
+- **شماره‌ی ویرایش (درخواست صریح کاربر)**: هر PR به شاخه‌ی زنده ثابت `APP_VERSION` (درست قبل از `// ---- boot ----` در فرانت‌اند؛ بج صفحه‌ی ورود و فوتر از کلاس `.app-version` پر می‌شن) رو بالا می‌بره. تشخیص اندازه با Claude: تغییر کوچیک (باگ، متن/ظاهر، تنظیم جزئی، فقط مستندات/اسکریپت) → عدد آخر +۱؛ تغییر بزرگ (قابلیت/تب/بخش جدید، بازطراحی صفحه، جدول/migration جدید) → عدد وسط +۱ و آخر صفر؛ عدد اول فقط با درخواست کاربر. ⚠️ نسخه‌ی فارسیِ داخل دو `<span class="app-version">` هم باید هم‌زمان عوض بشه (fallback قبل از اجرای JS). بعد از مرج شماره‌ی جدید رو به کاربر بگو. آخرین: **۵.۲۷.۰**.
 - کاربر با گیت/GitHub راحت نیست — هر کار دستی (SQL Editor، ساخت توکن، secret) رو قدم‌به‌قدم و با مسیر دقیق منو توضیح بده.
 - دیباگ خطاهای سمت کاربر: F12 → Network → درخواست قرمز → تب Response (اگه DevTools زود پاک کرد، Clear و یه‌بار دیگه امتحان). اگه کاربر عکسی رو مستقیم در چت paste کرد و به دستت نرسید، اول ترنسکریپت سشن (`.jsonl`، بلوک‌های base64) رو بگرد، بعد درخواست پیوست کن.
 
@@ -35,7 +35,7 @@ GitHub Actions (فقط از شاخه‌ی main اجرا می‌شن؛ ⚠️ ا�
 Supabase (پروژه‌ی زنده: komqnapfqrtxxaytpcdt — Postgres + PostgREST + Storage، پلن رایگان)
   نقش‌ها app_admin / app_viewer؛ ورود با رمز مشترک از public.login() (pgcrypto + pgjwt، توکن ۲۴ ساعته)
   RLS: بیننده فقط خواندن (به‌جز insert روی feedback و notify_subscribers)، مدیر خواندن/نوشتن
-  Edge Functions (Deno): translate، news-insights، extract-post-keywords، run-job
+  Edge Functions (Deno): translate، news-insights، extract-post-keywords، run-job، notify (هشدار ایمیلی، ۵.۲۷.۰)
         ▼
 design/ita-monitoring-prototype.html — فرانت‌اند تک‌فایلی (HTML/CSS/JS)، مستقیم با fetch به PostgREST/Storage/Functions
 ```
@@ -54,9 +54,10 @@ design/ita-monitoring-prototype.html — فرانت‌اند تک‌فایلی (
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `ADMIN_PASSWORD`, `TG_*` | GitHub Secrets | کالکتورها و جاب‌ها | — |
 | `SUPABASE_ACCESS_TOKEN` | GitHub Secret | دیپلوی Edge Functionها (scope: Edge Functions + Edge Function Secrets: Read-write) | ۹۰ روزه — حدود **۱۳ آذر ۱۴۰۵ (۴ دسامبر ۲۰۲۶)** |
 | `LIARA_API_KEY` | سوپابیس ← Edge Functions ← Secrets | هوش مصنوعی لیارا (`ai.liara.ir`، مدل `openai/gpt-4o-mini`) | — |
+| `RESEND_API_KEY` | سوپابیس ← Edge Functions ← Secrets | `notify` (هشدار ایمیلی/گزارش روزانه، ۵.۲۷.۰) — حساب Resend کاربر؛ بدون دامنه‌ی تأییدشده فرستنده `onboarding@resend.dev` و فقط به ایمیل صاحب حساب | — |
 | `GITHUB_DISPATCH_TOKEN` | سوپابیس ← Edge Functions ← Secrets | `run-job` (اجرای دستی/وضعیت ورک‌فلوها) — fine-grained، فقط ریپوی `vt42-qxr8-hn`، فقط Actions: Read and write | **۵ دی ۱۴۰۵ (۲۶ دسامبر ۲۰۲۶)** |
 
-- تاریخ‌های انقضا توی آرایه‌ی `SYS_TOKENS` فرانت‌اند هم هاردکدن (صفحه‌ی «وضعیت سامانه» شمارش معکوس نشون می‌ده) — با ساخت توکن جدید هر دو جا رو به‌روز کن.
+- تاریخ‌های انقضا توی آرایه‌ی `SYS_TOKENS` فرانت‌اند و `TOKENS` در `supabase/functions/notify/index.ts` هم هاردکدن (صفحه‌ی «وضعیت سامانه» شمارش معکوس نشون می‌ده) — با ساخت توکن جدید هر دو جا رو به‌روز کن.
 - ⚠️ **چک‌لیست هر مهاجرت/بازسازی پروژه‌ی سوپابیس** (از تجربه‌ی مهاجرت شهریور): SQL migrationها فقط دیتابیس رو می‌سازن؛ جدا از اون باید (۱) `--project-ref` توی `deploy-edge-functions.yml` و `SUPABASE_URL`/anon key فرانت عوض بشه، (۲) `SUPABASE_ACCESS_TOKEN` جدید روی پروژه‌ی جدید ساخته بشه، (۳) `LIARA_API_KEY` و `GITHUB_DISPATCH_TOKEN` دوباره روی پروژه‌ی جدید تنظیم بشن، (۴) GitHub Secrets کالکتورها به‌روز بشن. `migration_021` لیست کانال‌های پیش‌فرض رو داره. ⚠️ اگه `schema.sql` از نو اجرا شد، `migration_035` هم باید دوباره اجرا بشه (نسخه‌ی جدید `login()` رو داره). `schema.sql` رو روی پروژه‌ی زنده دوباره اجرا نکن — رمزها رو ریست می‌کنه.
 
 ## روش پیش‌نمایش قبل از مرج (Playwright + داده‌ی موک)
@@ -165,6 +166,7 @@ design/ita-monitoring-prototype.html — فرانت‌اند تک‌فایلی (
 - **منابع بی‌خبر** (RPC `channel_last_post()`): منابع `active` بدون مطلب در ۳ روز اخیر؛ ۵.۲۰.۰: کلیک روی ردیف = `openChanEditor` همون منبع.
 - **خلاصه‌ی بالای صفحه** (`#sys-summary`، `renderSysSummary()`، ۵.۲۰.۰): بعد از تموم شدن همه‌ی کارت‌ها، موارد زرد/قرمز رو از خودِ DOM صفحه جمع می‌کنه (`.sys-bar`، `.svc-row`، `.sys-status-item`، `.sys-login-stat`، `#sys-stale .sys-row`، `#sys-tokens .sys-row`) — «همه‌چیز سالم است» یا «N مورد نیازمند توجه» با چیپ‌هایی که به همون کارت اسکرول می‌کنن. کارت/کلاس جدید در این صفحه → به `renderSysSummary` هم اضافه‌ش کن.
 - **انقضای توکن‌ها** (`SYS_TOKENS`): زرد ≤۲۱ روز، قرمز ≤۷.
+- **هشدار ایمیلی** (۵.۲۷.۰، مرحله‌ی ۴، migration_045، `#sys-alerts-panel`/`renderSysAlerts`): Edge Function `notify` — `{mode:'check'}` هر ۳۰ دقیقه (`jarian-notify-check`، دقیقه‌ی ۷ و ۳۷) موارد **قرمز** (تازگی خروجی کارها با `JOB_FRESHNESS` در `_shared/jobs.ts` — ⚠️ هم‌سو با `SYS_STATUS_JOBS`؛ آخرین اجرای گیت‌هاب ناموفق؛ پاک‌سازی عقب‌افتاده >۵۰؛ فضای فایل/پایگاه داده ≥۸۵٪؛ توکن ≤۷ روز؛ ≥۲۰ ورود ناموفق) → ایمیل فقط برای مورد تازه، یادآوری هر ۱۲ ساعت، «برطرف شد» در ایمیل بعدی (جدول `alert_state`)؛ `{mode:'daily'}` ‏۰۳:۵۲ UTC (= ۰۷:۲۲ تهران، `jarian-notify-daily`) گزارش ۲۴ ساعت؛ `{mode:'test'}` دکمه‌ی «ارسال ایمیل آزمایشی». گیرنده و روشن/خاموش در `alert_settings` (یک ردیف، فقط مدیر). pg_cron با `jarian_cron.notify(mode)` (همون الگوی `dispatch`). `JOBS`/`GITHUB_REPO` از ۵.۲۷.۰ در `_shared/jobs.ts` (مشترک با `run-job`).
 - **۵.۲۵.۰ (مرحله‌ی ۲ ابزارهای مدیر، migration_043)**: (۱) **مدت نگهداری رسانه** زیر نوار فضا (`renderSysRetention`، `site_settings.media_retention_hours` ∈ ۱۲/۲۴/۴۸/۷۲، `mediaRetentionHours()`): تخمین حجم هر گزینه = post-media × (h+12)/(فعلی+12)؛ بالای ۸۵٪ ذخیره نمی‌شه. `cleanup_media.py` (`load_retention_setting`) همینو می‌خونه (`RETENTION_DAYS_OVERRIDE` هنوز اولویت داره)؛ تعداد برچسب‌های تاریخ روزنامه و آستانه‌ی کارت پاک‌سازی (نگهداری + ۱۸ ساعت) هم ازش. (۲) **سابقه‌ی ظرفیت** (`#sys-capacity-panel`، `renderSysCapacity`/`drawSysCapacity`): جدول `capacity_snapshots` (روز، storage|db، دسته، بایت) از `capacity_snapshot_job()` هر شب ۲۰:۵۰ UTC (`jarian-capacity` در pg_cron) + `capacity_snapshot()` با باز کردن صفحه؛ دسته‌های پایگاه داده posts/hawza/logs/other (`CAP_DB_NAMES`، سقف `DB_LIMIT_MB=500`)؛ کاشی‌های امروز/اول این ماه/ماه گذشته/تغییر (ماه شمسی، `jalaliMonthStarts`)، تفکیک، روند ۳۰ روز/۱۲ ماه، پیش‌بینی با رشد ۱۴ روز اخیر (زرد <۹۰ روز، قرمز <۳۰). (۳) **خطاهای مرورگر کاربران** (`#sys-cerr-panel`): `reportClientError()` (بعد از `api()`) از `window.onerror`، `unhandledrejection`، هر `console.error` و پاسخ ۵xx در `api()` → RPC `log_client_error` (جدول `client_errors`، یک ردیف برای هر خطا/روز با شمارش نشست؛ سمت کاربر هر متن یک‌بار در هر زبانه و حداکثر ۲۰ در ساعت؛ آدرس‌ها بدون query؛ سقف ۵۰۰ ردیف/روز؛ ۳۰ روز)؛ «رفع شد» = حذف. (۴) **گزارش اجرا**: دکمه‌ی «مشاهده‌ی گزارش» (`.sys-log-btn`، نه `.sys-run-btn` تنها — هندلر اجرای دستی `:not(.sys-log-btn)`) → `run-job` با `{action:'logs', job}` (۶۰ خط آخر آخرین اجرای تمام‌شده، قدم‌های پایانی گیت‌هاب حذف) → `#job-log-modal` با «کپی متن گزارش».
 
 ### امنیت، خطایابی و سرعت در فرانت
@@ -249,15 +251,15 @@ design/fonts/                           IRANSansX
 design/images/                          dashboard-hero.webp، domain-icon-{news,cyberspace,schools,people,hawza}.webp، analysis-illustration.webp، basirat-logo.webp
 scripts/                                کالکتورها و جاب‌ها (بخش «معماری») + requirements.txt + telegram_session_to_string.py (ابزار محلی)
 .github/workflows/                      یک ورک‌فلو برای هر اسکریپت + deploy-edge-functions.yml
-supabase/functions/                     translate، news-insights، extract-post-keywords، run-job، _shared/{auth,liara,cluster}.ts
+supabase/functions/                     translate، news-insights، extract-post-keywords، run-job، notify، _shared/{auth,liara,cluster,jobs}.ts
 db/schema.sql                           اسکیمای پایه — روی پروژه‌ی زنده دوباره اجرا نکن (رمزها ریست می‌شن)
-db/migration_002 … 044                  به ترتیب شماره؛ مهم‌های اخیر:
+db/migration_002 … 045                  به ترتیب شماره؛ مهم‌های اخیر:
   021 کانال‌های پیش‌فرض فعلی (برای بازسازی پروژه)   022 news_ai_insights   023 dossier + ai_keywords
   024 newsletter   025/026 پروفایل کانال و طلاب   027/028/029 اخبار حوزه   030 view شمارش روزنامه‌ها
   031 ایندکس posts.scraped_at   032 show_in_orgs   033 profile_groups   034 storage_usage/channel_last_post
   035 login_events + login() جدید   036 announcements (اطلاعیه برای کاربران)   037 app_users (دفترچه‌ی کاربران)
   038 خصوصی کردن bucket گزارش‌های مدارس   039 گزارش فعالیت (posts.hidden_at + page_views + admin_audit و triggerها)
-  040 زمان‌بندی موقت کارهای خودکار با pg_cron + pg_net (تا مهاجرت به VPS)   041 خزنده‌ی «درباره حوزه» (crawl_sites + hawza_mentions + crawl_seen + jarian-hawza)   042 قفل ورود + site_settings (حالت تعمیر، بخش‌های پنهان)   043 سابقه‌ی ظرفیت + خطاهای مرورگر + مدت نگهداری رسانه   044 ویرایش دستی «اخبار منتخب» (news_pick_edits)
+  040 زمان‌بندی موقت کارهای خودکار با pg_cron + pg_net (تا مهاجرت به VPS)   041 خزنده‌ی «درباره حوزه» (crawl_sites + hawza_mentions + crawl_seen + jarian-hawza)   042 قفل ورود + site_settings (حالت تعمیر، بخش‌های پنهان)   043 سابقه‌ی ظرفیت + خطاهای مرورگر + مدت نگهداری رسانه   044 ویرایش دستی «اخبار منتخب» (news_pick_edits)   045 هشدار ایمیلی (alert_settings + alert_state + jarian-notify-*)
 brand-kit/                              بسته گرافیکی (زیپ) + tools/ اسکریپت‌های سازنده — بخش «بسته گرافیکی و لوگو»
 .claude/skills/                         اسکیل‌های نصب‌شده (پایین)
 ```
