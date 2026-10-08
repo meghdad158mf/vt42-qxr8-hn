@@ -8982,9 +8982,10 @@
     finally{ PF_EXTRA_LOADING[mode] = false; }
     if(pfMode === mode) renderPoliticalFigures();
   }
-  // ۵.۲۹.۰ (migration_048): در اندیشکده‌ها و تب‌های «مواضع» فقط مطلبی نمایش داده می‌شود که
+  // ۵.۲۹.۰ (migration_048): در تب‌های «مواضع» فقط مطلبی نمایش داده می‌شود که
   // هوش مصنوعی مرتبط تشخیص داده (section_relevant=true؛ NULL = هنوز بررسی نشده — خواست کاربر: پنهان)
-  function pfModeFiltered(mode){ mode = mode || pfMode; return mode === 'thinktanks' || mode.startsWith('pos-'); }
+  // اندیشکده‌ها عمداً بدون فیلتر (خواست کاربر: «فعلاً نیاز به بررسی هوش مصنوعی ندارد»)
+  function pfModeFiltered(mode){ mode = mode || pfMode; return mode.startsWith('pos-'); }
   function secRelevant(p){ return p.section_relevant === true; }
   // متن «در انتظار بررسی» فقط برای مدیر
   function secPendingNote(list){
@@ -9920,7 +9921,7 @@
     { field:'show_in_orgs', label:'تحلیل سازمان‌ها', short:'سازمان‌ها',
       hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری سازمان‌ها نمایش داده می‌شود.' },
     { field:'show_in_thinktanks', label:'اندیشکده‌ها و پژوهشگاه‌ها', short:'اندیشکده‌ها', needsMig:true,
-      hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری اندیشکده‌ها نمایش داده می‌شود؛ فقط تحلیل‌های سیاسی‌اجتماعی (به تشخیص هوش مصنوعی) می‌آیند.' },
+      hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری اندیشکده‌ها نمایش داده می‌شود.' },
     { field:'show_in_hawza', label:'درباره حوزه', short:'درباره حوزه', webOnly:true,
       hint:'تب «اخبار حوزه»: فقط برای خبرگزاری‌های حوزوی (وب‌سایت)؛ اخبار سیاسی‌اجتماعی‌شان به تشخیص هوش مصنوعی نمایش داده می‌شود.' },
     { field:'show_in_cyberspace', label:'کنشگری مجازی', short:'کنشگری',
