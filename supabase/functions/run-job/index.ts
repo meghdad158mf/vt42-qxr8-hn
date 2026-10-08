@@ -143,6 +143,10 @@ Deno.serve(async (req) => {
 
   try {
     const { job, action } = await req.json();
+    // action ناشناخته (مثلاً غلط تایپی «log») نباید به اجرای کار برسه
+    if (action !== undefined && !["status", "health", "logs"].includes(action)) {
+      return jsonResponse({ error: "unknown action" }, 400);
+    }
     // Object.hasOwn: کلیدهایی مثل «constructor» از prototype رد بشن، نه فقط کلیدهای JOBS
     if (action !== "status" && action !== "health" && !(typeof job === "string" && Object.hasOwn(JOBS, job))) {
       // { action: "logs" } هم job معتبر لازم داره

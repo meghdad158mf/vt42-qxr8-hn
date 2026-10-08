@@ -2228,6 +2228,8 @@
   .bulk-sum{ font-size:13px; color: var(--text-dim); line-height:1.8; margin:0 0 10px; }
   .bulk-sum b{ color: var(--ok); }
   .bulk-table-wrap{ max-height:300px; overflow:auto; border:1px solid var(--border); border-radius:10px; margin-bottom:14px; }
+  .bulk-sum .bulk-cut{ color:#b3261e; }
+  .btn[hidden]{ display:none !important; } /* .btn{display:inline-flex} صفت hidden رو بی‌اثر می‌کرد */
   .bulk-table{ width:100%; border-collapse:collapse; font-size:13px; }
   .bulk-table th{ position:sticky; top:0; background: var(--surface-2); text-align:right; font-size:12px; color: var(--text-faint); padding:8px; }
   .bulk-table td{ padding:6px 8px; border-top:1px solid var(--border); vertical-align:middle; }
@@ -2270,7 +2272,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۷.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۷.۳</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -3767,7 +3769,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۲۷.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۷.۳</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -5366,7 +5368,7 @@
             <div class="field"><label for="sys-alert-email">نشانی ایمیل گیرنده</label><input type="email" id="sys-alert-email" dir="ltr" value="${escAttr(a.email || '')}" placeholder="name@example.com" autocomplete="email"></div>
             <label class="ce-check"><input type="checkbox" id="sys-alert-on" ${a.alerts_on ? 'checked' : ''}>ایمیل فوری هنگام خرابی <small>(بررسی هر ۳۰ دقیقه؛ یادآوری هر ۱۲ ساعت تا برطرف شود)</small></label>
             <label class="ce-check"><input type="checkbox" id="sys-alert-daily" ${a.daily_on ? 'checked' : ''}>گزارش روزانه <small>(هر روز ساعت ۷:۲۲ صبح، حتی اگر همه‌چیز سالم باشد)</small></label>
-            <div class="sys-btn-row"><button type="button" class="btn btn-sm primary" id="sys-alert-save" onclick="saveAlertSettings()">ذخیره</button><button type="button" class="btn btn-sm" id="sys-alert-test" onclick="testAlertEmail()" ${a.email ? '' : 'disabled'}>ارسال ایمیل آزمایشی</button></div>
+            <div class="sys-btn-row"><button type="button" class="btn btn-sm primary" id="sys-alert-save" onclick="saveAlertSettings()">ذخیره</button><button type="button" class="btn btn-sm" id="sys-alert-test" onclick="testAlertEmail()">ارسال ایمیل آزمایشی</button></div>
           </div>
           <div class="sys-alerts-stat">
             <div><span>آخرین بررسی</span><b>${when(a.last_check_at)}</b></div>
@@ -5385,14 +5387,17 @@
     const email = document.getElementById('sys-alert-email').value.trim();
     if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showToast('نشانی ایمیل درست نیست؛ مثل name@example.com وارد کنید.'); return false; }
     const body = { email: email || null, alerts_on: document.getElementById('sys-alert-on').checked, daily_on: document.getElementById('sys-alert-daily').checked };
-    const r = await api('/alert_settings?id=eq.1', { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify(body) });
-    if(!r.ok){ showToast('ذخیره نشد؛ اتصال اینترنت را بررسی کنید.'); return false; }
+    let r;
+    try{ r = await api('/alert_settings?id=eq.1', { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify(body) }); }
+    catch(e){ r = null; }
+    if(!r || !r.ok){ showToast('ذخیره نشد؛ اتصال اینترنت را بررسی کنید.'); return false; }
     Object.assign(ALERT_SETTINGS || {}, body);
     if(!silent){ showToast(email ? 'ذخیره شد.' : 'ذخیره شد؛ بدون نشانی ایمیل، چیزی فرستاده نمی‌شود.'); renderSysAlerts(); }
     return true;
   }
   async function testAlertEmail(){
     const btn = document.getElementById('sys-alert-test');
+    if(!document.getElementById('sys-alert-email').value.trim()){ showToast('اول نشانی ایمیل گیرنده را وارد کنید.'); return; }
     btn.disabled = true; btn.textContent = 'در حال ارسال…';
     try{
       if(!await saveAlertSettings(true)) return;
@@ -5457,12 +5462,15 @@
   // ---- گزارش اجرای کارهای خودکار (۵.۲۵.۰، run-job با {action:'logs'}) ----
   let JOB_LOG_TEXT = '';
   const JOB_LOG_ERR_RX = /##\[error\]|traceback|error|exception|failed|\[!\]|❌/i;
+  let JOB_LOG_SEQ = 0; // جواب دیرِ گزارش قبلی روی گزارش تازه ننشینه
   async function openJobLog(job){
+    const seq = ++JOB_LOG_SEQ;
     const j = SYS_STATUS_JOBS.find(x=>x.job === job);
     document.getElementById('job-log-title').textContent = 'گزارش آخرین اجرا: ' + (j ? j.name : job);
     document.getElementById('job-log-meta').textContent = 'در حال دریافت از گیت‌هاب…';
     document.getElementById('job-log-body').innerHTML = '';
-    document.getElementById('job-log-gh').hidden = true;
+    const ghLink = document.getElementById('job-log-gh');
+    ghLink.hidden = true; ghLink.removeAttribute('href');
     document.getElementById('job-log-copy').disabled = true;
     JOB_LOG_TEXT = '';
     document.getElementById('job-log-modal').classList.add('active');
@@ -5474,6 +5482,7 @@
       });
       if(!r.ok) throw new Error('run-job logs ' + r.status);
       const d = await r.json();
+      if(seq !== JOB_LOG_SEQ) return;
       if(d.error && !d.lines) throw new Error(d.error);
       const meta = document.getElementById('job-log-meta');
       if(!d.run){ meta.textContent = d.running ? 'اولین اجرا هنوز در جریان است؛ گزارش بعد از پایان آن آماده می‌شود.' : 'هنوز اجرایی ثبت نشده است.'; return; }
@@ -5495,6 +5504,7 @@
       const body = document.getElementById('job-log-body');
       body.scrollTop = body.scrollHeight;
     }catch(e){
+      if(seq !== JOB_LOG_SEQ) return;
       console.error(e);
       document.getElementById('job-log-meta').textContent = 'دریافت گزارش ناموفق بود. اگر تازه منتشر شده، چند دقیقه بعد دوباره امتحان کنید (تابع run-job باید دوباره نصب شود).';
     }
@@ -5772,7 +5782,7 @@
     const loginCheck = (async()=>{
       try{
         const since = new Date(Date.now() - 86400000).toISOString();
-        const n = await fetchExactCount('/login_events?success=is.false&created_at=gt.' + since);
+        const n = await fetchExactCount('/login_events?success=is.false&blocked=is.false&created_at=gt.' + since);
         const locks = await fetchLoginLocks().catch(()=>null);
         if(locks && locks.length) note('warn', 'ورود از ' + faNum(locks.length) + ' اتصال قفل است', 'login-lock');
         note(n >= 20 ? 'bad' : n >= 5 ? 'warn' : 'ok', 'تلاش ناموفق ورود در ۲۴ ساعت: ' + faNum(n), 'logins');
@@ -6930,12 +6940,10 @@
     ARCHIVE_REPORTS = r.ok ? await r.json() : [];
   }
   async function loadNewspapers(){
-    // limit=500: تعداد واقعی روزنامه‌های کیوسک جار الان حدود ۱۶۵ عنوان در روزه (نه
-    // ۵۴ تایی که فرض اولیه بود) — با نگه‌داری فعلاً ۱ روزه (RETENTION_DAYS، نگاه کن
-    // به «نکات عملیاتی» در CLAUDE.md) تب «روزنامه‌ها» به «امروز»+«دیروز» یعنی حداکثر
-    // ۲ روز نیاز داره (~۳۳۰ ردیف)؛ ۵۰۰ یه حاشیه‌ی امن براش می‌ذاره. وقتی RETENTION_DAYS
-    // به ۳ برگرده، این عدد هم باید متناسب (~۵۰۰+) بازبینی بشه
-    const r = await api('/newspapers?select=*&order=edition_date.desc,title.asc&limit=500');
+    // limit=1000: کیوسک جار حدود ۱۶۵ عنوان در روز داره و مدت نگهداری رسانه (۵.۲۵.۰) تا ۳ روز
+    // می‌ره → تب «روزنامه‌ها» تا ۴ برگه‌ی تاریخ (~۶۶۰ ردیف). ۵۰۰ قبلی روز چهارم رو ناقص
+    // می‌آورد. فیلتر تاریخ نذاشتیم چون جلدهای آخرین تاریخ (تعطیلی طولانی) هیچ‌وقت پاک نمی‌شن.
+    const r = await api('/newspapers?select=*&order=edition_date.desc,title.asc&limit=1000');
     NEWSPAPERS = r.ok ? await r.json() : [];
   }
   async function loadNewsAiInsights(){
@@ -7209,6 +7217,8 @@
     btn.disabled = true; btn.textContent = 'در حال بررسی…';
     try{
       await loadSiteSettings();
+      // نشست منقضی شده → loadAllAndEnter پیام «نشست منقضی شد» رو روی صفحه‌ی ورود نشون می‌ده
+      if(SESSION_EXPIRED){ await loadAllAndEnter(); return; }
       if(maintOn()){ showMaintView(); showToast('سامانه هنوز در حال به‌روزرسانی است؛ کمی بعد دوباره امتحان کنید.'); }
       else await loadAllAndEnter();
     }finally{ btn.disabled = false; btn.textContent = 'بررسی دوباره'; }
@@ -7219,6 +7229,7 @@
     SITE_POLL_TIMER = setInterval(async ()=>{
       if(!authToken) return;
       await loadSiteSettings();
+      if(SESSION_EXPIRED && document.getElementById('view-maint').classList.contains('active')){ loadAllAndEnter(); return; }
       const admin = currentRole === 'app_admin';
       const inDash = document.getElementById('view-dash').classList.contains('active');
       if(!admin && maintOn()){ if(inDash) showMaintView(); return; }
@@ -7311,6 +7322,7 @@
     }catch(e){
       console.error(e);
       showToast('ذخیره نشد. اتصال اینترنت را بررسی کنید؛ اگر مشکل ماند، migration_042 را در SQL Editor اجرا کنید.');
+      return; // ذخیره نشد: فرم دست نخوره تا متن/انتخاب مدیر از دست نره
     }finally{ btn.disabled = false; }
     renderSiteSettingsAdmin();
     applySiteVisibility();
@@ -7329,6 +7341,7 @@
     }catch(e){
       console.error(e);
       showToast('ذخیره نشد. اتصال اینترنت را بررسی کنید؛ اگر مشکل ماند، migration_042 را در SQL Editor اجرا کنید.');
+      return; // ذخیره نشد: فرم دست نخوره تا متن/انتخاب مدیر از دست نره
     }finally{ btn.disabled = false; }
     renderSiteSettingsAdmin();
     applySiteVisibility();
@@ -9027,16 +9040,21 @@
   // مصنوعی به ترتیب امتیاز، بدون «حذف از منتخب»ها و پست‌های پنهان؛ جمعاً تا ۱۰ (سنجاق‌ها همیشه).
   let NEWS_PICK_EDITS = [];
   let NEWS_PICK_EDITS_MISSING = false;
+  // true = خونده شد؛ خطای موقت (نه جدول نبودن) فهرست قبلی رو نگه می‌داره
   async function loadNewsPickEdits(){
     try{
       const r = await api('/news_pick_edits?select=*&order=sort_order.asc,id.asc');
       NEWS_PICK_EDITS_MISSING = r.status === 404 || r.status === 400;
-      NEWS_PICK_EDITS = r.ok ? await r.json() : [];
-    }catch(e){ NEWS_PICK_EDITS = []; }
+      if(r.ok){ NEWS_PICK_EDITS = await r.json(); return true; }
+      if(NEWS_PICK_EDITS_MISSING) NEWS_PICK_EDITS = [];
+      return false;
+    }catch(e){ return false; }
   }
   const PICK_MAX = 10;
+  // سنجاق‌هایی که واقعاً در فهرست دیده می‌شن (پست پنهان‌شده یا بی‌مشخصات نه)
+  const pickVisiblePin = x=>x.action === 'pin' && x.pick && !HIDDEN_POST_IDS.has(Number(x.post_id));
   function newsPickItems(){
-    const pins = NEWS_PICK_EDITS.filter(x=>x.action === 'pin' && x.pick && !HIDDEN_POST_IDS.has(Number(x.post_id)));
+    const pins = NEWS_PICK_EDITS.filter(pickVisiblePin);
     const skip = new Set(NEWS_PICK_EDITS.map(x=>Number(x.post_id)));
     const ai = (NEWS_AI_INSIGHTS?.selected_posts || [])
       .filter(sp => !HIDDEN_POST_IDS.has(Number(sp.id)) && !skip.has(Number(sp.id)))
@@ -9105,10 +9123,11 @@
   }
   function pickNextOrder(){ return NEWS_PICK_EDITS.filter(x=>x.action === 'pin').reduce((m, x)=>Math.max(m, x.sort_order), 0) + 1; }
   async function pickAfterChange(msg){
-    await loadNewsPickEdits();
+    const fresh = await loadNewsPickEdits();
     renderNewsPicks();
     try{ renderNewsFeed(); }catch(e){}
-    if(msg) showToast(msg);
+    if(!fresh) showToast((msg ? msg + ' ' : '') + 'فهرست تازه دریافت نشد؛ برای دیدن نتیجه صفحه را دوباره بارگذاری کنید.');
+    else if(msg) showToast(msg);
   }
   function pickFailMsg(){ return NEWS_PICK_EDITS_MISSING ? 'انجام نشد؛ اول migration_044 را در SQL Editor سوپابیس اجرا کنید.' : 'انجام نشد؛ اتصال اینترنت را بررسی و دوباره تلاش کنید.'; }
   document.getElementById('news-analytics-selected-list').addEventListener('click', async e=>{
@@ -9129,12 +9148,14 @@
         if(!r.ok) throw new Error('unpin ' + r.status);
         await pickAfterChange('سنجاق برداشته شد.');
       }else if(act === 'up' || act === 'down'){
-        const pins = NEWS_PICK_EDITS.filter(x=>x.action === 'pin');
+        // فقط سنجاق‌های دیده‌شده جابه‌جا می‌شن (هم‌سو با newsPickItems)؛ بقیه ته ترتیب
+        const pins = NEWS_PICK_EDITS.filter(pickVisiblePin);
+        const rest = NEWS_PICK_EDITS.filter(x=>x.action === 'pin' && !pickVisiblePin(x));
         const i = pins.findIndex(x=>x.id === Number(b.dataset.id)), j = act === 'up' ? i - 1 : i + 1;
         if(i < 0 || j < 0 || j >= pins.length) return;
         // ترتیب از نو شماره‌گذاری می‌شه (sort_orderهای برابر هم درست جابه‌جا بشن)
         [pins[i], pins[j]] = [pins[j], pins[i]];
-        const res = await Promise.all(pins.map((x, k)=>x.sort_order === k + 1 ? { ok:true } : api('/news_pick_edits?id=eq.' + x.id, { method:'PATCH', body: JSON.stringify({ sort_order: k + 1 }) })));
+        const res = await Promise.all([...pins, ...rest].map((x, k)=>x.sort_order === k + 1 ? { ok:true } : api('/news_pick_edits?id=eq.' + x.id, { method:'PATCH', body: JSON.stringify({ sort_order: k + 1 }) })));
         if(res.some(r=>!r.ok)) throw new Error('reorder');
         await pickAfterChange('');
       }
@@ -9578,6 +9599,7 @@
   // = بستر پیش‌فرض انتخاب‌شده، http(s) دیگه = فید RSS وب‌سایت. بله نه — کالکتورش فقط
   // قالب «رصد شایعات» رو می‌شناسه. تکراری = همون بستر + شناسه در منابع فعلی یا همین فهرست.
   let BULK_ROWS = [];
+  const BULK_MAX = 300;
   function openBulkChan(){
     BULK_ROWS = [];
     document.getElementById('bulk-chan-text').value = '';
@@ -9598,16 +9620,30 @@
     showToast('فایل خوانده شد؛ «بررسی فهرست» را بزنید.');
   });
   function parseBulkLine(line, defPlat){
-    line = faDigitsToEn(line).replace(/‌/g, ' ').trim();
+    // نیم‌فاصله‌ی نام منبع دست نمی‌خوره (فقط از خودِ لینک/شناسه حذف می‌شه)؛ گیومه‌های CSV چسبانده‌شده هم مثل فایل
+    line = faDigitsToEn(line).replace(/"/g, '').trim();
     if(!line || line.startsWith('#')) return null;
-    const m = line.match(/^(\S+?)(?:(?:\s*[,،]\s*|\s+)(.*))?$/);
-    const tok = m[1].replace(/[,،]+$/, ''), title = (m[2] || '').replace(/^[,،\s]+|[,،\s]+$/g, '').slice(0, 120);
+    const m = line.match(/^(\S+?)(?:(?:\s*[,،;]\s*|\s+)(.*))?$/);
+    const tok = m[1].replace(/[​-‏﻿]/g, '').replace(/[,،;]+$/, ''), title = (m[2] || '').replace(/^[,،;\s]+|[,،;\s]+$/g, '').slice(0, 120);
     const row = { raw: line, title, platform:null, username:null, error:null };
     let x;
-    if(/^(https?:\/\/)?(www\.)?(t\.me|telegram\.me)\/(joinchat\/|\+)/i.test(tok)){ row.error = 'لینک دعوت خصوصی؛ فقط کانال عمومی قابل رصد است'; return row; }
-    if((x = tok.match(/^(?:https?:\/\/)?(?:www\.)?(?:t\.me|telegram\.me)\/(?:s\/)?([A-Za-z0-9_]{4,})\/?(?:\d+\/?)?$/i))){ row.platform = 'telegram'; row.username = x[1]; return row; }
-    if((x = tok.match(/^(?:https?:\/\/)?(?:www\.)?eitaa\.com\/([A-Za-z0-9_]{3,})\/?(?:\d+\/?)?$/i))){ row.platform = 'eitaa'; row.username = x[1]; return row; }
-    if(/^(?:https?:\/\/)?(?:www\.)?ble\.ir\//i.test(tok)){ row.error = 'کانال بله پشتیبانی نمی‌شود (جمع‌آوری بله فقط برای «رصد شایعات» ساخته شده)'; return row; }
+    // لینک ایتا/تلگرام/بله: ?… و #… (مثل ?single) کنار؛ اگه با الگوی کانال عمومی نخونه خطاست، هرگز «وب‌سایت»
+    const msg = tok.match(/^(?:https?:\/\/)?(?:www\.)?(t\.me|telegram\.me|eitaa\.com|web\.eitaa\.com|ble\.ir)(\/.*)?$/i);
+    if(msg){
+      const host = msg[1].toLowerCase(), rest = msg[2] || '';
+      const webEitaa = host === 'web.eitaa.com' && rest.match(/#@?([A-Za-z0-9_]{3,})/);
+      const path = rest.replace(/[?#].*$/, '');
+      if(host === 'ble.ir'){ row.error = 'کانال بله پشتیبانی نمی‌شود (جمع‌آوری بله فقط برای «رصد شایعات» ساخته شده)'; return row; }
+      if(/^\/(joinchat\/|\+|c\/)/i.test(path)){ row.error = 'لینک دعوت یا کانال خصوصی؛ فقط کانال عمومی قابل رصد است'; return row; }
+      if(host === 't.me' || host === 'telegram.me'){
+        if((x = path.match(/^\/(?:s\/)?([A-Za-z0-9_]{4,})\/?(?:\d+\/?)?$/))){ row.platform = 'telegram'; row.username = x[1]; return row; }
+      }else if(webEitaa){ row.platform = 'eitaa'; row.username = webEitaa[1]; return row; }
+      else if(host === 'eitaa.com'){
+        if((x = path.match(/^\/([A-Za-z0-9_]{3,})\/?(?:\d+\/?)?$/))){ row.platform = 'eitaa'; row.username = x[1]; return row; }
+      }
+      row.error = 'لینک ' + (host.includes('eitaa') ? 'ایتا' : 'تلگرام') + ' قابل تشخیص نیست؛ نشانی کانال را به شکل ' + (host.includes('eitaa') ? 'eitaa.com/نام' : 't.me/نام') + ' وارد کنید';
+      return row;
+    }
     if((x = tok.match(/^@?([A-Za-z][A-Za-z0-9_]{2,})$/))){ row.platform = defPlat; row.username = x[1]; return row; }
     if(/^https?:\/\/[^\s/]+\.[^\s]+$/i.test(tok)){ row.platform = 'website'; row.username = tok; return row; }
     row.error = 'لینک یا نام کاربری قابل تشخیص نیست';
@@ -9619,8 +9655,10 @@
     const lines = document.getElementById('bulk-chan-text').value.split(/\r?\n/);
     const existing = new Map(CHANNELS.map(c=>[bulkKey(c.platform, String(c.username || '')), c]));
     const seen = new Set();
-    BULK_ROWS = lines.map(l=>parseBulkLine(l, defPlat)).filter(Boolean).slice(0, 300);
+    const parsed = lines.map(l=>parseBulkLine(l, defPlat)).filter(Boolean);
+    BULK_ROWS = parsed.slice(0, BULK_MAX);
     if(!BULK_ROWS.length){ showToast('فهرست خالی است؛ دست‌کم یک لینک وارد کنید.'); return; }
+    const cut = parsed.length - BULK_ROWS.length;
     BULK_ROWS.forEach(r=>{
       if(r.error){ r.status = 'bad'; return; }
       const k = bulkKey(r.platform, r.username);
@@ -9631,7 +9669,7 @@
       if(!r.title) r.title = r.platform === 'website' ? (()=>{ try{ return new URL(r.username).hostname.replace(/^www\./, ''); }catch(e){ return r.username; } })() : r.username;
     });
     const n = BULK_ROWS.filter(r=>r.status === 'new').length, d = BULK_ROWS.filter(r=>r.status === 'dup').length, b = BULK_ROWS.filter(r=>r.status === 'bad').length;
-    document.getElementById('bulk-chan-sum').innerHTML = `<b>${faNum(n)} منبع تازه</b>${d ? '، ' + faNum(d) + ' تکراری' : ''}${b ? '، ' + faNum(b) + ' نامعتبر' : ''}. تکراری‌ها و نامعتبرها اضافه نمی‌شوند؛ نام منابع تازه را اگر لازم است اصلاح کنید.`;
+    document.getElementById('bulk-chan-sum').innerHTML = `<b>${faNum(n)} منبع تازه</b>${d ? '، ' + faNum(d) + ' تکراری' : ''}${b ? '، ' + faNum(b) + ' نامعتبر' : ''}. تکراری‌ها و نامعتبرها اضافه نمی‌شوند؛ نام منابع تازه را اگر لازم است اصلاح کنید.${cut ? `<br><b class="bulk-cut">فقط ${faNum(BULK_MAX)} خط اول بررسی شد؛ ${faNum(cut)} خط باقی‌مانده را بعد از ذخیره در نوبت بعدی وارد کنید.</b>` : ''}`;
     const PL = { eitaa:'ایتا', telegram:'تلگرام', website:'وب‌سایت' };
     document.getElementById('bulk-chan-table').innerHTML = `<thead><tr><th>بستر</th><th>شناسه یا آدرس</th><th>نام</th><th>وضعیت</th></tr></thead><tbody>${BULK_ROWS.map((r, i)=>`<tr class="${r.status}">
       <td>${r.platform ? PL[r.platform] : '—'}</td>
@@ -11834,7 +11872,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.27.2';
+  const APP_VERSION = '5.27.3';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
