@@ -2259,6 +2259,35 @@
   .sys-alerts-stat b{ color: var(--text); }
   .sys-alert-err{ font-size:13px; line-height:1.8; margin:0; padding:8px 12px; border-radius:10px; background: rgba(217,154,30,0.12); color:#8a5d06; }
   @media (max-width:760px){ .sys-alerts-grid{ grid-template-columns:1fr; } }
+
+  /* ---- مدار دوم و عرصه‌های تازه (۵.۲۸.۰) ---- */
+  .domain-orbits{ margin-bottom:26px; }
+  .domain-grid-2{ margin-top:38px; margin-bottom:0; }
+  .domain-grid-2.is-empty{ display:none; }
+  /* آیکون موقت عرصه‌های تازه تا رسیدن تصویر نهایی */
+  .tmp-dom-icon{ border-radius:50%; background: radial-gradient(circle at 50% 46%, rgba(234,179,147,0.30), rgba(234,179,147,0) 62%); }
+  .tmp-dom-icon svg{ width:136px; height:136px; }
+  /* گوشی: همه‌ی عرصه‌ها یک جدول دوستونه‌ی پیوسته (دو ردیف مدار جدا نه) */
+  @media (max-width:900px){
+    .domain-orbits{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; }
+    .domain-orbits > .domain-grid{ display:contents; }
+  }
+  .soon-panel, .ask-wrap{ max-width:560px; margin:48px auto; text-align:center; color: rgba(255,255,255,0.7); }
+  .soon-panel-icon{ width:64px; height:64px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background: rgba(234,179,147,0.12); color: var(--accent); margin-bottom:14px; }
+  .soon-panel-icon svg{ width:30px; height:30px; }
+  .soon-panel h3, .ask-wrap h3{ font-size:16px; font-weight:800; color:#fff; margin-bottom:8px; }
+  .soon-panel p, .ask-wrap p{ font-size:14px; line-height:2; }
+  .ask-box{ display:flex; gap:8px; margin:20px 0 12px; }
+  .ask-box input{ flex:1; min-width:0; height:44px; border-radius: var(--radius-control); border:1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color:#fff; padding:0 14px; font:inherit; font-size:14px; }
+  .ask-box .btn{ height:44px; }
+  .ask-examples{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .ask-examples span{ font-size:12px; color: rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.14); border-radius: var(--radius-pill); padding:5px 12px; }
+  .ask-wrap .ask-note{ font-size:12px; color: rgba(255,255,255,0.45); margin-top:18px; }
+  .np-compare-soon{ display:flex; gap:12px; align-items:flex-start; margin-top:24px; padding:14px 16px; border:1px dashed rgba(255,255,255,0.18); border-radius:12px; color: rgba(255,255,255,0.6); font-size:13px; line-height:1.9; }
+  .np-compare-soon svg{ width:26px; height:26px; color: var(--accent); flex-shrink:0; margin-top:2px; }
+  .np-compare-soon b{ display:block; color:#fff; font-size:14px; }
+  .laws-source-chips{ margin-top:2px; }
+  .laws-card .news-title{ margin-bottom:4px; }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -2272,7 +2301,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۷.۳</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۸.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2348,11 +2377,26 @@
               <button class="nav-menu-group-title-btn" data-nav="people" onclick="goToPeopleTab('figures'); closeNavMenu();">یادداشت‌ها</button>
               <button class="nav-menu-sub" data-nav="people/orgs" onclick="goToPeopleTab('orgs'); closeNavMenu();">تحلیل سازمان‌ها</button>
               <button class="nav-menu-sub" data-nav="people/figures" onclick="goToPeopleTab('figures'); closeNavMenu();">چهره‌ها و فعالان سیاسی</button>
+              <button class="nav-menu-sub" data-nav="people/thinktanks" onclick="goToPeopleTab('thinktanks'); closeNavMenu();">اندیشکده‌ها و پژوهشگاه‌ها</button>
               <button class="nav-menu-sub" data-nav="people/archive" onclick="goToPeopleTab('archive'); closeNavMenu();">بسته‌های تحلیلی</button>
 
               <button class="nav-menu-group-title-btn" data-nav="hawza" onclick="goToHawzaTab('news'); closeNavMenu();">درباره حوزه</button>
               <button class="nav-menu-sub" data-nav="hawza/news" onclick="goToHawzaTab('news'); closeNavMenu();">اخبار حوزه</button>
               <button class="nav-menu-sub" data-nav="hawza/about" onclick="goToHawzaTab('about'); closeNavMenu();">آنچه درباره حوزه گفته می‌شود</button>
+
+              <button class="nav-menu-group-title-btn" data-nav="positions" onclick="switchSection('positions'); closeNavMenu();">مواضع مراجع و علماء</button>
+              <button class="nav-menu-sub" data-nav="positions/leader" onclick="goToPosTab('leader'); closeNavMenu();">رهبر انقلاب</button>
+              <button class="nav-menu-sub" data-nav="positions/maraji" onclick="goToPosTab('maraji'); closeNavMenu();">مراجع و علماء</button>
+              <button class="nav-menu-sub" data-nav="positions/hawza" onclick="goToPosTab('hawza'); closeNavMenu();">حوزه‌های علمیه</button>
+              <button class="nav-menu-sub" data-nav="positions/imams" onclick="goToPosTab('imams'); closeNavMenu();">ائمه جمعه</button>
+              <button class="nav-menu-sub" data-nav="positions/orgs" onclick="goToPosTab('orgs'); closeNavMenu();">تشکل‌ها و نخبگان</button>
+
+              <button class="nav-menu-group-title-btn" data-nav="public" onclick="switchSection('public'); closeNavMenu();">درباره مردم</button>
+              <button class="nav-menu-sub" data-nav="public/trends" onclick="switchSection('public'); closeNavMenu();">جست‌وجوهای داغ مردم</button>
+
+              <button class="nav-menu-group-title-btn" data-nav="laws" onclick="switchSection('laws'); closeNavMenu();">قوانین و مصوبات</button>
+
+              <button class="nav-menu-group-title-btn soon-item" data-nav="ask" onclick="switchSection('ask'); closeNavMenu();">از جریان بپرس<span class="news-soon">به‌زودی</span></button>
             </div>
             <div class="nav-menu-col nav-menu-col-top">
               <button class="nav-menu-toplevel-btn" data-nav="dashboard" onclick="switchSection('dashboard'); closeNavMenu();">صفحه نخست</button>
@@ -2436,13 +2480,15 @@
           <p>مطالب کانال‌های ایتا، تلگرام و بله، سایت‌های خبری و صفحه‌ی اول روزنامه‌ها هر ۲ ساعت به‌صورت خودکار جمع‌آوری و با هوش مصنوعی دسته‌بندی می‌شوند.</p>
         </div>
         <div class="intro-step" data-step="1" hidden>
-          <h3>پنج عرصه‌ی رصد</h3>
+          <h3>عرصه‌های رصد</h3>
           <ul class="intro-list">
             <li><b>اخبار و رویدادها</b> — خبرگزاری‌ها، سایت‌ها، روزنامه‌ها، ادعاها و شایعات</li>
             <li><b>یادداشت‌ها</b> — نوشته‌های چهره‌ها، فعالان سیاسی و سازمان‌ها</li>
             <li><b>درباره حوزه</b> — اخبار پایگاه‌های حوزوی و آنچه رسانه‌ها درباره‌ی حوزه می‌گویند</li>
             <li><b>کنشگری مجازی</b> — پست‌های کنشگران و طلاب در فضای مجازی</li>
             <li><b>برنامه مدارس</b> — گزارش‌های برنامه‌های مدارس علمیه</li>
+            <li><b>مواضع مراجع و علماء</b> — بیانات و مواضع رسمی رهبر انقلاب، مراجع، حوزه‌ها، ائمه جمعه و تشکل‌های حوزوی</li>
+            <li><b>درباره مردم</b> و <b>قوانین و مصوبات</b> — آنچه مردم جست‌وجو می‌کنند و مصوبات و اطلاعیه‌های رسمی</li>
           </ul>
         </div>
         <div class="intro-step" data-step="2" hidden>
@@ -2664,6 +2710,7 @@
       <div class="datebar" id="datebar" aria-live="off"></div>
 
       <div class="section-label">عرصه‌های رصد و پایش</div>
+      <div class="domain-orbits">
       <div class="domain-grid">
         <svg class="dom-orbit" viewBox="-600 -100 1200 360" aria-hidden="true">
           <defs>
@@ -2708,7 +2755,51 @@
           <h3>برنامه مدارس</h3>
         </div>
       </div>
-      <p class="domain-caption">جریان این پنج عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، یادداشت‌های مربوط به افراد و مجموعه‌های تأثیرگذار، اخبار سیاسی‌اجتماعی پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود، کنشگری فضای مجازی و برنامه‌های آموزشی مدارس. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
+        <!-- مدار دوم (۵.۲۸.۰، خواست کاربر): چهار عرصه‌ی تازه زیر پنج عرصه‌ی اصلی؛ قوس، کوچک‌شده‌ی
+             هم‌شکل قوس بالاست (۰٫۷۵ حول خط مرکز آیکون‌ها) و شهابش هم‌جهت (راست به چپ). جای سوراخ‌های
+             mask پشت آیکون‌ها با layoutOrbit2() از روی کارت‌های دیده‌شده ساخته می‌شه. -->
+        <div class="domain-grid domain-grid-2">
+          <svg class="dom-orbit dom-orbit-2" viewBox="-600 -100 1200 360" aria-hidden="true">
+            <defs>
+              <radialGradient id="dom-orbit2-hole"><stop offset=".55" stop-color="#000"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+              <mask id="dom-orbit2-mask" maskUnits="userSpaceOnUse" x="-600" y="-100" width="1200" height="360">
+                <rect x="-600" y="-100" width="1200" height="360" fill="#fff"/>
+                <g id="dom-orbit2-holes"></g>
+              </mask>
+              <path id="dom-orbit2-path" d="M -421.5 111.5 Q 0 -8.5, 421.5 111.5"/>
+              <path id="dom-orbit2-path2" d="M -384 128 Q 0 38, 384 128"/>
+            </defs>
+            <g mask="url(#dom-orbit2-mask)">
+              <use href="#dom-orbit2-path" fill="none" stroke="#EAB393" stroke-opacity=".32" stroke-width="1.3"/>
+              <use href="#dom-orbit2-path2" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="1"/>
+              <g class="flow" fill="none" stroke="#EAB393" stroke-linecap="round">
+                <use href="#dom-orbit2-path" stroke-width="3" stroke-opacity="1" stroke-dasharray="18 2278"><animate attributeName="stroke-dashoffset" values="-874;130;130" keyTimes="0;.51;1" dur="9s" repeatCount="indefinite"/></use>
+                <use href="#dom-orbit2-path" stroke-width="2" stroke-opacity="0.45" stroke-dasharray="55 2278"><animate attributeName="stroke-dashoffset" values="-874;130;130" keyTimes="0;.51;1" dur="9s" repeatCount="indefinite"/></use>
+                <use href="#dom-orbit2-path" stroke-width="1.4" stroke-opacity="0.18" stroke-dasharray="110 2278"><animate attributeName="stroke-dashoffset" values="-874;130;130" keyTimes="0;.51;1" dur="9s" repeatCount="indefinite"/></use>
+              </g>
+            </g>
+            <circle cx="-421.5" cy="111.5" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="-421.5" cy="111.5" r="2.2" fill="#EAB393" fill-opacity=".5"/>
+            <circle cx="421.5" cy="111.5" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="421.5" cy="111.5" r="2.2" fill="#EAB393" fill-opacity=".5"/>
+          </svg>
+          <div class="domain-card" data-vis="positions" role="button" tabindex="0" onclick="switchSection('positions')">
+            <div class="domain-icon is-illustrated tmp-dom-icon"><svg viewBox="0 0 136 136" aria-hidden="true"><g fill="none" stroke="#EAB393" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M44 96h48"/><path d="M50 96V70a18 18 0 0 1 36 0v26"/><path d="M68 40v12"/><path d="M60 46h16"/><path d="M58 96V80h20v16"/></g></svg></div>
+            <h3>مواضع مراجع و علماء</h3>
+          </div>
+          <div class="domain-card" data-vis="public" role="button" tabindex="0" onclick="switchSection('public')">
+            <div class="domain-icon is-illustrated tmp-dom-icon"><svg viewBox="0 0 136 136" aria-hidden="true"><g fill="none" stroke="#EAB393" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="68" cy="56" r="10"/><path d="M50 94a18 18 0 0 1 36 0"/><circle cx="42" cy="64" r="8"/><path d="M27 96a15 15 0 0 1 23-12"/><circle cx="94" cy="64" r="8"/><path d="M109 96a15 15 0 0 0-23-12"/></g></svg></div>
+            <h3>درباره مردم</h3>
+          </div>
+          <div class="domain-card" data-vis="laws" role="button" tabindex="0" onclick="switchSection('laws')">
+            <div class="domain-icon is-illustrated tmp-dom-icon"><svg viewBox="0 0 136 136" aria-hidden="true"><g fill="none" stroke="#EAB393" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M68 38v58M52 96h32M44 50h48"/><path d="M44 50l-11 23h22zM92 50l-11 23h22z"/></g></svg></div>
+            <h3>قوانین و مصوبات</h3>
+          </div>
+          <div class="domain-card soon-item" data-vis="ask" role="button" tabindex="0" onclick="switchSection('ask')">
+            <div class="domain-icon is-illustrated tmp-dom-icon"><svg viewBox="0 0 136 136" aria-hidden="true"><g fill="none" stroke="#EAB393" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M40 44h56a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H64L50 96V84H40a6 6 0 0 1-6-6V50a6 6 0 0 1 6-6z"/><path d="M68 54v16M60 62h16"/></g></svg></div>
+            <h3>از جریان بپرس<span class="news-soon">به‌زودی</span></h3>
+          </div>
+        </div>
+      </div>
+      <p class="domain-caption">جریان هر عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، یادداشت‌های افراد، سازمان‌ها و اندیشکده‌های تأثیرگذار، اخبار پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود، کنشگری فضای مجازی، برنامه‌های مدارس، مواضع مراجع و علماء، آنچه مردم دنبال می‌کنند و قوانین و مصوبات. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
 
       <div class="domain-shortcuts">
         <a role="button" tabindex="0" data-vis="overview/analytics" onclick="goToNewsTab('analytics')">در یک نگاه</a>
@@ -2725,6 +2816,12 @@
         <a role="button" tabindex="0" data-vis="hawza/about" onclick="goToHawzaTab('about')">آنچه درباره حوزه گفته می‌شود</a>
         <a role="button" tabindex="0" data-vis="posts/feed" onclick="goToPostsTab('feed')">پست‌های منتشر شده</a>
         <a role="button" tabindex="0" data-vis="posts/people" onclick="goToPostsTab('people')">افراد و مجموعه‌ها</a>
+        <a role="button" tabindex="0" data-vis="people/thinktanks" onclick="goToPeopleTab('thinktanks')">اندیشکده‌ها و پژوهشگاه‌ها</a>
+        <a role="button" tabindex="0" data-vis="positions/leader" onclick="goToPosTab('leader')">رهبر انقلاب</a>
+        <a role="button" tabindex="0" data-vis="positions/maraji" onclick="goToPosTab('maraji')">مراجع و علماء</a>
+        <a role="button" tabindex="0" data-vis="positions/imams" onclick="goToPosTab('imams')">ائمه جمعه</a>
+        <a role="button" tabindex="0" data-vis="public/trends" onclick="switchSection('public')">جست‌وجوهای داغ مردم</a>
+        <a role="button" tabindex="0" data-vis="laws" onclick="switchSection('laws')">قوانین و مصوبات</a>
         <!-- «به‌زودی»ها آخر ردیف (۵.۲۰.۰) -->
         <span class="domain-shortcut-disabled soon-item">شرکت‌کننده در برنامه‌ها<span class="news-soon">به‌زودی</span></span>
         <span class="domain-shortcut-disabled soon-item">جامعه مخاطب<span class="news-soon">به‌زودی</span></span>
@@ -2898,6 +2995,12 @@
           </div>
         </div>
         <div class="newspaper-grid" id="newspaper-grid"></div>
+        <!-- «مقایسه‌ی تیترهای روزنامه‌ها» (۵.۲۸.۰): جای خالی تا راه‌اندازی دوباره‌ی هوش مصنوعی -->
+        <div class="np-compare-soon soon-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h7v14H3zM14 5h7v14h-7z"/><path d="M5 9h3M5 12h3M16 9h3M16 12h3"/></svg>
+          <div><b>مقایسه‌ی تیترهای روزنامه‌ها<span class="news-soon">به‌زودی</span></b>
+          <span>تیتر یک روزنامه‌ها کنار هم و دسته‌بندی‌شده بر اساس گرایش؛ پس از راه‌اندازی دوباره‌ی هوش مصنوعی فعال می‌شود.</span></div>
+        </div>
         <p class="news-empty" id="newspapers-empty" style="display:none;">هنوز روزنامه‌ای دریافت نشده.</p>
       </div>
 
@@ -3048,6 +3151,7 @@
       <div class="news-page-tabs" id="people-page-tabs">
         <button data-people-tab="orgs" data-ic="orgs">تحلیل سازمان‌ها</button>
         <button class="active" data-people-tab="figures" data-ic="figures">چهره‌ها و فعالان سیاسی</button>
+        <button data-people-tab="thinktanks" data-ic="thinktank">اندیشکده‌ها و پژوهشگاه‌ها</button>
         <button data-people-tab="archive" data-ic="archive">بسته‌های تحلیلی</button>
       </div>
       <p class="news-tab-subtitle" id="people-tab-subtitle"><span>یادداشت‌ها و مطالب کانال‌های معرفی‌شده به‌عنوان چهره‌ی سیاسی.</span></p>
@@ -3149,6 +3253,74 @@
         <div class="news-feed hab-feed" id="hab-feed"></div>
         <p class="news-empty" id="hab-empty" style="display:none;"></p>
         <div class="news-pagination" id="hab-pagination"></div>
+      </div>
+    </section>
+
+    <!-- «مواضع مراجع و علماء» (۵.۲۸.۰، مدار دوم): پنج تب، هر تب = گالری لوگو + فید منبع؛
+         از همون ظرف people-tab-figures «یادداشت‌ها» استفاده می‌کنه — placePfPanel('positions')
+         خودِ عنصر رو به positions-pf-slot منتقل می‌کنه (کپی نه، تا idها تکراری نشن) -->
+    <section class="section" id="sec-positions">
+      <div class="news-page-tabs" id="positions-page-tabs">
+        <button class="active" data-pos-tab="leader" data-ic="leader">رهبر انقلاب</button>
+        <button data-pos-tab="maraji" data-ic="maraji">مراجع و علماء</button>
+        <button data-pos-tab="hawza" data-ic="hawza">حوزه‌های علمیه</button>
+        <button data-pos-tab="imams" data-ic="imams">ائمه جمعه</button>
+        <button data-pos-tab="orgs" data-ic="users">تشکل‌ها و نخبگان</button>
+      </div>
+      <p class="news-tab-subtitle" id="positions-tab-subtitle"><span></span></p>
+      <div id="positions-pf-slot"></div>
+    </section>
+
+    <!-- «درباره مردم» (۵.۲۸.۰): تب «جست‌وجوهای داغ مردم» (داده‌اش در مرحله‌ی بعد) + «حال‌وهوای جامعه» به‌زودی -->
+    <section class="section" id="sec-public">
+      <div class="news-page-tabs" id="public-page-tabs">
+        <button class="active" data-public-tab="trends" data-ic="trends">جست‌وجوهای داغ مردم</button>
+        <button disabled class="soon-item" data-ic="mood">حال‌وهوای جامعه<span class="news-soon">به‌زودی</span></button>
+      </div>
+      <p class="news-tab-subtitle" id="public-tab-subtitle"><span>پرجست‌وجوترین موضوع‌های روز ایران در گوگل؛ نشان می‌دهد مردم واقعاً دنبال چه هستند.</span></p>
+      <div class="soon-panel" id="public-trends-panel">
+        <span class="soon-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8M7.5 12l2-2.2 1.8 1.6 2.2-2.6"/></svg></span>
+        <h3>در حال راه‌اندازی</h3>
+        <p>فهرست پرجست‌وجوترین موضوع‌های هر روز به‌زودی به‌صورت خودکار در این بخش نمایش داده می‌شود.</p>
+      </div>
+    </section>
+
+    <!-- «قوانین و مصوبات» (۵.۲۸.۰): بدون تب؛ یک فید با فیلتر مرجع صادرکننده (channels.laws_source) -->
+    <section class="section" id="sec-laws">
+      <p class="news-tab-subtitle sec-intro"><span>قوانین، مصوبات، بخشنامه‌ها و مواضع رسمی؛ هر مطلب با مرجع صادرکننده‌اش.</span></p>
+      <div class="news-filters laws-filters">
+        <div class="news-filter-row">
+          <div class="news-search-box">
+            <input type="text" id="laws-search" aria-label="جست‌وجو در قوانین و مصوبات" placeholder="جستجو در عنوان و متن…" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </div>
+          <div class="news-seg" id="laws-time-seg" role="group" aria-label="بازه‌ی زمانی">
+            <button type="button" class="active" data-t="">همه</button>
+            <button type="button" data-t="today">امروز</button>
+            <button type="button" data-t="yesterday">دیروز</button>
+            <button type="button" data-t="week">هفته گذشته</button>
+          </div>
+        </div>
+        <div class="news-topic-chips laws-source-chips" id="laws-source-chips"></div>
+      </div>
+      <p class="news-empty" id="laws-empty" style="display:none;"></p>
+      <div class="news-feed laws-feed" id="laws-feed"></div>
+      <div class="news-pagination" id="laws-pagination"></div>
+    </section>
+
+    <!-- «از جریان بپرس» (۵.۲۸.۰): به‌زودی — کاملاً به هوش مصنوعی وابسته‌ست -->
+    <section class="section" id="sec-ask">
+      <div class="ask-wrap">
+        <span class="soon-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-5 4v-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M12 7.5v5M9.5 10h5"/></svg></span>
+        <h3>از جریان بپرس<span class="news-soon">به‌زودی</span></h3>
+        <p>پرسش خود را درباره‌ی فضای رسانه‌ای بنویسید؛ پاسخ از روی مطالب جمع‌آوری‌شده‌ی سامانه و همراه با منابع آن داده می‌شود.</p>
+        <div class="ask-box"><input type="text" disabled aria-label="پرسش" placeholder="مثلاً: این هفته درباره‌ی حجاب چه گفته شد؟" /><button type="button" class="btn primary" disabled>بپرس</button></div>
+        <div class="ask-examples">
+          <span>مهم‌ترین موج‌های خبری امروز کدام بود؟</span>
+          <span>رسانه‌ها درباره‌ی حوزه چه گفتند؟</span>
+          <span>مواضع ائمه جمعه این هفته</span>
+        </div>
+        <p class="ask-note">این بخش پس از راه‌اندازی دوباره‌ی سرویس هوش مصنوعی فعال می‌شود.</p>
       </div>
     </section>
 
@@ -3769,7 +3941,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۲۷.۳</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۸.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -4346,6 +4518,10 @@
     announce: 'درج اطلاعیه',
     users: 'کاربران',
     activity: 'گزارش فعالیت',
+    positions: 'مواضع مراجع و علماء',
+    public: 'درباره مردم',
+    laws: 'قوانین و مصوبات',
+    ask: 'از جریان بپرس',
   };
 
   function switchSection(key){
@@ -4377,7 +4553,11 @@
     if(key === 'activity') setActTab(ACT_TAB);
     if(key === 'settings'){ renderBackupPanel(); renderSiteSettingsAdmin(); loadCrawlSites(); if(currentRole === 'app_admin') loadCrawlSuggestions(); }
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
+    if(key === 'people') placePfPanel('people'); // ظرف گالری ممکنه الان توی «مواضع مراجع و علماء» باشه
     if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
+    if(key === 'people') syncPeopleTab();
+    if(key === 'positions') setPosTab(POS_TAB);
+    if(key === 'laws') openLaws();
     if(key === 'posts' || key === 'people') ensureVisibleTab(key);
     // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
     requestAnimationFrame(()=>document.querySelectorAll('#sec-'+key+' .news-page-tabs').forEach(bar=>updateTabInk(bar, true)));
@@ -4423,6 +4603,7 @@
   const PEOPLE_TAB_INFO = {
     orgs: 'مطالب و تحلیل‌های منتشرشده‌ی سازمان‌ها و نهادها؛ برای دیدن مطالب، سازمان موردنظر را انتخاب کنید.',
     figures: 'یادداشت‌ها و مطالب کانال‌های معرفی‌شده به‌عنوان چهره‌ی سیاسی.',
+    thinktanks: 'گزارش‌ها و یادداشت‌های اندیشکده‌ها و پژوهشگاه‌ها؛ برای دیدن مطالب، اندیشکده‌ی موردنظر را انتخاب کنید.',
     archive: 'تولیدات تحلیلی سایر نهادها، جدا از بسته‌های تحلیلی خودِ جریان.'
   };
 
@@ -4445,6 +4626,13 @@
     about: '<path d="M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2h-7l-5 4v-4H5a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M8.5 9h2v2c0 1.3-.7 2.1-2 2.4M13.5 9h2v2c0 1.3-.7 2.1-2 2.4"/>',
     notify: '<path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/>',
     feedback: '<path d="M21 11.5a8.4 8.4 0 01-1.2 4.4L21 20l-4.3-1.1a8.5 8.5 0 114.3-7.4z"/>',
+    // ۵.۲۸.۰: تب‌های عرصه‌های تازه
+    leader: '<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
+    maraji: '<path d="M12 6.5C10.3 5 7.8 4.5 4 4.5v13c3.8 0 6.3.5 8 2 1.7-1.5 4.2-2 8-2v-13c-3.8 0-6.3.5-8 2z"/><path d="M12 6.5v13"/>',
+    imams: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3M8 21h8"/>',
+    thinktank: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/>',
+    trends: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8M7.5 12l2-2.2 1.8 1.6 2.2-2.6"/>',
+    mood: '<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',
   };
   function lsGet(k, def){ try{ const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; }catch(e){ return def; } }
   function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -4580,6 +4768,212 @@
     document.getElementById('news-study-panel').style.display = '';
     document.getElementById('news-feed').classList.remove('social-tab');
     activateNewsStudy('hawza');
+  }
+
+  // ---- «مواضع مراجع و علماء» (۵.۲۸.۰، مدار دوم) ----
+  // پنج تب؛ هر تب = گالری لوگو + فید منبع با همون ظرف «یادداشت‌ها» (pfMode = 'pos-<تب>')؛
+  // عضویت منبع: channels.show_in_positions + positions_tab (migration_047)
+  var POS_TAB_INFO = {
+    leader: 'بیانات، پیام‌ها و مواضع رهبر معظم انقلاب.',
+    maraji: 'مواضع و بیانیه‌های مراجع تقلید و علمای طراز اول در برابر مسائل روز.',
+    hawza: 'مواضع رسمی حوزه‌های علمیه در برابر مسائل خاص (بیشتر از سوی مدیر حوزه)؛ این تب خبر نیست، فقط موضع رسمی.',
+    imams: 'خطبه‌ها و مواضع ائمه جمعه.',
+    orgs: 'مواضع و بیانیه‌های تشکل‌ها و نخبگان حوزوی.',
+  };
+  var POS_TAB_LABEL = { leader:'رهبر انقلاب', maraji:'مراجع و علماء', hawza:'حوزه‌های علمیه', imams:'ائمه جمعه', orgs:'تشکل‌ها و نخبگان' };
+  var POS_TAB = (t=>POS_TAB_INFO[t] ? t : 'leader')(lsGet('jarian_last_pos_tab', 'leader'));
+  function setPosTab(tab){
+    if(!POS_TAB_INFO[tab]) tab = 'leader';
+    if(viewerHidden('positions/' + tab)) tab = firstVisibleTab('positions') || tab;
+    navMark();
+    POS_TAB = tab;
+    lsSet('jarian_last_pos_tab', tab);
+    document.querySelectorAll('#positions-page-tabs button[data-pos-tab]').forEach(b=>b.classList.toggle('active', b.dataset.posTab === tab));
+    const sub = document.querySelector('#positions-tab-subtitle span');
+    if(sub) sub.textContent = POS_TAB_INFO[tab];
+    placePfPanel('positions');
+    setPfMode('pos-' + tab);
+  }
+  function goToPosTab(tab){
+    if(POS_TAB_INFO[tab]){ POS_TAB = tab; lsSet('jarian_last_pos_tab', tab); }
+    switchSection('positions'); // خودش تب POS_TAB رو باز می‌کنه
+  }
+  document.getElementById('positions-page-tabs').addEventListener('click', e=>{
+    const b = e.target.closest('button[data-pos-tab]'); if(!b) return;
+    if(viewerHidden('positions/' + b.dataset.posTab)) return;
+    setPosTab(b.dataset.posTab);
+  });
+  // ظرف گالری/فید «یادداشت‌ها» (people-tab-figures) بین «یادداشت‌ها» و «مواضع» جابه‌جا می‌شه
+  // — خودِ عنصر، مثل placeNewsStudyPanel
+  var PF_PANEL_HOME = null;
+  function placePfPanel(where){
+    const panel = document.getElementById('people-tab-figures');
+    if(!panel) return;
+    if(!PF_PANEL_HOME){
+      PF_PANEL_HOME = document.createComment('pf-panel-home');
+      panel.parentNode.insertBefore(PF_PANEL_HOME, panel);
+    }
+    if(where === 'positions'){
+      const slot = document.getElementById('positions-pf-slot');
+      if(panel.parentNode !== slot) slot.appendChild(panel);
+      panel.style.display = '';
+    }else if(PF_PANEL_HOME.nextSibling !== panel){
+      PF_PANEL_HOME.parentNode.insertBefore(panel, PF_PANEL_HOME.nextSibling);
+    }
+  }
+  // برگشت به «یادداشت‌ها»: حالت گالری (pfMode) و نمایش ظرف با تب فعال همون بخش هم‌سو بشه
+  function syncPeopleTab(){
+    const b = document.querySelector('#people-page-tabs button.active');
+    const t = b ? b.dataset.peopleTab : 'figures';
+    const pfTab = ['orgs','figures','thinktanks'].includes(t);
+    document.getElementById('people-tab-figures').style.display = pfTab ? '' : 'none';
+    document.getElementById('people-tab-archive').style.display = t === 'archive' ? '' : 'none';
+    if(pfTab && pfMode !== t) setPfMode(t);
+  }
+
+  // ---- «قوانین و مصوبات» (۵.۲۸.۰، مدار دوم) ----
+  // بدون تب: یک فید از منابع show_in_laws با فیلتر «مرجع صادرکننده» (channels.laws_source).
+  // داده فقط با باز شدن بخش (کوئری اختصاصی، نه POSTS_CACHE — منابع کم‌تکرارن) و ۱۰ دقیقه کش.
+  var LAWS_SOURCES = ['حوزه علمیه خراسان', 'دولت', 'مجلس', 'قوه قضاییه', 'شوراهای عالی', 'استان خراسان رضوی', 'سایر'];
+  var LAWS_POSTS = null, LAWS_AT = 0, LAWS_KEY = '', LAWS_LOADING = null;
+  var LAWS_STATE = { q:'', time:'', src:'', page:1, key:'' };
+  function lawsChannels(){ return CHANNELS.filter(c=>c.show_in_laws); }
+  function lawsSourceOf(ch){ return (ch && String(ch.laws_source || '').trim()) || 'سایر'; }
+  async function loadLawsPosts(force){
+    const ids = lawsChannels().map(c=>c.id).sort((a,b)=>a-b);
+    const key = ids.join(',');
+    if(!force && LAWS_POSTS && key === LAWS_KEY && Date.now() - LAWS_AT < 600000) return;
+    if(!ids.length){ LAWS_POSTS = []; LAWS_KEY = key; LAWS_AT = Date.now(); return; }
+    if(LAWS_LOADING) return LAWS_LOADING;
+    LAWS_LOADING = (async()=>{
+      try{
+        const r = await api('/posts?select=*&channel_id=in.(' + key + ')&order=scraped_at.desc&limit=600');
+        if(r.ok){ LAWS_POSTS = (await r.json()).filter(p=>!p.hidden_at); LAWS_KEY = key; LAWS_AT = Date.now(); }
+        else if(!LAWS_POSTS) LAWS_POSTS = [];
+      }catch(e){ if(!LAWS_POSTS) LAWS_POSTS = []; }
+      finally{ LAWS_LOADING = null; }
+    })();
+    return LAWS_LOADING;
+  }
+  async function openLaws(){
+    renderLaws();
+    await loadLawsPosts();
+    renderLaws();
+  }
+  function goLawsPage(p){
+    LAWS_STATE.page = p;
+    renderLaws();
+    scrollToListTop(document.querySelector('#sec-laws .laws-filters'));
+  }
+  function renderLaws(){
+    const feed = document.getElementById('laws-feed'), empty = document.getElementById('laws-empty');
+    if(!feed) return;
+    const chans = lawsChannels();
+    const byId = new Map(chans.map(c=>[c.id, c]));
+    const counts = {};
+    chans.forEach(c=>{ const s = lawsSourceOf(c); counts[s] = (counts[s] || 0) + 1; });
+    const srcs = LAWS_SOURCES.filter(s=>counts[s]).concat(Object.keys(counts).filter(s=>!LAWS_SOURCES.includes(s)));
+    if(LAWS_STATE.src && !counts[LAWS_STATE.src]) LAWS_STATE.src = '';
+    const chips = document.getElementById('laws-source-chips');
+    chips.style.display = srcs.length > 1 ? '' : 'none';
+    chips.innerHTML = [`<button type="button" class="news-topic-chip${LAWS_STATE.src ? '' : ' active'}" data-src="">همه</button>`]
+      .concat(srcs.map(s=>`<button type="button" class="news-topic-chip${LAWS_STATE.src === s ? ' active' : ''}" data-src="${escAttr(s)}">${escHtml(s)}</button>`)).join('');
+    if(LAWS_POSTS === null){
+      feed.innerHTML = '';
+      empty.textContent = 'در حال بارگذاری…'; empty.style.display = 'block';
+      renderPagination('laws-pagination', 1, 1, 'goLawsPage');
+      return;
+    }
+    const q = searchNorm(LAWS_STATE.q);
+    const filtered = LAWS_POSTS.filter(p=>{
+      const ch = byId.get(p.channel_id); if(!ch) return false;
+      if(HIDDEN_POST_IDS.has(p.id)) return false;
+      if(LAWS_STATE.src && lawsSourceOf(ch) !== LAWS_STATE.src) return false;
+      if(!matchesTime(p.scraped_at, LAWS_STATE.time)) return false;
+      if(q && !searchHay(p).includes(q)) return false;
+      return true;
+    });
+    const key = [LAWS_STATE.q, LAWS_STATE.time, LAWS_STATE.src].join('|');
+    if(key !== LAWS_STATE.key){ LAWS_STATE.key = key; LAWS_STATE.page = 1; }
+    const pages = Math.max(1, Math.ceil(filtered.length / NEWS_PAGE_SIZE));
+    if(LAWS_STATE.page > pages) LAWS_STATE.page = pages;
+    const list = filtered.slice((LAWS_STATE.page - 1) * NEWS_PAGE_SIZE, LAWS_STATE.page * NEWS_PAGE_SIZE);
+    renderPagination('laws-pagination', LAWS_STATE.page, pages, 'goLawsPage');
+    if(!filtered.length){
+      empty.textContent = !chans.length
+        ? (currentRole === 'app_admin' ? 'هنوز منبعی برای این بخش انتخاب نشده است. در «تنظیمات بخش‌ها ← مدیریت منابع»، بخش «قوانین و مصوبات» را برای منابع موردنظر تیک بزنید.' : 'هنوز مطلبی در این بخش منتشر نشده است.')
+        : !LAWS_POSTS.length ? 'هنوز مطلبی از منابع این بخش جمع‌آوری نشده است؛ مطالب با اجرای بعدی جمع‌آوری می‌رسند.'
+        : 'مطلبی با این فیلتر پیدا نشد.';
+      empty.style.display = 'block';
+    }else empty.style.display = 'none';
+    const admin = currentRole === 'app_admin';
+    feed.innerHTML = list.map(p=>{
+      const ch = byId.get(p.channel_id) || {};
+      const hasThumb = !!p.media_path && p.media_type === 'photo';
+      return `
+      <div class="news-card laws-card">
+        ${hasThumb ? `<div class="news-thumb"><img src="${escAttr(p.media_path)}" alt="" loading="lazy" data-viewer-kind="image" data-viewer-src="${escAttr(p.media_path)}" /></div>` : ''}
+        <div class="news-body">
+          <div class="news-head">
+            <span class="news-source">${escHtml(ch.title || ch.username || '؟')}</span>
+            <span class="news-platform">${NEWS_PLATFORM_ICON[ch.platform] || ''}${NEWS_PLATFORM_LABEL[ch.platform] || ch.platform || ''}</span>
+            <span class="news-time">${newsRelTime(p.posted_at || p.scraped_at)}</span>
+          </div>
+          ${p.title ? `<h4 class="news-title" dir="auto">${escHtml(p.title)}</h4>` : ''}
+          <p class="news-text" id="lw-post-text-${p.id}">${claimsTextDisplay(p.text)}</p>
+          <button class="news-more" onclick="toggleMoreText('lw', ${p.id})" id="lw-post-more-${p.id}">
+            نمایش بیشتر
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="news-foot">
+            <div><span class="news-topic">${escHtml(lawsSourceOf(ch))}</span></div>
+            <div>${p.link ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}</div>
+          </div>
+          ${admin ? `<div class="post-admin-row">${postHideBtnHtml(p)}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    wireMediaViewerClicks(feed);
+    updateMoreButtons('lw', list);
+    if(document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(()=>updateMoreButtons('lw', list));
+  }
+  // «نمایش بیشتر» عمومی برای فیدهای تازه (پیشوند id جدا تا با فیدهای دیگر تصادم نکند)
+  function updateMoreButtons(prefix, list){
+    list.forEach(p=>{
+      const t = document.getElementById(prefix + '-post-text-' + p.id), b = document.getElementById(prefix + '-post-more-' + p.id);
+      if(t && b) b.style.display = t.scrollHeight > t.clientHeight + 1 ? '' : 'none';
+    });
+  }
+  function toggleMoreText(prefix, id){
+    const t = document.getElementById(prefix + '-post-text-' + id), b = document.getElementById(prefix + '-post-more-' + id);
+    if(!t || !b) return;
+    const open = t.classList.toggle('expanded');
+    b.classList.toggle('open', open);
+    b.firstChild.textContent = open ? 'بستن ' : 'نمایش بیشتر ';
+  }
+  document.getElementById('laws-search').addEventListener('input', e=>{ LAWS_STATE.q = e.target.value; renderLaws(); });
+  document.getElementById('laws-time-seg').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b || b.dataset.t === undefined) return;
+    document.querySelectorAll('#laws-time-seg > button').forEach(x=>x.classList.toggle('active', x === b));
+    LAWS_STATE.time = b.dataset.t; renderLaws();
+  });
+  document.getElementById('laws-source-chips').addEventListener('click', e=>{
+    const b = e.target.closest('[data-src]'); if(!b) return;
+    LAWS_STATE.src = b.dataset.src; renderLaws();
+  });
+
+  // ---- مدار دوم صفحه‌ی نخست: سوراخ‌های mask پشت کارت‌های دیده‌شده ----
+  // کارت‌ها وسط‌چین‌اند (فاصله‌ی مراکز ۱۸۶px)؛ با کارت پنهان/«به‌زودی» (بیننده) جای
+  // سوراخ‌ها از نو حساب می‌شه تا قوس پشت جای خالی بریده دیده نشه
+  function layoutOrbit2(){
+    const grid = document.querySelector('.domain-grid-2');
+    if(!grid) return;
+    const cards = [...grid.querySelectorAll('.domain-card')].filter(c=>getComputedStyle(c).display !== 'none');
+    grid.classList.toggle('is-empty', !cards.length);
+    const g = document.getElementById('dom-orbit2-holes');
+    if(!g) return;
+    const n = cards.length;
+    g.innerHTML = cards.map((c, i)=>`<circle cx="${(i - (n - 1) / 2) * 186}" cy="74" r="58" fill="url(#dom-orbit2-hole)"/>`).join('');
   }
 
   // ---- «آنچه درباره حوزه گفته می‌شود» (خزنده، ۵.۲۳.۰) ----
@@ -7134,10 +7528,14 @@
   // var (نه const/let): switchSection و setNewsPageTab ممکنه پیش از رسیدن اجرا به این خط صدا زده بشن
   var SITE_VIS_ITEMS = [
     { key:'overview', name:'اخبار و رویدادها', tabs:[['analytics','در یک نگاه'],['claims','ادعاها و شایعات'],['study','شبکه‌های اجتماعی'],['website','وب‌سایت‌ها'],['newspapers','روزنامه‌ها'],['dossier','پرونده‌های موضوعی'],['newsletter','خبرنامه مدارس']] },
-    { key:'people', name:'یادداشت‌ها', tabs:[['orgs','تحلیل سازمان‌ها'],['figures','چهره‌ها و فعالان سیاسی'],['archive','بسته‌های تحلیلی']] },
+    { key:'people', name:'یادداشت‌ها', tabs:[['orgs','تحلیل سازمان‌ها'],['figures','چهره‌ها و فعالان سیاسی'],['thinktanks','اندیشکده‌ها و پژوهشگاه‌ها'],['archive','بسته‌های تحلیلی']] },
     { key:'hawza', name:'درباره حوزه', tabs:[['news','اخبار حوزه'],['about','آنچه درباره حوزه گفته می‌شود']] },
     { key:'posts', name:'کنشگری مجازی', tabs:[['feed','پست‌های منتشر شده'],['people','افراد و مجموعه‌ها']] },
     { key:'schools', name:'برنامه مدارس', tabs:[] },
+    { key:'positions', name:'مواضع مراجع و علماء', tabs:[['leader','رهبر انقلاب'],['maraji','مراجع و علماء'],['hawza','حوزه‌های علمیه'],['imams','ائمه جمعه'],['orgs','تشکل‌ها و نخبگان']] },
+    { key:'public', name:'درباره مردم', tabs:[['trends','جست‌وجوهای داغ مردم']] },
+    { key:'laws', name:'قوانین و مصوبات', tabs:[] },
+    { key:'ask', name:'از جریان بپرس', tabs:[] },
     { key:'reports', name:'بسته تحلیلی جریان', tabs:[] },
   ];
   const MAINT_DEFAULT_MSG = 'سامانه در حال به‌روزرسانی است و به‌زودی در دسترس خواهد بود.';
@@ -7183,6 +7581,8 @@
     document.querySelectorAll('#people-page-tabs button[data-people-tab]').forEach(b=>out.push([b, 'people/' + b.dataset.peopleTab]));
     document.querySelectorAll('#hawza-page-tabs button[id^="hawza-tab-"]').forEach(b=>out.push([b, 'hawza/' + b.id.slice(10)]));
     document.querySelectorAll('#posts-page-tabs button[data-posts-tab]').forEach(b=>out.push([b, 'posts/' + b.dataset.postsTab]));
+    document.querySelectorAll('#positions-page-tabs button[data-pos-tab]').forEach(b=>out.push([b, 'positions/' + b.dataset.posTab]));
+    document.querySelectorAll('#public-page-tabs button[data-public-tab]').forEach(b=>out.push([b, 'public/' + b.dataset.publicTab]));
     return out;
   }
   function applySiteVisibility(){
@@ -7200,6 +7600,7 @@
     // قوس «مدار» برای دقیقاً پنج کارت جای‌گذاری شده — با کارت پنهان کنار می‌ره
     const grid = document.querySelector('.domain-grid');
     if(grid) grid.classList.toggle('vis-partial', !admin && !!grid.querySelector('.domain-card.vis-off'));
+    layoutOrbit2();
     document.getElementById('maint-admin-bar').hidden = !(admin && maintOn());
     requestAnimationFrame(()=>document.querySelectorAll('.section.active .news-page-tabs').forEach(bar=>updateTabInk(bar, true)));
   }
@@ -8002,13 +8403,13 @@
     const peopleSubEl = document.getElementById('people-tab-subtitle');
     if(peopleSubEl) peopleSubEl.querySelector('span').textContent = PEOPLE_TAB_INFO[b.dataset.peopleTab] || '';
     const tab = b.dataset.peopleTab;
-    // orgs و figures هر دو ظرف people-tab-figures رو نشون می‌دن
-    const container = tab === 'orgs' ? 'figures' : tab;
+    // orgs، figures و thinktanks هر سه ظرف people-tab-figures رو نشون می‌دن
+    const container = (tab === 'orgs' || tab === 'thinktanks') ? 'figures' : tab;
     ['figures','archive'].forEach(key=>{
       const el = document.getElementById('people-tab-'+key);
       if(el) el.style.display = key === container ? '' : 'none';
     });
-    if(tab === 'orgs' || tab === 'figures') setPfMode(tab);
+    if(tab === 'orgs' || tab === 'figures' || tab === 'thinktanks') setPfMode(tab);
   });
 
   // فیلتر «طلاب خراسان / سایر» جدول «افراد و مجموعه‌ها» — '' یعنی همه؛
@@ -8537,11 +8938,46 @@
   let pfMode = 'figures';
   let pfSelectedChannel = null;
 
-  function pfDomainField(){ return pfMode === 'orgs' ? 'show_in_orgs' : 'show_in_people'; }
+  // حالت‌ها: figures/orgs/thinktanks («یادداشت‌ها») و pos-<تب> («مواضع مراجع و علماء»، ۵.۲۸.۰)
+  function pfDomainField(mode){
+    mode = mode || pfMode;
+    return mode === 'orgs' ? 'show_in_orgs' : mode === 'thinktanks' ? 'show_in_thinktanks'
+      : mode.startsWith('pos-') ? 'show_in_positions' : 'show_in_people';
+  }
+  function pfModeMatch(ch, mode){
+    if(!ch || !ch[pfDomainField(mode)]) return false;
+    return !mode.startsWith('pos-') || ch.positions_tab === mode.slice(4);
+  }
+  function pfChannelMatch(ch){ return pfModeMatch(ch, pfMode); }
 
   function politicalFigureChannels(){
-    const field = pfDomainField();
-    return CHANNELS.filter(c=>c[field]);
+    return CHANNELS.filter(pfChannelMatch);
+  }
+  // حالت‌های تازه منابع کم‌تکرار دارن (بیانیه‌ی مرجع، گزارش اندیشکده) — از سقف ۱۰۰۰تایی POSTS_CACHE
+  // زود بیرون می‌افتن؛ پس با باز شدن هر حالت، پست‌های همون منابع جدا گرفته و کنار کش نگه داشته می‌شن
+  var PF_EXTRA_POSTS = [], PF_EXTRA_AT = {}, PF_EXTRA_LOADING = {};
+  async function ensurePfExtra(mode){
+    if(mode === 'figures' || mode === 'orgs') return;
+    if(PF_EXTRA_AT[mode] && Date.now() - PF_EXTRA_AT[mode] < 600000) return;
+    if(PF_EXTRA_LOADING[mode]) return;
+    const ids = CHANNELS.filter(c=>pfModeMatch(c, mode)).map(c=>c.id);
+    if(!ids.length){ PF_EXTRA_AT[mode] = Date.now(); return; }
+    PF_EXTRA_LOADING[mode] = true;
+    try{
+      const r = await api('/posts?select=*&channel_id=in.(' + ids.join(',') + ')&order=scraped_at.desc&limit=600');
+      if(r.ok){
+        const have = new Set(PF_EXTRA_POSTS.map(p=>p.id));
+        (await r.json()).forEach(p=>{ if(!p.hidden_at && !have.has(p.id)) PF_EXTRA_POSTS.push(p); });
+        PF_EXTRA_AT[mode] = Date.now();
+      }
+    }catch(e){}
+    finally{ PF_EXTRA_LOADING[mode] = false; }
+    if(pfMode === mode) renderPoliticalFigures();
+  }
+  function pfPostsAll(){
+    if(!PF_EXTRA_POSTS.length) return POSTS_CACHE;
+    const ids = new Set(POSTS_CACHE.map(p=>p.id));
+    return POSTS_CACHE.concat(PF_EXTRA_POSTS.filter(p=>!ids.has(p.id) && !HIDDEN_POST_IDS.has(p.id)));
   }
 
   let pfGroupFilter = null; // id گروه انتخاب‌شده در ردیف چیپ‌ها (null = همه)
@@ -8556,6 +8992,7 @@
     if(pfMode !== mode){ pfMode = mode; pfSelectedChannel = null; pfGroupFilter = null; }
     if(pfGallerySearchEl) pfGallerySearchEl.value = '';
     renderPoliticalFigures();
+    ensurePfExtra(mode);
   }
 
   function pfLogoHtml(ch){
@@ -8583,7 +9020,7 @@
     const q = searchNorm(pfGallerySearchEl ? pfGallerySearchEl.value : '');
     const all = politicalFigureChannels();
     const stats = {};
-    POSTS_CACHE.forEach(p=>{
+    pfPostsAll().forEach(p=>{
       const st = stats[p.channel_id] || (stats[p.channel_id] = {n:0, last:''});
       st.n++;
       const t = p.posted_at || p.scraped_at || '';
@@ -8593,14 +9030,15 @@
       .filter(c=> !q || searchNorm(c.title).includes(q) || searchNorm(c.username).includes(q))
       .sort((a,b)=> ((stats[b.id]||{}).last||'').localeCompare((stats[a.id]||{}).last||''));
     if(!all.length){
-      empty.textContent = pfMode === 'orgs'
-        ? 'هنوز سازمانی به این بخش اضافه نشده است.'
-        : 'هنوز چهره‌ای به این بخش اضافه نشده است.';
+      empty.textContent = pfMode === 'orgs' ? 'هنوز سازمانی به این بخش اضافه نشده است.'
+        : pfMode === 'figures' ? 'هنوز چهره‌ای به این بخش اضافه نشده است.'
+        : pfMode === 'thinktanks' ? 'هنوز اندیشکده‌ای به این بخش اضافه نشده است.'
+        : 'هنوز منبعی به این تب اضافه نشده است.' + (currentRole === 'app_admin' ? ' منابع از «تنظیمات بخش‌ها ← مدیریت منابع»، بخش «مواضع مراجع و علماء» اضافه می‌شوند.' : '');
     }else{
       empty.textContent = 'موردی با این نام پیدا نشد.';
     }
     empty.style.display = channels.length ? 'none' : 'block';
-    const unit = pfMode === 'orgs' ? 'مطلب' : 'یادداشت';
+    const unit = pfMode === 'figures' ? 'یادداشت' : 'مطلب';
     const cardHtml = (ch,i)=>{
       const st = stats[ch.id];
       const meta = st ? `${toFaDigits(st.n)} ${unit}<br>${newsRelTime(st.last)}` : `بدون ${unit} اخیر`;
@@ -8680,12 +9118,12 @@
   function filteredPoliticalFigurePosts(){
     const timeFilter = pfFilterTimeEl ? pfFilterTimeEl.value : '';
     const q = searchNorm(pfSearchEl ? pfSearchEl.value : '');
-    return POSTS_CACHE.filter(p=>{
+    return pfPostsAll().filter(p=>{
       if(p.channel_id !== pfSelectedChannel) return false;
       if(!matchesTime(p.scraped_at, timeFilter)) return false;
       if(q && !searchHay(p).includes(q)) return false;
       return true;
-    });
+    }).sort((a,b)=>String(b.scraped_at || '').localeCompare(String(a.scraped_at || '')));
   }
 
   function renderPoliticalFigures(){
@@ -8693,7 +9131,7 @@
     const galleryView = document.getElementById('pf-gallery-view');
     const feedView = document.getElementById('pf-feed-view');
     const selCh = pfSelectedChannel ? chById(pfSelectedChannel) : null;
-    if(!selCh || !selCh[pfDomainField()]){
+    if(!selCh || !pfChannelMatch(selCh)){
       pfSelectedChannel = null;
       galleryView.style.display = '';
       feedView.style.display = 'none';
@@ -8737,6 +9175,7 @@
             ${ch.region_id ? `<span class="news-region">${escHtml(regionNameOf(ch.region_id))}</span>` : ''}
             <span class="news-time">${newsRelTime(p.posted_at||p.scraped_at)}</span>
           </div>
+          ${p.title ? `<h4 class="news-title" dir="auto">${escHtml(p.title)}</h4>` : ''}
           <p class="news-text" id="pf-post-text-${p.id}">${claimsTextDisplay(p.text)}</p>
           <button class="news-more" onclick="togglePoliticalFigureText(${p.id})" id="pf-post-more-${p.id}">
             نمایش بیشتر
@@ -9450,11 +9889,21 @@
       hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری چهره‌ها نمایش داده می‌شود.' },
     { field:'show_in_orgs', label:'تحلیل سازمان‌ها', short:'سازمان‌ها',
       hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری سازمان‌ها نمایش داده می‌شود.' },
+    { field:'show_in_thinktanks', label:'اندیشکده‌ها و پژوهشگاه‌ها', short:'اندیشکده‌ها', needsMig:true,
+      hint:'بخش «یادداشت‌ها»: لوگوی منبع در گالری اندیشکده‌ها نمایش داده می‌شود.' },
     { field:'show_in_hawza', label:'درباره حوزه', short:'درباره حوزه', webOnly:true,
       hint:'تب «اخبار حوزه»: فقط برای خبرگزاری‌های حوزوی (وب‌سایت)؛ اخبار سیاسی‌اجتماعی‌شان به تشخیص هوش مصنوعی نمایش داده می‌شود.' },
     { field:'show_in_cyberspace', label:'کنشگری مجازی', short:'کنشگری',
       hint:'پست‌ها در «پست‌های منتشر شده» می‌آیند و منبع در جدول «افراد و مجموعه‌ها» معرفی می‌شود.' },
+    // ۵.۲۸.۰ — عرصه‌های مدار دوم (migration_047)
+    { field:'show_in_positions', label:'مواضع مراجع و علماء', short:'مواضع', needsMig:true, noBulk:true,
+      hint:'لوگوی منبع در گالری تبی که انتخاب می‌کنید نمایش داده می‌شود.' },
+    { field:'show_in_laws', label:'قوانین و مصوبات', short:'قوانین', needsMig:true,
+      hint:'مطالب منبع در فید «قوانین و مصوبات» با برچسب مرجع صادرکننده می‌آیند.' },
   ];
+  // ستون‌های migration_047 هنوز در پایگاه داده نیستند → این بخش‌ها غیرفعال (وگرنه ذخیره‌ی منبع خطا می‌دهد)
+  function newColsReady(){ return !CHANNELS.length || ('show_in_positions' in CHANNELS[0]); }
+  function chanSecUsable(sec){ return !sec.needsMig || newColsReady(); }
   const CHAN_PLATFORM_LABEL = { eitaa:'ایتا', telegram:'تلگرام', website:'وب‌سایت', bale:'بله' };
   function chanSecOn(ch, field){
     if(field === 'show_in_news') return !!ch.show_in_news && !ch.show_in_hawza;
@@ -9463,7 +9912,10 @@
   function chanSectionsOf(ch){
     return CHAN_SECTIONS.filter(sec=>chanSecOn(ch, sec.field)).map(sec=>
       // کانال بله فقط تب «ادعاها و شایعات» رو تغذیه می‌کنه، نه فید عمومی اخبار
-      sec.field === 'show_in_news' && ch.platform === 'bale' ? 'ادعاها و شایعات' : sec.short);
+      sec.field === 'show_in_news' && ch.platform === 'bale' ? 'ادعاها و شایعات'
+      : sec.field === 'show_in_positions' && POS_TAB_LABEL[ch.positions_tab] ? 'مواضع (' + POS_TAB_LABEL[ch.positions_tab] + ')'
+      : sec.field === 'show_in_laws' ? 'قوانین (' + lawsSourceOf(ch) + ')'
+      : sec.short);
   }
   function chanAvatarHtml(ch){
     if(ch.avatar_url) return `<img src="${escAttr(ch.avatar_url)}" alt="" />`;
@@ -9556,13 +10008,26 @@
         <label class="ce-check ce-full"><input type="checkbox" data-ce="is_khorasan_talabeh" ${val('is_khorasan_talabeh', !!ch.is_khorasan_talabeh)?'checked':''}/>صاحب کانال، طلبه‌ی حوزه‌ی خراسان است</label>`,
       show_in_people: groupsHtml('figures'),
       show_in_orgs: groupsHtml('orgs'),
+      show_in_thinktanks: '',
+      show_in_positions: `
+        <div class="field"><label>تب</label><select data-ce="positions_tab">
+          ${Object.keys(POS_TAB_LABEL).map(k=>`<option value="${k}" ${val('positions_tab', ch.positions_tab || 'maraji') === k ? 'selected' : ''}>${POS_TAB_LABEL[k]}</option>`).join('')}
+        </select></div>`,
+      show_in_laws: (()=>{
+        const cur = String(val('laws_source', ch.laws_source || '') || '');
+        const opts = LAWS_SOURCES.concat(cur && !LAWS_SOURCES.includes(cur) ? [cur] : []);
+        return `<div class="field"><label>مرجع صادرکننده (فیلتر)</label><select data-ce="laws_source">
+          ${opts.map(s=>`<option value="${escAttr(s === 'سایر' ? '' : s)}" ${(cur || '') === (s === 'سایر' ? '' : s) ? 'selected' : ''}>${escHtml(s)}</option>`).join('')}
+        </select></div>`;
+      })(),
     };
     wrap.innerHTML = CHAN_SECTIONS.map(sec=>{
-      const blocked = sec.webOnly && !isWeb;
+      const noMig = !chanSecUsable(sec);
+      const blocked = (sec.webOnly && !isWeb) || noMig;
       const on = !blocked && val(sec.field, chanSecOn(ch, sec.field));
       return `<div class="ce-section${on?' on':''}${blocked?' blocked':''}">
         <label class="ce-section-toggle"><input type="checkbox" data-ce="${sec.field}" ${on?'checked':''} ${blocked?'disabled':''}/>
-          <div><b>${sec.label}</b><span>${blocked ? 'فقط برای منابع «وب‌سایت» (خبرگزاری‌های حوزوی) قابل انتخاب است.' : sec.hint}</span></div></label>
+          <div><b>${sec.label}</b><span>${noMig ? 'برای فعال شدن این بخش، ابتدا migration_047 باید در سوپابیس اجرا شود.' : blocked ? 'فقط برای منابع «وب‌سایت» (خبرگزاری‌های حوزوی) قابل انتخاب است.' : sec.hint}</span></div></label>
         <div class="ce-section-extra">${extras[sec.field]}</div>
       </div>`;
     }).join('');
@@ -9681,7 +10146,7 @@
     document.getElementById('bulk-chan-cat').innerHTML = '<option value="">بدون موضوع</option>' + CATEGORIES.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
     document.getElementById('bulk-chan-region').innerHTML = '<option value="">بدون منطقه</option>' + REGIONS.map(r=>`<option value="${r.id}">${escHtml(r.name)}</option>`).join('');
     const hasWeb = BULK_ROWS.some(r=>r.status === 'new' && r.platform === 'website');
-    document.getElementById('bulk-chan-secs').innerHTML = CHAN_SECTIONS.map(sec=>`<label class="ce-check"><input type="checkbox" data-bulk-sec="${sec.field}" ${sec.webOnly && !hasWeb ? 'disabled' : ''}/>${escHtml(sec.label)}${sec.webOnly ? '<small>(فقط وب‌سایت‌ها)</small>' : ''}</label>`).join('');
+    document.getElementById('bulk-chan-secs').innerHTML = CHAN_SECTIONS.filter(sec=>!sec.noBulk && chanSecUsable(sec)).map(sec=>`<label class="ce-check"><input type="checkbox" data-bulk-sec="${sec.field}" ${sec.webOnly && !hasWeb ? 'disabled' : ''}/>${escHtml(sec.label)}${sec.webOnly ? '<small>(فقط وب‌سایت‌ها)</small>' : ''}</label>`).join('');
     const save = document.getElementById('bulk-chan-save');
     save.textContent = n ? 'افزودن ' + faNum(n) + ' منبع' : 'منبع تازه‌ای نیست';
     save.disabled = !n;
@@ -9700,7 +10165,7 @@
     const cat = document.getElementById('bulk-chan-cat').value, reg = document.getElementById('bulk-chan-region').value;
     const body = rows.map(r=>{
       const b = { platform: r.platform, username: r.username, title: (r.title || '').trim() || r.username, category_id: cat ? Number(cat) : null };
-      CHAN_SECTIONS.forEach(sec=>{ b[sec.field] = !!secs[sec.field]; });
+      CHAN_SECTIONS.filter(sec=>!sec.noBulk && chanSecUsable(sec)).forEach(sec=>{ b[sec.field] = !!secs[sec.field]; });
       if(r.platform !== 'website') b.show_in_hawza = false;
       if(b.show_in_hawza) b.show_in_news = true; // مثل ویرایشگر تکی: کلیدواژه/تشخیص سیاسی فقط روی show_in_news
       b.region_id = (b.show_in_news && reg) ? Number(reg) : null;
@@ -9714,6 +10179,7 @@
       const added = (await r.json()).length;
       closeBulkChan();
       await loadChannels();
+      PF_EXTRA_AT = {}; LAWS_AT = 0;
       renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
       renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures();
       loadCrawlSites();
@@ -9749,7 +10215,11 @@
     const get = key=>{ const el = ceEl('ce-sections').querySelector(`[data-ce="${key}"]`); return el ? (el.type==='checkbox' ? el.checked : el.value) : undefined; };
     const catVal = ceEl('ce-cat').value;
     const body = { title:name, username:handle, category_id: catVal ? Number(catVal) : null };
-    CHAN_SECTIONS.forEach(sec=>{ body[sec.field] = !!get(sec.field); });
+    CHAN_SECTIONS.filter(chanSecUsable).forEach(sec=>{ body[sec.field] = !!get(sec.field); });
+    if(newColsReady()){
+      body.positions_tab = body.show_in_positions ? (get('positions_tab') || 'maraji') : null;
+      body.laws_source = body.show_in_laws ? ((get('laws_source') || '').trim() || null) : null;
+    }
     if(platform !== 'website') body.show_in_hawza = false;
     // «درباره حوزه» توی دیتابیس show_in_news رو هم لازم داره (کلیدواژه و تشخیص
     // سیاسی‌اجتماعی فقط روی منابع show_in_news اجرا می‌شن)
@@ -9786,6 +10256,7 @@
       current.forEach(gid=>{ if(!wanted.has(gid)) ops.push(api('/channel_profile_groups?channel_id=eq.'+id+'&group_id=eq.'+gid, {method:'DELETE'})); });
       await Promise.all(ops);
       await Promise.all([loadChannels(), loadChannelProfileGroups()]);
+      PF_EXTRA_AT = {}; LAWS_AT = 0; // عضویت بخش‌های تازه عوض شده باشه، داده‌ی جدا دوباره گرفته بشه
       closeChanEditor();
       renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
       renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures(); renderProfileGroupAdmin();
@@ -11515,7 +11986,7 @@
     return currentRole === 'app_admin' ? `<button type="button" class="post-hide-btn" onclick="hidePost(${Number(p.id)})" title="این پست برای همه‌ی بیننده‌ها پنهان می‌شود"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button>` : '';
   }
   function rerenderPostViews(){
-    [renderNewsFeed, renderPosts, renderPoliticalFigures, renderDossierTab].forEach(fn=>{ try{ fn(); }catch(e){ console.error(e); } });
+    [renderNewsFeed, renderPosts, renderPoliticalFigures, renderDossierTab, renderLaws].forEach(fn=>{ try{ fn(); }catch(e){ console.error(e); } });
     if(document.getElementById('sec-overview').classList.contains('active') && NEWS_CURRENT_TAB === 'analytics'){ try{ renderNewsAnalytics(); }catch(e){ console.error(e); } }
   }
   async function hidePost(id){
@@ -11669,6 +12140,7 @@
   const AUDIT_FIELD = {
     title:'عنوان', name:'نام', username:'آدرس / شناسه', platform:'بستر', active:'فعال', category_id:'موضوع', region_id:'منطقه', hawza_region_id:'منطقه‌ی حوزه',
     show_in_news:'بخش اخبار و رویدادها', show_in_cyberspace:'بخش کنشگری مجازی', show_in_people:'بخش چهره‌ها', show_in_orgs:'بخش سازمان‌ها', show_in_hawza:'بخش درباره حوزه',
+    show_in_positions:'بخش مواضع مراجع و علماء', positions_tab:'تب مواضع', show_in_thinktanks:'بخش اندیشکده‌ها', show_in_laws:'بخش قوانین و مصوبات', laws_source:'مرجع صادرکننده',
     avatar_url:'عکس', owner_name:'صاحب کانال', subscriber_count:'مخاطب', is_khorasan_talabeh:'طلاب خراسان', keywords:'کلیدواژه‌ها', color:'رنگ', kind:'نوع',
     excluded:'پنهان در پرونده', message:'متن', level:'اهمیت', expires_at:'انقضا', full_name:'نام', phone:'موبایل', eitaa_id:'شناسه‌ی ایتا',
     access_level:'سطح دسترسی', notes:'یادداشت', issue_no:'شماره', publish_date:'تاریخ انتشار', file_type:'نوع فایل', files:'فایل‌ها', cover_url:'جلد',
@@ -11682,6 +12154,7 @@
     if(k === 'region_id' || k === 'hawza_region_id') return escHtml(regionNameOf(v) || String(v));
     if(k === 'access_level') return escHtml(USER_LEVELS[v] || v);
     if(k === 'level') return v === 'important' ? 'مهم' : 'عادی';
+    if(k === 'positions_tab') return escHtml(POS_TAB_LABEL[v] || v);
     if(k === 'platform') return escHtml(NEWS_PLATFORM_LABEL[v] || v);
     if(typeof v === 'number') return faNum(v);
     if(typeof v === 'string' && /^\d{4}-\d\d-\d\dT/.test(v)) return new Date(v).toLocaleString('fa-IR', { timeZone:'Asia/Tehran', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
@@ -11780,8 +12253,10 @@
     else if(s === 'posts'){ const b = document.querySelector('#posts-page-tabs button.active'); t = b ? b.dataset.postsTab : null; }
     else if(s === 'people'){
       const b = document.querySelector('#people-page-tabs button.active'); t = b ? b.dataset.peopleTab : null;
-      if((t === 'figures' || t === 'orgs') && pfSelectedChannel) ch = pfSelectedChannel;
+      if((t === 'figures' || t === 'orgs' || t === 'thinktanks') && pfSelectedChannel) ch = pfSelectedChannel;
     }
+    else if(s === 'positions'){ t = POS_TAB; if(pfSelectedChannel) ch = pfSelectedChannel; }
+    else if(s === 'public') t = 'trends';
     else if(s === 'uploads') t = UPLOADS_TAB;
     else if(s === 'activity') t = ACT_TAB;
     else if(s === 'hawza') t = HAWZA_TAB;
@@ -11837,6 +12312,11 @@
     if(st.s === 'uploads' && st.t && ['magazines','archive','schools'].includes(st.t) && st.t !== UPLOADS_TAB) setUploadsTab(st.t);
     if(st.s === 'activity' && st.t && ACT_TAB_INFO[st.t] && st.t !== ACT_TAB) setActTab(st.t);
     if(st.s === 'hawza' && st.t && HAWZA_TAB_INFO[st.t] && st.t !== HAWZA_TAB) setHawzaTab(st.t);
+    if(st.s === 'positions'){
+      if(st.t && POS_TAB_INFO[st.t] && st.t !== POS_TAB) setPosTab(st.t);
+      if(st.ch && st.ch !== pfSelectedChannel) openPfChannel(st.ch);
+      else if(!st.ch && pfSelectedChannel) closePfChannel();
+    }
   }
   window.addEventListener('popstate', e=>{
     // اول پنجره‌ی باز (عکس/فیلم، ویرایش منبع...) بسته می‌شه، نه خودِ بخش
@@ -11872,7 +12352,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.27.3';
+  const APP_VERSION = '5.28.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----

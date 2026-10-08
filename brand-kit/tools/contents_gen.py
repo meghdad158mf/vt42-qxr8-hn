@@ -15,7 +15,7 @@ cards=[
    <img src="{F('01-logo/lockups/png/jarian-logo-horizontal-white.png')}" style="height:54px;padding:8px 12px"></div></div>'''),
  ('02-illustrations','تصویرها',['تصویر اصلی صفحه‌ی نخست','۵ آیکون سه‌بعدی عرصه‌ها','تصویر تحلیل و لوگوی بصیرت','PNG شفاف + فایل اصلی WebP'],
   f'''<div class="row"><img src="{F('02-illustrations/png/dashboard-hero.png')}" style="height:160px">'''+''.join(f'<img src="{F("02-illustrations/png/domain-icon-"+n+".png")}" style="height:62px">' for n in ('news','hawza'))+'</div>'),
- ('03-icons','آیکون‌های خطی',['۳۴ آیکون سایت: آمار، ۱۰ بخش بسته، تب‌ها','رنگ هلویی و سفید (SVG)','PNG هلویی ۵۱۲ پیکسل'],
+ ('03-icons','آیکون‌های خطی',['۴۰ آیکون سایت: آمار، ۱۰ بخش بسته، تب‌ها','رنگ هلویی و سفید (SVG)','PNG هلویی ۵۱۲ پیکسل'],
   '<div class="ic">'+''.join(f'<div><img src="{F("03-icons/svg-peach/"+i)}"></div>' for i in icons)+'</div>'),
  ('04-shapes','اجزای تزئینی',['قوس‌های مدار صفحه‌ی نخست','شهاب نورانی و نقطه‌های ایستگاه','خط تزئینی ستاره‌دار'],
   f'''<div class="col" style="gap:6px"><img src="{F('04-shapes/png/orbit-domains-arc-clean.png')}" style="width:92%"><img src="{F('04-shapes/png/meteor-streak.png')}" style="width:70%"><img src="{F('04-shapes/png/divider-ornament.png')}" style="width:92%"></div>'''),
