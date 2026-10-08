@@ -39,6 +39,105 @@
 import { fetchPostsMissingKeywords, isAdminRequest } from "../_shared/auth.ts";
 import { AiTimeoutError, liaraChat, mapLimit } from "../_shared/liara.ts";
 
+// ---- فیلتر عرصه‌های تازه (۵.۲۹.۰، migration_048) ----
+// منابع «مواضع مراجع و علماء» و «قوانین و مصوبات» همه‌ی مطالبشان را می‌فرستند
+// (استفتاء، تسلیت، خبر عادی…)؛ خواست کاربر: فقط مطالب مرتبط نمایش داده شوند و تا بررسی
+// نشده‌اند پنهان بمانند. هر پست یک‌بار بررسی و posts.section_relevant (true/false) پر می‌شود.
+// اندیشکده‌ها عمداً بررسی نمی‌شوند (خواست کاربر: «فعلاً نیاز ندارد») — اگر بعداً خواست، کلید
+// thinktanks را به SECTION_RULES و show_in_thinktanks را به کوئری منابع برگردان.
+// پرامپت هر بخش جداست و هر درخواست فقط پست‌های یک بخش را دارد (درس hawza_relevant: فیلد
+// شرطی برای زیرمجموعه‌ای از دسته قابل‌اعتماد نیست). جواب برای همه‌ی پست‌ها اجباری است و
+// پست جاافتاده false می‌گیرد (پنهان ماندنِ نامشخص امن‌تر از نمایش اشتباه است).
+const SECTION_LIMIT = 20;
+const SECTION_BUDGET_MS = 25_000;
+const SECTION_RULES: Record<string, string> = {
+  positions:
+    "The posts come from the official channels/sites of senior clerics (the Leader, maraji, seminary " +
+    "authorities, Friday prayer leaders, clerical organizations). relevant = true ONLY if the post states a " +
+    "POSITION, STANCE, MESSAGE or COMMENTARY on a POLITICAL or SOCIAL matter: government, elections, foreign " +
+    "policy, international events, the economy and people's livelihood, social issues and pathologies, " +
+    "family/hijab/population policy, culture as a social issue, public protests, or official statements on " +
+    "current affairs. relevant = false for: religious rulings, fatwas and istifta Q&A, purely religious or " +
+    "moral teaching, sermons with no political/social angle, condolence or obituary notices, routine " +
+    "meetings/visits/ceremonies with no stated position, seminary administrative or educational notices, " +
+    "book/class announcements, and anything not clearly a political or social position.",
+  laws:
+    "The posts come from official bodies (government, parliament, Guardian Council, supreme councils, " +
+    "judiciary, provincial and seminary authorities). relevant = true ONLY if the post is about a LAW, BILL, " +
+    "RESOLUTION or APPROVAL (مصوبه), regulation, bylaw, directive, official decision, or an OFFICIAL POSITION " +
+    "of the issuing body on a public matter. relevant = false for: general news reports, interviews and " +
+    "personal opinions of officials, routine meetings/visits/ceremonies, events, sports, culture, " +
+    "congratulations/condolences, and anything that is not a law, approval, official decision or official position.",
+};
+type SecPost = { id: number; channel_id: number; title: string | null; text: string | null };
+async function classifySectionPosts(req: Request, deadline: number): Promise<Record<string, unknown>> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const auth = req.headers.get("Authorization") || "";
+  const headers = { apikey: anonKey ?? "", Authorization: auth };
+  // ستون‌های migration_047/048 هنوز نیستند → ۴۰۰ → این مرحله بی‌صدا رد می‌شود
+  const chRes = await fetch(
+    `${supabaseUrl}/rest/v1/channels?select=id,show_in_positions,show_in_laws` +
+      `&or=(show_in_positions.eq.true,show_in_laws.eq.true)`,
+    { headers },
+  );
+  if (!chRes.ok) return { section_note: "channels " + chRes.status };
+  const chans: Array<{ id: number; show_in_positions: boolean; show_in_laws: boolean }> = await chRes.json();
+  if (!chans.length) return { section_checked: 0 };
+  const secOf = new Map(chans.map((c) => [c.id, c.show_in_positions ? "positions" : "laws"]));
+  const pRes = await fetch(
+    `${supabaseUrl}/rest/v1/posts?select=id,channel_id,title,text&channel_id=in.(${[...secOf.keys()].join(",")})` +
+      `&section_relevant=is.null&hidden_at=is.null&order=scraped_at.desc&limit=${SECTION_LIMIT}`,
+    { headers },
+  );
+  if (!pRes.ok) return { section_note: "posts " + pRes.status };
+  const posts: SecPost[] = await pRes.json();
+  if (!posts.length) return { section_checked: 0 };
+  // تکه‌های ۵تایی، هر تکه فقط از یک بخش
+  const chunks: Array<{ sec: string; items: SecPost[] }> = [];
+  for (const sec of Object.keys(SECTION_RULES)) {
+    const ps = posts.filter((p) => secOf.get(p.channel_id) === sec);
+    for (let i = 0; i < ps.length; i += 5) chunks.push({ sec, items: ps.slice(i, i + 5) });
+  }
+  const verdict = new Map<number, boolean>();
+  let ok = 0, failed = 0;
+  await mapLimit(chunks, 3, async ({ sec, items }) => {
+    const allotted = Math.min(40_000, deadline - Date.now());
+    if (allotted < 8_000) return;
+    const system =
+      "You classify a batch of Persian posts (each with id, title, text). " + SECTION_RULES[sec] + "\n" +
+      "For EVERY post in the batch, without exception, return exactly one entry {\"id\": <given id>, \"relevant\": true or false}. " +
+      'Respond with ONLY a raw JSON object like {"results":[{"id":1,"relevant":false}]} — no markdown, no commentary.';
+    const payload = items.map((p) => ({ id: p.id, title: p.title || null, text: (p.text || "").slice(0, 600) }));
+    try {
+      const content = await liaraChat(system, JSON.stringify(payload), 0, allotted);
+      const res: Array<{ id: number; relevant?: boolean }> = JSON.parse(content).results || [];
+      const ids = new Set(items.map((p) => p.id));
+      for (const r of res) if (ids.has(Number(r.id))) verdict.set(Number(r.id), r.relevant === true);
+      for (const p of items) if (!verdict.has(p.id)) verdict.set(p.id, false);
+      ok++;
+    } catch {
+      failed++; // NULL می‌ماند تا اجرای بعدی
+    }
+  });
+  const writeHeaders = { ...headers, "Content-Type": "application/json", Prefer: "return=minimal" };
+  for (const val of [true, false]) {
+    const ids = [...verdict].filter(([, v]) => v === val).map(([id]) => id);
+    if (!ids.length) continue;
+    await fetch(`${supabaseUrl}/rest/v1/posts?id=in.(${ids.join(",")})`, {
+      method: "PATCH",
+      headers: writeHeaders,
+      body: JSON.stringify({ section_relevant: val }),
+    });
+  }
+  return {
+    section_checked: verdict.size,
+    section_relevant: [...verdict.values()].filter(Boolean).length,
+    section_failed_chunks: failed,
+    section_all_failed: ok === 0 && failed > 0,
+  };
+}
+
 const DEFAULT_LIMIT = 80; // هم‌راستا با BATCH_LIMIT در scripts/extract_keywords.py — کالر همیشه صریح limit می‌فرسته، این فقط fallbacke
 const TEXT_TRUNCATE = 400;
 
@@ -60,6 +159,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const t0 = Date.now();
     let limit = DEFAULT_LIMIT;
     try {
       const body = await req.json();
@@ -72,11 +172,15 @@ Deno.serve(async (req) => {
     // فقط مدیر (کالر واقعی extract_keywords.py با توکن مدیره) — همون دلیل news-insights
     if (!(await isAdminRequest(req))) return jsonResponse({ error: "admin only" }, 403);
 
+    // اول فیلتر عرصه‌های تازه (کم‌حجم، بودجه‌ی جدا)، بعد کلیدواژه‌ها با باقی بودجه
+    const section = await classifySectionPosts(req, t0 + SECTION_BUDGET_MS);
+
     const result = await fetchPostsMissingKeywords(req, limit);
     if (result === null) return jsonResponse({ error: "unauthorized" }, 401);
     const { posts, hawzaChannelIds } = result;
     if (!posts.length) {
-      return jsonResponse({ processed: 0, matched: 0, note: "no posts pending" });
+      if (section.section_all_failed) return jsonResponse({ error: "ai request failed", ...section }, 502);
+      return jsonResponse({ processed: 0, matched: 0, note: "no posts pending", ...section });
     }
 
     // ⚠️ hawza_relevant عمداً بدون هیچ پرچم شرطی («فقط برای این پست‌ها»)
@@ -157,7 +261,7 @@ Deno.serve(async (req) => {
     const TIME_BUDGET_MS = 75_000; // + زمان PATCHهای پایین، باید زیر ۱۲۰ ثانیه‌ی اسکریپت بمونه
     const CALL_TIMEOUT_MS = 45_000;
     const FULL_TIMEOUT_MS = 20_000; // timeout کمتر از این = تقصیر ته‌مونده‌ی بودجه‌ست، نه پست
-    const deadline = Date.now() + TIME_BUDGET_MS;
+    const deadline = t0 + TIME_BUDGET_MS; // از شروع درخواست (فیلتر عرصه‌ها هم از همین بودجه است)
     const failedIds: number[] = [];
     // پست‌هایی که واقعاً جواب گرفتن یا به‌تنهایی خطای غیرزمانی دادن — فقط این‌ها علامت می‌خورن
     const doneIds = new Set<number>();
@@ -215,7 +319,7 @@ Deno.serve(async (req) => {
     // اگه هیچ فراخوانی موفق نشد، مشکل از خودِ سرویسه نه یه پست خاص — هیچ
     // پستی علامت نخوره (NULL بمونه) تا اجرای بعدی دوباره امتحان کنه
     if (aiSuccesses === 0) {
-      return jsonResponse({ error: "ai request failed", detail: lastError }, 502);
+      return jsonResponse({ error: "ai request failed", detail: lastError, ...section }, 502);
     }
     // پست‌هایی که حتی تنها هم خطا دادن (failedIds) توی نتایج نیستن، پس پایین‌تر
     // مثل پست‌های جاافتاده صریح با [] علامت می‌خورن — تا یه پست مشکل‌دار صف رو
@@ -333,6 +437,7 @@ Deno.serve(async (req) => {
       skipped_post_ids: failedIds,
       left_for_next_run: posts.length - doneIds.size,
       timeout_strikes: strikeIds,
+      ...section,
     });
   } catch (e) {
     return jsonResponse({ error: String(e) }, 500);
