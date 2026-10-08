@@ -58,14 +58,18 @@ async function count(ctx: Ctx, path: string): Promise<number | null> {
   return m ? Number(m[1]) : null;
 }
 
-async function ghRuns(ctx: Ctx, file: string, perPage = 30) {
-  if (!ctx.gh) return [];
+// null = گیت‌هاب جواب نداد (توکن منقضی، محدودیت سهمیه، قطعی) — یعنی «بررسی نشد»، نه «سالمه»
+async function ghRuns(ctx: Ctx, file: string, perPage = 30): Promise<Record<string, string>[] | null> {
+  if (!ctx.gh) return null;
   try {
     const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/${file}/runs?per_page=${perPage}&branch=${GITHUB_REF}`, { headers: ctx.gh });
-    if (!r.ok) { await r.body?.cancel(); return []; }
+    if (!r.ok) { await r.body?.cancel(); return null; }
     return (await r.json())?.workflow_runs || [];
-  } catch { return []; }
+  } catch { return null; }
 }
+// هم‌سو با فرانت (کارت‌های «کارهای خودکار»): هر نتیجه‌ای جز این‌ها ناموفقه (failure، timed_out، startup_failure…)
+const RUN_OK = new Set(["success", "cancelled", "skipped", "neutral"]);
+const runFailed = (x: Record<string, string>) => !!x.conclusion && !RUN_OK.has(x.conclusion);
 
 async function retentionHours(ctx: Ctx) {
   try {
@@ -91,9 +95,12 @@ async function dbBytes(ctx: Ctx) {
   } catch { return null; }
 }
 
-// همه‌ی موارد «قرمز» فعلی
-async function collectIssues(ctx: Ctx): Promise<Issue[]> {
+// همه‌ی موارد «قرمز» فعلی + کلید بررسی‌هایی که واقعاً انجام شدن (checked). مورد قبلی فقط وقتی
+// «برطرف شد» حساب می‌شه که بررسی‌اش این بار انجام شده باشه — وگرنه یه قطعی لحظه‌ای گیت‌هاب
+// یا پایگاه داده ایمیل «برطرف شد» و نیم ساعت بعد «هشدار تازه» می‌فرستاد.
+async function collectIssues(ctx: Ctx): Promise<{ issues: Issue[]; checked: Set<string> }> {
   const issues: Issue[] = [];
+  const checked = new Set<string>();
   const add = (key: string, text: string) => issues.push({ key, text });
   const retention = await retentionHours(ctx);
   await Promise.all(JOB_FRESHNESS.map(async (j) => {
@@ -101,11 +108,13 @@ async function collectIssues(ctx: Ctx): Promise<Issue[]> {
       if (j.job === "cleanup") {
         const cutoff = new Date(Date.now() - (retention + 18) * 3600000).toISOString();
         const n = await count(ctx, "/posts?select=id&media_storage_path=not.is.null&or=" + encodeURIComponent(`(media_fetched_at.lt.${cutoff},media_fetched_at.is.null)`));
+        if (n !== null) checked.add("job:cleanup");
         if (n !== null && n > 50) add("job:cleanup", `${j.name}: ${faNum(n)} عکس/فیلم قدیمی پاک نشده است`);
       } else if (j.path) {
         const r = await ctx.rest(j.path);
         const rows = r.ok ? await r.json() : null;
         if (rows) {
+          checked.add("job:" + j.job);
           const at = rows[0]?.[j.col as string] || null;
           if (!at || (Date.now() - new Date(at).getTime()) / 3600000 >= (j.bad as number)) {
             add("job:" + j.job, `${j.name}: آخرین خروجی ${relHours(at)}`);
@@ -113,24 +122,30 @@ async function collectIssues(ctx: Ctx): Promise<Issue[]> {
         }
       }
       const runs = await ghRuns(ctx, JOBS[j.job], 5);
-      const last = runs.find((x: Record<string, string>) => x.status === "completed");
-      if (last && last.conclusion === "failure") {
+      if (runs) checked.add("gh:" + j.job);
+      const last = runs?.find((x) => x.status === "completed");
+      if (last && runFailed(last)) {
         add("gh:" + j.job, `${j.name}: آخرین اجرا در گیت‌هاب ناموفق بود (${tehranTime(last.run_started_at || last.created_at)})`);
       }
     } catch { /* این یکی بررسی نشد؛ بقیه ادامه */ }
   }));
   const st = await storageBytes(ctx).catch(() => null);
+  if (st !== null) checked.add("storage");
   if (st !== null && st / STORAGE_LIMIT >= 0.85) add("storage", `فضای فایل ${faNum(Math.round(st / STORAGE_LIMIT * 100))}٪ پر است (${faMb(st)} از ۱۰۲۴ مگ)`);
   const db = await dbBytes(ctx);
+  if (db !== null) checked.add("db");
   if (db !== null && db / DB_LIMIT >= 0.85) add("db", `پایگاه داده ${faNum(Math.round(db / DB_LIMIT * 100))}٪ پر است (${faMb(db)} از ۵۰۰ مگ)`);
   for (const t of TOKENS) {
     const days = Math.ceil((new Date(t.exp + "T00:00:00Z").getTime() - Date.now()) / 86400000);
+    checked.add("token:" + t.exp);
     if (days <= 7) add("token:" + t.exp, `توکن «${t.name}» ${days < 0 ? "منقضی شده است" : faNum(days) + " روز دیگر منقضی می‌شود"}`);
   }
   const since = new Date(Date.now() - 86400000).toISOString();
-  const fails = await count(ctx, "/login_events?select=id&success=is.false&created_at=gt." + since);
+  // تلاش‌های حین قفل (blocked) شمرده نمی‌شن — هم‌سو با صفحه‌ی وضعیت
+  const fails = await count(ctx, "/login_events?select=id&success=is.false&blocked=is.false&created_at=gt." + since);
+  if (fails !== null) checked.add("logins");
   if (fails !== null && fails >= 20) add("logins", `${faNum(fails)} تلاش ناموفق ورود در ۲۴ ساعت اخیر`);
-  return issues.sort((a, b) => a.key.localeCompare(b.key));
+  return { issues: issues.sort((a, b) => a.key.localeCompare(b.key)), checked };
 }
 
 function emailHtml(title: string, sections: { head: string; items: string[]; tone?: string }[], note = "") {
@@ -159,14 +174,16 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 async function runCheck(ctx: Ctx, to: string) {
-  const issues = await collectIssues(ctx);
+  const { issues, checked } = await collectIssues(ctx);
   const sr = await ctx.rest("/alert_state?select=*");
-  const state: { key: string; text: string; last_sent_at: string }[] = sr.ok ? await sr.json() : [];
+  // وضعیت قبلی خونده نشد → ادامه نده (وگرنه همه‌ی موارد باز دوباره «تازه» ایمیل می‌شدن)
+  if (!sr.ok) { await sr.body?.cancel(); throw new Error("alert_state " + sr.status); }
+  const state: { key: string; text: string; last_sent_at: string }[] = await sr.json();
   const byKey = new Map(state.map((s) => [s.key, s]));
   const now = Date.now();
   const fresh = issues.filter((i) => !byKey.has(i.key));
   const remind = issues.filter((i) => byKey.has(i.key) && now - new Date(byKey.get(i.key)!.last_sent_at).getTime() >= REMIND_HOURS * 3600000);
-  const resolved = state.filter((s) => !issues.some((i) => i.key === s.key));
+  const resolved = state.filter((s) => checked.has(s.key) && !issues.some((i) => i.key === s.key));
   let sent = null;
   if (fresh.length || remind.length || resolved.length) {
     const subject = fresh.length ? `جریان: ${faNum(fresh.length)} هشدار تازه` : remind.length ? `جریان: ${faNum(remind.length)} مورد هنوز برطرف نشده` : "جریان: موارد قبلی برطرف شد";
@@ -187,20 +204,20 @@ async function runCheck(ctx: Ctx, to: string) {
 
 async function dailyReport(ctx: Ctx) {
   const since = new Date(Date.now() - 86400000).toISOString();
-  const issues = await collectIssues(ctx);
+  const { issues } = await collectIssues(ctx);
   // اجراهای ۲۴ ساعت گذشته از گیت‌هاب
   let ok = 0, fail = 0;
   const failed: string[] = [];
   await Promise.all(JOB_FRESHNESS.map(async (j) => {
-    const runs = (await ghRuns(ctx, JOBS[j.job], 30)).filter((x: Record<string, string>) => x.status === "completed" && new Date(x.run_started_at || x.created_at).toISOString() >= since);
-    const f = runs.filter((x: Record<string, string>) => x.conclusion === "failure").length;
-    ok += runs.filter((x: Record<string, string>) => x.conclusion === "success").length; fail += f;
+    const runs = ((await ghRuns(ctx, JOBS[j.job], 30)) || []).filter((x) => x.status === "completed" && new Date(x.run_started_at || x.created_at).toISOString() >= since);
+    const f = runs.filter(runFailed).length;
+    ok += runs.filter((x) => x.conclusion === "success").length; fail += f;
     if (f) failed.push(`${j.name}: ${faNum(f)} اجرای ناموفق`);
   }));
   const [posts, queue, fails, st, db] = await Promise.all([
     count(ctx, "/posts?select=id&scraped_at=gt." + since),
     count(ctx, "/posts?select=id,channels!inner(show_in_news,platform)&ai_keywords=is.null&channels.show_in_news=eq.true&channels.platform=neq.bale"),
-    count(ctx, "/login_events?select=id&success=is.false&created_at=gt." + since),
+    count(ctx, "/login_events?select=id&success=is.false&blocked=is.false&created_at=gt." + since),
     storageBytes(ctx).catch(() => null),
     dbBytes(ctx),
   ]);
@@ -259,7 +276,10 @@ Deno.serve(async (req) => {
     const settings = (await sr.json())[0];
     const to = settings?.email;
     const stamp = (body: Record<string, unknown>) => ctx.rest("/alert_settings?id=eq.1", { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify(body) }).then((r) => r.body?.cancel());
-    if (!to) return jsonResponse({ skipped: "no email" });
+    if (!to) {
+      if (mode === "test") return jsonResponse({ ok: false, error: "نشانی ایمیل گیرنده هنوز ذخیره نشده است" }, 400);
+      return jsonResponse({ skipped: "no email" });
+    }
 
     if (mode === "test") {
       const r = await sendEmail(to, "جریان: ایمیل آزمایشی", emailHtml("ایمیل آزمایشی", [{ head: "ارسال ایمیل درست کار می‌کند", items: ["هشدارها و گزارش روزانه به همین نشانی فرستاده می‌شوند."], tone: "ok" }]));
