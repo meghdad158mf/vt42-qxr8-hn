@@ -1813,23 +1813,25 @@
      (۱۷۸/۲=۸۹px از بالای ردیف) = y=۷۴ در viewBox → top:-85px. قوس قرینه‌ی حول y=۷۴؛ طول مسیر
      همون ≈۱۱۳۹ پس مقادیر dash شهاب همون‌هاست. زیر ۹۰۰px مخفی. */
   .pkg-flow{ position:relative; }
-  .pkg-orbit{ position:absolute; left:50%; top:-85px; width:1200px; max-width:none; height:360px; margin-left:-600px; z-index:-1; pointer-events:none; overflow:visible;
+  .pkg-orbit{ position:absolute; left:50%; top:-101px; width:1200px; max-width:none; height:360px; margin-left:-600px; z-index:-1; pointer-events:none; overflow:visible;
     -webkit-mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px));
             mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px)); }
   @media (max-width:900px){ .pkg-orbit{ display:none; } }
   @media (prefers-reduced-motion: reduce){ .pkg-orbit .flow{ display:none; } }
   .pkg-covers{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; }
-  .pkg-tile{ width:170px; display:flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; }
+  .pkg-row{ position:relative; z-index:0; }
+  .pkg-row + .pkg-row{ margin-top:38px; }
+  .pkg-tile{ width:170px; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; }
   /* گوشی: یک ردیف افقی اسکرول‌خور با جلدهای کوچک‌تر (۵ جلد دوستونه خیلی بلند می‌شد) */
-  @media (max-width:900px){ .pkg-covers{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:6px 4px 10px; } .pkg-covers::-webkit-scrollbar{ display:none; } .pkg-tile{ width:128px; flex-shrink:0; scroll-snap-align:start; } .pkg-cover{ width:112px; height:156px; } }
+  @media (max-width:900px){ .pkg-covers{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:6px 4px 10px; } .pkg-covers::-webkit-scrollbar{ display:none; } .pkg-tile{ width:128px; flex-shrink:0; scroll-snap-align:start; } .pkg-cover{ width:110px; height:146px; } }
   @media (min-width:640px) and (max-width:900px){ .pkg-covers{ justify-content:center; } }
-  .pkg-cover{ width:128px; height:178px; border-radius:6px; overflow:hidden; background:#243140; border:1px solid rgba(255,255,255,0.12);
+  .pkg-cover{ width:110px; height:146px; border-radius:6px; overflow:hidden; background:#243140; border:1px solid rgba(255,255,255,0.12);
     box-shadow: 0 22px 34px -16px rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; color: rgba(255,255,255,0.4);
     transition: transform .25s ease, box-shadow .25s ease; }
   .pkg-tile:hover .pkg-cover{ transform: translateY(-6px); box-shadow: 0 28px 40px -16px rgba(0,0,0,0.8), 0 0 26px -6px rgba(234,179,147,0.45); }
   .pkg-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
   .pkg-cover svg{ width:34%; height:34%; }
-  .pkg-title{ font-size:15px; font-weight:700; color:#fff; text-align:center; line-height:1.6; max-width:160px; }
+  .pkg-title{ font-size:15px; font-weight:700; color:#fff; text-align:center; line-height:24px; max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .pkg-empty{ font-size:13px; color: rgba(255,255,255,0.55); padding:40px 0; }
   /* قرینه‌ی عرصه‌ها: آن‌جا توضیح زیر آیکون‌هاست، این‌جا بالای جلدها */
   .pkg-caption{ margin:-8px auto 16px; }
@@ -2291,7 +2293,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۹.۲</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۹.۳</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -2826,22 +2828,7 @@
         <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>تحلیل اندیشگده‌ها</span>
       </div>
       <div class="pkg-flow">
-        <svg class="pkg-orbit" viewBox="-600 -100 1200 360" aria-hidden="true">
-          <defs>
-            <path id="pkg-orbit-path" d="M -562 24 Q 0 184, 562 24"/>
-            <path id="pkg-orbit-path2" d="M -512 2 Q 0 122, 512 2"/>
-          </defs>
-          <use href="#pkg-orbit-path" fill="none" stroke="#EAB393" stroke-opacity=".32" stroke-width="1.3"/>
-          <use href="#pkg-orbit-path2" fill="none" stroke="#EAB393" stroke-opacity=".2" stroke-width="1"/>
-          <g class="flow" fill="none" stroke="#EAB393" stroke-linecap="round">
-              <use href="#pkg-orbit-path" stroke-width="3" stroke-opacity="1" stroke-dasharray="18 2278"><animate attributeName="stroke-dashoffset" values="18;-1272;-1272" keyTimes="0;.65;1" dur="9s" repeatCount="indefinite"/></use>
-              <use href="#pkg-orbit-path" stroke-width="2" stroke-opacity="0.45" stroke-dasharray="55 2278"><animate attributeName="stroke-dashoffset" values="55;-1235;-1235" keyTimes="0;.65;1" dur="9s" repeatCount="indefinite"/></use>
-              <use href="#pkg-orbit-path" stroke-width="1.4" stroke-opacity="0.18" stroke-dasharray="110 2278"><animate attributeName="stroke-dashoffset" values="110;-1180;-1180" keyTimes="0;.65;1" dur="9s" repeatCount="indefinite"/></use>
-          </g>
-          <circle cx="-562" cy="24" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="-562" cy="24" r="2.2" fill="#EAB393" fill-opacity=".5"/>
-          <circle cx="562" cy="24" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="562" cy="24" r="2.2" fill="#EAB393" fill-opacity=".5"/>
-        </svg>
-        <div class="pkg-covers" id="pkg-covers"></div>
+        <div id="pkg-covers"></div>
       </div>
       <div class="pkg-more" data-vis="reports"><button type="button" class="pkg-more-btn" onclick="switchSection('reports')">مشاهده‌ی همه‌ی شماره‌ها<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button></div>
 
@@ -3904,7 +3891,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۲۹.۲</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۹.۳</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -10805,6 +10792,41 @@
   }
 
   // «بسته تحلیلی جریان» صفحه‌ی نخست — جلد ۵ شماره‌ی اول (به ترتیب مدیر) روی قوس
+  // جلدهای بسته: ردیف بالا ۴ جلد (مدار کوچک‌تر) و ردیف پایین ۵ جلد (مدار بزرگ)
+  // هر ردیف مدار خودش را دارد؛ ردیف دوم با همان هندسه‌ی ردیف اول و ضریب ۰٫۷۵
+  // مدار هر ردیف عیناً مثل مدار عرصه‌های صفحه‌ی نخست: ردیف بزرگ (۵ جلد) = مدار اول،
+  // ردیف کوچک (۴ جلد) = مدار دوم با ضریب ۰٫۷۵. مرکز جلدها روی همان خط مرکز آیکون‌هاست.
+  function pkgOrbitSvg(ri, n){
+    const big = ri === 1, id = 'pkg-orbit-' + ri;
+    const d1 = big ? 'M -562 24 Q 0 184, 562 24' : 'M -421.5 36.5 Q 0 156.5, 421.5 36.5';
+    const d2 = big ? 'M -512 2 Q 0 122, 512 2' : 'M -384 20 Q 0 110, 384 20';
+    const ex = big ? 562 : 421.5, ey = big ? 24 : 36.5;
+    const kt = big ? '0;.65;1' : '0;.51;1', v = big ? '-1159;130;130' : '-874;130;130';
+    const holes = Array.from({length: n}, (_, i) => `<rect x="${(i - (n - 1) / 2) * 186 - 61}" y="-6" width="122" height="159" rx="8" fill="#000"/>`).join('');
+    const streak = (w, o, d) => `<use href="#${id}-path" stroke-width="${w}" stroke-opacity="${o}" stroke-dasharray="${d} 2278"><animate attributeName="stroke-dashoffset" values="${v}" keyTimes="${kt}" dur="9s" repeatCount="indefinite"/></use>`;
+    return `<svg class="pkg-orbit" viewBox="-600 -100 1200 360" aria-hidden="true"><defs>
+        <mask id="${id}-mask" maskUnits="userSpaceOnUse" x="-600" y="-100" width="1200" height="360"><rect x="-600" y="-100" width="1200" height="360" fill="#fff"/>${holes}</mask>
+        <path id="${id}-path" d="${d1}"/>
+        <path id="${id}-path2" d="${d2}"/>
+      </defs>
+      <g mask="url(#${id}-mask)">
+        <use href="#${id}-path" fill="none" stroke="#EAB393" stroke-opacity=".32" stroke-width="1.3"/>
+        <use href="#${id}-path2" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="1"/>
+        <g class="flow" fill="none" stroke="#EAB393" stroke-linecap="round">${streak(3, 1, 18)}${streak(2, 0.45, 55)}${streak(1.4, 0.18, 110)}</g>
+      </g>
+      <circle cx="${-ex}" cy="${ey}" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="${-ex}" cy="${ey}" r="2.2" fill="#EAB393" fill-opacity=".5"/>
+      <circle cx="${ex}" cy="${ey}" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="${ex}" cy="${ey}" r="2.2" fill="#EAB393" fill-opacity=".5"/>
+    </svg>`;
+  }
+  function pkgTile(m){
+    const files = Array.isArray(m.files) ? m.files : [];
+    const tile = document.createElement('div'); tile.className = 'pkg-tile';
+    tile.setAttribute('role', 'button'); tile.tabIndex = 0;
+    tile.innerHTML = `<div class="pkg-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
+      <div class="pkg-title">${escHtml(m.issue_no ? 'شماره ' + toFaDigits(String(m.issue_no)) : faTitle(m.title))}</div>`;
+    tile.addEventListener('click', () => { if(files.length) openMagazineViewer(m); });
+    return tile;
+  }
   function renderMagazineCarousel(){
     const wrap = document.getElementById('pkg-covers');
     if(!wrap) return;
@@ -10813,14 +10835,15 @@
       wrap.innerHTML = '<div class="pkg-empty">هنوز شماره‌ای بارگذاری نشده.</div>';
       return;
     }
-    MAGAZINES.slice(0, 5).forEach(m=>{
-      const files = Array.isArray(m.files) ? m.files : [];
-      const tile = document.createElement('div'); tile.className = 'pkg-tile';
-      tile.setAttribute('role', 'button'); tile.tabIndex = 0;
-      tile.innerHTML = `<div class="pkg-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
-        <div class="pkg-title">${escHtml(faTitle(m.title))}</div>`;
-      tile.addEventListener('click', () => { if(files.length) openMagazineViewer(m); });
-      wrap.appendChild(tile);
+    const items = MAGAZINES.slice(0, 9);
+    const rows = items.length > 4 ? [items.slice(0, 4), items.slice(4)] : [items];
+    rows.forEach((list, ri)=>{
+      const row = document.createElement('div'); row.className = 'pkg-row';
+      row.innerHTML = pkgOrbitSvg(rows.length === 2 ? ri : 0, list.length);
+      const covers = document.createElement('div'); covers.className = 'pkg-covers';
+      list.forEach(m => covers.appendChild(pkgTile(m)));
+      row.appendChild(covers);
+      wrap.appendChild(row);
     });
   }
 
@@ -12345,7 +12368,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.29.2';
+  const APP_VERSION = '5.29.3';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
