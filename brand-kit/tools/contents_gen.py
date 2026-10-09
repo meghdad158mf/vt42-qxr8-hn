@@ -13,8 +13,8 @@ cards=[
   f'''<div class="row"><img src="{F('01-logo/lockups/png/jarian-logo-vertical-on-dark.png')}" style="height:180px">
    <div class="col"><img src="{F('01-logo/lockups/png/jarian-logo-horizontal-on-light.png')}" style="height:54px;background:#F4EEE8;border-radius:10px;padding:8px 12px">
    <img src="{F('01-logo/lockups/png/jarian-logo-horizontal-white.png')}" style="height:54px;padding:8px 12px"></div></div>'''),
- ('02-illustrations','تصویرها',['تصویر اصلی صفحه‌ی نخست','۵ آیکون سه‌بعدی عرصه‌ها','تصویر تحلیل و لوگوی بصیرت','PNG شفاف + فایل اصلی WebP'],
-  f'''<div class="row"><img src="{F('02-illustrations/png/dashboard-hero.png')}" style="height:160px">'''+''.join(f'<img src="{F("02-illustrations/png/domain-icon-"+n+".png")}" style="height:62px">' for n in ('news','hawza'))+'</div>'),
+ ('02-illustrations','تصویرها',['تصویر اصلی صفحه‌ی نخست','۹ آیکون سه‌بعدی عرصه‌ها','تصویر تحلیل و لوگوی بصیرت','PNG شفاف + فایل اصلی WebP'],
+  f'''<div class="row"><img src="{F('02-illustrations/png/dashboard-hero.png')}" style="height:160px">'''+''.join(f'<img src="{F("02-illustrations/png/domain-icon-"+n+".png")}" style="height:62px">' for n in ('news','positions'))+'</div>'),
  ('03-icons','آیکون‌های خطی',['۴۰ آیکون سایت: آمار، ۱۰ بخش بسته، تب‌ها','رنگ هلویی و سفید (SVG)','PNG هلویی ۵۱۲ پیکسل'],
   '<div class="ic">'+''.join(f'<div><img src="{F("03-icons/svg-peach/"+i)}"></div>' for i in icons)+'</div>'),
  ('04-shapes','اجزای تزئینی',['قوس‌های مدار صفحه‌ی نخست','شهاب نورانی و نقطه‌های ایستگاه','خط تزئینی ستاره‌دار'],
@@ -23,7 +23,7 @@ cards=[
   '<div class="sw">'+''.join(f'<div style="background:{c}"><span style="color:{"#16202A" if c in ("#FFFFFF","#FFFAF5","#F1C4A8","#EAB393") else "#fff"}">{c}</span></div>' for c in ['#16202A','#24323F','#EAB393','#B5651D','#F1C4A8','#FFFAF5','#0E9968','#D9433C'])+'</div>'),
  ('06-fonts','فونت',['IRANSansX — فونت سایت','Regular، Medium، Bold، ExtraBold + Variable','⚠️ فونت تجاری؛ برای انتشار مجوز لازم است'],
   '<div class="fonts">'+''.join(f'<span style="font-family:F{w}">جریان</span>' for w in ('R','M','B','X'))+'<div class="fw"><span>Regular</span><span>Medium</span><span>Bold</span><span>ExtraBold</span></div></div>'),
- ('07-screenshots','تصویر صفحه‌های سایت',['۱۱ تصویر رایانه ۱۹۲۰×۱۰۸۰ (ویرایش ۵.۲۳.۰)','۳ تصویر گوشی با کیفیت بالا','برای مرجع و استفاده در ویدئو'],
+ ('07-screenshots','تصویر صفحه‌های سایت',['۱۱ تصویر رایانه ۱۹۲۰×۱۰۸۰ (ویرایش ۵.۲۹.۱)','۳ تصویر گوشی با کیفیت بالا','برای مرجع و استفاده در ویدئو'],
   f'''<div class="row"><img src="{F('07-screenshots/desktop-1920x1080/01-home-hero.png')}" class="shot" style="height:150px"><img src="{F('07-screenshots/mobile/01-home-hero.png')}" class="shot" style="height:170px"></div>'''),
  ('08-text','متن‌ها',['نام، شعار و متن‌های سایت','عرصه‌ها، «چرا جریان»، بسته‌ی تحلیلی','آماده‌ی کپی در موشن'],
   '<div class="txt"><b>سامانه هوشمند جریان</b><span>نبض <i>فضای سیاسی اجتماعی</i></span><span>به روایت حوزه علمیه خراسان</span></div>'),
