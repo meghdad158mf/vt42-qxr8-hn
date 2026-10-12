@@ -40,9 +40,9 @@ const mk = d=>fs.mkdirSync(path.join(OUT,d),{recursive:true});
     const ctx = await browser.newContext({ serviceWorkers:'block', viewport:{width:W,height:Hh}, deviceScaleFactor:dpr||1 });
     await setup(ctx); const page = await ctx.newPage();
     await page.goto('http://localhost:8765/ita-monitoring-prototype.html');
-    await page.evaluate(()=>{ sessionStorage.setItem('jarian_token','x'); sessionStorage.setItem('jarian_role','app_viewer'); });
+    await page.evaluate(()=>{ sessionStorage.setItem('jarian_token','x'); sessionStorage.setItem('jarian_role','app_viewer'); localStorage.setItem('jarian_intro_seen','1'); });
     await page.reload(); await page.waitForTimeout(2500);
-    await page.addStyleTag({content:'#ann-bar{display:none!important}'});
+    await page.addStyleTag({content:'#ann-bar,#to-top{display:none!important}'});
     return {ctx,page};
   };
   const shot = async (W,Hh,dpr,dir,list)=>{
