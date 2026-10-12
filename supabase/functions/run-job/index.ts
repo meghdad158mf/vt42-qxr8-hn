@@ -20,22 +20,9 @@
 // feedback» بود که فقط تا وقتی بیننده GRANT نداشت درست کار می‌کرد).
 
 import { isAdminRequest } from "../_shared/auth.ts";
+import { GITHUB_REF, GITHUB_REPO, githubHeaders, JOBS } from "../_shared/jobs.ts";
 
-const GITHUB_REPO = "meghdad158mf/vt42-qxr8-hn";
-// کرون‌ها فقط از main اجرا می‌شن (نکته‌ی عملیاتی ۶ CLAUDE.md)، اجرای دستی هم همونجا
-const GITHUB_REF = "main";
-
-const JOBS: Record<string, string> = {
-  eitaa: "collect-eitaa.yml",
-  telegram: "collect-telegram.yml",
-  website: "collect-rss.yml",
-  bale: "collect-bale.yml",
-  newspapers: "collect-newspapers.yml",
-  insights: "analyze-news-insights.yml",
-  keywords: "extract-keywords.yml",
-  cleanup: "cleanup-media.yml",
-  hawza: "crawl-hawza.yml",
-};
+// فهرست کارها و ریپو در _shared/jobs.ts (مشترک با notify، ۵.۲۷.۰)
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -156,6 +143,10 @@ Deno.serve(async (req) => {
 
   try {
     const { job, action } = await req.json();
+    // action ناشناخته (مثلاً غلط تایپی «log») نباید به اجرای کار برسه
+    if (action !== undefined && !["status", "health", "logs"].includes(action)) {
+      return jsonResponse({ error: "unknown action" }, 400);
+    }
     // Object.hasOwn: کلیدهایی مثل «constructor» از prototype رد بشن، نه فقط کلیدهای JOBS
     if (action !== "status" && action !== "health" && !(typeof job === "string" && Object.hasOwn(JOBS, job))) {
       // { action: "logs" } هم job معتبر لازم داره
@@ -166,12 +157,7 @@ Deno.serve(async (req) => {
 
     const ghToken = Deno.env.get("GITHUB_DISPATCH_TOKEN");
     if (!ghToken) return jsonResponse({ error: "GITHUB_DISPATCH_TOKEN is not set" }, 500);
-    const ghHeaders = {
-      Authorization: `Bearer ${ghToken}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-      "User-Agent": "jarian-run-job",
-    };
+    const ghHeaders = githubHeaders(ghToken, "jarian-run-job");
 
     if (action === "logs") {
       return jsonResponse(await jobLogs(JOBS[job], ghHeaders));

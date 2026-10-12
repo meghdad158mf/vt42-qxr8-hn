@@ -56,8 +56,11 @@ begin
 exception when undefined_object then null;
 end $$;
 
--- زمان‌بندی‌ها (اجرای دوباره: قبلی‌ها پاک و از نو ساخته می‌شن)
-select cron.unschedule(jobid) from cron.job where jobname like 'jarian-%';
+-- زمان‌بندی‌ها (اجرای دوباره: قبلی‌ها پاک و از نو ساخته می‌شن). فقط نام‌های همین فایل —
+-- زمان‌بندی‌های migrationهای بعدی (jarian-hawza، jarian-capacity، jarian-notify-*) دست نمی‌خورن.
+select cron.unschedule(jobid) from cron.job where jobname in (
+  'jarian-eitaa', 'jarian-telegram', 'jarian-website', 'jarian-bale', 'jarian-newspapers',
+  'jarian-insights', 'jarian-keywords', 'jarian-cleanup-am', 'jarian-cleanup-pm', 'jarian-cron-history');
 
 select cron.schedule('jarian-eitaa',      '0 */2 * * *',                    $$select jarian_cron.dispatch('eitaa')$$);
 select cron.schedule('jarian-telegram',   '15 */2 * * *',                   $$select jarian_cron.dispatch('telegram')$$);

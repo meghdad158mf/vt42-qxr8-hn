@@ -490,15 +490,32 @@ class Site:
             return {"permanent": True}
         if r.status_code >= 400:
             return {"permanent": 400 <= r.status_code < 500}
-        raw = trafilatura.extract(r.content, url=r.url, output_format="json", with_metadata=True,
+        raw = trafilatura.extract(protect_zwnj(r.content), url=r.url, output_format="json", with_metadata=True,
                                   include_comments=False, include_tables=False, favor_precision=True)
         data = json.loads(raw) if raw else {}
+        data = {k: restore_zwnj(v) if isinstance(v, str) else v for k, v in data.items()}
         title = (item.get("title") or data.get("title") or "").strip()
         if not title:
             m = re.search(r"<title[^>]*>(.*?)</title>", r.text, re.S | re.I)
             title = unescape(m.group(1)).strip() if m else ""
         return {"title": title, "text": (data.get("text") or "").strip(), "date": item.get("date") or parse_date(data.get("date")),
                 "html": r.content, "final_url": r.url}
+
+
+# trafilatura هر نویسه‌ی «غیرچاپی» (از جمله نیم‌فاصله‌ی U+200C) رو از متن حذف می‌کنه و
+# «آیت‌الله» می‌شه «آیتالله» (حروف به هم می‌چسبن). پس قبل از استخراج نیم‌فاصله‌ها (نویسه یا
+# موجودیت HTML) با یه نویسه‌ی چاپی کمیاب جایگزین و بعدش برگردونده می‌شن.
+ZWNJ_MARK = "\ua66e"
+_ZWNJ_BYTES_RE = re.compile(rb"\xe2\x80\x8c|&zwnj;|&#8204;|&#x0*200c;", re.I)
+
+
+def protect_zwnj(html: bytes) -> bytes:
+    # به‌صورت موجودیت HTML تا با هر کدگذاری صفحه (UTF-8 یا windows-1256) درست خونده بشه
+    return _ZWNJ_BYTES_RE.sub(b"&#xa66e;", html)
+
+
+def restore_zwnj(text: str) -> str:
+    return text.replace(ZWNJ_MARK, "\u200c")
 
 
 def extract_links(html: bytes, base: str) -> list[str]:
