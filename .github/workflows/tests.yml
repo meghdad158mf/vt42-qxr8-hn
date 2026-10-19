@@ -1,11 +1,10 @@
 name: Site tests
 
-# آزمون‌های مرورگر سایت (tests/e2e) با داده‌ی ساختگی — روی هر PR به شاخه‌ی زنده
-# و هر push به آن. اگر قرمز شد، PR نباید ادغام شود (گزارش کامل در Artifacts).
+# آزمون‌های مرورگر سایت (tests/e2e) با داده‌ی ساختگی، روی همان خروجی ساخته‌شده‌ای
+# که منتشر می‌شود (dist/). روی هر PR به شاخه‌ی زنده؛ اگر قرمز شد، PR ادغام نشود
+# (گزارش کامل در Artifacts). انتشار خودِ سایت: pages.yml
 on:
   pull_request:
-    branches: [claude/new-project-8ekywm]
-  push:
     branches: [claude/new-project-8ekywm]
   workflow_dispatch: {}
 
@@ -24,8 +23,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - run: npm test
+      - run: npm run test:dist
         env:
           CI: "1"
       - uses: actions/upload-artifact@v4

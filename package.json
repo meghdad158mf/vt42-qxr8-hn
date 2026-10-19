@@ -4,10 +4,14 @@
   "description": "سامانه‌ی رصد رسانه‌ای جریان",
   "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
     "test": "playwright test",
+    "test:dist": "SITE_DIR=dist/design playwright test",
     "test:report": "playwright show-report"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.1"
+    "@playwright/test": "1.56.1",
+    "vite": "8.3.4"
   }
 }
