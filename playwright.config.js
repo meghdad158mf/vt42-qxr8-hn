@@ -31,7 +31,8 @@ export default defineConfig({
     // تا قبل از ابزار ساخت، فایل‌های design/ همان‌طور که هستند سرو می‌شوند
     command: `python3 -m http.server ${PORT} --directory ${process.env.SITE_DIR || 'design'}`,
     url: `http://localhost:${PORT}/ita-monitoring-prototype.html`,
-    reuseExistingServer: !process.env.CI,
+    // SITE_DIR=dist/design (npm run test:dist) همیشه سرور تازه، تا سرور قدیمی design/ اشتباهی آزموده نشه
+    reuseExistingServer: !process.env.CI && !process.env.SITE_DIR,
     stdout: 'ignore',
   },
 });
