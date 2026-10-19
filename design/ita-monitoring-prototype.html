@@ -2280,6 +2280,62 @@
   .laws-source-chips{ margin-top:2px; }
   .laws-card .news-title{ margin-bottom:4px; }
   .sec-pending-note{ margin-top:6px; font-size:12px; color:#b7800f; }
+
+  /* دکمه‌ی فلش تب‌بار روی گوشی (۵.۲۹.۵، انتخاب کاربر از ۴ مدل: فلش/نوار پیشرفت/«N تب دیگر»/چندردیفه) —
+     کاربر نمی‌فهمید تب‌بار به چپ و راست می‌ره. setupTabBars هر نوار رو داخل .tab-bar-wrap می‌ذاره و
+     چسبان بودن به همین ظرف منتقل شده (فلش‌ها بیرون از mask محو نوار می‌مونن)؛ کلاس‌های has-end/has-start از updateTabFade */
+  .tab-bar-wrap{ position:sticky; top:0; z-index:30; margin-bottom:16px; }
+  .tab-bar-wrap > .news-page-tabs{ position:relative; margin-bottom:0; }
+  .tab-arrow{ display:none; position:absolute; top:50%; transform:translateY(-50%); width:30px; height:30px; padding:0; border:none; border-radius:50%;
+    background: var(--accent); color:#16202a; align-items:center; justify-content:center; cursor:pointer; z-index:31;
+    box-shadow:0 2px 10px rgba(0,0,0,0.45); transition: opacity .2s ease; }
+  .tab-arrow::before{ content:''; position:absolute; inset:-7px; }
+  .tab-arrow svg{ width:16px; height:16px; }
+  .tab-arrow.end{ left:2px; }
+  .tab-arrow.start{ right:2px; }
+  .tab-arrow:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  @media (max-width:700px){
+    .tab-bar-wrap.has-end .tab-arrow.end, .tab-bar-wrap.has-start .tab-arrow.start{ display:flex; }
+  }
+
+  /* ---- کوتاه‌تر شدن صفحه‌ها روی گوشی (۵.۲۹.۵، خواست کاربر: موارد ۳ تا ۶ بازبینی نمای گوشی) ---- */
+  @media (max-width:640px){
+    /* عرصه‌های صفحه‌ی نخست سه‌ستونه با آیکون کوچک‌تر (قبلاً دوستونه، ۵ ردیف) */
+    .domain-orbits{ gap:18px 12px; }
+    .domain-grid > .domain-card{ width:calc((100% - 24px) / 3); padding:4px 2px; }
+    .domain-icon.is-illustrated, .domain-icon.is-illustrated img{ width:92px; height:92px; max-width:92px; }
+    .domain-icon.is-illustrated{ margin-bottom:6px; }
+    .domain-card h3{ font-size:13px; line-height:1.6; }
+    /* «چرا جریان» جمع‌وجورتر: تیتر و خط کوتاه هم‌تراز با متن، فاصله‌ی داخلی کمتر */
+    .why-jarian-grid{ gap:12px; text-align:start; }
+    .why-jarian-item{ padding:18px 18px 20px; }
+    .why-jarian-item .why-jarian-tag{ margin-bottom:8px; }
+    .why-jarian-item .why-jarian-bar{ margin:0 0 10px; }
+  }
+  @media (max-width:560px){
+    /* گالری چهره‌ها/سازمان‌ها سه‌تایی (قبلاً دوتایی با دایره‌ی ۸۸px) */
+    .pf-logo-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px 6px; }
+    .pf-logo{ width:72px; height:72px; font-size:26px; }
+    .pf-logo-card{ gap:8px; padding:8px 2px; }
+    .pf-logo-name{ font-size:13px; line-height:1.6; }
+    .pf-logo-meta{ margin-top:-5px; }
+  }
+  /* «افراد و مجموعه‌ها» روی گوشی: هر کانال یه کارت فشرده‌ی چهارخطه —
+     نام + مخاطب، بستر و لینک، صاحب کانال، برچسب‌ها در یک خط (قبلاً هر خونه یه خط جدا) */
+  @media (max-width:700px){
+    .cpt-row{ display:grid; grid-template-columns:auto auto auto minmax(0,1fr) auto; align-items:center; gap:6px 6px; padding:12px 14px; }
+    .cpt-who{ grid-column:1 / 5; grid-row:1; }
+    .cpt-num{ grid-column:5; grid-row:1; justify-content:flex-end; }
+    .cpt-platform{ grid-column:1 / -1; grid-row:2; flex-direction:row; align-items:center; justify-content:flex-start; gap:6px; }
+    .cpt-platform-name::after{ content:'،'; }
+    .cpt-owner{ grid-column:1 / -1; grid-row:3; margin-inline-start:0; }
+    .cpt-activity-col{ grid-column:1; grid-row:4; }
+    .cpt-tagcol{ grid-column:2; grid-row:4; }
+    .cpt-groupcol{ grid-column:3; grid-row:4; }
+    .cpt-row > :empty{ display:none; }
+    .cpt-activity, .cpt-tag, .cpt-num-val{ white-space:nowrap; }
+    .cpt-num-val svg{ flex-shrink:0; }
+  }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -2293,7 +2349,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۹.۴</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۲۹.۵</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -3891,7 +3947,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۲۹.۴</span></small>
+          <small>ویرایش <span class="app-version">۵.۲۹.۵</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -4614,8 +4670,15 @@
   function updateTabFade(bar){
     const max = bar.scrollWidth - bar.clientWidth;
     const pos = Math.abs(bar.scrollLeft);
-    bar.style.setProperty('--fs', max > 2 && pos > 2 ? '32px' : '0px');
-    bar.style.setProperty('--fe', max > 2 && pos < max - 2 ? '32px' : '0px');
+    const hasStart = max > 2 && pos > 2, hasEnd = max > 2 && pos < max - 2;
+    // محو کمی پهن‌تر از دکمه‌ی فلش تا متن تب زیرش نره
+    bar.style.setProperty('--fs', hasStart ? '44px' : '0px');
+    bar.style.setProperty('--fe', hasEnd ? '44px' : '0px');
+    const wrap = bar.parentElement;
+    if(wrap && wrap.classList.contains('tab-bar-wrap')){
+      wrap.classList.toggle('has-start', hasStart);
+      wrap.classList.toggle('has-end', hasEnd);
+    }
   }
   function updateStuckTabBars(){
     document.querySelectorAll('.section.active .news-page-tabs').forEach(bar=>{
@@ -4637,6 +4700,18 @@
       });
       bar.insertAdjacentHTML('beforeend', '<span class="tab-ink" aria-hidden="true"></span><span class="tab-ink-origin" aria-hidden="true" style="position:absolute;left:0;top:0;width:0;height:0"></span>');
       bar.addEventListener('scroll', ()=>updateTabFade(bar), { passive:true });
+      // فلش‌های گوشی: «پایان» (چپ، تب‌های بعدی) و «شروع» (راست)؛ هر بار ~۷۰٪ عرض نوار
+      const wrap = document.createElement('div');
+      wrap.className = 'tab-bar-wrap';
+      bar.parentNode.insertBefore(wrap, bar);
+      wrap.appendChild(bar);
+      wrap.insertAdjacentHTML('beforeend',
+        '<button type="button" class="tab-arrow end" aria-label="تب‌های بعدی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>' +
+        '<button type="button" class="tab-arrow start" aria-label="تب‌های قبلی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>');
+      wrap.querySelectorAll('.tab-arrow').forEach(a=>a.addEventListener('click', ()=>{
+        const step = bar.clientWidth * 0.7 * (a.classList.contains('end') ? -1 : 1);   // RTL: به چپ = scrollLeft منفی‌تر
+        bar.scrollBy({ left: step, behavior: 'smooth' });
+      }));
     });
     window.addEventListener('resize', ()=>refreshAllTabBars(true));
     window.addEventListener('scroll', updateStuckTabBars, { passive:true });
@@ -12368,7 +12443,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.29.4';
+  const APP_VERSION = '5.29.5';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
