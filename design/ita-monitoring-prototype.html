@@ -12012,20 +12012,10 @@
   async function renderSmsAdmins(){
     const el = document.getElementById('sms-admins');
     let rows = null;
-    try{ const r = await api('/app_users?select=id,full_name,national_id_last4&is_admin=eq.true&active=eq.true&order=full_name'); if(r.ok) rows = await r.json(); }catch(e){}
-    if(!rows){ el.innerHTML = ''; return; }
-    const ok = rows.filter(u=>u.national_id_last4);
-    const btn = '<button type="button" class="btn btn-sm" onclick="openAdminSelfEditor()">ثبت کد ملی خودم به‌عنوان مدیر</button>';
-    el.className = 'sms-admins' + (ok.length ? '' : ' warn');
-    el.innerHTML = ok.length
-      ? '<span><b>مدیرانی که با کد ملی وارد می‌شوند:</b> ' + ok.map(u=>escHtml(u.full_name)).join('، ') + '</span>' + btn
-      : '<span><b>هنوز هیچ مدیری کد ملی ثبت‌شده ندارد.</b> ورود مدیر هم با کد ملی است؛ پیش از خروج، کد ملی خودتان را با نقش «مدیر» ثبت کنید.</span>' + btn;
-  }
-  async function openAdminSelfEditor(){
-    switchSection('users');
-    await renderUsersSection();
-    openUserEditor(null);
-    document.getElementById('usr-role').value = '1';
+    try{ const r = await api('/app_users?select=id&is_admin=eq.true&active=eq.true&national_id_last4=not.is.null&limit=1'); if(r.ok) rows = await r.json(); }catch(e){}
+    el.className = 'sms-admins warn';
+    el.innerHTML = rows && !rows.length
+      ? '<span><b>هنوز هیچ مدیری کد ملی ثبت‌شده ندارد.</b> ورود مدیر هم با کد ملی است؛ پیش از خروج، در «کاربران» کد ملی خودتان را با نقش «مدیر» ثبت کنید.</span>' : '';
   }
   async function saveSmsConfig(){
     const key = document.getElementById('sms-key').value.trim();
