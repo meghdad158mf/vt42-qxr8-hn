@@ -487,7 +487,8 @@
     .usr-table thead{ display:none; }
     .usr-table, .usr-table tbody{ display:block; }
     .usr-table tr{ display:grid; grid-template-columns:28px minmax(0,1fr) auto; column-gap:8px; row-gap:4px; align-items:center;
-      grid-template-areas:"sel name lvl" "sel phone st" "sel title title" "sel eitaa eitaa" "sel act act"; padding:12px 2px; border-bottom:1px solid var(--border); }
+      grid-template-areas:"sel name lvl" "sel phone st" "sel nid nid" "sel title title" "sel eitaa eitaa" "sel act act"; padding:12px 2px; border-bottom:1px solid var(--border); }
+    .usr-table td.u-nid{ grid-area:nid; justify-self:start; font-size:12px; }
     .usr-table td{ border:none; padding:0; white-space:normal; min-width:0; }
     .usr-table td.is-empty{ display:none; }
     .usr-table td.u-sel{ grid-area:sel; align-self:start; padding-top:2px; width:auto; }
@@ -2336,6 +2337,34 @@
     .cpt-activity, .cpt-tag, .cpt-num-val{ white-space:nowrap; }
     .cpt-num-val svg{ flex-shrink:0; }
   }
+
+  /* ---- ورود با کد ملی + پیامک (۵.۳۱.۰) ---- */
+  .otp-ltr{ direction:ltr; text-align:left; }
+  .otp-code-input{ text-align:center; font-size:20px; font-weight:700; letter-spacing:8px; }
+  .otp-hint{ font-size:12px; color: var(--text-faint); line-height:1.9; margin:-4px 0 12px; }
+  .otp-sent{ font-size:13px; color: var(--text); line-height:1.9; margin:0 0 14px; padding:10px 12px; border-radius:10px; background: rgba(234,179,147,0.14); }
+  .otp-sent bdi{ font-weight:700; letter-spacing:1px; }
+  .otp-row{ display:flex; justify-content:space-between; gap:10px; margin:-4px 0 12px; }
+  .otp-link{ background:none; border:none; padding:6px 0; font:inherit; font-size:12px; color: var(--accent-strong); cursor:pointer; min-height:32px; }
+  .otp-link:disabled{ color: var(--text-faint); cursor:default; }
+  .otp-link:not(:disabled):hover{ text-decoration:underline; }
+  .otp-mode-switch{ display:block; margin:18px auto 0; }
+  .usr-admin-tag{ display:inline-block; margin-inline-start:6px; font-size:11px; font-weight:700; color:#16202a; background: var(--accent); border-radius:100px; padding:1px 8px; vertical-align:middle; }
+  .usr-nid-none{ font-size:11px; font-weight:700; color:#c9483e; }
+  .usr-nid-cur{ display:block; margin-top:4px; font-size:11px; color: var(--text-faint); line-height:1.7; }
+  .sms-status{ display:flex; align-items:center; gap:8px; font-size:13px; margin:0 0 12px; line-height:1.8; }
+  .sms-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; background:#c9483e; } .sms-dot.ok{ background:#2f9e63; }
+  .sms-test{ margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+  .sms-test-result{ margin:8px 0 0; font-size:12px; line-height:1.9; color: var(--text-dim); }
+  .sms-test-result.ok{ color:#2f9e63; } .sms-test-result.bad{ color:#c9483e; }
+  .sms-recent{ margin-top:16px; }
+  .sms-recent-title{ display:block; font-size:13px; margin-bottom:6px; }
+  .sms-recent-table{ width:100%; border-collapse:collapse; font-size:12px; }
+  .sms-recent-table td{ padding:6px 4px; border-bottom:1px solid var(--border); }
+  .sms-recent-table td.ok{ color:#2f9e63; } .sms-recent-table td.bad{ color:#c9483e; }
+  .sms-emerg{ display:flex; gap:8px; align-items:flex-start; margin-top:16px; padding:10px 12px; border-radius:10px; font-size:12px; line-height:1.9; background: rgba(201,72,62,0.06); border:1px solid rgba(201,72,62,0.25); cursor:pointer; }
+  .sms-emerg input{ margin-top:5px; }
+  .usr-warn{ margin:0 0 12px; padding:9px 12px; border-radius:10px; font-size:12px; line-height:1.9; color:#9a6a0c; background: rgba(217,154,30,0.1); border:1px solid rgba(217,154,30,0.4); }
 </style>
 
 <canvas id="ambient" aria-hidden="true"></canvas>
@@ -2349,32 +2378,61 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۳۰.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۳۱.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
-      <!-- فرم واقعی + autocomplete تا مرورگر پیشنهاد ذخیره‌ی رمز بده (۵.۲۰.۰)؛ نام کاربری
-           ثابت و پنهانه چون ورود فقط با رمز مشترکه -->
-      <form class="login-form-wrap" id="login-form" autocomplete="on" onsubmit="event.preventDefault(); handleLogin();">
-        <input type="text" name="username" autocomplete="username" value="جریان" tabindex="-1" aria-hidden="true" style="display:none">
+      <div class="login-form-wrap">
         <div id="login-maint" class="login-maint" role="status" hidden></div>
-        <div class="field">
-          <label for="login-password">رمز عبور</label>
-          <div style="position:relative;">
-            <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="رمز عبور را وارد کنید" style="padding-left:40px;" />
-            <button type="button" id="login-pw-toggle" aria-label="نمایش رمز عبور" onclick="togglePasswordVisibility()" style="position:absolute; left:6px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-faint); padding:6px; display:flex;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
+        <!-- ورود با کد ملی و رمز یک‌بارمصرف پیامکی (۵.۳۱.۰، migration_050): مرحله‌ی ۱ کد ملی،
+             مرحله‌ی ۲ کد پیامک‌شده. بیننده‌ها فقط از این راه وارد می‌شوند؛ مدیر هر دو راه را دارد -->
+        <form id="otp-form" autocomplete="off" onsubmit="event.preventDefault(); otpSubmit();">
+          <div id="otp-step-nid">
+            <div class="field">
+              <label for="otp-nid">کد ملی</label>
+              <input type="text" id="otp-nid" inputmode="numeric" maxlength="12" autocomplete="off" dir="ltr" class="otp-ltr" placeholder="کد ملی ۱۰ رقمی" />
+            </div>
+            <p class="otp-hint">کد ورود به شماره‌ی موبایلی که در سامانه برای شما ثبت شده پیامک می‌شود.</p>
           </div>
-        </div>
-        <p id="login-kb-hint" class="login-kb-hint" aria-live="polite" hidden></p>
-        <p id="login-error" role="alert" style="display:none;color:var(--danger);font-size:12px;margin:-8px 0 14px;"></p>
-        <button type="button" id="login-retry-btn" class="btn" style="display:none;width:100%;margin:-4px 0 14px;" onclick="retryLoadAll()">تلاش دوباره</button>
-        <button type="submit" class="btn primary" id="login-btn">
-          <span class="login-btn-fill" aria-hidden="true"></span>
-          <span class="login-btn-label">ورود</span>
-        </button>
-      </form>
+          <div id="otp-step-code" hidden>
+            <p class="otp-sent" id="otp-sent"></p>
+            <div class="field">
+              <label for="otp-code">کد پیامک‌شده</label>
+              <input type="text" id="otp-code" inputmode="numeric" maxlength="8" autocomplete="one-time-code" dir="ltr" class="otp-ltr otp-code-input" placeholder="-----" />
+            </div>
+            <div class="otp-row">
+              <button type="button" class="otp-link" id="otp-resend" onclick="otpResend()" disabled></button>
+              <button type="button" class="otp-link" onclick="otpBack()">تغییر کد ملی</button>
+            </div>
+          </div>
+          <button type="submit" class="btn primary" id="otp-btn">
+            <span class="login-btn-fill" aria-hidden="true"></span>
+            <span class="login-btn-label">دریافت کد ورود</span>
+          </button>
+        </form>
+        <!-- فرم واقعی + autocomplete تا مرورگر پیشنهاد ذخیره‌ی رمز بده (۵.۲۰.۰)؛ از ۵.۳۱.۰ فقط برای
+             مدیر (و بیننده‌ها فقط وقتی مدیر «ورود اضطراری با رمز مشترک» را روشن کرده باشد) -->
+        <form id="login-form" autocomplete="on" hidden onsubmit="event.preventDefault(); handleLogin();">
+          <input type="text" name="username" autocomplete="username" value="جریان" tabindex="-1" aria-hidden="true" style="display:none">
+          <div class="field">
+            <label for="login-password">رمز عبور</label>
+            <div style="position:relative;">
+              <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="رمز عبور را وارد کنید" style="padding-left:40px;" />
+              <button type="button" id="login-pw-toggle" aria-label="نمایش رمز عبور" onclick="togglePasswordVisibility()" style="position:absolute; left:6px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-faint); padding:6px; display:flex;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <p id="login-kb-hint" class="login-kb-hint" aria-live="polite" hidden></p>
+          <button type="submit" class="btn primary" id="login-btn">
+            <span class="login-btn-fill" aria-hidden="true"></span>
+            <span class="login-btn-label">ورود</span>
+          </button>
+        </form>
+        <p id="login-error" role="alert" style="display:none;color:var(--danger);font-size:12px;margin:12px 0 0;"></p>
+        <button type="button" id="login-retry-btn" class="btn" style="display:none;width:100%;margin:10px 0 0;" onclick="retryLoadAll()">تلاش دوباره</button>
+        <button type="button" class="otp-link otp-mode-switch" id="login-mode-switch" onclick="setLoginMode(LOGIN_MODE === 'otp' ? 'password' : 'otp')">ورود مدیر با رمز عبور</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3756,8 +3814,30 @@
               <button class="btn" type="button" onclick="changePassword('admin')">تغییر رمز مدیر</button>
             </div>
             <div class="pw-item">
-              <div class="pw-item-head"><b>رمز بیننده</b><span class="role">بیننده</span><span class="pw-item-note">فقط مشاهده‌ی سایت</span></div>
+              <div class="pw-item-head"><b>رمز بیننده</b><span class="role">بیننده</span><span class="pw-item-note">از ۵.۳۱.۰ فقط برای ورود اضطراری (پایین‌تر)</span></div>
               <button class="btn" type="button" onclick="changePassword('viewer')">تغییر رمز بیننده</button>
+            </div>
+          </details>
+          <!-- ورود با پیامک (۵.۳۱.۰، migration_050): کلید وب‌سرویس ملی‌پیامک «فقط نوشتنی» (هیچ‌وقت به مرورگر
+               برنمی‌گرده)، شماره‌ی الگو، پیامک آزمایشی، نتیجه‌ی ۱۰ ارسال آخر و کلید اضطراری رمز مشترک بیننده -->
+          <details class="panel settings-accordion" id="sms-panel">
+            <summary class="panel-head"><span class="panel-pill">ورود با پیامک</span><span class="settings-sum-desc" id="sms-sum">ملی‌پیامک، پیامک آزمایشی و ورود اضطراری</span></summary>
+            <p class="ann-missing" id="sms-missing" style="display:none;">برای ورود با پیامک، فایل <b>db/migration_050_sms_login.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</p>
+            <div id="sms-body">
+              <p class="settings-help">کاربران با کد ملی وارد می‌شوند و کد ورود به موبایل ثبت‌شده‌شان در «کاربران» پیامک می‌شود. کلید وب‌سرویس فقط ذخیره می‌شود و دیگر نمایش داده نمی‌شود؛ برای تغییر، کلید تازه را وارد کنید.</p>
+              <div class="sms-status" id="sms-status"></div>
+              <div class="form-grid">
+                <div class="field"><label for="sms-key">کلید کنسول ملی‌پیامک</label><input type="password" id="sms-key" dir="ltr" autocomplete="off" placeholder="برای تغییر، کلید تازه را وارد کنید" /></div>
+                <div class="field"><label for="sms-body-id">شماره‌ی الگوی پیامک (bodyId)</label><input type="text" id="sms-body-id" inputmode="numeric" dir="ltr" class="mono" maxlength="12" placeholder="مثلاً 123456" /></div>
+              </div>
+              <button type="button" class="btn primary" id="sms-save" onclick="saveSmsConfig()">ذخیره</button>
+              <div class="sms-test">
+                <div class="field"><label for="sms-test-phone">پیامک آزمایشی به شماره‌ی</label><input type="tel" id="sms-test-phone" dir="ltr" class="mono" maxlength="20" placeholder="09xxxxxxxxx" /></div>
+                <button type="button" class="btn" id="sms-test-btn" onclick="sendSmsTest()">ارسال پیامک آزمایشی (کد ۱۲۳۴۵)</button>
+                <p class="sms-test-result" id="sms-test-result" hidden></p>
+              </div>
+              <div class="sms-recent" id="sms-recent"></div>
+              <label class="sms-emerg"><input type="checkbox" id="sms-viewer-pw" onchange="saveViewerPasswordLogin(this.checked)"> <span><b>ورود اضطراری با رمز مشترک بیننده</b> — فقط اگر ارسال پیامک از کار افتاده است روشن کنید؛ بعد از رفع مشکل خاموشش کنید.</span></label>
             </div>
           </details>
           <!-- پشتیبان تنظیمات (مهر ۱۴۰۵، گروه «امنیت»): یک فایل SQL که در SQL Editor سوپابیس اجرا می‌شه و فقط
@@ -3824,7 +3904,7 @@
           <div id="sys-timeline"></div>
         </div>
         <div class="panel">
-          <div class="panel-head"><span class="panel-pill">ورودها</span><span class="settings-sum-desc">ورودهای ۳۰ روز اخیر به سایت. چون رمز مشترک است، فقط نقش (مدیر/بیننده)، دستگاه و IP معلوم است، نه نام افراد. ورود خودکار کارهای گیت‌هاب نمایش داده نمی‌شود.</span></div>
+          <div class="panel-head"><span class="panel-pill">ورودها</span><span class="settings-sum-desc">ورودهای ۳۰ روز اخیر به سایت. ورود با کد ملی و پیامک نام هر نفر را دارد؛ ورود با رمز (مدیر یا ورود اضطراری بیننده) فقط نقش، دستگاه و IP را. ورود خودکار کارهای گیت‌هاب نمایش داده نمی‌شود.</span></div>
           <div id="sys-logins"></div>
         </div>
         <div class="panel" id="sys-alerts-panel">
@@ -3893,7 +3973,9 @@
           <span class="panel-pill">فهرست کاربران</span>
           <span class="usr-head-actions"><button type="button" class="btn usr-dl" onclick="usrDownload()" title="فهرست همان کاربرانی که الان در جدول دیده می‌شوند (با فیلتر و جست‌وجوی فعلی)">دانلود فهرست</button><button type="button" class="btn primary usr-add" onclick="openUserEditor(null)">＋ افزودن کاربر</button></span>
         </div>
-        <p class="usr-note">سطح دسترسی فعلاً فقط ثبت و نمایش می‌شود؛ ورود هنوز با رمز مشترک مدیر/بیننده است.</p>
+        <p class="usr-note">ورود کاربران با <b>کد ملی و پیامک</b> است: فقط کاربرِ فعالی که کد ملی و موبایلش اینجا ثبت شده می‌تواند وارد شود (کاربر «مدیر» وارد بخش مدیریت می‌شود). کد ملی فقط به‌صورت رمزنگاری‌شده ذخیره می‌شود و بعد از ثبت، فقط ۴ رقم آخرش دیده می‌شود. سطح دسترسی فعلاً فقط ثبت و نمایش می‌شود.</p>
+        <p class="ann-missing" id="usr-nid-missing" style="display:none;">برای ورود با کد ملی و پیامک، فایل <b>db/migration_050_sms_login.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</p>
+        <p class="usr-warn" id="usr-nologin" style="display:none;"></p>
         <p class="ann-missing" id="usr-missing" style="display:none;">برای ثبت کاربران، فایل <b>db/migration_037_app_users.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود. (مشترکین فرم اطلاع‌رسانی همین حالا هم پایین دیده می‌شوند.)</p>
         <form class="usr-editor" id="usr-editor" style="display:none;" onsubmit="event.preventDefault(); saveUser();">
           <div class="usr-editor-title" id="usr-editor-title">افزودن کاربر</div>
@@ -3912,6 +3994,8 @@
               </select>
             </div>
             <div class="field"><label for="usr-active">وضعیت</label><select id="usr-active"><option value="1">فعال</option><option value="0">غیرفعال</option></select></div>
+            <div class="field usr-nid-field"><label for="usr-nid">کد ملی</label><input type="text" id="usr-nid" inputmode="numeric" dir="ltr" class="mono" maxlength="12" autocomplete="off" placeholder="کد ملی ۱۰ رقمی" /><small class="usr-nid-cur" id="usr-nid-cur"></small></div>
+            <div class="field usr-nid-field"><label for="usr-role">نقش در سامانه</label><select id="usr-role"><option value="0">بیننده</option><option value="1">مدیر (دسترسی به بخش مدیریت)</option></select></div>
           </div>
           <div class="field"><label for="usr-notes">یادداشت (اختیاری)</label><input type="text" id="usr-notes" maxlength="500" /></div>
           <div class="usr-editor-actions"><button type="submit" class="btn primary" id="usr-save">ذخیره</button><button type="button" class="btn" onclick="closeUserEditor()">انصراف</button></div>
@@ -3947,7 +4031,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro" onclick="openIntro()">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۳۰.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۳۱.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -4242,9 +4326,12 @@
       const d = await r.json().catch(()=>({}));
       const e = new Error('locked'); e.retryAfter = Number(d.retry_after) || 900; throw e;
     }
+    // ۵.۳۱.۰: رمز مشترک بیننده خاموشه (فقط کد ملی + پیامک) مگر مدیر ورود اضطراری رو روشن کرده باشه
+    if(r.status === 403) throw new Error('viewer_disabled');
     if(!r.ok) throw new Error('invalid');
     const data = await r.json();
     authToken = data.token; currentRole = data.role;
+    try{ sessionStorage.removeItem('jarian_user_name'); }catch(e){}
     sessionStorage.setItem('jarian_token', authToken);
     sessionStorage.setItem('jarian_role', currentRole);
   }
@@ -4266,7 +4353,7 @@
     sessionStorage.removeItem('jarian_token'); sessionStorage.removeItem('jarian_role');
     // «مهم»های بسته‌شده فقط تا ورود بعدی پنهان‌ان — خروج باید اینو هم پاک کنه (قبلاً فقط
     // بستن زبانه پاکش می‌کرد و بعد از خروج/ورود در همون زبانه اطلاعیه‌ی مهم برنمی‌گشت)
-    try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); sessionStorage.removeItem('jarian_ann_dismissed_s'); sessionStorage.removeItem('jarian_pv_session'); }catch(e){}
+    try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); sessionStorage.removeItem('jarian_ann_dismissed_s'); sessionStorage.removeItem('jarian_pv_session'); sessionStorage.removeItem('jarian_user_name'); }catch(e){}
     PV_LAST = '';
     clearTimeout(ADMIN_ALERT_TIMER);
     clearInterval(SITE_POLL_TIMER);
@@ -4416,6 +4503,7 @@
         // TypeError یعنی اصلاً به سرور نرسیدیم، نه رمز اشتباه
         showLoginError(e instanceof TypeError ? 'اتصال به سرور برقرار نشد. اتصال اینترنت را بررسی کنید.'
           : e.message === 'locked' ? 'به‌دلیل چند بار وارد کردن رمز اشتباه، ورود از این اتصال موقتاً بسته شده است. حدود ' + faNum(Math.max(1, Math.ceil(e.retryAfter / 60))) + ' دقیقه‌ی دیگر دوباره امتحان کنید.'
+          : e.message === 'viewer_disabled' ? 'ورود با رمز مشترک برای بیننده‌ها بسته است. با کد ملی و پیامک وارد شوید.'
           : 'رمز عبور اشتباه است.', false);
         pwEl.focus();
         pwEl.select();
@@ -4429,6 +4517,130 @@
       btnLabelEl.textContent = 'ورود';
     }
   }
+
+  // ---- ورود با کد ملی + رمز یک‌بارمصرف پیامکی (۵.۳۱.۰، migration_050) ----
+  // RPCهای otp_request / login_otp با کلید anon (پیش از ورود). کد ملی خام فقط در همین درخواست
+  // فرستاده می‌شه و در پایگاه داده فقط HMAC‌اش نگه داشته می‌شه؛ اینجا هم در هیچ storage ای نمی‌مونه.
+  let LOGIN_MODE = 'otp';
+  const OTP = { id: null, nid: '', resendAt: 0, timer: null };
+  function setLoginMode(m){
+    LOGIN_MODE = m;
+    document.getElementById('otp-form').hidden = m !== 'otp';
+    document.getElementById('login-form').hidden = m !== 'password';
+    document.getElementById('login-mode-switch').textContent = m === 'otp' ? 'ورود مدیر با رمز عبور' : 'ورود با کد ملی و پیامک';
+    document.getElementById('login-error').style.display = 'none';
+    focusLoginPassword();
+  }
+  function faDigitsToLatin(s){ return String(s || '').replace(/[۰-۹]/g, d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g, ''); }
+  // اعتبار کد ملی (رقم کنترل) — همون قاعده‌ی nid_valid سمت سرور
+  function nidValid(n){
+    if(!/^\d{10}$/.test(n) || /^(\d)\1{9}$/.test(n)) return false;
+    let s = 0; for(let i = 0; i < 9; i++) s += +n[i] * (10 - i);
+    const r = s % 11, c = +n[9];
+    return r < 2 ? c === r : c === 11 - r;
+  }
+  function otpSetBusy(on, label){
+    const btn = document.getElementById('otp-btn');
+    btn.disabled = on; btn.classList.toggle('is-loading', on);
+    btn.querySelector('.login-btn-label').textContent = label;
+  }
+  function otpBtnLabel(){ return document.getElementById('otp-step-code').hidden ? 'دریافت کد ورود' : 'ورود'; }
+  function otpTick(){
+    const btn = document.getElementById('otp-resend');
+    const left = Math.ceil((OTP.resendAt - Date.now()) / 1000);
+    btn.disabled = left > 0;
+    btn.textContent = left > 0 ? 'ارسال دوباره تا ' + faNum(left) + ' ثانیه‌ی دیگر' : 'ارسال دوباره‌ی کد';
+    if(left <= 0 && OTP.timer){ clearInterval(OTP.timer); OTP.timer = null; }
+  }
+  function otpBack(){
+    document.getElementById('otp-step-code').hidden = true;
+    document.getElementById('otp-step-nid').hidden = false;
+    document.getElementById('login-error').style.display = 'none';
+    document.getElementById('otp-code').value = '';
+    OTP.id = null;
+    otpSetBusy(false, otpBtnLabel());
+    document.getElementById('otp-nid').focus();
+  }
+  async function otpPost(fn, body){
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+      method: 'POST', headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    const d = await r.json().catch(()=>({}));
+    return { status: r.status, d: d || {} };
+  }
+  function otpWaitText(sec){
+    return sec >= 120 ? 'حدود ' + faNum(Math.ceil(sec / 60)) + ' دقیقه‌ی دیگر' : faNum(Math.max(1, sec)) + ' ثانیه‌ی دیگر';
+  }
+  async function otpRequestCode(){
+    const nid = faDigitsToLatin(document.getElementById('otp-nid').value);
+    document.getElementById('login-error').style.display = 'none';
+    if(!nidValid(nid)){ showLoginError('کد ملی وارد‌شده معتبر نیست. ۱۰ رقم کد ملی را بدون فاصله وارد کنید.', false); return; }
+    otpSetBusy(true, 'در حال ارسال پیامک...');
+    try{
+      const { status, d } = await otpPost('otp_request', { p_nid: nid });
+      if(status === 200 && d.otp_id){
+        OTP.id = d.otp_id; OTP.nid = nid;
+        OTP.resendAt = Date.now() + (Number(d.resend_in) || 60) * 1000;
+        document.getElementById('otp-sent').innerHTML = 'کد ورود به شماره‌ی <bdi dir="ltr">' + escHtml(toFaDigits(d.phone_hint || '')) + '</bdi> پیامک شد. کد تا ' + faNum(Math.round((Number(d.expires_in) || 120) / 60)) + ' دقیقه اعتبار دارد.';
+        document.getElementById('otp-step-nid').hidden = true;
+        document.getElementById('otp-step-code').hidden = false;
+        if(OTP.timer) clearInterval(OTP.timer);
+        OTP.timer = setInterval(otpTick, 1000); otpTick();
+        const codeEl = document.getElementById('otp-code'); codeEl.value = ''; codeEl.focus();
+        return;
+      }
+      const ra = Number(d.retry_after) || 60;
+      showLoginError(
+        d.code === 'PGRST202' ? 'ورود با پیامک هنوز فعال نشده است. فعلاً از پیوند «ورود مدیر با رمز عبور» (پایین همین کادر) با رمز همیشگی وارد شوید.'
+        : d.error === 'not_found' ? 'این کد ملی در سامانه ثبت نشده یا حساب آن غیرفعال است. برای ثبت، با مدیر سامانه تماس بگیرید.'
+        : d.error === 'invalid_nid' ? 'کد ملی وارد‌شده معتبر نیست.'
+        : d.error === 'wait' ? 'کد قبلی همین حالا فرستاده شده است. ' + otpWaitText(ra) + ' دوباره امتحان کنید.'
+        : (d.error === 'ip_limit' || d.error === 'user_limit') ? 'تعداد درخواست کد زیاد بوده است. ' + otpWaitText(ra) + ' دوباره امتحان کنید.'
+        : d.error === 'global_limit' ? 'سامانه در این لحظه پیامک‌های زیادی فرستاده است. ' + otpWaitText(ra) + ' دوباره امتحان کنید.'
+        : d.error === 'sms_not_configured' ? 'ارسال پیامک هنوز راه‌اندازی نشده است. با مدیر سامانه تماس بگیرید.'
+        : 'ارسال کد انجام نشد. چند لحظه‌ی دیگر دوباره امتحان کنید.', false);
+    }catch(e){
+      showLoginError('اتصال به سرور برقرار نشد. اتصال اینترنت را بررسی کنید.', false);
+    }finally{
+      otpSetBusy(false, otpBtnLabel());
+    }
+  }
+  function otpResend(){
+    if(Date.now() < OTP.resendAt) return;
+    document.getElementById('otp-nid').value = OTP.nid;
+    otpRequestCode();
+  }
+  async function otpVerify(){
+    const code = faDigitsToLatin(document.getElementById('otp-code').value);
+    document.getElementById('login-error').style.display = 'none';
+    if(!/^\d{5}$/.test(code)){ showLoginError('کد ۵ رقمی پیامک‌شده را وارد کنید.', false); return; }
+    otpSetBusy(true, 'در حال ورود...');
+    try{
+      const { status, d } = await otpPost('login_otp', { p_otp_id: OTP.id, p_code: code });
+      if(status === 200 && d.token){
+        authToken = d.token; currentRole = d.role;
+        sessionStorage.setItem('jarian_token', authToken);
+        sessionStorage.setItem('jarian_role', currentRole);
+        try{ sessionStorage.setItem('jarian_user_name', d.name || ''); }catch(e){}
+        if(OTP.timer){ clearInterval(OTP.timer); OTP.timer = null; }
+        applyRoleUI();
+        if(await loadAllAndEnter()){ OTP.id = null; document.getElementById('otp-nid').value = ''; otpBack(); }
+        return;
+      }
+      showLoginError(
+        d.error === 'invalid_code' ? (Number(d.left) > 0 ? 'کد اشتباه است. ' + faNum(d.left) + ' بار دیگر می‌توانید امتحان کنید.' : 'کد اشتباه است و دیگر اعتبار ندارد. کد تازه بگیرید.')
+        : d.error === 'expired' ? 'این کد دیگر اعتبار ندارد (منقضی شده یا چند بار اشتباه وارد شده است). کد تازه بگیرید.'
+        : d.error === 'locked' ? 'به‌دلیل چند بار ورود ناموفق، ورود از این اتصال موقتاً بسته شده است. حدود ' + faNum(Math.max(1, Math.ceil((Number(d.retry_after) || 900) / 60))) + ' دقیقه‌ی دیگر دوباره امتحان کنید.'
+        : d.error === 'inactive' ? 'حساب شما غیرفعال است. با مدیر سامانه تماس بگیرید.'
+        : 'ورود انجام نشد. دوباره امتحان کنید.', false);
+      const codeEl = document.getElementById('otp-code'); codeEl.focus(); codeEl.select();
+    }catch(e){
+      showLoginError('اتصال به سرور برقرار نشد. اتصال اینترنت را بررسی کنید.', false);
+    }finally{
+      otpSetBusy(false, otpBtnLabel());
+    }
+  }
+  function otpSubmit(){ return document.getElementById('otp-step-code').hidden ? otpRequestCode() : otpVerify(); }
 
   function togglePasswordVisibility(){
     const pwEl = document.getElementById('login-password');
@@ -4459,7 +4671,9 @@
   })();
   // روی رایانه مکان‌نما از اول توی کادر رمز باشه (روی گوشی نه، تا صفحه‌کلید ناخواسته باز نشه)
   function focusLoginPassword(){
-    try{ if(window.matchMedia('(pointer:fine)').matches) document.getElementById('login-password').focus({ preventScroll:true }); }catch(e){}
+    const id = LOGIN_MODE === 'password' ? 'login-password'
+      : (document.getElementById('otp-step-code').hidden ? 'otp-nid' : 'otp-code');
+    try{ if(window.matchMedia('(pointer:fine)').matches) document.getElementById(id).focus({ preventScroll:true }); }catch(e){}
   }
 
   let INTRO_STEP = 0;
@@ -4570,7 +4784,7 @@
     if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
     if(key === 'announce') renderAnnAdmin();
     if(key === 'activity') setActTab(ACT_TAB);
-    if(key === 'settings'){ renderBackupPanel(); renderSiteSettingsAdmin(); loadCrawlSites(); if(currentRole === 'app_admin') loadCrawlSuggestions(); }
+    if(key === 'settings'){ renderBackupPanel(); renderSiteSettingsAdmin(); renderSmsPanel(); loadCrawlSites(); if(currentRole === 'app_admin') loadCrawlSuggestions(); }
     if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
     if(key === 'people') placePfPanel('people'); // ظرف گالری ممکنه الان توی «مواضع مراجع و علماء» باشه
     if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
@@ -6026,10 +6240,10 @@
           <div class="sys-login-stat"><b>${faNum(okAdmin)}</b><span>ورود مدیر در ۲۴ ساعت اخیر</span></div>
           <div class="sys-login-stat"><b>${faNum(okViewer)}</b><span>ورود بیننده در ۲۴ ساعت اخیر</span></div>
           <div class="sys-login-stat ${failCls}"><b>${faNum(fails.length)}</b><span>تلاش ناموفق (رمز اشتباه) در ۲۴ ساعت اخیر${topIps.length ? '<br>بیشترین از: ' + topIps.map(([ip,n])=>escHtml(ip) + ' (' + faNum(n) + ')').join('، ') : ''}</span></div>
-        </div>` + (rows.length ? `<div class="sys-login-wrap"><table class="sys-login-table"><thead><tr><th>زمان</th><th>نتیجه</th><th>نقش</th><th>دستگاه</th><th>IP</th></tr></thead><tbody>${list.map(x=>{
+        </div>` + (rows.length ? `<div class="sys-login-wrap"><table class="sys-login-table"><thead><tr><th>زمان</th><th>نتیجه</th><th>نقش</th><th>نام</th><th>دستگاه</th><th>IP</th></tr></thead><tbody>${list.map(x=>{
           const d = new Date(x.created_at);
           const full = d.toLocaleString('fa-IR', { timeZone:'Asia/Tehran', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
-          return `<tr class="${x.success ? '' : 'fail'}"><td title="${escAttr(full)}">${escHtml(full)}</td><td><span class="sys-login-badge ${x.success ? '' : 'fail'}">${x.success ? 'موفق' : x.blocked ? 'رد شد (قفل)' : 'رمز اشتباه'}</span></td><td>${x.role==='app_admin' ? 'مدیر' : x.role==='app_viewer' ? 'بیننده' : '—'}</td><td title="${escAttr(x.user_agent||'')}">${escHtml(sysDeviceLabel(x.user_agent))}</td><td dir="ltr">${escHtml(x.ip||'—')}</td></tr>`;
+          return `<tr class="${x.success ? '' : 'fail'}"><td title="${escAttr(full)}">${escHtml(full)}</td><td><span class="sys-login-badge ${x.success ? '' : 'fail'}">${x.success ? 'موفق' : x.blocked ? (x.role === 'app_viewer' ? 'رمز بیننده بسته است' : 'رد شد (قفل)') : x.user_id ? 'کد پیامک اشتباه' : 'رمز اشتباه'}</span></td><td>${x.role==='app_admin' ? 'مدیر' : x.role==='app_viewer' ? 'بیننده' : '—'}</td><td>${x.user_name ? escHtml(x.user_name) : x.success ? '<span class="usr-dim">رمز مشترک</span>' : '—'}</td><td title="${escAttr(x.user_agent||'')}">${escHtml(sysDeviceLabel(x.user_agent))}</td><td dir="ltr">${escHtml(x.ip||'—')}</td></tr>`;
         }).join('')}</tbody></table></div>${rows.length > 15 ? `<button type="button" class="btn sys-login-more" onclick="SYS_LOGINS_SHOW_ALL=!SYS_LOGINS_SHOW_ALL;renderSysLogins()">${SYS_LOGINS_SHOW_ALL ? 'نمایش کمتر' : 'نمایش همه (' + faNum(rows.length) + ')'}</button>` : ''}` : '<div class="sys-note">هنوز ورودی ثبت نشده.</div>');
     }catch(e){
       console.error(e);
@@ -7953,13 +8167,21 @@
   let USR_FILTER = 'all';
   const USR_SELECTED = new Set();
   let USR_EDIT_ID = null;
+  let USR_NID_READY = false;   // migration_050 (ستون‌های national_id_last4 و is_admin) اجرا شده؟
   async function loadAppUsers(){
     try{
-      const r = await api('/app_users?select=*&order=created_at.desc');
+      const [r, probe] = await Promise.all([
+        api('/app_users?select=*&order=created_at.desc'),
+        api('/app_users?select=national_id_last4,is_admin&limit=1'),
+      ]);
       APP_USERS_MISSING = r.status === 404 || r.status === 400;
+      USR_NID_READY = probe.ok;
       APP_USERS = r.ok ? await r.json() : [];
     }catch(e){ APP_USERS = []; }
   }
+  // «••••••۲۴۱۹» — کد ملی هیچ‌وقت کامل به مرورگر نمی‌رسه، فقط ۴ رقم آخر
+  function usrNidMask(u){ return u && u.national_id_last4 ? '••••••' + toFaDigits(u.national_id_last4) : ''; }
+  function usrCanLogin(u){ return !!(u.active && u.phone && u.national_id_last4); }
   // هر ردیف فهرست: کاربر ثبت‌شده، یا مشترک فرم که شماره‌ش هنوز در کاربران نیست
   function usrRows(){
     const phones = new Set(APP_USERS.map(u=>u.phone).filter(Boolean));
@@ -7981,6 +8203,8 @@
   async function renderUsersSection(){
     await Promise.all([loadAppUsers(), loadNotifySubscribers(), loadFeedbackList()]);
     document.getElementById('usr-missing').style.display = APP_USERS_MISSING ? '' : 'none';
+    document.getElementById('usr-nid-missing').style.display = !APP_USERS_MISSING && !USR_NID_READY ? '' : 'none';
+    document.querySelectorAll('#usr-editor .usr-nid-field').forEach(el=>{ el.style.display = USR_NID_READY ? '' : 'none'; });
     document.querySelector('#usr-panel .usr-add').style.display = APP_USERS_MISSING ? 'none' : '';
     renderUsersTable();
     renderFeedbackList(); markFeedbackSeen();
@@ -7996,7 +8220,7 @@
     const rows = usrVisible();
     const t = document.getElementById('usr-table');
     const allSel = rows.length && rows.every(r=>USR_SELECTED.has(r.key));
-    t.innerHTML = `<thead><tr><th><input type="checkbox" id="usr-sel-all" ${allSel?'checked':''} aria-label="انتخاب همه"></th><th>نام</th><th>موبایل</th><th>ایتا</th><th>سمت</th><th>سطح دسترسی</th><th>وضعیت</th><th></th></tr></thead><tbody>` +
+    t.innerHTML = `<thead><tr><th><input type="checkbox" id="usr-sel-all" ${allSel?'checked':''} aria-label="انتخاب همه"></th><th>نام</th><th>موبایل</th>${USR_NID_READY ? '<th>کد ملی</th>' : ''}<th>ایتا</th><th>سمت</th><th>سطح دسترسی</th><th>وضعیت</th><th></th></tr></thead><tbody>` +
       (rows.length ? rows.map(r=>{
         const lvl = r.kind==='sub' ? '<span class="usr-lvl sub">مشترک فرم</span>' : `<span class="usr-lvl ${r.level}">${USER_LEVELS[r.level]||r.level}</span>`;
         const st = r.kind==='sub' ? (r.s.notified_at ? '<span class="usr-st done">اطلاع‌رسانی‌شده</span>' : '<span class="usr-st">در انتظار</span>') : (r.active ? '<span class="usr-st on">فعال</span>' : '<span class="usr-st off">غیرفعال</span>');
@@ -8006,10 +8230,15 @@
         // کلاس هر خانه برای نمای کارتی گوشی (۵.۲۰.۰)؛ خانه‌ی خالی روی گوشی پنهان می‌شه
         const emp = v => v ? '' : ' is-empty';
         return `<tr class="${r.kind==='user' && !r.active ? 'inactive' : ''}"><td class="u-sel"><input type="checkbox" data-sel="${r.key}" ${USR_SELECTED.has(r.key)?'checked':''} aria-label="انتخاب"></td>
-          <td class="u-name">${r.kind==='sub' ? '<span class="usr-dim">— (از فرم اطلاع‌رسانی)</span>' : `<b>${escHtml(r.name)}</b>`}</td>
-          <td class="u-phone mono${emp(r.phone)}" dir="ltr">${escHtml(r.phone)||'—'}</td><td class="u-eitaa${emp(r.eitaa)}" dir="ltr">${escHtml(r.eitaa)||'—'}</td>
+          <td class="u-name">${r.kind==='sub' ? '<span class="usr-dim">— (از فرم اطلاع‌رسانی)</span>' : `<b>${escHtml(r.name)}</b>${r.u.is_admin ? '<span class="usr-admin-tag">مدیر</span>' : ''}`}</td>
+          <td class="u-phone mono${emp(r.phone)}" dir="ltr">${escHtml(r.phone)||'—'}</td>${USR_NID_READY ? `<td class="u-nid${r.kind==='sub' ? ' is-empty' : ''}">${r.kind==='sub' ? '—' : (usrNidMask(r.u) ? `<span class="mono" dir="ltr">${usrNidMask(r.u)}</span>` : '<span class="usr-nid-none">ثبت نشده</span>')}</td>` : ''}<td class="u-eitaa${emp(r.eitaa)}" dir="ltr">${escHtml(r.eitaa)||'—'}</td>
           <td class="u-title${emp(r.title)}">${escHtml(r.title)||'—'}</td><td class="u-lvl">${lvl}</td><td class="u-st">${st}</td><td class="u-act${act ? '' : ' is-empty'}"><div class="usr-acts">${act}</div></td></tr>`;
-      }).join('') : '<tr><td colspan="8" class="usr-empty">موردی نیست.</td></tr>') + '</tbody>';
+      }).join('') : `<tr><td colspan="${USR_NID_READY ? 9 : 8}" class="usr-empty">موردی نیست.</td></tr>`) + '</tbody>';
+    // کاربر فعالی که با این وضع نمی‌تونه وارد بشه (کد ملی یا موبایل نداره)
+    const stuck = USR_NID_READY ? APP_USERS.filter(u=>u.active && !usrCanLogin(u)) : [];
+    const warn = document.getElementById('usr-nologin');
+    warn.style.display = stuck.length ? '' : 'none';
+    warn.textContent = stuck.length ? toFaDigits(stuck.length) + ' کاربر فعال کد ملی یا موبایل ثبت‌شده ندارد و نمی‌تواند وارد سامانه شود: ' + stuck.slice(0, 6).map(u=>u.full_name).join('، ') + (stuck.length > 6 ? '، …' : '') : '';
     updateUsrSelCount();
   }
   function updateUsrSelCount(){
@@ -8026,9 +8255,11 @@
     const out = rows.map(r=>({
       'نام': r.name || '(مشترک فرم اطلاع‌رسانی)', 'موبایل': r.phone ? '="' + r.phone + '"' : '','ایتا': r.eitaa, 'سمت': r.title,
       'سطح دسترسی': r.kind === 'sub' ? 'مشترک فرم' : (USER_LEVELS[r.level] || r.level),
+      'نقش': r.kind === 'sub' ? '' : (r.u.is_admin ? 'مدیر' : 'بیننده'),
       'وضعیت': r.kind === 'sub' ? (r.s.notified_at ? 'اطلاع‌رسانی‌شده' : 'در انتظار') : (r.active ? 'فعال' : 'غیرفعال'),
     }));
-    const cols = ['نام','موبایل','ایتا','سمت','سطح دسترسی','وضعیت'];
+    // کد ملی عمداً در خروجی نیست (خواست کاربر: حفاظت از کد ملی)
+    const cols = ['نام','موبایل','ایتا','سمت','سطح دسترسی','نقش','وضعیت'];
     const tag = USR_FILTER === 'all' ? '' : '-' + USR_FILTER;
     downloadBlob('jarian-users' + tag + '.csv', '\ufeff' + toCSV(out, cols), 'text/csv;charset=utf-8');
     showToast('فهرست ' + toFaDigits(rows.length) + ' نفر دانلود شد');
@@ -8043,6 +8274,9 @@
     document.getElementById('usr-level').value = u ? u.access_level : 'normal';
     document.getElementById('usr-active').value = !u || u.active ? '1' : '0';
     document.getElementById('usr-notes').value = u ? (u.notes||'') : '';
+    document.getElementById('usr-nid').value = '';
+    document.getElementById('usr-nid-cur').innerHTML = u && u.national_id_last4 ? 'ثبت‌شده: <bdi dir="ltr">' + usrNidMask(u) + '</bdi> — فقط برای تغییر، کد ملی تازه را وارد کنید.' : 'برای ورود با پیامک لازم است.';
+    document.getElementById('usr-role').value = u && u.is_admin ? '1' : '0';
     const ed = document.getElementById('usr-editor'); ed.style.display = '';
     ed.scrollIntoView({ behavior:'smooth', block:'center' });
     document.getElementById('usr-name').focus({ preventScroll:true });
@@ -8061,16 +8295,30 @@
       notes: document.getElementById('usr-notes').value.trim() || null,
     };
     if(!body.full_name){ showToast('نام را وارد کنید'); return; }
+    const nid = USR_NID_READY ? faDigitsToLatin(document.getElementById('usr-nid').value) : '';
+    if(nid && !nidValid(nid)){ showToast('کد ملی معتبر نیست؛ ۱۰ رقم را دوباره بررسی کنید'); return; }
+    if(USR_NID_READY) body.is_admin = document.getElementById('usr-role').value === '1';
     const btn = document.getElementById('usr-save'); btn.disabled = true;
     try{
       const r = USR_EDIT_ID
         ? await api('/app_users?id=eq.' + USR_EDIT_ID, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify(body) })
-        : await api('/app_users', { method:'POST', headers:{ Prefer:'return=minimal' }, body: JSON.stringify(body) });
+        : await api('/app_users?select=id', { method:'POST', headers:{ Prefer:'return=representation' }, body: JSON.stringify(body) });
       if(r.status === 409){ showToast('این شماره قبلاً برای کاربر دیگری ثبت شده'); return; }
       if(!r.ok) throw new Error('app_users ' + r.status);
+      const id = USR_EDIT_ID || ((await r.json().catch(()=>[]))[0] || {}).id;
+      // کد ملی جدا و فقط از تابع سمت سرور (HMAC؛ نه در ردیف کاربر، نه در دفتر تغییرات)
+      if(nid && id){
+        const rr = await api('/rpc/set_user_national_id', { method:'POST', body: JSON.stringify({ p_user_id: id, p_nid: nid }) });
+        const d = rr.ok ? await rr.json() : {};
+        if(!d.ok){
+          await loadAppUsers(); renderUsersTable(); USR_EDIT_ID = id;
+          showToast(d.error === 'duplicate' ? 'کاربر ذخیره شد، ولی این کد ملی قبلاً برای کاربر دیگری ثبت شده است' : 'کاربر ذخیره شد، ولی ثبت کد ملی انجام نشد');
+          return;
+        }
+      }
       closeUserEditor(); await loadAppUsers(); renderUsersTable(); showToast('ذخیره شد');
     }catch(e){ console.error(e); showToast('ذخیره ناموفق بود'); }
-    finally{ btn.disabled = false; }
+    finally{ btn.disabled = false; document.getElementById('usr-nid').value = ''; }
   }
   async function deleteAppUser(id){
     const u = APP_USERS.find(x=>x.id === id);
@@ -11642,6 +11890,85 @@
     ['crawl_sites', 'منابع خزنده‌ی «درباره حوزه»'],
     ['site_settings', 'نمایش سایت (حالت تعمیر، بخش‌های پنهان)'],
   ];
+  // ---- «ورود با پیامک» در تنظیمات (۵.۳۱.۰، migration_050) ----
+  const SMS_REPLY_HELP = [
+    [/کلید کنسول معتبر نیست|invalid.*key/i, 'کلید کنسول معتبر نیست'],
+    [/الگو|body/i, 'شماره‌ی الگو یا متن الگو درست نیست'],
+    [/اعتبار|credit/i, 'اعتبار پنل پیامک کافی نیست'],
+  ];
+  function smsReplyText(row){
+    if(row.status_code == null) return row.reply ? 'خطا: ' + row.reply : 'در انتظار پاسخ';
+    const ok = row.status_code >= 200 && row.status_code < 300 && !/false|error|خطا|نامعتبر|معتبر نیست/i.test(row.reply || '');
+    if(ok) return 'ارسال شد';
+    const hit = SMS_REPLY_HELP.find(([rx])=>rx.test(row.reply || ''));
+    return 'ناموفق (' + toFaDigits(row.status_code) + ')' + (hit ? '، ' + hit[1] : '');
+  }
+  async function renderSmsPanel(){
+    const missing = document.getElementById('sms-missing'), body = document.getElementById('sms-body');
+    document.getElementById('sms-viewer-pw').checked = SITE_SETTINGS.viewer_password_login === true;
+    let d = null;
+    try{ const r = await api('/rpc/sms_status', { method:'POST', body:'{}' }); if(r.ok) d = await r.json(); }catch(e){}
+    missing.style.display = d ? 'none' : '';
+    body.style.display = d ? '' : 'none';
+    if(!d){ document.getElementById('sms-sum').textContent = 'هنوز راه‌اندازی نشده'; return; }
+    const ready = d.key_set && d.body_id;
+    document.getElementById('sms-sum').textContent = ready ? 'فعال — الگوی ' + toFaDigits(d.body_id) : 'کلید یا شماره‌ی الگو ثبت نشده';
+    document.getElementById('sms-status').innerHTML = ready
+      ? '<span class="sms-dot ok"></span><span>کلید وب‌سرویس ثبت شده است؛ الگوی <b>' + escHtml(toFaDigits(d.body_id)) + '</b>.</span>'
+      : '<span class="sms-dot bad"></span><span>' + (d.key_set ? 'شماره‌ی الگو ثبت نشده است.' : d.body_id ? 'کلید وب‌سرویس ثبت نشده است.' : 'کلید وب‌سرویس و شماره‌ی الگو ثبت نشده‌اند؛ تا ثبت نشوند، هیچ‌کس با پیامک وارد نمی‌شود.') + '</span>';
+    document.getElementById('sms-body-id').value = d.body_id || '';
+    const rec = Array.isArray(d.recent) ? d.recent : [];
+    document.getElementById('sms-recent').innerHTML = rec.length
+      ? '<b class="sms-recent-title">ده پیامک آخر ورود</b><table class="sms-recent-table"><tbody>' + rec.map(x=>`<tr><td>${escHtml(new Date(x.at).toLocaleString('fa-IR', { timeZone:'Asia/Tehran', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' }))}</td><td>${escHtml(x.name || '—')}</td><td class="${/^ارسال شد/.test(smsReplyText(x)) ? 'ok' : 'bad'}">${escHtml(smsReplyText(x))}</td></tr>`).join('') + '</tbody></table>'
+      : '<p class="settings-help">هنوز پیامک ورودی فرستاده نشده است.</p>';
+  }
+  async function saveSmsConfig(){
+    const key = document.getElementById('sms-key').value.trim();
+    const bodyId = faDigitsToLatin(document.getElementById('sms-body-id').value);
+    if(!key && !bodyId){ showToast('کلید یا شماره‌ی الگو را وارد کنید'); return; }
+    const btn = document.getElementById('sms-save'); btn.disabled = true;
+    try{
+      const r = await api('/rpc/sms_config_set', { method:'POST', body: JSON.stringify({ p_api_key: key, p_body_id: bodyId }) });
+      const d = r.ok ? await r.json() : {};
+      if(!d.ok){ showToast(d.error === 'invalid_key' ? 'کلید وارد‌شده درست به نظر نمی‌رسد؛ کلید کنسول را دوباره از پنل ملی‌پیامک کپی کنید' : 'ذخیره ناموفق بود'); return; }
+      document.getElementById('sms-key').value = '';
+      showToast('ذخیره شد'); renderSmsPanel();
+    }catch(e){ console.error(e); showToast('ذخیره ناموفق بود'); }
+    finally{ btn.disabled = false; }
+  }
+  async function sendSmsTest(){
+    const phone = normalizeIrMobile(document.getElementById('sms-test-phone').value);
+    const out = document.getElementById('sms-test-result');
+    if(!/^09\d{9}$/.test(phone)){ showToast('شماره‌ی موبایل باید ۱۱ رقم و با ۰۹ شروع شود'); return; }
+    const btn = document.getElementById('sms-test-btn'); btn.disabled = true;
+    out.hidden = false; out.className = 'sms-test-result'; out.textContent = 'در حال ارسال…';
+    try{
+      const r = await api('/rpc/sms_test', { method:'POST', body: JSON.stringify({ p_phone: phone }) });
+      const d = r.ok ? await r.json() : {};
+      if(!d.ok){ out.classList.add('bad'); out.textContent = d.error === 'sms_not_configured' ? 'اول کلید و شماره‌ی الگو را ذخیره کنید.' : 'ارسال انجام نشد.'; return; }
+      // pg_net درخواست رو بعد از تراکنش می‌فرسته — چند ثانیه بعد نتیجه رو می‌خونیم
+      for(let i = 0; i < 8; i++){
+        await new Promise(res=>setTimeout(res, 1500));
+        const rr = await api('/rpc/sms_test_result', { method:'POST', body: JSON.stringify({ p_req_id: d.req_id }) });
+        const x = rr.ok ? await rr.json() : {};
+        if(x.pending) continue;
+        const txt = smsReplyText({ status_code: x.status_code, reply: x.reply });
+        out.classList.add(/^ارسال شد/.test(txt) ? 'ok' : 'bad');
+        out.textContent = /^ارسال شد/.test(txt) ? 'پیامک فرستاده شد؛ چند ثانیه‌ی دیگر روی گوشی بررسی کنید.' : txt + (x.reply ? ' — پاسخ ملی‌پیامک: ' + x.reply : '');
+        return;
+      }
+      out.textContent = 'پاسخی از ملی‌پیامک نرسید؛ چند دقیقه‌ی دیگر نتیجه را در فهرست پایین ببینید.';
+    }catch(e){ console.error(e); out.classList.add('bad'); out.textContent = 'ارسال انجام نشد.'; }
+    finally{ btn.disabled = false; }
+  }
+  async function saveViewerPasswordLogin(on){
+    if(on && !await uiConfirm('ورود با رمز مشترک بیننده دوباره باز شود؟\nهر کسی که رمز بیننده را بداند، بدون کد ملی وارد می‌شود. فقط وقتی ارسال پیامک از کار افتاده است روشن کنید.')){
+      document.getElementById('sms-viewer-pw').checked = false; return;
+    }
+    try{ await saveSiteSetting('viewer_password_login', !!on); showToast(on ? 'ورود اضطراری با رمز مشترک روشن شد' : 'ورود با رمز مشترک بیننده بسته شد'); }
+    catch(e){ console.error(e); showToast('ذخیره ناموفق بود'); document.getElementById('sms-viewer-pw').checked = !on; }
+  }
+
   function renderBackupPanel(){
     const list = document.getElementById('backup-list');
     if(!list) return;
@@ -12254,7 +12581,7 @@
     show_in_positions:'بخش مواضع مراجع و علماء', positions_tab:'تب مواضع', show_in_thinktanks:'بخش اندیشکده‌ها', show_in_laws:'بخش قوانین و مصوبات', laws_source:'مرجع صادرکننده',
     avatar_url:'عکس', owner_name:'صاحب کانال', subscriber_count:'مخاطب', is_khorasan_talabeh:'طلاب خراسان', keywords:'کلیدواژه‌ها', color:'رنگ', kind:'نوع',
     excluded:'پنهان در پرونده', message:'متن', level:'اهمیت', expires_at:'انقضا', full_name:'نام', phone:'موبایل', eitaa_id:'شناسه‌ی ایتا',
-    access_level:'سطح دسترسی', notes:'یادداشت', issue_no:'شماره', publish_date:'تاریخ انتشار', file_type:'نوع فایل', files:'فایل‌ها', cover_url:'جلد',
+    access_level:'سطح دسترسی', national_id_last4:'کد ملی (۴ رقم آخر)', is_admin:'نقش مدیر', notes:'یادداشت', issue_no:'شماره', publish_date:'تاریخ انتشار', file_type:'نوع فایل', files:'فایل‌ها', cover_url:'جلد',
     source_org:'نهاد', image_url:'تصویر', media_storage_path:'فایل', notified_at:'زمان اطلاع‌رسانی', type:'نوع منبع', value:'مقدار',
   };
   const AUDIT_FILE_FIELDS = ['avatar_url','files','cover_url','image_url','media_storage_path'];
@@ -12463,7 +12790,7 @@
 
   // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
   // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
-  const APP_VERSION = '5.30.0';
+  const APP_VERSION = '5.31.0';
   document.querySelectorAll('.app-version').forEach(el=>{ el.textContent = toFaDigits(APP_VERSION); });
 
   // ---- boot ----
