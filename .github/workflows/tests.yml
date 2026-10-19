@@ -1,0 +1,36 @@
+name: Site tests
+
+# آزمون‌های مرورگر سایت (tests/e2e) با داده‌ی ساختگی — روی هر PR به شاخه‌ی زنده
+# و هر push به آن. اگر قرمز شد، PR نباید ادغام شود (گزارش کامل در Artifacts).
+on:
+  pull_request:
+    branches: [claude/new-project-8ekywm]
+  push:
+    branches: [claude/new-project-8ekywm]
+  workflow_dispatch: {}
+
+concurrency:
+  group: site-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+        env:
+          CI: "1"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

@@ -1,0 +1,13 @@
+{
+  "name": "jarian",
+  "private": true,
+  "description": "سامانه‌ی رصد رسانه‌ای جریان",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}
