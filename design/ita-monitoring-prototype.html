@@ -4214,8 +4214,21 @@
   // شمارش جا می‌موندن. الان فقط *تعداد* رو با همون ترفند Content-Range
   // (fetchExactCount، بدون انتقال ردیف‌های واقعی) می‌گیریم — این هیچ‌وقت به آن
   // سقف نمی‌خوره.
-  async function fetchUniqueNewspaperCount(){
-    return fetchExactCount('/newspaper_unique_slugs', 'slug');
+  // «منبع رصد» صفحه‌ی نخست = منابعی که الان رصد می‌شن، هر منبع یک‌بار (خواست کاربر، ۵.۳۰.۰):
+  // منابع فعال «مدیریت منابع» + روزنامه‌های ۳۰ روز اخیر + سایت‌های خزنده‌ی «درباره حوزه» که در
+  // «مدیریت منابع» نیستن — RPC monitored_source_counts (migration_049؛ crawl_sites فقط برای مدیر
+  // خواندنیه). تا migration اجرا نشده: منابع فعال + روزنامه‌های ۳۰ روز اخیر از NEWSPAPERS.
+  async function fetchMonitoredSourceCount(){
+    try{
+      const r = await api('/rpc/monitored_source_counts', { method:'POST', body:'{}' });
+      if(r.ok){
+        const d = await r.json();
+        if(d && typeof d.channels === 'number') return d.channels + (+d.newspapers || 0) + (+d.crawl || 0);
+      }
+    }catch(e){}
+    const since = new Date(iranTodayStartMs() - 30 * 864e5).toISOString().slice(0, 10);
+    return CHANNELS.filter(c=>c.active !== false).length
+      + new Set(NEWSPAPERS.filter(n=>n.edition_date >= since).map(n=>n.slug)).size;
   }
 
   async function doLogin(password){
@@ -7453,34 +7466,30 @@
     const wrap = document.getElementById('dash-hero-stats');
     if(!wrap) return;
 
-    // «محتوای رصد شده» — از ابتدا تا الان، هر پست دریافت‌شده و هر روزنامه یک مورد؛
-    // چون POSTS_CACHE/NEWSPAPERS برای کارکرد عادی صفحه سقف limit دارن (۱۰۰۰/۵۰۰)، عدد واقعیِ
-    // تاریخی رو مستقیم با count=exact از خودِ جدول می‌گیریم، نه از کش محلی
-    // «خبرگزاری» — تعداد عنوان‌های یکتای روزنامه رو مستقیم از View دیتابیسی
-    // newspaper_unique_slugs (migration_030) می‌گیره، نه از آرایه‌ی NEWSPAPERS که
-    // برای نمایش تب «روزنامه‌ها» با limit=500 محدود شده — چون اون سقف فقط چند روز
-    // اخیر رو پوشش می‌ده و همون روزنامه‌ی تکراری در روزهای مختلف رو کامل نمی‌بینه.
-    const [postsTotal, newspapersTotal, newspaperTitles] = await Promise.all([
-      fetchExactCount('/posts'),
-      fetchExactCount('/newspapers'),
-      fetchUniqueNewspaperCount(),
-    ]);
-    const trackedContentCount = postsTotal + newspapersTotal;
-
     // پنج کارت = مسیر کار سامانه از منبع تا تحلیل (۵.۳۰.۰، خواست کاربر: کارت‌ها «منطقی و به هم
     // مرتبط» باشن): از کجا (منبع رصد) ← چقدر (محتوای رصد شده) ← زنده بودن (رصد امروز) ← در چه
     // حوزه‌هایی (بخش رصد) ← حاصل کار (بسته تحلیلی). قبلاً «خبرگزاری»/«کنشگر مجازی» (دو زیرمجموعه‌ی
     // ناقص منابع) و «مدارس علمیه» (عدد دستی ۱۲۶) بود.
-    // «منبع رصد» — همه‌ی منابع فعال «مدیریت منابع» (هر بستر، هر بخش؛ هر منبع یک‌بار) + عنوان‌های
-    // یکتای روزنامه (newspaper_unique_slugs، چون NEWSPAPERS فقط چند روز اخیره)
-    const sourceCount = CHANNELS.filter(c=>c.active !== false).length + newspaperTitles;
-
-    // «رصد امروز» — محتوای رسیده از نیمه‌شب تهران؛ scraped_at فقط موقع درج اول پر می‌شه
-    // (کالکتورها روی upsert دوباره‌اش نمی‌نویسن) پس پست قدیمیِ دوباره‌اسکن‌شده شمرده نمی‌شه
-    const todayIso = new Date(iranTodayStartMs()).toISOString();
+    // همه‌ی عددها با count=exact از خودِ جدول‌ها (نه از کش‌های محدود POSTS_CACHE/NEWSPAPERS).
+    // «محتوای رصد شده»/«رصد امروز» = پست‌ها + روزنامه‌ها + یافته‌های خزنده‌ی «درباره حوزه» از سایت‌ها
+    // (hawza_mentions با post_id خالی؛ یافته‌های شبکه‌های اجتماعی خودشون پست‌ان و دوباره شمرده نمی‌شن).
+    // scraped_at فقط موقع درج اول پر می‌شه (کالکتورها روی upsert دوباره‌اش نمی‌نویسن)، پس پست
+    // قدیمیِ دوباره‌اسکن‌شده در «رصد امروز» نمیاد.
+    const todayIso = encodeURIComponent(new Date(iranTodayStartMs()).toISOString());
     const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Tehran', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
-    const todayPosts = await fetchExactCount('/posts?scraped_at=gte.' + encodeURIComponent(todayIso));
-    const todayCount = todayPosts + NEWSPAPERS.filter(n=>n.edition_date === todayStr).length;
+    const CRAWL_ONLY = '/hawza_mentions?post_id=is.null&hidden_at=is.null';
+    const [postsTotal, newspapersTotal, crawlTotal, postsToday, newspapersToday, crawlToday, sources] = await Promise.all([
+      fetchExactCount('/posts'),
+      fetchExactCount('/newspapers'),
+      fetchExactCount(CRAWL_ONLY),
+      fetchExactCount('/posts?scraped_at=gte.' + todayIso),
+      fetchExactCount('/newspapers?edition_date=eq.' + todayStr),
+      fetchExactCount(CRAWL_ONLY + '&scraped_at=gte.' + todayIso),
+      fetchMonitoredSourceCount(),
+    ]);
+    const trackedContentCount = postsTotal + newspapersTotal + crawlTotal;
+    const todayCount = postsToday + newspapersToday + crawlToday;
+    const sourceCount = sources;
 
     // «بخش رصد» — زیربخش‌های عرصه‌هایی که بیننده زیر همین هرو در «عرصه‌های رصد و پایش» می‌بینه
     // (خواست کاربر: ملاک تب‌ها باشن، نه خودِ عرصه‌ها): هر تب = یک بخش، عرصه‌ی بی‌تب = یک بخش؛
