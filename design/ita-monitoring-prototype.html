@@ -7469,7 +7469,7 @@
 
     // پنج کارت = مسیر کار سامانه از منبع تا تحلیل (۵.۳۰.۰، خواست کاربر: کارت‌ها «منطقی و به هم
     // مرتبط» باشن): از کجا (منبع رصد) ← چقدر (محتوای رصد شده) ← زنده بودن (رصد امروز) ← در چه
-    // حوزه‌هایی (عرصه‌ی رصد) ← حاصل کار (بسته تحلیلی). قبلاً «خبرگزاری»/«کنشگر مجازی» (دو زیرمجموعه‌ی
+    // حوزه‌هایی (بخش رصد) ← حاصل کار (بسته تحلیلی). قبلاً «خبرگزاری»/«کنشگر مجازی» (دو زیرمجموعه‌ی
     // ناقص منابع) و «مدارس علمیه» (عدد دستی ۱۲۶) بود.
     // «منبع رصد» — همه‌ی منابع فعال «مدیریت منابع» (هر بستر، هر بخش؛ هر منبع یک‌بار) + عنوان‌های
     // یکتای روزنامه (newspaper_unique_slugs، چون NEWSPAPERS فقط چند روز اخیره)
@@ -7482,10 +7482,17 @@
     const todayPosts = await fetchExactCount('/posts?scraped_at=gte.' + encodeURIComponent(todayIso));
     const todayCount = todayPosts + NEWSPAPERS.filter(n=>n.edition_date === todayStr).length;
 
-    // «عرصه‌ی رصد» — همون کارت‌هایی که بیننده زیر همین هرو در «عرصه‌های رصد و پایش» می‌بینه
-    // (بدون «به‌زودی» و بخش‌های پنهان‌شده از «نمایش سایت»)
+    // «بخش رصد» — زیربخش‌های عرصه‌هایی که بیننده زیر همین هرو در «عرصه‌های رصد و پایش» می‌بینه
+    // (خواست کاربر: ملاک تب‌ها باشن، نه خودِ عرصه‌ها): هر تب = یک بخش، عرصه‌ی بی‌تب = یک بخش؛
+    // کارت‌های «به‌زودی»، بخش/تب‌های پنهان‌شده از «نمایش سایت» و تب‌های هنوز راه‌نیفتاده نه
+    const DOMAIN_PLACEHOLDER_TABS = new Set(['public/trends']); // «در حال راه‌اندازی» — با راه‌افتادن از اینجا برداشته بشه
     const domainCount = [...document.querySelectorAll('.domain-card[data-vis]')]
-      .filter(c=>!c.classList.contains('soon-item') && !visHidden(c.dataset.vis)).length;
+      .filter(c=>!c.classList.contains('soon-item') && !visHidden(c.dataset.vis))
+      .reduce((n, c)=>{
+        const it = SITE_VIS_ITEMS.find(x=>x.key === c.dataset.vis);
+        if(!it || !it.tabs.length) return n + 1;
+        return n + it.tabs.filter(([t])=>!DOMAIN_PLACEHOLDER_TABS.has(it.key + '/' + t) && !visHidden(it.key + '/' + t)).length;
+      }, 0);
 
     const magazinesCount = MAGAZINES.length; // «بسته تحلیلی» — مجلات خودِ جریان
 
@@ -7495,7 +7502,7 @@
       stat('<circle cx="12" cy="12" r="2"/><path d="M8.5 15.5a5 5 0 010-7M15.5 8.5a5 5 0 010 7M5.6 18.4a9 9 0 010-12.8M18.4 5.6a9 9 0 010 12.8"/>', sourceCount, 'منبع رصد') +
       stat('<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>', trackedContentCount, 'محتوای رصد شده') +
       stat('<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>', todayCount, 'رصد امروز') +
-      stat('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.4-6.4"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', domainCount, 'عرصه‌ی رصد') +
+      stat('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.4-6.4"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', domainCount, 'بخش رصد') +
       stat('<path d="M2 5.5c2.5-1 6-1 10 1.5 4-2.5 7.5-2.5 10-1.5V19c-2.5-1-6-1-10 1.5C8 18 4.5 18 2 19z"/><path d="M12 7v13.5"/>', magazinesCount, 'بسته تحلیلی');
     animateHeroStatCounters(wrap);
   }
