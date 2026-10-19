@@ -71,7 +71,8 @@ const mk = d=>fs.mkdirSync(path.join(OUT,d),{recursive:true});
   const c1 = await shot(1920,1080,1,'desktop-1920x1080',desktop); await c1.close();
   const mobile = [
     ['01-home-hero', `switchSection('dashboard'); window.scrollTo(0,0)`],
-    ['02-home-domains', toEl('.domain-grid')],
+    // روی گوشی .domain-grid با display:contents جعبه نداره؛ ۹۰px بالاتر تا تیتر بخش هم دیده بشه
+    ['02-home-domains', `(()=>{ const e=document.querySelector('.domain-orbits'); window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 90); })()`],
     ['03-news-at-a-glance', `goToNewsTab('analytics'); window.scrollTo(0,0)`],
   ];
   const c2 = await shot(390,844,3,'mobile',mobile); await c2.close();
