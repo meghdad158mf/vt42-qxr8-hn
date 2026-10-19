@@ -1,0 +1,119 @@
+/* نظرات، بسته‌های تحلیلی، بسته تحلیلی صفحه‌ی نخست، روزنامه‌ها */
+
+/* ---------- نظرات کاربران (کارت «ثبت نظر و پیشنهاد» صفحه نخست) ---------- */
+.feedback-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:14px 4px; border-bottom:1px solid var(--border); }
+.feedback-row:last-child{ border-bottom:none; }
+.feedback-row-main{ flex:1; min-width:0; }
+.feedback-row-head{ display:flex; align-items:baseline; gap:8px; margin-bottom:5px; flex-wrap:wrap; }
+.feedback-row-name{ font-size:13px; font-weight:700; color: var(--text); }
+.feedback-row-time{ font-size:11px; color: var(--text-faint); }
+.feedback-row-message{ font-size:13px; color: var(--text-dim); line-height:1.8; white-space:pre-wrap; }
+
+.notify-subs-list{ max-height:280px; overflow-y:auto; }
+.notify-sub-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 4px; border-bottom:1px solid var(--border); font-size:13px; }
+.notify-sub-row:last-child{ border-bottom:none; }
+.notify-sub-time{ color: var(--text-faint); font-size:12px; }
+.notify-sub-status{ font-size:11px; font-weight:700; color: var(--text-dim); background: var(--surface-2); border-radius: var(--radius-pill); padding:3px 10px; flex-shrink:0; }
+.notify-sub-status.done{ color: var(--accent-strong); background: rgba(234,179,147,0.14); }
+
+/* ---------- magazines library (بخش تحلیلی) ---------- */
+.magazine-grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
+.magazine-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:18px; display:flex; flex-direction:column; gap:8px; box-shadow: var(--shadow); }
+.mag-icon{ width:38px; height:38px; border-radius: var(--radius-control); background: var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.mag-icon svg{ width:19px; height:19px; }
+.mag-title{ font-size:14px; font-weight:700; color: var(--text); }
+.mag-meta{ font-size:11px; color: var(--text-faint); }
+.mag-actions{ margin-top:auto; padding-top:6px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+/* کنترل‌های مدیر زیر جلدها (cardAdminControls): جابه‌جایی + «حذف» با برچسب — ۳۲px، روی بوم تیره */
+.card-admin{ display:flex; gap:6px; align-items:center; width:100%; } /* ردیف جدای مدیر زیر «مطالعه» */
+.card-admin .card-del{ margin-inline-start:auto; }
+.card-admin button{ display:inline-flex; align-items:center; justify-content:center; gap:5px; min-width:32px; min-height:32px; padding:0 7px; border-radius:999px; border:1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.78); font:inherit; font-size:12px; font-weight:600; cursor:pointer; }
+.card-admin button svg{ width:15px; height:15px; flex-shrink:0; }
+.card-admin button:hover:not(:disabled){ color:#fff; border-color: var(--accent); }
+.card-admin button:disabled{ opacity:.3; cursor:default; }
+.card-admin .card-del:hover{ color:#ffb3ad; border-color: rgba(217,67,60,0.7); background: rgba(217,67,60,0.14); }
+.card-admin .card-del{ padding-inline:10px; }
+
+/* تب «سایر بسته‌های تحلیلی» (زیرتب «یادداشت‌ها») — یه قاب تصویر جلد بلند
+   (aspect-ratio 5/7) به‌جای .mag-icon کوچیک. کارت هم برخلاف .magazine-card
+   معمولی، قاب/زمینه‌ی سفید نداره — بدون قاب، مستقیم روی بوم تیره چون خودِ
+   تصویر جلد کافیه و کارت نیازی به زمینه‌ی روشن نداره؛ رنگ متن‌ها هم به
+   همین خاطر روشن شدن (نه رنگ تیره‌ی پیش‌فرض .mag-title/.mag-meta که
+   برای زمینه‌ی سفید طراحی شده بودن). */
+.archive-report-card{ padding:0; background:none; border:none; box-shadow:none; }
+.archive-report-poster{ width:100%; aspect-ratio: 5/7; border-radius: var(--radius-control); overflow:hidden; background: var(--surface-2); display:flex; align-items:center; justify-content:center; color: var(--text-faint); margin-bottom:2px; }
+.archive-report-poster img{ width:100%; height:100%; object-fit:cover; display:block; }
+.archive-report-poster svg{ width:26%; height:26%; opacity:.5; }
+.archive-report-card .mag-title{ color:#fff; }
+.archive-report-card .mag-meta{ color: rgba(255,255,255,0.55); }
+.mag-issue-card .mag-actions{ justify-content:space-between; }
+.mag-read-btn{ min-height:40px; padding-inline:20px; }
+/* روی بوم تیره دکمه‌ی سرمه‌ای دیده نمی‌شد — هلویی */
+.archive-report-card .mag-read-btn, .archive-report-card .mag-read-btn:hover{ background: var(--accent); color: var(--primary); border-color: var(--accent); }
+.sec-intro{ margin-top:0; }
+
+/* «بسته تحلیلی جریان» صفحه‌ی نخست (مهر ۱۴۰۵، به‌جای کارت هلویی + کاروسل): جلد ۵ شماره‌ی
+   اول (ترتیب مدیر) بدون قاب، روی قوسی که قرینه‌ی «مدار» عرصه‌هاست (رو به پایین)، با همون
+   «شهاب جریان». مختصات مثل .dom-orbit: کاشی ۱۷۰ + فاصله‌ی ۱۶ = ۱۸۶px بین مراکز؛ مرکز جلد
+   (۱۷۸/۲=۸۹px از بالای ردیف) = y=۷۴ در viewBox → top:-85px. قوس قرینه‌ی حول y=۷۴؛ طول مسیر
+   همون ≈۱۱۳۹ پس مقادیر dash شهاب همون‌هاست. زیر ۹۰۰px مخفی. */
+.pkg-flow{ position:relative; }
+.pkg-orbit{ position:absolute; left:50%; top:-101px; width:1200px; max-width:none; height:360px; margin-left:-600px; z-index:-1; pointer-events:none; overflow:visible;
+  -webkit-mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px));
+          mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px)); }
+@media (max-width:900px){ .pkg-orbit{ display:none; } }
+@media (prefers-reduced-motion: reduce){ .pkg-orbit .flow{ display:none; } }
+.pkg-covers{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; }
+.pkg-row{ position:relative; z-index:0; }
+.pkg-row + .pkg-row{ margin-top:38px; }
+.pkg-tile{ width:170px; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; }
+/* گوشی: یک ردیف افقی اسکرول‌خور با جلدهای کوچک‌تر (۵ جلد دوستونه خیلی بلند می‌شد) */
+@media (max-width:900px){ .pkg-covers{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:6px 4px 10px; } .pkg-covers::-webkit-scrollbar{ display:none; } .pkg-tile{ width:128px; flex-shrink:0; scroll-snap-align:start; } .pkg-cover{ width:110px; height:146px; } }
+@media (min-width:640px) and (max-width:900px){ .pkg-covers{ justify-content:center; } }
+.pkg-cover{ width:110px; height:146px; border-radius:6px; overflow:hidden; background:#243140; border:1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 22px 34px -16px rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; color: rgba(255,255,255,0.4);
+  transition: transform .25s ease, box-shadow .25s ease; }
+.pkg-tile:hover .pkg-cover{ transform: translateY(-6px); box-shadow: 0 28px 40px -16px rgba(0,0,0,0.8), 0 0 26px -6px rgba(234,179,147,0.45); }
+.pkg-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+.pkg-cover svg{ width:34%; height:34%; }
+.pkg-title{ font-size:15px; font-weight:700; color:#fff; text-align:center; line-height:24px; max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pkg-empty{ font-size:13px; color: rgba(255,255,255,0.55); padding:40px 0; }
+/* قرینه‌ی عرصه‌ها: آن‌جا توضیح زیر آیکون‌هاست، این‌جا بالای جلدها */
+.pkg-caption{ margin:-8px auto 16px; }
+/* فهرست ۱۰ بخش بسته — فقط نمایشی، بدون قاب؛ دو ردیف ۵تایی روی دسکتاپ */
+.pkg-parts{ display:grid; grid-template-columns:repeat(5,auto); justify-content:center; gap:12px 26px; margin:0 auto 54px; }
+@media (max-width:900px){ .pkg-parts{ display:flex; flex-wrap:wrap; } }
+.pkg-part{ display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color: rgba(255,255,255,0.78); white-space:nowrap; }
+.pkg-part svg{ width:15px; height:15px; color:#EAB393; flex-shrink:0; }
+@media (max-width:640px){ .pkg-parts{ gap:10px 16px; margin-bottom:34px; } .pkg-part{ font-size:12px; } }
+.pkg-more{ display:flex; justify-content:center; margin:30px 0 0; }
+.pkg-more-btn{ display:inline-flex; align-items:center; gap:6px; font:700 13px 'IRANSansX',Tahoma,sans-serif; color:#EAB393; background:none; border:1px solid rgba(234,179,147,0.45); border-radius:999px; padding:8px 16px; cursor:pointer; transition: background .2s ease, color .2s ease; }
+.pkg-more-btn:hover{ background:#EAB393; color:#16202a; }
+.pkg-more-btn svg{ width:14px; height:14px; }
+
+/* کارت همیشه‌نمایان «ثبت نظر و پیشنهاد» — ته صفحه‌ی نخست، قبل از فوتر.
+   طبق خواسته‌ی صریح کاربر، مثل .notify-card کناریش قاب/زمینه‌ی روشن
+   نداره — بدون قاب، مستقیم روی بوم تیره؛ فقط خودِ ورودی‌ها (mono
+   نیستن ولی از همون tokenهای var(--surface-2)) یه سطح روشن کوچیک
+   دارن تا قابل‌تشخیص/قابل‌کلیک بمونن، دقیقاً مثل ورودی .notify-card-form. */
+.feedback-card{ flex:1 1 400px; max-width:440px; box-sizing:border-box; }
+.feedback-card h3{ font-size:15px; font-weight:800; color:#fff; margin:0; text-align:center; }
+.feedback-form{ display:flex; flex-direction:column; gap:9px; max-width:560px; margin:0 auto; }
+.feedback-form input, .feedback-form textarea{
+  font-family:inherit; font-size:13px; padding:9px 13px; border:1px solid var(--border);
+  border-radius: var(--radius-control); background: var(--surface-2); color: var(--text); resize:vertical;
+}
+.feedback-form textarea{ min-height:64px; }
+.feedback-form input:focus, .feedback-form textarea:focus{ outline:none; border-color: var(--accent); }
+.feedback-form button{ align-self:center; margin-top:4px; padding:13px 34px; font-size:15px; box-shadow: 0 14px 28px -14px rgba(234,179,147,0.55); }
+
+/* تب «روزنامه‌ها» — گرید صفحه‌ی اول روزنامه‌های امروز، همون زبان بصری کاور مجله (mag-tile) */
+.newspaper-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:20px 16px; margin-top:8px; }
+@media (max-width:900px){ .newspaper-grid{ grid-template-columns: repeat(2,1fr); } }
+@media (max-width:560px){ .newspaper-grid{ grid-template-columns: repeat(2,minmax(0,1fr)); gap:16px 10px; } }
+.newspaper-card{ cursor:pointer; display:flex; flex-direction:column; gap:9px; }
+.newspaper-cover{ width:100%; aspect-ratio: 4/3; border-radius: var(--radius-control); overflow:hidden; background: var(--surface); border:1px solid var(--border); box-shadow: var(--shadow); transition: transform .2s ease, box-shadow .2s ease; }
+.newspaper-card:hover .newspaper-cover{ transform:translateY(-5px) scale(1.02); box-shadow: var(--shadow-hover); }
+.newspaper-cover img{ width:100%; height:100%; object-fit:contain; display:block; }
+.newspaper-title{ font-size:12px; font-weight:600; color: rgba(255,255,255,0.82); text-align:center; line-height:1.5; }
+.mag-empty-hint{ font-size:13px; color: var(--text-faint); padding:6px 4px; }

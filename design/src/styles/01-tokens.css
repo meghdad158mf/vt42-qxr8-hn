@@ -1,0 +1,33 @@
+/* متغیرهای طراحی (رنگ، گوشه، سایه) */
+
+:root{
+  /* Tactile Analytics Interface design system — light */
+  --bg: #eef1f6;
+  --bg-2: #e4e9f0;
+  --surface: #ffffff;
+  --surface-2: #f2f4f8;
+  --border: #dee3ea;
+  --border-strong: #c7cedb;
+  --primary: #16202a;
+  --primary-strong: #3a5068;
+  --primary-2: #24323f;
+  --primary-soft: rgba(58,80,104,0.10);
+  --accent: #EAB393;
+  --accent-strong: #b5651d;
+  --accent-soft: rgba(181,101,29,0.12);
+  --text: #141b24;
+  --text-dim: #5b6472;
+  --text-faint: #646f80; /* ۵.۲۱.۰: قبلاً #707b8c با کنتراست ۴٫۳ روی سفید (زیر حد ۴٫۵) */
+  --ok: #0e9968;
+  --ok-soft: rgba(14,153,104,0.12);
+  --danger: #d9433c;
+  --danger-soft: rgba(217,67,60,0.12);
+  --radius-card: 16px;
+  --radius-control: 10px; /* ۵.۲۲.۰: کادرهای فرم ۱۰ (قبلاً ۸) */
+  --radius-pill: 9999px;
+  --radius: var(--radius-card);
+  --navy: var(--primary);
+  --navy-2: var(--primary-2);
+  --shadow: 0 10px 24px -14px rgba(23,35,48,0.16), 0 1px 0 rgba(255,255,255,0.7) inset;
+  --shadow-hover: 0 18px 40px -18px rgba(23,35,48,0.22), 0 1px 0 rgba(255,255,255,0.8) inset;
+}

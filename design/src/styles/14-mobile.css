@@ -1,0 +1,69 @@
+/* بازبینی ریسپانسیو و کاهش شلوغی گوشی */
+
+/* ---- بازبینی ریسپانسیو موبایل (۵ مهر ۱۴۰۵) ---- */
+/* فید «شبکه‌های اجتماعی»/«پست‌های منتشر شده»/«یادداشت‌ها» (social-tab) قانون
+   ۴ستونه‌ی اختصاصی داره که از قانون‌های موبایل عمومی grid-view قوی‌تره —
+   بدون این، روی گوشی ۴ ستون خیلی باریک نشون داده می‌شد */
+@media (max-width:900px){ .news-feed.grid-view.social-tab{ grid-template-columns: repeat(2,1fr); } }
+@media (max-width:560px){ .news-feed.grid-view.social-tab{ grid-template-columns: 1fr; } }
+@media (max-width:640px){
+  /* پاپ‌آور «بازه‌ی زمانی» (چپ‌ترین دکمه‌ی ردیف زمان) از لبه‌ی چپ صفحه بیرون می‌زد */
+  .news-daterange-details .news-daterange-popover{ inset-inline-start:auto; inset-inline-end:auto; left:0; right:auto; }
+  /* فاصله‌های خیلی بزرگ دسکتاپ بین بلوک‌های صفحه‌ی نخست روی گوشی فضای خالی زیادی می‌ساخت */
+  .why-jarian-card{ margin-top:110px; }
+  .section-label{ margin-top:80px; }
+  .home-bottom-row{ margin-top:90px; }
+}
+@media (max-width:560px){
+  /* قاب تصویر خالی کارت‌های بدون رسانه روی گوشی فقط جا می‌گیره */
+  .news-card > .news-thumb.placeholder{ display:none; }
+  #archive-report-grid{ grid-template-columns: repeat(2,minmax(0,1fr)); gap:18px 12px; }
+}
+/* پنل آماری ۵تایی در ۲ ستون: کاشی آخر تنها نمونه، تمام‌عرض بشه */
+@media (max-width:640px){ .dash-hero-stats > :last-child:nth-child(odd){ grid-column:1 / -1; } }
+/* ===== کاهش شلوغی نمای گوشی ===== */
+.m-filter-btn{ display:none; align-items:center; gap:6px; flex-shrink:0; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.85); padding:0 14px; border-radius: var(--radius-control); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+.m-filter-btn svg{ width:16px; height:16px; }
+.m-filter-btn.active{ border-color: var(--accent); color: var(--accent); }
+.m-filter-count:not(:empty){ background: var(--accent); color: var(--primary); border-radius:999px; min-width:18px; height:18px; padding:0 5px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; }
+@media (max-width:640px){
+  .m-filter-btn{ display:inline-flex; align-self:stretch; }
+  [data-mfilters]:not(.m-open) .m-collapse{ display:none !important; }
+  .news-search-box{ min-width:0; }
+  .news-view-toggle{ display:none; }
+  #posts-tab-feed{ display:flex; flex-direction:column; }
+  #posts-tab-feed > .toolbar{ order:-1; }
+  #posts-tab-feed .toolbar > #posts-search-box{ order:-2; flex:1; min-width:0; }
+  #posts-tab-feed .toolbar > .m-filter-btn{ order:-1; }
+  #posts-tab-feed .toolbar > select{ flex:1; }
+  .news-tab-subtitle{ margin-bottom:18px; }
+  .news-tab-subtitle span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  .app-footer{ margin-top:36px; padding-top:18px; }
+  .app-footer-top{ flex-direction:column; align-items:center; text-align:center; gap:10px; }
+  .app-footer-brand{ align-items:center; max-width:none; }
+  .app-footer-tagline{ display:none; }
+  .app-footer-org{ gap:4px; flex-direction:column; align-items:center; }
+  .afo-item{ display:block; max-width:none; font-size:11px; text-align:center; line-height:1.8; }
+  .afo-item b{ font-size:11px; margin-inline-end:5px; }
+  .afo-item b::after{ content:':'; }
+  .news-smart-toggle{ display:none !important; }
+  #news-time-seg{ gap:2px; }
+  #news-time-seg > button, #news-time-seg .news-daterange-details summary{ white-space:nowrap; padding-inline:9px; }
+}
+
+/* «کنشگری مجازی» — ردیف گروه + زمان، نوار «فقط پست‌های X»، دسته‌بندی تیره (هم‌شکل اخبار)، مرتب‌سازی گوشی */
+.posts-seg-row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+.posts-focus-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:14px; padding:10px 14px; border-radius:12px; background: rgba(234,179,147,0.12); border:1px solid rgba(234,179,147,0.4); color:#fff; font-size:13px; }
+.posts-focus-bar b{ color: var(--accent); }
+.posts-focus-bar button{ font:inherit; font-size:12px; font-weight:700; color: var(--primary); background: var(--accent); border:none; border-radius:999px; padding:7px 14px; cursor:pointer; min-height:36px; }
+#posts-tab-feed .toolbar select{ background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color:#fff; color-scheme:dark; }
+.cpt-sort-m{ display:none; }
+@media (max-width:700px){
+  .cpt-sort-m{ display:flex; align-items:center; gap:8px; padding:10px 14px; font-size:12px; color: var(--text-dim); border-bottom:1px solid var(--border); }
+  .cpt-sort-m select{ flex:1; font:inherit; font-size:13px; padding:8px 10px; min-height:40px; border-radius:8px; border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); }
+}
+@media (max-width:640px){
+  #posts-time-seg{ gap:2px; }
+  #posts-time-seg > button, #posts-time-seg .news-daterange-details summary{ white-space:nowrap; padding-inline:9px; }
+  .posts-seg-row{ gap:8px; }
+}

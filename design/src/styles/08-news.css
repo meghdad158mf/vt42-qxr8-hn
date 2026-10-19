@@ -1,0 +1,375 @@
+/* اخبار و رویدادها: تب‌بار، گالری، فید، فیلترها، در یک نگاه، موج‌ها، نمودارها */
+
+/* اخبار رسمی — بخش مطالعه (فاز ۱، بدون فیلتر/ترجمه‌ی هوشمند) */
+/* تب‌بار همه‌ی بخش‌ها (بدون خط پایه — زیر هدر خودش خط هست، به خواست کاربر): خط هلویی لغزان (.tab-ink، با setupTabBars/updateTabInk)
+   + آیکون کنار هر تب (data-ic → TAB_ICONS) + چسبان هنگام اسکرول */
+.news-page-tabs{ display:flex; gap:4px; margin-bottom:16px; position:sticky; top:0; z-index:30;
+  transition: background .2s ease, box-shadow .2s ease; }
+/* فقط وقتی به بالای صفحه چسبیده (روی محتوا) پس‌زمینه می‌گیره — updateStuckTabBars */
+.news-page-tabs.is-stuck{ background: rgba(22,32,42,0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 10px 24px -14px rgba(0,0,0,0.6); }
+.news-page-tabs button{ border:none; background:none; color:rgba(255,255,255,0.5); font-size:14px; font-weight:700; padding:12px 14px; border-radius:10px 10px 0 0; cursor:pointer; position:relative; font-family:inherit; white-space:nowrap; display:inline-flex; align-items:center; gap:7px; transition: color .15s ease, background .15s ease; }
+.news-page-tabs button:hover:not(:disabled):not(.active){ color:rgba(255,255,255,0.85); background:rgba(255,255,255,0.04); }
+.news-page-tabs button.active{ color:#fff; background: linear-gradient(180deg, rgba(234,179,147,0.03), rgba(234,179,147,0.15)); }
+.news-page-tabs button:disabled{ cursor:default; opacity:.6; }
+.news-page-tabs button:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+.news-page-tabs .tab-ic{ width:16px; height:16px; flex-shrink:0; opacity:.75; }
+.news-page-tabs button.active .tab-ic{ opacity:1; color: var(--accent); }
+.tab-ink{ position:absolute; bottom:0; left:0; height:3px; width:0; border-radius:3px; background: var(--accent); pointer-events:none; transition: transform .32s cubic-bezier(.22,1,.36,1), width .32s cubic-bezier(.22,1,.36,1); }
+.tab-ink.no-anim{ transition:none; }
+@media (prefers-reduced-motion: reduce){ .tab-ink{ transition:none; } }
+.news-soon{ font-size:11px; font-weight:600; color: var(--accent); background: rgba(234,179,147,0.14); border-radius:100px; padding:2px 7px; margin-inline-start:6px; }
+/* ردیف تب‌ها با تعداد زیاد (مثلاً ۷ تای «اخبار و رویدادها» یا ۵ تای
+   «یادداشت‌ها») از عرض موبایل رد می‌شه و باعث اسکرول افقی کل صفحه
+   می‌شد — روی موبایل به‌جای شکستن/جمع‌شدن، خودِ ردیف تب‌ها اسکرول
+   افقی می‌گیره (الگوی معمول تب‌بار موبایل)، بقیه‌ی صفحه دست‌نخورده می‌مونه */
+@media (max-width:700px){
+  .news-page-tabs{ overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; gap:2px;
+    /* سایه‌ی محو لبه‌ها وقتی تب بیشتری بیرون صفحه هست (--fs سمت راست/شروع، --fe سمت چپ/پایان؛ updateTabFade) */
+    -webkit-mask-image: linear-gradient(to left, transparent 0, #000 var(--fs,0px), #000 calc(100% - var(--fe,0px)), transparent 100%);
+            mask-image: linear-gradient(to left, transparent 0, #000 var(--fs,0px), #000 calc(100% - var(--fe,0px)), transparent 100%); }
+  .news-page-tabs button{ padding:11px 11px; }
+  .news-page-tabs::-webkit-scrollbar{ display:none; }
+}
+
+
+/* گالری لوگو/عکس «تحلیل سازمان‌ها» و «چهره‌ها و فعالان سیاسی» — بدون
+   قاب، مستقیم روی بوم تیره؛ با کلیک، فید مطالب همون کانال باز می‌شه */
+.pf-logo-grid{ display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:26px 12px; margin-top:6px; }
+@media (max-width:1100px){ .pf-logo-grid{ grid-template-columns:repeat(6,minmax(0,1fr)); } }
+@media (max-width:820px){ .pf-logo-grid{ grid-template-columns:repeat(4,minmax(0,1fr)); } }
+.pf-logo-card{ all:unset; box-sizing:border-box; cursor:pointer; display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; padding:12px 4px; border-radius:18px; transition:background .2s ease, transform .2s cubic-bezier(0.23,1,0.32,1); animation:pfCardIn .35s cubic-bezier(0.23,1,0.32,1) both; }
+.pf-logo-card:hover{ background:rgba(255,255,255,0.05); transform:translateY(-3px); }
+.pf-logo-card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.pf-logo{ width:92px; height:92px; border-radius:50%; overflow:hidden; flex:none; display:flex; align-items:center; justify-content:center; background:linear-gradient(145deg, #f3cdb4, var(--accent)); color:#16202a; font-size:34px; font-weight:800; box-shadow:0 0 0 3px rgba(234,179,147,0.25); transition:box-shadow .2s ease; }
+.pf-logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+.pf-logo-card:hover .pf-logo{ box-shadow:0 0 0 3px var(--accent), 0 10px 26px rgba(0,0,0,0.35); }
+.pf-logo-name{ color:#fff; font-size:14px; font-weight:700; line-height:1.7; }
+.pf-logo-meta{ color:rgba(255,255,255,0.5); font-size:12px; line-height:1.7; margin-top:-6px; white-space:nowrap; }
+@keyframes pfCardIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+@media (prefers-reduced-motion:reduce){ .pf-logo-card{ animation:none; transition:none; } }
+@media (max-width:560px){ .pf-logo-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 10px; } .pf-logo{ width:88px; height:88px; font-size:32px; } }
+
+.pf-group-chips{ margin:4px 0 18px; }
+.pf-group-section + .pf-group-section{ margin-top:34px; }
+.pf-group-title{ display:flex; align-items:center; gap:12px; color:#fff; font-size:15px; font-weight:800; margin:0 0 6px; }
+.pf-group-title::after{ content:''; flex:1; height:1px; background:linear-gradient(90deg, rgba(234,179,147,0), rgba(234,179,147,0.45)); }
+.pf-group-title small{ color:rgba(255,255,255,0.45); font-size:12px; font-weight:500; }
+.pf-feed-groups{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.pf-feed-groups span{ font-size:11px; font-weight:600; padding:3px 10px; border-radius:var(--radius-pill); background:rgba(234,179,147,0.18); color:var(--accent); }
+.pf-feed-head{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+.pf-feed-identity{ display:flex; align-items:center; gap:14px; }
+.pf-feed-identity .pf-logo{ width:64px; height:64px; font-size:24px; }
+.pf-feed-identity h3{ margin:0; color:#fff; font-size:18px; }
+.pf-feed-identity a{ color:var(--accent); font-size:13px; text-decoration:none; }
+.pf-feed-identity a:hover{ text-decoration:underline; }
+.pf-back-btn{ display:inline-flex; align-items:center; gap:6px; background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.3); border-radius:999px; padding:8px 16px; font:inherit; font-size:13px; cursor:pointer; transition:border-color .2s, color .2s; }
+.pf-back-btn:hover{ border-color:var(--accent); color:var(--accent); }
+.pf-back-btn svg{ width:16px; height:16px; }
+
+/* زیرنویس توضیحی تب فعال — یه خط کوتاه هدف همون تب رو توضیح می‌ده،
+   با تعویض تب هم عوض می‌شه (نگاه کن به setNewsPageTab و دو هندلر کلیک
+   posts-page-tabs/people-page-tabs) */
+.news-tab-subtitle{ display:flex; align-items:flex-start; gap:9px; color:rgba(255,255,255,0.58); font-size:13px; line-height:1.9; margin:0 0 26px; max-width:620px; animation:subtitleFade .25s ease; }
+.news-tab-subtitle::before{ content:''; flex:none; width:2px; align-self:stretch; border-radius:2px; background:linear-gradient(180deg, var(--accent), rgba(234,179,147,0)); margin-top:2px; }
+.news-tab-subtitle span{ padding-top:1px; }
+@keyframes subtitleFade{ from{ opacity:0; transform:translateY(-4px); } to{ opacity:1; transform:translateY(0); } }
+
+.news-view-toggle{ display:flex; gap:4px; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); padding:4px; border-radius:9px; flex-shrink:0; margin-inline-start:auto; }
+.news-view-toggle button{ border:none; background:none; color: rgba(255,255,255,0.55); padding:8px 10px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.news-view-toggle button.active{ background: var(--accent); color: var(--primary); }
+.news-view-toggle svg{ width:16px; height:16px; }
+
+.news-filters{ display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+.news-filter-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+.news-search-box{ position:relative; flex:1; min-width:220px; }
+.news-search-box input{ width:100%; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color:#fff; padding:11px 14px; padding-inline-end:40px; /* آیکون ذره‌بین سمت پایان (چپ) */ border-radius: var(--radius-control); font-size:13px; font-family:inherit; }
+.news-search-box input::placeholder{ color: rgba(255,255,255,0.4); }
+.news-search-box svg{ position:absolute; inset-inline-end:13px; top:50%; transform:translateY(-50%); width:16px; height:16px; color: rgba(255,255,255,0.4); }
+
+.news-smart-toggle{ display:inline-flex; align-items:center; gap:6px; flex-shrink:0; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.4); padding:11px 14px; border-radius: var(--radius-control); font-size:13px; font-weight:700; cursor:default; }
+.news-smart-toggle svg{ width:15px; height:15px; }
+.news-smart-toggle .sw{ width:28px; height:16px; border-radius:9999px; background: rgba(255,255,255,0.12); position:relative; flex-shrink:0; }
+.news-smart-toggle .sw::after{ content:''; position:absolute; top:2px; inset-inline-start:2px; width:12px; height:12px; border-radius:50%; background:#fff; opacity:.5; }
+
+.news-seg{ display:flex; gap:6px; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); padding:4px; border-radius:9px; width:fit-content; }
+.news-seg button{ border:none; background:none; color: rgba(255,255,255,0.65); font-size:12px; font-weight:700; padding:8px 14px; border-radius:6px; cursor:pointer; font-family:inherit; }
+.news-seg button.active{ background: var(--accent); color: var(--primary); }
+.news-seg button:disabled{ cursor:default; opacity:.4; }
+
+.news-toolbar-row{ row-gap:12px; }
+.news-filter-divider{ width:1px; align-self:stretch; background: rgba(255,255,255,0.12); flex-shrink:0; }
+.news-region-chips{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.news-region-chip{ font-size:12px; font-weight:600; padding:8px 15px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.65); cursor:pointer; }
+.news-region-chip.active{ background: rgba(142,163,184,0.28); border-color: rgba(142,163,184,0.5); color:#fff; }
+
+.news-topic-group{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.news-topic-label{ font-size:12px; font-weight:700; color: rgba(255,255,255,0.45); flex-shrink:0; }
+.news-topic-chips{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.news-topic-chip{ font-size:12px; font-weight:600; padding:8px 15px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.65); cursor:pointer; }
+.news-topic-chip.active{ background: rgba(234,179,147,0.24); border-color: rgba(234,179,147,0.45); color:#fff; }
+
+.news-daterange-details{ position:relative; }
+.news-daterange-details summary{
+  display:inline-flex; align-items:center; list-style:none; cursor:pointer; font-family:inherit;
+  color: rgba(255,255,255,0.65); font-size:12px; font-weight:700; padding:8px 14px; border-radius:6px; white-space:nowrap;
+}
+.news-daterange-details summary::-webkit-details-marker{ display:none; }
+.news-daterange-details[open] summary,
+.news-daterange-details.has-value summary{ background: var(--accent); color: var(--primary); }
+.news-daterange-popover{ gap:10px; min-width:270px; }
+.jdate{ display:flex; gap:6px; flex:1; }
+.jdate select{ background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:7px 6px; border-radius: var(--radius-control); font-size:13px; font-family:inherit; min-height:38px; }
+.jdate select[data-part="m"]{ flex:1; min-width:84px; }
+.news-daterange-field{ display:flex; align-items:center; gap:8px; font-size:12px; color: var(--text-dim); white-space:nowrap; }
+.news-daterange-field input[type=date]{ flex:1; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:6px 8px; border-radius: var(--radius-control); font-size:12px; font-family:inherit; }
+.news-search-hint{ display:none; position:absolute; top:calc(100% + 6px); inset-inline:0; z-index:21; background: var(--surface); color: var(--text-dim); border:1px solid var(--border-strong); border-radius: var(--radius-control); padding:8px 12px; font-size:12px; line-height:1.8; box-shadow: var(--shadow-hover); }
+.news-search-box:focus-within .news-search-hint{ display:block; }
+.news-search-box:focus-within input:not(:placeholder-shown) ~ .news-search-hint{ display:none; }
+.news-seg .news-daterange-clear{ align-self:flex-start; font-size:11px; font-weight:600; color: var(--accent-strong); background:none; border:none; cursor:pointer; padding:0; font-family:inherit; }
+
+.news-source-details{ position:relative; margin-inline-start:auto; }
+.news-source-details summary{
+  display:inline-flex; align-items:center; list-style:none; cursor:pointer;
+  background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color:#fff;
+  padding:9px 12px; border-radius: var(--radius-control); font-size:13px; font-family:inherit; white-space:nowrap;
+}
+.news-source-details summary::-webkit-details-marker{ display:none; }
+.news-source-list{
+  position:absolute; z-index:20; top:calc(100% + 6px); inset-inline-end:0; display:flex; flex-direction:column; gap:8px; color-scheme:light;
+  background: var(--surface); border:1px solid var(--border-strong); border-radius: var(--radius-control); padding:12px 14px;
+  box-shadow: var(--shadow-hover); min-width:220px; max-height:260px; overflow-y:auto;
+}
+.news-source-list label{ display:flex; align-items:center; gap:7px; font-size:13px; color: var(--text-dim); cursor:pointer; white-space:nowrap; }
+/* توی صفحه‌ی کنشگری مجازی، دکمه‌ی «انتخاب کانال‌ها…» با margin-inline-start:auto
+   کاملاً به لبه‌ی راست toolbar چسبیده — با inset-inline-end:0 پیش‌فرض (که لبه‌ی
+   چپ پاپ‌آپ رو ثابت نگه می‌داره و به سمت راست باز می‌شه)، پاپ‌آپ از لبه‌ی راست
+   صفحه بیرون می‌زد. اینجا برعکسش می‌کنیم: لبه‌ی راست ثابت می‌مونه، به چپ باز می‌شه */
+#posts-source-list{ inset-inline-end:auto; inset-inline-start:0; }
+/* همون مشکل دقیقاً برای تب‌های «وب‌سایت‌ها»، «روزنامه‌ها» و «چهره‌های سیاسی»
+   هم پیش میاد — دکمه‌شون هم با margin-inline-start:auto به همون لبه چسبیده */
+#news-source-list, #newspaper-source-list{ inset-inline-end:auto; inset-inline-start:0; }
+/* وقتی این دراپ‌داون داخل .toolbar تو در توئه (مثل صفحه‌ی کنشگری مجازی)،
+   قانون عمومی «.toolbar input» (که برای اینپوت متنی جست‌وجوئه) رو چک‌باکس‌ها
+   هم به ارث می‌برن — flex:1/min-width بزرگ باعث می‌شه چک‌باکس عملاً نامرئی
+   بشه و چیدمان راست‌چین متن رو هم به‌هم بریزه؛ all:revert کاملاً برش می‌گردونه
+   به ظاهر پیش‌فرض checkbox مرورگر */
+.news-source-list label input[type=checkbox]{ all: revert; cursor:pointer; flex:none; }
+@media (max-width:760px){ .news-filter-divider{ display:none; } .news-source-details{ margin-inline-start:0; width:100%; } .news-source-list{ inset-inline-end:auto; inset-inline-start:0; width:100%; } }
+
+.news-platform{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color: var(--text-faint); }
+.news-platform svg{ width:12px; height:12px; }
+
+.news-feed{ display:flex; flex-direction:column; gap:14px; max-width:800px; margin:0 auto; }
+/* grid ردیفی — هر کارتِ یک ردیف تا کف ردیف کشیده می‌شه (align-items پیش‌فرض
+   stretch‌ه) تا لبه‌ی پایین همه‌ی کارت‌های یک ردیف دقیقاً هم‌تراز باشه. */
+.news-feed.grid-view{ display:grid; grid-template-columns: repeat(3,1fr); gap:14px; max-width:100%; margin:0; }
+.news-feed.grid-view.social-tab{ grid-template-columns: repeat(4,1fr); }
+@media (max-width:900px){ .news-feed.grid-view{ grid-template-columns: repeat(2,1fr); } }
+@media (max-width:560px){ .news-feed.grid-view{ grid-template-columns: 1fr; } }
+
+.news-card{ display:flex; gap:14px; background: var(--surface); border:1px solid var(--border); border-inline-start:3px solid var(--accent); border-radius: var(--radius); padding:16px; box-shadow: var(--shadow); }
+@media (max-width:520px){ .news-card{ flex-direction:column; } }
+
+/* تب «پرونده‌های موضوعی»: چیدمان سایدباری — موضوعات ستون راست (اولین فرزند
+   flex، توی RTL خودکار سمت راست درمیاد)، اخبار موضوعِ انتخاب‌شده توی
+   ستون چپ‌ترش. فقط یه موضوع در هر لحظه انتخاب می‌شه (نه هم‌زمان چندتا) */
+.dossier-layout{ display:flex; gap:24px; align-items:flex-start; }
+.dossier-sidebar{ width:210px; flex-shrink:0; display:flex; flex-direction:column; gap:8px; position:sticky; top:90px; }
+.dossier-content{ flex:1; min-width:0; }
+@media (max-width:760px){
+  .dossier-layout{ flex-direction:column; }
+  .dossier-sidebar{ width:100%; flex-direction:row; flex-wrap:wrap; position:static; }
+}
+.dossier-nav-item{
+  display:block; width:100%; text-align:start; cursor:pointer; font-family:inherit;
+  font-size:14px; font-weight:800; color: var(--text-dim); background:none; border:none;
+  border-inline-start:3px solid var(--accent); padding:10px 12px; border-radius:8px;
+}
+@media (max-width:760px){ .dossier-nav-item{ width:auto; } }
+/* موضوعِ انتخاب‌شده («در حال نمایش») با پس‌زمینه‌ی هلویی‌رنگ و متن
+   پررنگ‌تر از بقیه مشخص می‌شه — تا معلوم باشه اخبار کدوم موضوع دیده می‌شه */
+.dossier-nav-item.active{ color: var(--accent-strong); background: rgba(234,179,147,0.16); }
+.news-feed.dossier-feed{ grid-template-columns: repeat(2,1fr); }
+@media (max-width:560px){ .news-feed.dossier-feed{ grid-template-columns: 1fr; } }
+.news-kw-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.news-kw-chip{ font-size:11px; background: rgba(234,179,147,0.14); color: var(--accent-strong); border-radius: var(--radius-pill); padding:3px 10px; }
+.news-kw-chip.empty{ color: var(--text-faint); background: rgba(0,0,0,0.04); }
+/* دکمه‌های ریز مدیر زیر کارت پست (ویرایش کلیدواژه / پنهان کردن / ذخیره / انصراف) — یک خانواده: متن + آیکون، بدون زیرخط */
+.news-kw-edit-btn, .post-hide-btn{ display:inline-flex; align-items:center; gap:5px; min-height:32px; padding:0 10px; border-radius:8px; border:1px solid var(--border); background: var(--surface-2); font-size:12px; font-weight:600; color: var(--text-dim); cursor:pointer; font-family:inherit; white-space:nowrap; flex-shrink:0; }
+.news-kw-edit-btn svg, .post-hide-btn svg{ width:14px; height:14px; flex-shrink:0; }
+.news-kw-edit-btn:hover{ color: var(--text); border-color: var(--border-strong); }
+.news-feed.grid-view .news-card{ flex-direction:column; border-inline-start:1px solid var(--border); border-top:3px solid var(--accent); padding:0; overflow:hidden; }
+.news-feed.grid-view .news-card .news-body{ padding:14px; display:flex; flex-direction:column; flex:1; }
+.news-feed.grid-view .news-card .news-foot{ margin-top:auto; }
+
+.news-thumb{ width:112px; height:88px; border-radius:10px; overflow:hidden; flex-shrink:0; background: var(--surface-2); display:flex; align-items:center; justify-content:center; color: var(--text-faint); }
+.news-thumb img{ width:100%; height:100%; object-fit:cover; display:block; cursor:zoom-in; }
+@media (max-width:520px){ .news-feed:not(.grid-view) .news-thumb{ width:100%; height:150px; } }
+.news-feed.grid-view .news-thumb{ width:100%; height:auto; aspect-ratio:4/3; max-height:170px; border-radius:0; }
+/* تب «شبکه‌های اجتماعی»: کارت‌ها کمی کشیده‌تر از نظر عمودی، شبیه فید
+   موبایل، چون عکس‌های کانال‌های پیام‌رسان بیشتر عمودی/مربعی‌ان و با
+   برش ۴:۳ افقی بد دیده می‌شدن */
+.news-feed.grid-view.social-tab .news-thumb{ aspect-ratio:2/3; max-height:340px; }
+.news-thumb.placeholder{ background: linear-gradient(155deg, var(--navy), #223142); color: rgba(255,255,255,0.35); }
+.news-thumb.placeholder svg{ width:34px; height:34px; }
+
+/* برخلاف بقیه‌ی کارت‌های grid-view (عکس بالای کارت)، اینجا طبق نظر کاربر
+   عکس کنار متن قرار می‌گیره (چون صفحه RTLه و thumb اولین فرزند flexه،
+   خودکار سمت راست کارت درمیاد) — flex-direction رو به row برمی‌گردونیم
+   و اندازه‌ی ثابت (نه کشیده‌ی تمام‌عرض) به thumb می‌دیم. این قوانین باید
+   بعد از قوانین پایه‌ی .grid-view بیان، وگرنه با specificity برابر،
+   قانون قبلی (که پایین‌تر توی فایل بود) برنده می‌شد */
+.news-feed.dossier-feed .news-card{ flex-direction:row; border-inline-start:3px solid var(--accent); border-top:none; padding:16px; }
+.news-feed.dossier-feed .news-card .news-body{ padding:0; }
+.news-feed.dossier-feed .news-thumb{ width:130px; height:110px; aspect-ratio:auto; max-height:none; border-radius:10px; }
+@media (max-width:520px){ .news-feed.dossier-feed .news-card{ flex-direction:column; } .news-feed.dossier-feed .news-thumb{ width:100%; height:150px; } }
+/* letterbox: عکس‌های عمودی/افقی مختلف کامل و بدون برش داخل قاب ثابت جا
+   می‌شن (به‌جای cover که بخشیش رو می‌برید)؛ فضای خالی اطراف عکس با همون
+   گرادیانی که placeholder بی‌عکس داره پر می‌شه، تا حاشیه‌ها یکدست به‌نظر برسن */
+.news-feed.dossier-feed .news-thumb{ background: linear-gradient(155deg, var(--navy), #223142); }
+.news-feed.dossier-feed .news-thumb img{ object-fit: contain; cursor:zoom-in; }
+
+.news-body{ flex:1; min-width:0; }
+.news-head{ display:flex; align-items:center; gap:7px; margin-bottom:8px; flex-wrap:wrap; }
+.news-source{ font-size:11px; color:#fff; background: var(--navy); padding:3px 11px; border-radius:100px; font-weight:600; }
+.news-region{ font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; background: var(--surface-2); color: var(--text-dim); border:1px solid var(--border-strong); }
+.news-time{ font-size:12px; color: var(--text-faint); margin-inline-start:auto; }
+.news-title{ font-size:15px; font-weight:700; color: var(--text); line-height:1.55; margin:0 0 6px; }
+.news-feed.grid-view .news-title{ font-size:14px; }
+.news-text{ font-size:13px; line-height:1.9; color: var(--text-dim); overflow:hidden; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; white-space:pre-wrap; }
+.news-feed.grid-view .news-text{ font-size:12px; -webkit-line-clamp:3; }
+/* کارت‌های «ادعا یا شایعه» با تیتر «انتشار توسط:» شروع می‌شن — یه خط
+   برای همون تیتر + ۳ خط برای متن بعدش، یعنی جمعاً ۴ خط نمایش اولیه */
+.news-text.claims-text,
+.news-feed.grid-view .news-text.claims-text{ -webkit-line-clamp:4; }
+/* کارت‌های تب «شبکه‌های اجتماعی» چون عکسشون کشیده‌تره، فضای بیشتری هم
+   دارن — قسمت متن هم ۵ خط نشون بده تا نسبت به عکس خیلی کوچیک نباشه */
+.news-feed.grid-view.social-tab .news-text{ -webkit-line-clamp:5; }
+.news-text.expanded,
+.news-feed.grid-view .news-text.expanded{ -webkit-line-clamp:unset; }
+.news-more{ margin-top:8px; font-size:12px; font-weight:700; color: var(--accent-strong); cursor:pointer; background:none; border:none; padding:0; display:inline-flex; align-items:center; gap:3px; }
+.news-more svg{ width:11px; height:11px; transition: transform .15s ease; }
+.news-more.open svg{ transform:rotate(180deg); }
+.news-foot{ margin-top:11px; padding-top:10px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:space-between; }
+.news-topic{ font-size:12px; font-weight:700; color: var(--accent-strong); }
+.news-link{ font-size:12px; font-weight:600; color: var(--text-faint); }
+.news-link:hover{ color: var(--accent-strong); }
+.news-translate-btn{ font-size:11px; font-weight:600; color: var(--accent-strong); background:none; border:none; padding:0; cursor:pointer; font-family:inherit; }
+.news-translate-btn:hover{ text-decoration:underline; }
+.news-translate-btn:disabled{ cursor:default; opacity:.6; text-decoration:none; }
+.news-title.is-translated,
+.news-text.is-translated{ color: var(--accent-strong); }
+.news-empty{ text-align:center; color: rgba(255,255,255,0.5); font-size:13px; padding:40px 0; }
+.news-pagination{ display:flex; align-items:center; justify-content:center; gap:6px; margin-top:24px; flex-wrap:wrap; }
+.news-pagination button{
+  border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);
+  font-size:13px; font-weight:700; font-family:inherit; min-width:34px; height:34px; padding:0 10px;
+  border-radius: var(--radius-control); cursor:pointer;
+}
+.news-pagination button.active{ background: var(--accent); border-color: var(--accent); color: var(--primary); }
+.news-pagination button:disabled{ opacity:.35; cursor:default; }
+.news-pagination .dots{ color: rgba(255,255,255,0.4); font-size:12px; padding:0 2px; }
+
+/* analytics */
+.seg{ display:flex; gap:6px; background: var(--surface-2); border:1px solid var(--border); padding:4px; border-radius:9px; margin-bottom:18px; width:fit-content; }
+.seg button{ border:none; background:none; color: var(--text-dim); font-size:13px; font-weight:700; padding:8px 16px; border-radius:6px; cursor:pointer; }
+.seg button.active{ background: var(--navy); color:#fff; }
+
+
+/* آمار تولید خبر — امروز (تب «آنالیز») — بدون عنوان پنل؛ عدد کل توی
+   کادر خودش سمت راست، تاریخ شمسی امروز سمت چپ همون ردیف */
+
+/* لیست «اخبار منتخب» بالای تب «آنالیز» */
+.rank-list{ display:flex; flex-direction:column; }
+.rank-item{ display:flex; gap:12px; padding:13px 0; border-bottom:1px solid var(--border); }
+.rank-item:last-child{ border-bottom:none; }
+.rank-num{ width:24px; height:24px; border-radius:7px; background: var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; font-family: ui-monospace,monospace; margin-top:1px; }
+.rank-item .rc{ min-width:0; }
+.rank-item .rc p{ margin:0; font-size:14px; color: var(--text); }
+.rank-item .rc .rmeta{ margin-top:6px; font-size:12px; color: var(--text-faint); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.sel-tags{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:6px; }
+.sel-tag{ font-size:11px; font-weight:600; border-radius:999px; padding:2px 9px; background: rgba(22,32,42,0.06); color: var(--text-dim); }
+.sel-tag.is-crit{ background: var(--navy); color:#fff; }
+.sel-tag.is-wide{ background: rgba(234,179,147,0.3); color:#8a4516; }
+.rank-item .rc .rmeta .cat{ color: var(--accent-strong); font-weight:600; }
+
+/* «در یک نگاه»: چینش (بازچینی مهر ۱۴۰۵) */
+#news-analytics-panel{ display:flex; flex-direction:column; gap:16px; }
+#news-analytics-panel .panel{ margin-bottom:0; }
+.nga-kpis{ display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:12px; }
+.nga-kpi{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:14px 18px; display:flex; flex-direction:column; gap:4px; min-width:0; text-align:start; font:inherit; color:inherit; }
+button.nga-kpi{ cursor:pointer; transition: border-color .15s, box-shadow .15s; }
+button.nga-kpi:hover{ border-color: rgba(234,179,147,0.9); box-shadow: 0 0 0 3px rgba(234,179,147,0.15); }
+.nga-kpi .k-label{ font-size:12px; color: var(--text-dim); font-weight:600; }
+.nga-kpi .k-val{ font-size:28px; font-weight:800; color:#b5651d; line-height:1.15; }
+.nga-kpi .k-val small{ font-size:14px; font-weight:600; color: var(--text-faint); }
+.nga-kpi .k-sub{ font-size:12px; color: var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nga-kpi.is-alert{ border-color: rgba(234,179,147,0.9); box-shadow: 0 0 0 3px rgba(234,179,147,0.15); }
+.nga-kpi.is-alert .k-sub{ color:#b5541f; font-weight:700; }
+.nga-kpi.is-date{ background: var(--navy); border-color: var(--navy); }
+.nga-kpi.is-date .k-label{ color: rgba(255,255,255,0.65); }
+.nga-kpi.is-date .k-val{ color:#fff; font-size:19px; font-weight:700; padding-top:6px; }
+.nga-kpi.is-date .k-sub{ color: #EAB393; }
+.nga-row{ display:grid; gap:16px; align-items:start; }
+.nga-main{ grid-template-columns:minmax(0,7fr) minmax(0,5fr); align-items:stretch; }
+.nga-side{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+.nga-side > .panel:last-child{ flex:1; }
+.nga-charts{ grid-template-columns:minmax(0,7fr) minmax(0,5fr); align-items:stretch; }
+.nga-donut{ min-height:250px; }
+.nga-more{ background:none; border:none; color: var(--accent-strong); font:inherit; font-size:12px; font-weight:600; cursor:pointer; padding:2px 4px; }
+#news-waves-panel{ scroll-margin-top:90px; }
+@media (max-width:1100px){ .nga-kpis{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
+/* تک‌ستونه: ترتیب بر اساس اهمیت — منتخب، بعد موج‌ها، بعد موضوعات/ادعاها، بعد نمودارها */
+@media (max-width:900px){
+  .nga-charts{ grid-template-columns:minmax(0,1fr); }
+  .nga-main, .nga-side{ display:contents; }
+  .nga-kpis{ order:0; } .nga-selected{ order:1; } #news-waves-panel{ order:2; }
+  .nga-side > .panel{ order:3; } .nga-charts{ order:4; }
+}
+@media (max-width:640px){
+  .nga-kpis{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; }
+  .nga-kpi{ padding:11px 13px; }
+  .nga-kpi .k-val{ font-size:23px; }
+  .nga-kpi.is-date{ grid-column:1 / -1; order:-1; }
+  .nga-kpi.is-date .k-val{ font-size:16px; padding-top:2px; }
+  #news-analytics-panel .panel-head{ flex-wrap:wrap; gap:6px 12px; }
+  #news-analytics-panel .panel-pill{ white-space:nowrap; }
+}
+/* موج‌های خبری («در یک نگاه») */
+.wave-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:start; }
+#news-waves-panel .panel-head{ flex-wrap:wrap; gap:6px 12px; }
+#news-waves-panel .panel-pill{ white-space:nowrap; }
+@media (max-width:900px){ .wave-grid{ grid-template-columns:minmax(0,1fr); } }
+.wave-card{ border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; background: var(--surface); display:flex; flex-direction:column; gap:8px; min-width:0; }
+.wave-card.is-live{ border-color: rgba(234,179,147,0.75); box-shadow: 0 0 0 3px rgba(234,179,147,0.14); }
+.wave-top{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.wave-count{ display:inline-flex; align-items:baseline; gap:5px; background: var(--navy); color:#fff; border-radius: var(--radius-control); padding:4px 10px; font-size:12px; }
+.wave-count b{ font-size:16px; color:#EAB393; }
+.wave-span{ font-size:12px; color: var(--text-faint); }
+.wave-live{ font-size:12px; font-weight:700; color:#9a4518; background: rgba(234,179,147,0.28); border-radius:999px; padding:2px 9px; }
+.wave-text{ margin:0; font-size:14px; line-height:1.9; color: var(--text); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+.wave-meta{ font-size:12px; color: var(--text-faint); }
+.wave-meta b{ color: var(--text-dim); font-weight:600; }
+.wave-kws{ display:flex; flex-wrap:wrap; gap:5px; }
+.wave-kws span{ font-size:11px; background: rgba(22,32,42,0.06); color: var(--text-dim); border-radius:999px; padding:2px 9px; }
+.wave-card details summary{ display:inline-flex; align-items:center; cursor:pointer; font-size:12px; font-weight:600; color: var(--accent-strong); list-style:none; }
+.wave-card details summary::-webkit-details-marker{ display:none; }
+.wave-card details[open] summary{ margin-bottom:6px; }
+.wave-posts{ display:flex; flex-direction:column; max-height:320px; overflow:auto; }
+.wave-post{ display:flex; gap:8px; align-items:flex-start; padding:8px 0; border-top:1px solid var(--border); font-size:12px; }
+.wave-post .wp-main{ min-width:0; flex:1; }
+.wave-post .wp-ch{ font-weight:600; color: var(--text); }
+.wave-post .wp-time{ color: var(--text-faint); margin-inline-start:6px; }
+.wave-post .wp-snip{ margin:3px 0 0; color: var(--text-dim); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+.wave-post a{ flex:none; color: var(--accent-strong); text-decoration:none; font-size:13px; padding:0 4px; }
+.wave-empty{ margin:0; color: var(--text-faint); font-size:13px; }
+
+/* نمودارهای Chart.js — کانتینر با ارتفاع کمینه‌ی یکسان (نه attribute
+   height خودِ canvas) چون به همراه maintainAspectRatio:false توی JS،
+   اندازه‌ی قابل‌پیش‌بینی می‌ده؛ flex:1 بالا باعث می‌شه اگه کارت هم‌ردیف
+   بلندتر بود، این‌یکی هم به همون اندازه کشیده بشه */
+.chart-box{ position:relative; width:100%; min-height:280px; }
+@media (max-width:640px){
+  .chart-box{ min-height:230px; }
+}

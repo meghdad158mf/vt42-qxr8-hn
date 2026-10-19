@@ -1,0 +1,234 @@
+/* صفحه‌ی نخست: هرو، آمار، عرصه‌ها، مدار، کارت‌ها */
+
+/* dashboard landing: two-column hero (pitch + illustration) + a feature-card grid to the three sections */
+.dash-hero-grid{
+  display:grid; grid-template-columns: 1.1fr 1fr; gap:44px; align-items:center; padding: 36px 28px 80px;
+  background: linear-gradient(155deg, rgba(142,163,184,0.14), rgba(255,255,255,0.02));
+  border:1px solid rgba(142,163,184,0.22); border-bottom-color:transparent; border-radius:20px; margin:50px 0 8px;
+}
+@media (max-width:860px){ .dash-hero-grid{ grid-template-columns:1fr; } }
+.dash-hero-text{ text-align:right; }
+.dash-hero-text h2{ font-size: clamp(22px,3vw,32px); font-weight:700; color:#fff; line-height:1.55; text-wrap:balance; text-align:center; }
+.dash-hero-text h2 .hl{ color: var(--accent); text-shadow: 0 0 14px rgba(234,179,147,0.3); }
+.dash-hero-text h2 .hero-subline{ display:inline-block; margin-top:6px; font-size:0.62em; font-weight:600; color: rgba(255,255,255,0.72); }
+.dash-hero-text p{ font-size:15px; color: rgba(255,255,255,0.62); line-height:1.85; margin-top:14px; max-width:440px; }
+
+.dash-hero-img{ width:100%; max-width:480px; margin:0 auto; display:block; aspect-ratio: 3/2; object-fit:contain; }
+
+/* پنل آماری ۵تایی — قبلاً یک نوار مستطیلی یکپارچه بود (که لبه‌ی
+   مستطیلش کنار نوار باریک‌تر اعداد از پشت دیده می‌شد)؛ حالا هر عدد
+   یه کارت شناور مجزاست (بدون کادر پیوسته‌ی مشترک) که نیمی‌شون روی
+   پایین کادر هرو می‌شینه — چون کادر مشترکی در کار نیست، دیگه چیزی از
+   پشت نوار دیده نمی‌شه. ورود با یه فید+بالا آمدن ملایم و پلکانی. */
+/* کارت‌های آمار هرو (مهر ۱۴۰۵، انتخاب کاربر از ۴ مدل + ۳ رنگ‌بندی): افقی، آیکون در
+   مربع هلویی توپُر + عدد سفید با جداکننده‌ی هزارگان + برچسب. عمداً کلیک‌پذیر نیستن
+   (خواست کاربر) — برای همین حالت hover/اشاره‌گر ندارن. */
+.dash-hero-stats{
+  display:grid; grid-template-columns: repeat(5,1fr); gap:10px; max-width:980px; margin:-46px auto 8px; position:relative; z-index:1;
+}
+@media (max-width:900px){ .dash-hero-stats{ grid-template-columns: repeat(3,1fr); max-width:620px; margin-top:-30px; } }
+@media (max-width:640px){ .dash-hero-stats{ grid-template-columns: repeat(2,1fr); max-width:460px; } }
+.dash-hero-stat{
+  display:flex; align-items:center; gap:11px; padding:12px 13px; min-width:0;
+  background: linear-gradient(165deg, #29343f, #1a222b); /* کاملاً غیرشفاف — کارت نیمی‌ش روی لبه‌ی کادر هرو می‌شینه و با پس‌زمینه‌ی نیمه‌شفاف خط حاشیه‌ی هرو از پشتش دیده می‌شد */
+  border:1px solid rgba(255,255,255,0.1); border-radius:14px;
+  box-shadow: 0 18px 34px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  animation: heroStatIn .5s cubic-bezier(.16,1,.3,1) both;
+}
+.dash-hero-stat:nth-child(1){ animation-delay:.02s; }
+.dash-hero-stat:nth-child(2){ animation-delay:.07s; }
+.dash-hero-stat:nth-child(3){ animation-delay:.12s; }
+.dash-hero-stat:nth-child(4){ animation-delay:.17s; }
+.dash-hero-stat:nth-child(5){ animation-delay:.22s; }
+@keyframes heroStatIn{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:translateY(0); } }
+@media (prefers-reduced-motion: reduce){ .dash-hero-stat{ animation:none; } }
+.dash-hero-stat-ic{
+  flex-shrink:0; width:38px; height:38px; border-radius:11px; display:grid; place-items:center;
+  background: linear-gradient(145deg, #f1c4a8, #d99a76); color: var(--primary);
+  box-shadow: 0 6px 14px -6px rgba(234,179,147,0.6);
+}
+.dash-hero-stat-ic svg{ width:20px; height:20px; }
+.dash-hero-stat-t{ display:flex; flex-direction:column; text-align:right; min-width:0; }
+.dash-hero-stat b{
+  font-size:21px; font-weight:700; line-height:1.25; color:#fff;
+  font-family: 'IRANSansX', ui-monospace,'JetBrains Mono',monospace; font-variant-numeric: tabular-nums;
+}
+.dash-hero-stat span.dash-hero-stat-l{ font-size:12px; color: rgba(255,255,255,0.58); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+@media (max-width:400px){
+  .dash-hero-stat{ gap:8px; padding:10px 9px; }
+  .dash-hero-stat-ic{ width:32px; height:32px; border-radius:9px; } .dash-hero-stat-ic svg{ width:17px; height:17px; }
+  .dash-hero-stat b{ font-size:18px; }
+}
+
+/* دسترسی سریع هرو — «کپسول» دوتکه‌ی شیشه‌ای با حاشیه و هاله‌ی هلویی (شکل گرد تا
+   با کارت‌های مربعی آمار زیرش فرق داشته باشه) + برق نرمی که هر ۶ ثانیه از روش رد
+   می‌شه تا دیده بشه (انتخاب کاربر از ۸ مدل). نیمه‌ی زیر ماوس هلویی پر می‌شه. */
+.quicknav{ display:flex; justify-content:center; margin-top:26px; }
+.qn-capsule{
+  position:relative; overflow:hidden; display:inline-flex; align-items:center; padding:5px; border-radius:999px;
+  background: rgba(234,179,147,0.07); border:1px solid rgba(234,179,147,0.55);
+  box-shadow: 0 0 0 4px rgba(234,179,147,0.06), 0 10px 26px -14px rgba(234,179,147,0.55);
+  backdrop-filter: blur(6px);
+}
+.qn-capsule::before{
+  content:''; position:absolute; top:0; bottom:0; width:40%; left:-45%; pointer-events:none;
+  background: linear-gradient(100deg, transparent, rgba(255,236,222,0.28), transparent);
+  animation: qnShine 6s ease-in-out 1.2s infinite;
+}
+@keyframes qnShine{ 0%{ left:-45%; } 22%{ left:105%; } 100%{ left:105%; } }
+@media (prefers-reduced-motion: reduce){ .qn-capsule::before{ animation:none; display:none; } }
+.qn-sep{ width:1px; height:22px; background: rgba(234,179,147,0.35); margin:0 2px; }
+.qn-btn{
+  position:relative; z-index:1; display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+  font: 800 14px 'IRANSansX',Tahoma,sans-serif; color:#fff; background:none; border:0;
+  padding:10px 18px; border-radius:999px; cursor:pointer; transition: background .2s ease, color .2s ease;
+}
+.qn-btn svg{ width:17px; height:17px; color: var(--accent); transition: color .2s ease, transform .2s ease; }
+.qn-btn svg.qn-down{ width:14px; height:14px; opacity:.8; }
+.qn-btn:hover, .qn-btn:focus-visible{ background: var(--accent); color: var(--primary); outline:none; }
+.qn-btn:hover svg, .qn-btn:focus-visible svg{ color: var(--primary); }
+.qn-btn:hover svg.qn-down{ transform: translateY(2px); }
+@media (max-width:520px){ .qn-btn{ padding:9px 11px; font-size:12px; gap:5px; } .qn-btn svg.qn-down{ display:none; } }
+
+/* «چرا جریان» — سه ستون معرفی مزیت اصلی، این‌بار داخل یه کادر یکپارچه‌ی
+   تمام‌عرض با زمینه‌ی رنگی (ته‌رنگ هلویی)، نه
+   مستقیم روی بوم تیره — طبق خواسته‌ی صریح کاربر. مهر ۱۴۰۵ به خواست کاربر از
+   زیر هرو به فاصله‌ی بین «عرصه‌های رصد» و «بسته تحلیلی جریان» منتقل شد (پل بین دو بخش). */
+.why-jarian-card{
+  margin:150px 0 0;
+}
+.section-label.pkg-flow-label{ margin-top:150px; }
+@media (max-width:640px){ .section-label.pkg-flow-label{ margin-top:110px; } }
+.why-jarian-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:20px; text-align:center; }
+@media (max-width:760px){ .why-jarian-grid{ grid-template-columns:1fr; } }
+.why-jarian-item{
+  padding:32px 24px; border-radius: var(--radius-card);
+  background: linear-gradient(155deg, #fffaf5, #fbe9d7);
+  border:1px solid rgba(181,101,29,0.3);
+  box-shadow: 0 24px 44px -26px rgba(10,15,22,0.4), 0 1px 0 rgba(255,255,255,0.7) inset;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.why-jarian-item:hover{
+  transform:translateY(-4px);
+  box-shadow: 0 28px 52px -24px rgba(10,15,22,0.5), 0 1px 0 rgba(255,255,255,0.7) inset;
+}
+.why-jarian-item .why-jarian-tag{ font-size:15px; font-weight:800; color: var(--accent-strong); margin:0 0 10px; letter-spacing:0.01em; }
+.why-jarian-item .why-jarian-bar{ width:32px; height:3px; border-radius:2px; background: var(--accent-strong); margin:0 auto 16px; transition: width .25s ease; }
+.why-jarian-item:hover .why-jarian-bar{ width:48px; }
+.why-jarian-item p{ font-size:13px; color: var(--text-dim); line-height:1.9; margin:0; }
+
+/* domain cards: no card box at all — just a big icon + title + tags floating on the
+   dark canvas, separated purely by grid spacing (no border/background/shadow). */
+.section-label{ font-size:15px; font-weight:800; color: #fff; margin: 160px 2px 26px; text-align:center; letter-spacing:0.01em; scroll-margin-top: 140px; }
+.domain-grid{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; margin-bottom:26px; }
+/* «مدار» عرصه‌ها (پایین‌تر) پشت محتوا: #sec-dashboard stacking context + z-index:-1؛
+   #view-dash با overflow-x:clip جلوی اسکرول افقی مدار ۱۲۰۰px رو می‌گیره (clip نه
+   hidden، تا تب‌های sticky خراب نشن) */
+#sec-dashboard{ position:relative; z-index:0; }
+.domain-grid{ position:relative; }
+/* «مدار» عرصه‌ها: قوس هلویی که از میان پنج عرصه رد می‌شه (پشت خودِ آیکون‌ها با
+   mask محو) + «شهاب جریان»: هر ۹ ثانیه یه نوار نور با دنباله‌ی محو از راست به چپ
+   روی قوس می‌گذره (سه خط‌چین روی هم با stroke-dashoffset متحرک، بدون JS؛ طول
+   مسیر ≈ ۱۱۳۹px). مختصات ثابت نسبت به مرکز ردیف (کارت ۱۷۰ + فاصله‌ی ۱۶ =
+   ۱۸۶px بین مرکز آیکون‌ها، مرکز آیکون ۷۴px از بالای ردیف). زیر ۹۰۰px ردیف دوستونه
+   می‌شه → مخفی. با prefers-reduced-motion فقط حرکت حذف می‌شه. */
+/* max-width:none — قانون سراسری img,svg{max-width:100%} عرض رو به عرض ردیف کم می‌کرد و
+   مدار (با margin-left ثابت) از وسط به چپ می‌رفت */
+.dom-orbit{ position:absolute; left:50%; top:-100px; width:1200px; max-width:none; height:360px; margin-left:-600px; z-index:-1; pointer-events:none; overflow:visible; }
+/* صفحه‌های باریک‌تر از ~۱۲۵۰px: دو سرِ مدار به لبه‌ی صفحه می‌رسید و بریده دیده می‌شد —
+   نزدیک لبه‌ی صفحه نرم محو می‌شه (مختصات نسبت به جعبه‌ی ۱۲۰۰px که وسط صفحه‌ست؛ روی
+   صفحه‌ی عریض این نقاط بیرون جعبه‌ان و اثری ندارن) */
+.dom-orbit{
+  -webkit-mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px));
+          mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px));
+}
+@media (max-width:900px){ .dom-orbit{ display:none; } }
+@media (prefers-reduced-motion: reduce){ .dom-orbit .flow{ display:none; } }
+.domain-grid > .domain-card{ width:170px; }
+.domain-caption{ text-align:center; color: rgba(255,255,255,0.55); font-size:14px; line-height:2; max-width:620px; margin:0 auto 28px; }
+@media (max-width:900px){ .domain-grid > .domain-card{ width:calc(50% - 8px); } }
+.domain-card{
+  display:flex; flex-direction:column; align-items:center; text-align:center; padding:6px 12px; cursor:pointer;
+  background:none; border:none; box-shadow:none;
+  transition: transform .15s ease;
+}
+.domain-card:hover{ transform:translateY(-3px); }
+.domain-icon{ width:64px; height:64px; background:none; border:none; color: var(--accent); display:flex; align-items:center; justify-content:center; margin-bottom:8px; }
+.domain-icon.is-illustrated{ width:136px; height:136px; }
+.domain-icon.is-illustrated img{ width:136px; height:136px; max-width:136px; object-fit:contain; }
+.domain-card h3{ font-size:15px; font-weight:700; color:#fff; display:flex; align-items:center; gap:7px; flex-wrap:wrap; justify-content:center; }
+
+/* صفحه‌کلید (۵.۲۰.۰): کارت‌های عرصه و جلدهای بسته با Tab/Enter */
+.domain-card:focus-visible, .pkg-tile:focus-visible{ outline:2px solid var(--accent); outline-offset:4px; border-radius:12px; }
+/* گزینه‌های «به‌زودی» فقط برای مدیر (۵.۲۱.۰) — برای بیننده حس ناتمام بودن می‌داد */
+body:not(.is-admin) .soon-item{ display:none !important; }
+
+.modal-overlay{ display:none; position:fixed; inset:0; background:rgba(10,14,20,0.6); z-index:100; align-items:center; justify-content:center; padding:24px; }
+.modal-overlay.active{ display:flex; }
+.modal-card{ position:relative; background: var(--surface); border-radius: var(--radius-card); box-shadow: 0 30px 70px -20px rgba(0,0,0,0.5); max-width:520px; width:100%; max-height:85vh; overflow-y:auto; padding:32px; }
+.modal-close{ position:absolute; top:16px; left:16px; background:none; border:none; cursor:pointer; color: var(--text-faint); width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition: background .15s ease, color .15s ease; }
+.modal-close:hover{ background: var(--surface-2); color: var(--text); }
+.modal-card h3{ font-size:19px; font-weight:700; color: var(--text); margin-bottom:14px; }
+.modal-card p{ font-size:14px; line-height:1.9; color: var(--text-dim); }
+.modal-card p + p{ margin-top:12px; }
+.intro-card{ max-width:480px; }
+.intro-mark{ width:44px; height:auto; margin-bottom:12px; }
+.intro-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; font-size:14px; line-height:1.8; color: var(--text-dim); }
+.intro-list b{ color: var(--text); }
+.intro-foot{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap; }
+.intro-dots{ display:flex; gap:6px; }
+.intro-dots span{ width:8px; height:8px; border-radius:50%; background: var(--border-strong); transition: width .2s ease, background .2s ease; }
+.intro-dots span.on{ width:22px; border-radius:4px; background: var(--accent-strong); }
+.intro-btns{ display:flex; gap:8px; }
+
+.media-viewer-overlay{ background:rgba(6,9,13,0.88); padding:20px; }
+.media-viewer-card{ max-width:min(96vw,1400px); max-height:94vh; width:auto; padding:0; background:transparent; box-shadow:none; overflow:visible; display:flex; align-items:center; justify-content:center; }
+.media-viewer-card img,
+.media-viewer-card video{ max-width:min(96vw,1400px); max-height:88vh; width:auto; height:auto; min-width:min(92vw,360px); border-radius: var(--radius-card); display:block; box-shadow: 0 30px 70px -20px rgba(0,0,0,0.6); }
+.media-viewer-card .modal-close{ top:-14px; left:-14px; background: var(--surface); color: var(--text); }
+.media-viewer-link{ position:absolute; bottom:-42px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#fff; background:rgba(255,255,255,0.12); padding:7px 16px; border-radius:100px; text-decoration:none; white-space:nowrap; }
+.media-viewer-link svg{ width:13px; height:13px; }
+
+
+.avatar{ width:32px; height:32px; border-radius:50%; background: var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+
+.guest-line{ font-size:13px; color: var(--text-dim); padding-bottom:14px; margin-bottom:14px; border-bottom:1px solid var(--border); }
+.guest-line a{ color: var(--primary-strong); font-weight:700; cursor:pointer; }
+.guest-line a:hover{ text-decoration:underline; }
+
+
+/* channel product cards (bottom half of dashboard) */
+/* horizontal channel card: photo on the right (first in RTL flow), text on the left */
+.channel-cards{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:14px; }
+.channel-card{
+  display:flex; align-items:stretch; min-height:104px;
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-card); overflow:hidden;
+  box-shadow: var(--shadow); cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.channel-card:hover{ transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--accent); }
+.channel-card:hover .cc-portrait{ opacity:.55; transform:scale(1.06); }
+
+.cc-photo{ position:relative; width:96px; flex-shrink:0; overflow:hidden;
+  background:
+    radial-gradient(160% 130% at 50% 0%, rgba(234,179,147,0.22), transparent 65%),
+    radial-gradient(120% 100% at 100% 100%, rgba(142,163,184,0.14), transparent 60%),
+    var(--bg);
+}
+.cc-portrait{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color: var(--accent); opacity:.45; transition: all .25s ease; }
+.cc-portrait svg{ width:48%; }
+.cc-photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+
+.cc-body{ flex:1; min-width:0; padding:14px 16px; display:flex; flex-direction:column; justify-content:center; gap:5px; }
+.cc-name{ font-size:14px; font-weight:700; color: var(--text); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cc-admin{ font-size:11px; color: var(--text-faint); }
+.cc-activity{ margin-top:2px; display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:3px 10px; border-radius: var(--radius-pill); width:fit-content; }
+.cc-activity .dot{ width:5px; height:5px; border-radius:50%; }
+.cc-activity.high{ color: var(--ok); background: var(--ok-soft); }
+.cc-activity.high .dot{ background: var(--ok); }
+.cc-activity.mid{ color: var(--accent-strong); background: var(--accent-soft); }
+.cc-activity.mid .dot{ background: var(--accent); }
+.cc-activity.low{ color: var(--text-faint); background: var(--surface-2); }
+.cc-activity.low .dot{ background: var(--text-faint); }
+.cc-cats{ display:flex; flex-wrap:wrap; gap:5px; margin-top:4px; }
+.cc-cats span{ font-size:11px; color: var(--text-dim); background: var(--surface-2); border:1px solid var(--border-strong); border-radius: var(--radius-pill); padding:2px 8px; }
