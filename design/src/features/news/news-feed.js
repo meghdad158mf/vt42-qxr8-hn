@@ -12,8 +12,9 @@ import { scrollToListTop } from '../../ui/scroll.js';
 import { searchHay, searchNorm } from '../../core/search.js';
 import { setupJalaliRange } from '../../ui/jalali-range.js';
 import { wireMediaViewerClicks } from '../../ui/media-viewer.js';
+import { pickAddBtnHtml, onPicksChanged } from './picks.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
-import { pickAddBtnHtml, postHideBtnHtml, updateMobileFilterBadges } from '../../app.js';
+import { postHideBtnHtml, updateMobileFilterBadges } from '../../app.js';
 
 export const newsState = { region: '', time: 'all', sources: [], query: '', page: 1, dateFrom: '', dateTo: '', platform: 'social' };
 // platform: 'social' = پیام‌رسان‌ها (ایتا/تلگرام)، 'website' = سایت‌های خبری عمومی،
@@ -266,6 +267,7 @@ export function keywordChipsHtml(keywords){
   return keywords.map(k=>`<span class="news-kw-chip">${escAttr(k)}</span>`).join('');
 }
 export function setupNewsFeed(){
+  onPicksChanged(renderNewsFeed);   // «افزودن به منتخب» → دکمه‌های کارت‌ها تازه بشن
   document.getElementById('news-view-list-btn').addEventListener('click', ()=>setNewsView('list'));
   document.getElementById('news-view-grid-btn').addEventListener('click', ()=>setNewsView('grid'));
   document.getElementById('news-feed').addEventListener('click', e=>{

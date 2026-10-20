@@ -9,7 +9,6 @@ import { escAttr, escHtml, safeUrl, claimsTextDisplay, toFaDigits, faTitle, faNu
 import { searchNorm, searchHay } from './core/search.js';
 import { JALALI_MONTHS, calParts, jalaliMonthStarts, iranTodayStartMs, tehranDayDiff, newsRelTime } from './core/date.js';
 import { nidValid, normalizeIrMobile } from './core/validate.js';
-import { loadScriptOnce, scriptRequested } from './core/load-script.js';
 import { navMark, navRestoring, startRouter, restoreScrollY } from './core/router.js';
 import { lsGet, lsSet } from './core/local-store.js';
 import { signStoragePaths } from './core/signed-urls.js';
@@ -28,31 +27,35 @@ import { setupJalaliRange } from './ui/jalali-range.js';
 import { renderPagination, NEWS_PAGE_SIZE } from './ui/pagination.js';
 import { setMobileFilterCount, setupMobileFilters } from './ui/mobile-filters.js';
 import { cardAdminControls } from './ui/card-controls.js';
-import { CATEGORIES, CHANNELS, POSTS_CACHE, REGIONS, catNameOf, chById, chInitials, chName, regionNameOf, setCategories, setChannels, setPostsCache, setRegions } from './data/store.js';
+import { CATEGORIES, CHANNELS, POSTS_CACHE, REGIONS, catNameOf, chById, chInitials, chName, regionNameOf, setCategories, setChannels, setPostsCache, setRegions, HIDDEN_POST_IDS, loadHiddenPostIds } from './data/store.js';
 import { setupPostTools } from './features/news/post-tools.js';
 import { NEWS_CURRENT_TAB, NEWS_TABS, activateNewsStudy, goToNewsTab, placeNewsStudyPanel, setNewsPageTab, setupNewsTabs } from './features/news/news-tabs.js';
 import { NEWS_PLATFORM_ICON, NEWS_PLATFORM_LABEL } from './ui/platforms.js';
 import { NEWS_TOPICS, loadNewsTopics, newsState, populateNewsSourceOptions, renderNewsFeed, renderNewsRegionChips, renderNewsTopicRow, setupNewsFeed } from './features/news/news-feed.js';
+import { loadNewsPickEdits, setupNewsPicks } from './features/news/picks.js';
+import { DOSSIER_TOPICS, DOSSIER_TOPIC_POSTS, loadDossierTopicPosts, loadDossierTopics, renderDossierTab, setupDossierTab } from './features/news/dossier.js';
+import { loadNewsAiInsights } from './features/news/insights.js';
+import { NEWSLETTER_POSTS, loadNewsletterPosts, setNewsletterPosts, setupNewsletter } from './features/news/newsletter.js';
+import { NEWSPAPERS, loadNewspapers, renderNewspaperDateTabs, renderNewspapers, setupNewspapers } from './features/news/newspapers.js';
+import { renderNewsAnalytics, setupNewsAnalytics } from './features/news/analytics.js';
 
 // ⚠️ پل موقت: دستگیره‌های درون HTML (onclick="…" در صفحه و در HTMLهایی که همین فایل می‌سازه)
 // فقط تابع سراسری رو می‌بینن، ولی تابع‌های یه module سراسری نیستن. این فهرست تا جایگزینی همه‌ی
 // onclickها با event delegation (مرحله‌های ۴ تا ۷) می‌مونه و هر بار کوچیک‌تر می‌شه؛ تابع تازه
 // اینجا اضافه نکن — به‌جاش addEventListener. tests/unit/inline-handlers.test.js هم‌خوانیش رو می‌سنجه.
 Object.assign(window, {
-  addCrawlSuggestion, addDossierManualPost, addNewsletterManualPost, addPostToPicks, autoMatchDossierTopic,
-  bulkChanBack, bulkChanPreview, bulkChanSave, changePassword, clearPostsFocus, closeUserEditor, copyJobLog,
-  deleteCrawlSite, deleteDossierTopic, deleteDossierTopicPost, downloadBackup, downloadNewsletter,
-  editDossierTopicKeywords, exportPosts, exportReport, goToUploadsTab, handleLogin, hideHawzaMention,
-  hidePost, ignoreCrawlSuggestion, introGo, logout, openBulkChan, openIntro, openSiteSettingsPanel,
-  openUserEditor, otpBack, otpChooseSms, otpResend, otpShow, otpSubmit, publishAnnouncement,
-  publishNewsletter, removeNewsletterDraftItem, renderDossierTopicAdminList, renderSystemStatus, retryLoadAll,
+  addCrawlSuggestion, addDossierManualPost, autoMatchDossierTopic, bulkChanBack, bulkChanPreview,
+  bulkChanSave, changePassword, clearPostsFocus, closeUserEditor, copyJobLog, deleteCrawlSite,
+  deleteDossierTopic, deleteDossierTopicPost, downloadBackup, editDossierTopicKeywords, exportPosts,
+  exportReport, goToUploadsTab, handleLogin, hideHawzaMention, hidePost, ignoreCrawlSuggestion, introGo,
+  logout, openBulkChan, openIntro, openSiteSettingsPanel, openUserEditor, otpBack, otpChooseSms, otpResend,
+  otpShow, otpSubmit, publishAnnouncement, renderDossierTopicAdminList, renderSystemStatus, retryLoadAll,
   retryMaintenance, saveAlertSettings, saveCrawlSite, saveDossierTopicKeywords, saveHiddenSections,
   saveMaintenance, saveMediaRetention, saveSmsConfig, saveUser, saveViewerPasswordLogin, scrollToDomainGrid,
-  scrollToPackageCard, searchDossierManualAdd, searchNewsletterManualAdd, sendSmsTest, setHawzaTab,
-  setUploadsTab, submitFeedback, subscribeNotify, suggestNewsletterSection, switchSection, testAlertEmail,
-  toggleCrawlSite, toggleDossierText, toggleDossierTopicActive, toggleDossierTopicPostExcluded,
-  toggleMoreText, togglePasswordVisibility, togglePoliticalFigureText, togglePostText, translateMention,
-  unhidePost, unlockLogin, usrDownload
+  scrollToPackageCard, searchDossierManualAdd, sendSmsTest, setHawzaTab, setUploadsTab, submitFeedback,
+  subscribeNotify, switchSection, testAlertEmail, toggleCrawlSite, toggleDossierTopicActive,
+  toggleDossierTopicPostExcluded, toggleMoreText, togglePasswordVisibility, togglePoliticalFigureText,
+  togglePostText, translateMention, unhidePost, unlockLogin, usrDownload
 });
 
 // خطاهای مرورگر: جای فعلی کاربر و دستگاه برای گزارش (core/error-reporting.js)
@@ -1104,20 +1107,11 @@ setupHawzaAbout();
 
 let PROFILE_GROUPS = []; // {id, name, kind:'figures'|'orgs', sort_order} — گروه‌های گالری «یادداشت‌ها»
 let CHANNEL_PROFILE_GROUPS = []; // {id, channel_id, group_id} — عضویت چندگانه‌ی کانال در گروه‌ها
-let DOSSIER_TOPICS = []; // {id, name, keywords, active, sort_order} — موضوعات موقت «پرونده‌های موضوعی»
-let DOSSIER_TOPIC_POSTS = []; // {id, topic_id, post_id, source, excluded} — پست‌های منتسب به هر موضوع
-let NEWSLETTER_POSTS = []; // {id, section, post_id, sort_order, posts:{...}} — مجموعه‌ی فعلیِ منتشرشده‌ی «خبرنامه مدارس» (بدون آرشیو)؛ posts رکورد کامل پست embedشده‌ست (نه فقط id) چون POSTS_CACHE سقف ۱۰۰۰تایی داره و پست‌های ادعا/شایعه (کمیاب‌تر) زود ازش بیرون می‌افتن — نگاه کن به buildNewsletterPrintHtml
-let NEWSLETTER_DRAFT = { claims: [], news: [], dossier: [] }; // پیش‌نویس در‌حال‌ویرایش مدیر (فقط حافظه، تا «انتشار» زده نشه ذخیره نمی‌شه)
 let MAGAZINES = [];   // {id, title, issue_no, publish_date, file_type, files, cover_url, uploaded_at}
 let ARCHIVE_REPORTS = [];   // {id, title, source_org, publish_date, file_type, files, cover_url, uploaded_at}
 let FEEDBACK_LIST = [];     // {id, name, message, created_at} — فقط با ورود مدیر به تب «نظرات کاربران» لود می‌شه
 let NOTIFY_SUBSCRIBERS = []; // {id, phone, created_at, notified_at} — فقط با ورود مدیر به تب «خروجی‌گیری» لود می‌شه
-let NEWSPAPERS = [];  // {id, slug, title, edition_date, image_url, media_storage_path, reader_url}
-let NEWSPAPER_TODAYS = [];  // زیرمجموعه‌ی NEWSPAPERS مربوط به تاریخ انتخاب‌شده — برای فیلتر بدون rebuild چک‌باکس‌ها
-let NEWSPAPER_DATES = [];   // تاریخ‌های موجود (نزولی) که حداقل یه عکس پاک‌نشده دارن
-const newspaperState = { selected: [], date: null };  // date=null یعنی جدیدترین تاریخ موجود
 let SCHOOL_REPORTS = []; // {id, title, image_url, media_storage_path, sort_order, uploaded_at, file_type, file_name} — گزارش‌های تحلیل Power BI (تصویر/PDF/اکسل)
-let NEWS_AI_INSIGHTS = null; // {id, computed_at, window_hours, selected_posts:[{id,headline,score,tags,sources,posts,channel_id,time,link}], topics:[{name,weight}]} — آخرین تحلیل هوش مصنوعی تب «در یک نگاه» (روزی ۴ بار از GitHub Actions، نه هر بار بازکردن تب)
 
 function chAvatar(id){ return `<span class="avatar">${escHtml(chInitials(id))}</span>`; }
 
@@ -1416,7 +1410,7 @@ async function renderSysStorage(){
 var RETENTION_OPTIONS = [[12,'۱۲ ساعت'],[24,'۱ روز'],[48,'۲ روز'],[72,'۳ روز']];
 const RETENTION_MAX_PCT = 85;
 let SYS_STORAGE = null; // {total, postMedia}
-function mediaRetentionHours(){
+export function mediaRetentionHours(){
   const h = Number(SITE_SETTINGS.media_retention_hours);
   return RETENTION_OPTIONS.some(([x])=>x === h) ? h : 12;
 }
@@ -2124,462 +2118,12 @@ export function updateMobileFilterBadges(){
     + (catEl && catEl.value ? 1 : 0) + (postsTime ? 1 : 0));
 }
 
-// ---- تب «پرونده‌های موضوعی» — اخبار مرتبط با موضوعات موقت/چرخشی، دسته‌بندی‌شده
-// بر اساس dossier_topic_posts (فقط موضوعات active، فقط excluded=false) ----
-// فیلتر «بازه‌ی زمانی» از نیمه‌شب تقویمی تهران حساب می‌شه (tehranDayDiff،
-// کنار iranTodayStartMs) — نه فاصله‌ی خام از همین لحظه. طبق نظر کاربر،
-// چیدمان سایدباریه: موضوعات ستون راست زیر هم، فقط یکی در هر لحظه
-// انتخاب/نمایش داده می‌شه (نه accordion چندبازِ قبلی)
-let dossierState = { time: 'all', topicId: null };
-
-export function renderDossierTab(){
-  const sidebar = document.getElementById('dossier-sidebar');
-  const wrap = document.getElementById('dossier-groups');
-  const empty = document.getElementById('dossier-empty');
-  if(!wrap || !sidebar) return;
-  const groups = DOSSIER_TOPICS.filter(t=>t.active).map(t=>{
-    const postIds = DOSSIER_TOPIC_POSTS.filter(dp=>dp.topic_id===t.id && !dp.excluded).map(dp=>dp.post_id);
-    let posts = postIds.map(id=>POSTS_CACHE.find(p=>p.id===id)).filter(Boolean);
-    if(dossierState.time !== 'all'){
-      posts = posts.filter(p=>{
-        const diffDays = tehranDayDiff(p.posted_at || p.scraped_at);
-        if(dossierState.time === 'today') return diffDays === 0;
-        if(dossierState.time === 'yesterday') return diffDays === 1;
-        if(dossierState.time === 'week') return diffDays >= 0 && diffDays <= 6;
-        return true;
-      });
-    }
-    posts.sort((a,b)=> new Date(b.posted_at||b.scraped_at) - new Date(a.posted_at||a.scraped_at));
-    return { topic: t, posts };
-  }).filter(g=>g.posts.length);
-
-  empty.style.display = groups.length ? 'none' : 'block';
-  if(!groups.length){ sidebar.innerHTML=''; wrap.innerHTML=''; return; }
-
-  // اگه موضوع انتخاب‌شده دیگه بین موضوعات دارای خبر نیست (غیرفعال شده یا
-  // با فیلتر زمانی خالی شده)، طبق نظر کاربر آخرین موضوع (پایین‌ترین ردیف
-  // سایدبار) پیش‌فرض انتخاب می‌شه
-  if(!groups.some(g=>g.topic.id===dossierState.topicId)){
-    dossierState.topicId = groups[groups.length-1].topic.id;
-  }
-
-  sidebar.innerHTML = groups.map(g=>`
-    <button type="button" class="dossier-nav-item${g.topic.id===dossierState.topicId?' active':''}" data-topic="${g.topic.id}">${escAttr(g.topic.name)}</button>
-  `).join('');
-
-  const active = groups.find(g=>g.topic.id===dossierState.topicId);
-  wrap.innerHTML = `<div class="news-feed grid-view dossier-feed">${active.posts.map(p=>dossierPostCardHtml(p, active.topic.id)).join('')}</div>`;
-  wireMediaViewerClicks(wrap);
-  updateDossierMoreButtons(wrap);
-  if(document.fonts && document.fonts.status !== 'loaded'){
-    document.fonts.ready.then(()=> updateDossierMoreButtons(wrap));
-  }
-}
-
-// کارت خبر «پرونده‌های موضوعی» — با دکمه‌ی «نمایش بیشتر» مثل فید اصلی، ولی چون
-// این پنل هم‌زمان با فیدهای دیگه توی DOM می‌مونه (فقط display:none
-// می‌شه) و چون یه پست می‌تونه هم‌زمان زیر چند موضوع مختلف هم ظاهر بشه،
-// idهای تعاملی (متن/دکمه) با ترکیب topicId-postId ساخته می‌شن، نه فقط
-// postId خام — تا با id پست توی فید اصلی یا موضوع دیگه تداخل نکنه
-function dossierPostCardHtml(p, topicId){
-  const ch = chById(p.channel_id) || {};
-  const isRealVideo = p.media_type === 'video' && p.media_path && /\.mp4($|\?)/i.test(p.media_path);
-  const hasThumb = !!p.media_path && (p.media_type === 'photo' || (p.media_type === 'video' && !isRealVideo));
-  const thumbHtml = hasThumb
-    ? `<div class="news-thumb"><img src="${escAttr(p.media_path)}" alt="" loading="lazy" data-viewer-kind="image" data-viewer-src="${escAttr(p.media_path)}"${p.media_type==='video' && p.link ? ` data-viewer-link="${escAttr(p.link)}"` : ''} /></div>`
-    : ch.avatar_url
-      ? `<div class="news-thumb"><img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" /></div>`
-      : `<div class="news-thumb placeholder">${ICONS.doc}</div>`;
-  const uid = topicId + '-' + p.id;
-  return `
-  <div class="news-card">
-    ${thumbHtml}
-    <div class="news-body">
-      <div class="news-head">
-        <span class="news-source">${escAttr(ch.title||ch.username||'؟')}</span>
-        <span class="news-platform">${NEWS_PLATFORM_ICON[ch.platform]||''}${NEWS_PLATFORM_LABEL[ch.platform]||ch.platform}</span>
-        ${ch.region_id ? `<span class="news-region">${escHtml(regionNameOf(ch.region_id))}</span>` : ''}
-        <span class="news-time">${newsRelTime(p.posted_at||p.scraped_at)}</span>
-      </div>
-      ${p.title ? `<h3 class="news-title">${escHtml(p.title)}</h3>` : ''}
-      <p class="news-text" id="dossier-text-${uid}">${claimsTextDisplay(p.text)}</p>
-      <button class="news-more" onclick="toggleDossierText('${uid}')" id="dossier-more-${uid}">
-        نمایش بیشتر
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="news-foot">
-        <div></div>
-        <div>${(!isRealVideo && p.link) ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}${isRealVideo ? `<a class="news-link" href="${safeUrl(p.media_path)}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}</div>
-      </div>
-    </div>
-  </div>`;
-}
-
-function toggleDossierText(uid){
-  const t = document.getElementById('dossier-text-'+uid);
-  const b = document.getElementById('dossier-more-'+uid);
-  if(!t || !b) return;
-  const isOpen = t.classList.toggle('expanded');
-  b.classList.toggle('open', isOpen);
-  b.firstChild.textContent = isOpen ? 'بستن ' : 'نمایش بیشتر ';
-}
-
-// چون <details> بسته محتواش رو layout نمی‌کنه، scrollHeight/clientHeight
-// موقع بسته بودن قابل‌اعتماد نیست — این تابع فقط روی یه گروه/بخش مشخص
-// (که همون لحظه بازه) صدا زده می‌شه، نه کل wrap
-function updateDossierMoreButtons(scopeEl){
-  if(!scopeEl) return;
-  scopeEl.querySelectorAll('.news-text[id^="dossier-text-"]').forEach(textEl=>{
-    const uid = textEl.id.slice('dossier-text-'.length);
-    const moreBtn = document.getElementById('dossier-more-'+uid);
-    if(!moreBtn) return;
-    const overflowing = textEl.scrollHeight > textEl.clientHeight + 1;
-    moreBtn.style.display = overflowing ? '' : 'none';
-  });
-}
-
-// ---- تب «خبرنامه مدارس» — خبرنامه‌ی قابل‌دانلود (چاپی، A4)، بدون
-// آرشیو: newsletter_posts همیشه فقط مجموعه‌ی «فعلیِ منتشرشده»‌ست. هر
-// بار مدیر پنل رو باز می‌کنه، برای هر بخش یه پیش‌نویس محلی
-// (NEWSLETTER_DRAFT) از روی مجموعه‌ی منتشرشده (یا اگه چیزی منتشر
-// نشده، از یه پیشنهاد خودکار جدیدترین‌ها) ساخته می‌شه؛ تا وقتی
-// «انتشار» نزنه، هیچ‌چیز توی دیتابیس تغییر نمی‌کنه.
-const NEWSLETTER_SUGGEST_LIMIT = { claims: 5, news: 8, dossier: 6 };
-
-function newsletterCandidatePosts(section){
-  if(section === 'claims'){
-    const ids = new Set(CHANNELS.filter(c=>c.platform==='bale').map(c=>c.id));
-    return POSTS_CACHE.filter(p=>ids.has(p.channel_id));
-  }
-  if(section === 'news'){
-    const ids = new Set(CHANNELS.filter(c=>c.show_in_news && c.platform!=='bale').map(c=>c.id));
-    return POSTS_CACHE.filter(p=>ids.has(p.channel_id));
-  }
-  // dossier: از پست‌های واقعاً منتسب به موضوعات فعال «پرونده‌های موضوعی» (excluded=false)
-  const activeTopicIds = new Set(DOSSIER_TOPICS.filter(t=>t.active).map(t=>t.id));
-  const postIds = new Set(DOSSIER_TOPIC_POSTS.filter(dp=>!dp.excluded && activeTopicIds.has(dp.topic_id)).map(dp=>dp.post_id));
-  return POSTS_CACHE.filter(p=>postIds.has(p.id));
-}
-
-function suggestNewsletterPostIds(section){
-  return newsletterCandidatePosts(section)
-    .sort((a,b)=> new Date(b.posted_at||b.scraped_at) - new Date(a.posted_at||a.scraped_at))
-    .slice(0, NEWSLETTER_SUGGEST_LIMIT[section])
-    .map(p=>p.id);
-}
-
-function initNewsletterDraft(){
-  ['claims','news','dossier'].forEach(section=>{
-    const published = NEWSLETTER_POSTS.filter(np=>np.section===section).sort((a,b)=>a.sort_order-b.sort_order).map(np=>np.post_id);
-    NEWSLETTER_DRAFT[section] = published.length ? published.slice() : suggestNewsletterPostIds(section);
-  });
-}
-
-export function renderNewsletterTab(){
-  const statusEl = document.getElementById('newsletter-download-status');
-  const downloadBtn = document.getElementById('newsletter-download-btn');
-  if(NEWSLETTER_POSTS.length){
-    statusEl.textContent = 'خبرنامه‌ی امروز آماده‌ی دانلوده.';
-    downloadBtn.disabled = false;
-  }else{
-    statusEl.textContent = 'هنوز خبرنامه‌ای منتشر نشده.';
-    downloadBtn.disabled = true;
-  }
-  const isAdmin = currentRole === 'app_admin';
-  document.getElementById('newsletter-admin-panel').style.display = isAdmin ? '' : 'none';
-  if(isAdmin){
-    initNewsletterDraft();
-    renderNewsletterAdminPanel();
-  }
-}
-
-function newsletterDraftLabel(postId){
-  const p = POSTS_CACHE.find(x=>x.id===postId);
-  if(!p) return 'پست #'+postId+' (حذف‌شده)';
-  return p.title || (p.text||'').slice(0,60) || ('پست #'+p.id);
-}
-
-function renderNewsletterAdminPanel(){
-  ['claims','news','dossier'].forEach(section=>{
-    const wrap = document.getElementById('newsletter-draft-'+section);
-    if(!wrap) return;
-    const ids = NEWSLETTER_DRAFT[section];
-    wrap.innerHTML = ids.length ? ids.map(id=>`
-      <div class="newsletter-draft-item">
-        <span class="txt">${escAttr(newsletterDraftLabel(id))}</span>
-        <button class="del-btn" style="min-width:24px;min-height:24px;font-size:11px;" title="حذف از خبرنامه" onclick="removeNewsletterDraftItem('${section}', ${id})">✕</button>
-      </div>`).join('') : '<p class="dossier-topic-empty">خبری انتخاب نشده.</p>';
-  });
-}
-
-function removeNewsletterDraftItem(section, postId){
-  NEWSLETTER_DRAFT[section] = NEWSLETTER_DRAFT[section].filter(id=>id!==postId);
-  renderNewsletterAdminPanel();
-}
-
-function suggestNewsletterSection(section){
-  NEWSLETTER_DRAFT[section] = suggestNewsletterPostIds(section);
-  renderNewsletterAdminPanel();
-}
-
-function searchNewsletterManualAdd(section, query){
-  const resultsEl = document.getElementById('newsletter-manual-results-'+section);
-  if(!resultsEl) return;
-  query = (query||'').trim();
-  if(query.length < 2){ resultsEl.innerHTML=''; return; }
-  const already = new Set(NEWSLETTER_DRAFT[section]);
-  const matches = POSTS_CACHE.filter(p=> !already.has(p.id) && ((p.title||'').includes(query) || (p.text||'').includes(query))).slice(0,8);
-  resultsEl.innerHTML = matches.length ? matches.map(p=>{
-    const label = p.title || (p.text||'').slice(0,60) || ('پست #'+p.id);
-    return `<div class="dossier-manual-result-row"><span class="txt">${escAttr(label)}</span><button class="btn btn-sm" onclick="addNewsletterManualPost('${section}', ${p.id})">افزودن</button></div>`;
-  }).join('') : '<p class="dossier-topic-empty">موردی پیدا نشد.</p>';
-}
-
-function addNewsletterManualPost(section, postId){
-  if(!NEWSLETTER_DRAFT[section].includes(postId)) NEWSLETTER_DRAFT[section].push(postId);
-  document.getElementById('newsletter-manual-results-'+section).innerHTML = '';
-  renderNewsletterAdminPanel();
-}
-
-// «انتشار» = جایگزینی کامل (نه insert اضافه‌شونده) — طبق تصمیم کاربر
-// این جدول آرشیو نداره، همیشه فقط مجموعه‌ی «فعلی» رو نشون می‌ده
-async function publishNewsletter(){
-  await api('/newsletter_posts?id=gt.0', {method:'DELETE'});
-  const rows = [];
-  ['claims','news','dossier'].forEach(section=>{
-    NEWSLETTER_DRAFT[section].forEach((postId, idx)=> rows.push({section, post_id: postId, sort_order: idx}));
-  });
-  if(rows.length){
-    const r = await api('/newsletter_posts', {method:'POST', headers:{Prefer:'return=minimal'}, body: JSON.stringify(rows)});
-    if(!r.ok){ showToast('انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
-  }
-  await loadNewsletterPosts();
-  renderNewsletterTab();
-  showToast('خبرنامه‌ی امروز منتشر شد.');
-}
-
-// idx: شماره‌ی خبر داخل همون بخش (۱-پایه، هر بخش از ۱ دوباره شروع می‌شه) —
-// به‌جای نشان مربعی جدا (که با تیتر هم‌ردیف نمی‌شد و بی‌ربط دیده می‌شد)،
-// مستقیم قبل از خودِ تیتر، هم‌رنگ و هم‌خط با اون نوشته می‌شه
-// ۵.۲۲.۱: زمان مطلق در PDF (قبلاً «۳ ساعت پیش» — فایل بعداً و در روز دیگری خونده می‌شه)
-function nlWhen(t){
-  if(!t) return '';
-  const d = new Date(t);
-  return d.toLocaleDateString('fa-IR', { timeZone:'Asia/Tehran', month:'long', day:'numeric' }) + '، ساعت ' +
-    d.toLocaleTimeString('fa-IR', { timeZone:'Asia/Tehran', hour:'2-digit', minute:'2-digit' });
-}
-function newsletterItemHtml(p, idx){
-  const ch = chById(p.channel_id) || {};
-  const num = `<span class="newsletter-item-num">${toFaDigits(idx)}.</span>`;
-  return `
-    <div class="newsletter-item">
-      ${p.title ? `<div class="newsletter-item-title">${num} ${escAttr(p.title)}</div>` : ''}
-      <div class="newsletter-item-text">${p.title ? '' : num + ' '}${claimsTextDisplay(p.text||'')}</div>
-      <div class="newsletter-item-meta">${escAttr(ch.title||ch.username||'')} — ${nlWhen(p.posted_at||p.scraped_at)}</div>
-    </div>`;
-}
-
-// ⚠️ طبق درخواست کاربر: «شبکه‌های اجتماعی...» و «پرونده‌های موضوعی» دیگه دو
-// بخش جدا با دو عنوان جدا نیستن — فقط توی پنل مدیریت (بالاتر، سه پنل
-// curation جدا) دسته‌بندی‌شون حفظ شده تا مدیر بهتر پیدا/مدیریت‌شون کنه؛
-// موقع نمایش نهایی به کاربر، آیتم‌های news+dossier با هم یکی (concat)
-// و زیر یه عنوان مشترک «برخی از مهمترین خبرها» با شماره‌گذاری پیوسته
-// (نه از سر گرفتن شماره برای هرکدوم) نشون داده می‌شن. صفحه‌ی اول هم
-// طبق خواسته‌ی کاربر فقط مخصوص «ادعاها و شایعات»ه — برش اجباری صفحه
-// بین این دو بخش توی buildNewsletterPdf (پایین‌تر) با اندازه‌گیری
-// مرز #nl-claims-block انجام می‌شه، نه صرفاً جریان پیوسته‌ی قبلی.
-function buildNewsletterPrintHtml(){
-  const wrap = document.getElementById('newsletter-print-view');
-  if(!wrap) return;
-  const grouped = { claims: [], news: [], dossier: [] };
-  NEWSLETTER_POSTS.forEach(np=>{
-    // از np.posts (embedشده توسط loadNewsletterPosts) استفاده می‌کنیم، نه
-    // POSTS_CACHE — چون POSTS_CACHE سقف ۱۰۰۰تایی داره و تا وقتی مدیر واقعاً
-    // به این تب برمی‌گرده، پست‌های ادعا/شایعه‌ی منتشرشده (کمیاب‌تر از بقیه)
-    // ممکنه ازش بیرون افتاده باشن و PDF رو با «خبری ثبت نشده» خالی بسازه
-    if(np.posts) grouped[np.section].push(np.posts);
-  });
-  const highlights = [...grouped.news, ...grouped.dossier];
-  const today = new Date().toLocaleDateString('fa-IR', { timeZone:'Asia/Tehran', year:'numeric', month:'long', day:'numeric' });
-  const headerHtml = `
-    <div class="newsletter-masthead">
-      <div class="newsletter-masthead-meta">
-        <span>نشریه‌ی داخلی · روزانه</span>
-        <span>${today}</span>
-      </div>
-      <div class="newsletter-masthead-title">خبرنامه مدارس</div>
-      <div class="newsletter-masthead-sub">سامانه هوشمند جریان — رصد و تحلیل فضای سیاسی‌اجتماعی</div>
-      <div class="newsletter-masthead-rule"></div>
-    </div>`;
-  wrap.innerHTML = `
-    <div class="newsletter-page">
-      ${headerHtml}
-      <div id="nl-claims-block">
-        <h3 class="newsletter-page-title"><span>ادعاها و شایعات</span></h3>
-        <div class="newsletter-flow-columns">
-          ${grouped.claims.map((p,i)=>newsletterItemHtml(p,i+1)).join('') || '<p>خبری ثبت نشده.</p>'}
-        </div>
-      </div>
-      <h3 class="newsletter-page-title"><span>برخی از مهمترین خبرها</span></h3>
-      <div class="newsletter-flow-columns">
-        ${highlights.map((p,i)=>newsletterItemHtml(p,i+1)).join('') || '<p>خبری ثبت نشده.</p>'}
-      </div>
-    </div>`;
-}
-
-async function downloadNewsletter(){
-  const btn = document.getElementById('newsletter-download-btn');
-  if(btn){ btn.disabled = true; btn.dataset.origText = btn.textContent; btn.textContent = 'در حال آماده‌سازی PDF...'; }
-  try{
-    const libs = await Promise.all([loadScriptOnce('vendor/html2canvas.min.js'), loadScriptOnce('vendor/jspdf.umd.min.js')]);
-    if(!libs.every(Boolean)) throw new Error('pdf libraries failed to load');
-    await buildNewsletterPdf();
-  }catch(err){
-    console.error(err);
-    showToast('تولید فایل PDF ناموفق بود، دوباره امتحان کنید');
-  }
-  if(btn){ btn.disabled = false; btn.textContent = btn.dataset.origText || 'دانلود خبرنامه‌ی امروز'; }
-}
-
-// ساخت واقعی فایل PDF با jsPDF+html2canvas (نه چاپ مرورگر) — دلیل کامل
-// این تغییر معماری بالای همین بخش، کنار #newsletter-print-view، مستند
-// شده. مراحل: ۱) هدر برند جدا رندر می‌شه تا روی هر صفحه دوباره چسبونده بشه.
-// ۲) هر خبر جدا در عرض یه ستون اندازه‌گیری می‌شه و خبرها به ترتیب در ستون راست،
-// بعد چپ، بعد صفحه‌ی بعد چیده می‌شن (۵.۲۲.۱ — قبلاً یه بوم بلند دوستونه افقی
-// برش می‌خورد و ترتیب خبرها بین صفحه‌ها به‌هم می‌ریخت). ۳) هر صفحه جدا با
-// html2canvas رندر و به‌شکل JPEG (کیفیت ۰.۸۸) زیر هدر روی یه صفحه‌ی A4 گذاشته می‌شه.
-async function buildNewsletterPdf(){
-  buildNewsletterPrintHtml();
-  const printView = document.getElementById('newsletter-print-view');
-  const pageEl = printView.querySelector('.newsletter-page');
-  const headerEl = pageEl.querySelector('.newsletter-masthead');
-
-  const PDF_PX_WIDTH = 750;
-  const marginLR = 14, headerTopMM = 10, marginBottom = 14;
-  const contentWidthMM = 210 - marginLR * 2;
-  const cssPxPerMM = PDF_PX_WIDTH / contentWidthMM;
-  const scale = 2;
-
-  const headerHolder = document.createElement('div');
-  headerHolder.style.cssText = `position:fixed; top:0; left:0; width:${PDF_PX_WIDTH}px; background:#fff; z-index:-1;`;
-  headerHolder.appendChild(headerEl.cloneNode(true));
-  document.body.appendChild(headerHolder);
-  const headerCanvas = await html2canvas(headerHolder, { scale, backgroundColor:'#ffffff' });
-  const headerDataUrl = headerCanvas.toDataURL('image/png');
-  const headerHeightMM = contentWidthMM * (headerCanvas.height / headerCanvas.width);
-  document.body.removeChild(headerHolder);
-  // ۵.۲۲.۱: شروع متن درست زیر سربرگ (قبلاً عدد ثابت ۳۴mm بود ولی سربرگ ~۴۲mm پایین می‌اومد و
-  // تصویر سفید متن روی خط دوتایی زیر عنوان «خبرنامه مدارس» می‌افتاد و پنهانش می‌کرد)
-  const marginTop = headerTopMM + headerHeightMM;
-  const pageContentHeightCss = (297 - marginTop - marginBottom) * cssPxPerMM;
-
-  // ۵.۲۲.۱ (بررسی خروجی PDF): قبلاً کل بدنه با CSS دوستونه یه بوم بلند می‌شد و افقی برش می‌خورد —
-  // وقتی «مهمترین خبرها» بیشتر از یه صفحه بود، ستون راست (خبر ۱ تا ۱۰) و چپ (۱۱ تا ۱۹) هر کدوم
-  // روی دو صفحه پخش می‌شدن (ترتیب خوندن ۱–۷، ۱۱–۱۶، بعد ۸–۱۰…) و خبرِ ستون دوم سر مرز صفحه
-  // بریده می‌شد. حالا هر صفحه جدا چیده می‌شه: خبرها به ترتیب اول ستون راست، بعد چپ، بعد صفحه‌ی بعد.
-  const colGap = 28, colW = (PDF_PX_WIDTH - colGap) / 2;
-  const stage = document.createElement('div');
-  stage.style.cssText = `position:fixed; top:0; left:0; width:${PDF_PX_WIDTH}px; background:#fff; direction:rtl; font-family:inherit; color:#222; z-index:-1;`;
-  stage.className = 'newsletter-page';
-  document.body.appendChild(stage);
-  // ⚠️ html2canvas با white-space:pre-wrap + «\n» واقعی، حروف متصل با نیم‌فاصله رو به‌هم می‌ریزه —
-  // خطوط با span بلوکی جدا می‌شن (نه \n داخل pre-wrap)
-  const prepItem = el=>{
-    el.querySelectorAll('.newsletter-item-text').forEach(t=>{
-      t.innerHTML = t.innerHTML.split('\n').map(l => `<span class="nl-line" style="display:block;">${l}</span>`).join('');
-      t.style.whiteSpace = 'normal';
-    });
-    return el;
-  };
-  // اندازه‌گیری: هر خبر در عرض یه ستون، عنوان بخش در عرض کامل
-  const measure = (html, width)=>{
-    const box = document.createElement('div'); box.style.width = width + 'px'; box.innerHTML = html;
-    stage.appendChild(box);
-    const el = prepItem(box);
-    const h = box.getBoundingClientRect().height;
-    stage.removeChild(box);
-    return { html: el.innerHTML, h };
-  };
-  const sections = Array.from(pageEl.querySelectorAll('h3.newsletter-page-title')).map(t=>{
-    const cols = t.nextElementSibling && t.nextElementSibling.classList.contains('newsletter-flow-columns')
-      ? t.nextElementSibling : t.parentElement.querySelector('.newsletter-flow-columns');
-    const items = Array.from(cols.children).map(c => measure(c.outerHTML, colW));
-    // فاصله‌ی پایین هر خبر (margin) در اندازه نیست
-    items.forEach(it => it.h += 16);
-    const title = measure(t.outerHTML, PDF_PX_WIDTH); title.h += 16; // margin پایین عنوان
-    return { title, items };
-  });
-  // چیدن خبرها در صفحه‌ها؛ هر بخش از صفحه‌ی تازه شروع می‌شه (صفحه‌ی اول فقط ادعاها — خواست کاربر)
-  const pages = [];
-  sections.forEach(sec=>{
-    let page = { title: sec.title.html, cols: [[], []] }, used = [sec.title.h, sec.title.h], c = 0;
-    pages.push(page);
-    sec.items.forEach(it=>{
-      while(true){
-        if(used[c] + it.h <= pageContentHeightCss || !page.cols[c].length){ page.cols[c].push(it); used[c] += it.h; break; }
-        if(c === 0){ c = 1; continue; }
-        page = { title: '', cols: [[], []] }; used = [0, 0]; c = 0; pages.push(page);
-      }
-    });
-    // صفحه‌ی آخر هر بخش مثل ستون‌بندی قبلی متوازن می‌شه (نه همه در ستون راست و ستون چپ خالی)
-    const all = page.cols[0].concat(page.cols[1]);
-    const total = all.reduce((t, it) => t + it.h, 0);
-    let k = 0, acc = 0;
-    while(k < all.length && acc + all[k].h / 2 <= total / 2){ acc += all[k].h; k++; }
-    if(k === 0 && all.length) k = 1;
-    page.cols = [all.slice(0, k), all.slice(k)];
-  });
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit:'mm', format:'a4' });
-  for(let i = 0; i < pages.length; i++){
-    const pg = pages[i];
-    stage.innerHTML = `${pg.title}<div style="display:flex; gap:${colGap}px; align-items:flex-start; position:relative;">
-        <div style="width:${colW}px;">${pg.cols[0].map(it => it.html).join('')}</div>
-        ${pg.cols[1].length ? `<div style="position:absolute; top:0; bottom:16px; left:${colW + colGap / 2}px; width:1px; background:#ccc;"></div>` : ''}
-        <div style="width:${colW}px;">${pg.cols[1].map(it => it.html).join('')}</div>
-      </div>`;
-    // آخرین خبر هر ستون خط جداکننده‌ی پایین نمی‌گیره
-    stage.querySelectorAll('.newsletter-item:last-child').forEach(el => { el.style.borderBottom = 'none'; });
-    const canvas = await html2canvas(stage, { scale, backgroundColor:'#ffffff', windowWidth: PDF_PX_WIDTH });
-    let wMM = contentWidthMM, hMM = canvas.height / scale / cssPxPerMM;
-    const maxH = 297 - marginTop - marginBottom;
-    // خبرِ تکیِ بلندتر از یه صفحه (خیلی نادر): کل صفحه کوچیک‌تر جا داده می‌شه، نه بریده
-    if(hMM > maxH){ wMM = wMM * maxH / hMM; hMM = maxH; }
-    if(i > 0) doc.addPage();
-    doc.addImage(headerDataUrl, 'PNG', marginLR, headerTopMM, contentWidthMM, headerHeightMM);
-    doc.addImage(canvas.toDataURL('image/jpeg', 0.88), 'JPEG', marginLR + (contentWidthMM - wMM) / 2, marginTop, wMM, hMM);
-  }
-  document.body.removeChild(stage);
-
-  // نام فایل با ارقام لاتین (مثل پشتیبان و خروجی CSV) — بعضی مرورگرها/برنامه‌های ایمیل نام غیرلاتین رو به «download» برمی‌گردونن
-  const jp = calParts(new Date(), 'persian');
-  const fileDate = jp.year + '-' + String(jp.month).padStart(2, '0') + '-' + String(jp.day).padStart(2, '0');
-  doc.save(`khabarnameh-madares-${fileDate}.pdf`);
-}
-
 setupNewsFeed();
 setupPostTools();
 setupNewsTabs();
 
-document.getElementById('newspaper-date-tabs').addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || !b.dataset.date) return;
-  newspaperState.date = b.dataset.date;
-  renderNewspapers();
-});
-// ---- فیلتر و سایدبار تب «پرونده‌های موضوعی» ----
-document.getElementById('dossier-time-seg').addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || !b.dataset.t) return;
-  document.querySelectorAll('#dossier-time-seg > button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  dossierState.time = b.dataset.t;
-  renderDossierTab();
-});
-document.getElementById('dossier-sidebar').addEventListener('click', e=>{
-  const btn = e.target.closest('.dossier-nav-item'); if(!btn) return;
-  dossierState.topicId = Number(btn.dataset.topic);
-  renderDossierTab();
-});
+setupNewspapers();
+setupDossierTab();
 
 async function loadChannels(){
   const r = await api('/channels?select=*&order=added_at.desc');
@@ -2600,22 +2144,6 @@ async function loadProfileGroups(){
 async function loadChannelProfileGroups(){
   const r = await api('/channel_profile_groups?select=id,channel_id,group_id');
   CHANNEL_PROFILE_GROUPS = r.ok ? await r.json() : [];
-}
-async function loadDossierTopics(){
-  const r = await api('/dossier_topics?select=*&order=sort_order.asc');
-  DOSSIER_TOPICS = r.ok ? await r.json() : [];
-}
-async function loadDossierTopicPosts(){
-  const r = await api('/dossier_topic_posts?select=*&order=created_at.desc&limit=2000');
-  DOSSIER_TOPIC_POSTS = r.ok ? await r.json() : [];
-}
-async function loadNewsletterPosts(){
-  // select=*,posts(*) پست واقعی رو مستقیم embed می‌کنه به‌جای اینکه بعداً
-  // از POSTS_CACHE (که سقف ۱۰۰۰تایی داره و پست‌های ادعا/شایعه زود ازش
-  // بیرون می‌افتن) پیدا بشه — نگاه کن به buildNewsletterPrintHtml
-  const r = await api('/newsletter_posts?select=*,posts(*)&order=section.asc,sort_order.asc');
-  // پست پنهان‌شده: برای بیننده posts=null (RLS)، برای مدیر hidden_at پر
-  NEWSLETTER_POSTS = (r.ok ? await r.json() : []).filter(np=>np.posts && !np.posts.hidden_at);
 }
 // هر سه کوئری (اصلی/حوزه/بله) دقیقاً هم‌زمان، از همون خط اول، ارسال
 // می‌شن — نه اینکه hawza/claims منتظر تموم‌شدن کامل کوئری اصلی (که با
@@ -2675,18 +2203,6 @@ async function loadMagazines(){
 async function loadArchiveReports(){
   const r = await api('/archive_reports?select=*&order=sort_order.asc,uploaded_at.desc');
   ARCHIVE_REPORTS = r.ok ? await r.json() : [];
-}
-async function loadNewspapers(){
-  // limit=1000: کیوسک جار حدود ۱۶۵ عنوان در روز داره و مدت نگهداری رسانه (۵.۲۵.۰) تا ۳ روز
-  // می‌ره → تب «روزنامه‌ها» تا ۴ برگه‌ی تاریخ (~۶۶۰ ردیف). ۵۰۰ قبلی روز چهارم رو ناقص
-  // می‌آورد. فیلتر تاریخ نذاشتیم چون جلدهای آخرین تاریخ (تعطیلی طولانی) هیچ‌وقت پاک نمی‌شن.
-  const r = await api('/newspapers?select=*&order=edition_date.desc,title.asc&limit=1000');
-  NEWSPAPERS = r.ok ? await r.json() : [];
-}
-async function loadNewsAiInsights(){
-  const r = await api('/news_ai_insights?select=*&order=computed_at.desc&limit=1');
-  const rows = r.ok ? await r.json() : [];
-  NEWS_AI_INSIGHTS = rows.length ? rows[0] : null;
 }
 async function loadSchoolReports(){
   const r = await api('/school_reports?select=*&order=sort_order.asc,uploaded_at.desc');
@@ -4508,7 +4024,7 @@ if(pfSearchEl) pfSearchEl.addEventListener('input', renderPoliticalFigures);
 // ---- analytics ----
 const STOPWORDS = new Set(['و','در','به','از','که','این','را','با','است','می','یک','آن','هم','ها','های','برای','تا','هر','خود','ما','یا','او','وی','شد','شده','شود','کرد','کرده','کند','باید','اما','اگر','هست','نیست','بود','بودن','بوده','بودند','بر','مورد','چه','همه','همین','همان','چند','بین','پس','هنوز','حتی','نه','نیز','دیگر','بعد','قبل','دارد','دارند','داشت','روی','زیر','آنها','ولی','پیش','چون','چرا','کجا','کدام','مثل','مانند','شما','تو','من']);
 
-function topChannelsByCount(list){
+export function topChannelsByCount(list){
   const byChannel = {};
   list.forEach(p=>{ byChannel[p.channel_id] = (byChannel[p.channel_id]||0)+1; });
   return Object.entries(byChannel).sort((a,b)=>b[1]-a[1]);
@@ -4526,526 +4042,9 @@ function wordFrequency(list, limit){
   return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0, limit || 20);
 }
 
-// «آنالیز» تب «اخبار و رویدادها» فقط روی «شبکه‌های اجتماعی» + «وب‌سایت‌ها»
-// تعریف شده — نه «روزنامه‌ها» (جدول جدایی داره، posts نیست) و نه «ادعاها
-// و شایعات» (کانال بله، محتوایی متفاوته)
-function newsAnalyticsChannels(){
-  return CHANNELS.filter(c => c.show_in_news && c.platform !== 'bale');
-}
-// معیار محاسبات تب «آنالیز» ۲۴ ساعت اخیره — hours رو خالی بذار برای
-// بدون محدودیت زمانی (فعلاً همه‌جا با hours=24 صدا زده می‌شه)
-function newsAnalyticsPosts(hours){
-  const ids = new Set(newsAnalyticsChannels().map(c=>c.id));
-  const cutoff = hours ? Date.now() - hours*3600*1000 : 0;
-  return POSTS_CACHE.filter(p=>{
-    if(!ids.has(p.channel_id)) return false;
-    if(!hours) return true;
-    const t = new Date(p.posted_at || p.scraped_at).getTime();
-    return t >= cutoff;
-  });
-}
-
-let newsTrendChart, newsSourcesChart, newsTopicsChart;
-let chartDefaultsApplied = false;
-function applyChartDefaultsOnce(){
-  if(chartDefaultsApplied || typeof Chart === 'undefined') return;
-  Chart.defaults.font.family = "'IRANSansX','Inter',Tahoma,'Segoe UI',system-ui,sans-serif";
-  Chart.defaults.color = '#5b6472';
-  Chart.defaults.plugins.tooltip.backgroundColor = '#16202a';
-  Chart.defaults.plugins.tooltip.titleColor = '#fff';
-  Chart.defaults.plugins.tooltip.bodyColor = 'rgba(255,255,255,0.85)';
-  Chart.defaults.plugins.tooltip.padding = 10;
-  Chart.defaults.plugins.tooltip.cornerRadius = 8;
-  Chart.defaults.plugins.tooltip.displayColors = false;
-  Chart.defaults.plugins.tooltip.rtl = true;
-  // ارقام فارسی روی محورها و راهنمای نمودارها (Chart.js عددها رو با Intl و همین locale قالب می‌زنه)
-  Chart.defaults.locale = 'fa-IR';
-  Chart.defaults.plugins.tooltip.titleFont = { weight: '700' };
-  chartDefaultsApplied = true;
-}
-
-// گرادیان افقی برای میله‌های چارت‌های indexAxis:'y' — دقیقاً همون
-// گرادیان برند (accent-strong → accent) که قبلاً روی .bar استفاده می‌شد
-function horizontalBarGradient(from, to){
-  return (context)=>{
-    const { ctx, chartArea } = context.chart;
-    if(!chartArea) return from;
-    const g = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
-    g.addColorStop(0, to); g.addColorStop(1, from);
-    return g;
-  };
-}
-
-// پالت ۶رنگه‌ی هم‌خانواده با برند برای نمودار دونات موضوعات پرتکرار
-const TOPIC_DONUT_COLORS = ['#b5651d', '#EAB393', '#16202a', '#5b6472', '#d98a4f', '#3a4756'];
-
-// ---- موج‌های خبری ----
-// یه خبر که در کمتر از WAVE_WINDOW_H ساعت در WAVE_MIN_CHANNELS کانال مختلف یا
-// بیشتر پخش شده (به انتخاب کاربر: ۵ کانال در ۱۲ ساعت، فقط نمایش در سایت).
-// تشخیص سمت کلاینت: (۱) متن تقریباً یکسان — سه‌کلمه‌ای‌های مشترک (شینگل) با
-// سهم ≥ ۵۰٪ از پست کوتاه‌تر (بازنشر/کپی، حتی با امضای متفاوت کانال)، (۲) ≥۳
-// کلیدواژه‌ی مشترک هوش مصنوعی (روایت‌های با متن متفاوت؛ صف کلیدواژه عقبه پس
-// این فقط مکمله). پست‌ها با union-find خوشه می‌شن. داده: POSTS_CACHE + (اگه
-// کش ۱۰۰۰تایی کل ۱۲ ساعت رو نپوشونه) باقی پست‌های همون بازه با کوئری جدا.
-const WAVE_MIN_CHANNELS = 5, WAVE_WINDOW_H = 12, WAVE_LIVE_H = 2;
-const WAVE_STOP = new Set(('از به در که و را این با برای تا آن هم بر یک ها های می شد شده است بود کرد کند اند ای یا اما نیز پس چه همه دیگر '
-  + 'وی او ما شما آنها خود هر اگر باید شود نمی کرده گفت داد دارد نیست بین روی پیش پی'). split(' '));
-let WAVE_STATE = { forCache: null, extra: null, loading: false, result: null };
-function waveNorm(s){
-  return String(s||'')
-    .replace(/https?:\/\/\S+/g, ' ').replace(/@[\w_]+/g, ' ')
-    .replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[ۀة]/g, 'ه').replace(/[أإآ]/g, 'ا').replace(/ؤ/g, 'و')
-    .replace(/[ً-ٰٟ]/g, '').replace(/‌/g, ' ')
-    .toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
-}
-function waveShingles(p){
-  const w = waveNorm((p.title || '') + ' ' + (p.text || '')).split(/\s+/).filter(t=>t.length > 1 && !WAVE_STOP.has(t)).slice(0, 150);
-  const out = new Set();
-  for(let i = 0; i + 2 < w.length; i++) out.add(w[i] + ' ' + w[i+1] + ' ' + w[i+2]);
-  return out;
-}
-function waveTime(p){ return new Date(p.posted_at || p.scraped_at).getTime(); }
-function computeNewsWaves(posts){
-  const cutoff = Date.now() - WAVE_WINDOW_H * 3600 * 1000;
-  const items = posts.filter(p=>p.platform !== 'bale' && waveTime(p) >= cutoff);
-  const n = items.length;
-  const parent = items.map((_, i)=>i);
-  const find = i=>{ while(parent[i] !== i){ parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
-  const union = (a, b)=>{ a = find(a); b = find(b); if(a !== b) parent[a] = b; };
-  // (۱) متن مشابه
-  const sh = items.map(waveShingles);
-  const index = new Map();
-  sh.forEach((set, i)=>{ if(set.size < 4) return; set.forEach(g=>{ let l = index.get(g); if(!l) index.set(g, l = []); l.push(i); }); });
-  for(let i = 0; i < n; i++){
-    if(sh[i].size < 4) continue;
-    const shared = new Map();
-    sh[i].forEach(g=>{ const l = index.get(g); if(!l || l.length > 400) return; for(const j of l) if(j > i) shared.set(j, (shared.get(j) || 0) + 1); });
-    shared.forEach((c, j)=>{ if(c >= 3 && c / Math.min(sh[i].size, sh[j].size) >= 0.5) union(i, j); });
-  }
-  // (۲) کلیدواژه‌های مشترک هوش مصنوعی
-  const kwOf = items.map(p=>Array.isArray(p.ai_keywords) ? [...new Set(p.ai_keywords.map(k=>waveNorm(k).replace(/\s+/g, ' ').trim()).filter(Boolean))] : []);
-  const kwIndex = new Map();
-  kwOf.forEach((ks, i)=>{ if(ks.length < 3) return; ks.forEach(k=>{ let l = kwIndex.get(k); if(!l) kwIndex.set(k, l = []); l.push(i); }); });
-  // کلیدواژه‌ی خیلی عام (مثل «ایران») زنجیره‌ی بی‌معنی می‌سازه — کنار گذاشته می‌شه
-  const kwPosts = kwOf.filter(ks=>ks.length >= 3).length;
-  const kwMax = Math.max(15, Math.round(kwPosts * 0.05));
-  for(let i = 0; i < n; i++){
-    if(kwOf[i].length < 3) continue;
-    const shared = new Map();
-    kwOf[i].forEach(k=>{ const l = kwIndex.get(k) || []; if(l.length > kwMax) return; for(const j of l) if(j > i) shared.set(j, (shared.get(j) || 0) + 1); });
-    shared.forEach((c, j)=>{ if(c >= 3) union(i, j); });
-  }
-  const groups = new Map();
-  for(let i = 0; i < n; i++){ const r = find(i); let g = groups.get(r); if(!g) groups.set(r, g = []); g.push(i); }
-  const waves = [];
-  groups.forEach(idx=>{
-    const chans = new Set(idx.map(i=>items[i].channel_id));
-    if(chans.size < WAVE_MIN_CHANNELS) return;
-    const ps = idx.map(i=>items[i]).sort((a, b)=>waveTime(a) - waveTime(b));
-    // متن نماینده: پستی که بیشترین شینگل مشترک با بقیه‌ی خوشه رو داره
-    const freq = new Map();
-    idx.forEach(i=>sh[i].forEach(g=>freq.set(g, (freq.get(g) || 0) + 1)));
-    let best = idx[0], bestScore = -1;
-    idx.forEach(i=>{ let sc = 0; sh[i].forEach(g=>{ sc += freq.get(g) - 1; }); sc = sh[i].size ? sc / Math.sqrt(sh[i].size) : 0; if(sc > bestScore){ bestScore = sc; best = i; } });
-    const kwFreq = new Map();
-    idx.forEach(i=>kwOf[i].forEach(k=>kwFreq.set(k, (kwFreq.get(k) || 0) + 1)));
-    const kws = [...kwFreq.entries()].filter(([, c])=>c >= 2).sort((a, b)=>b[1] - a[1]).slice(0, 4).map(([k])=>k);
-    waves.push({ posts: ps, channels: chans.size, rep: items[best], first: ps[0], last: ps[ps.length - 1], kws });
-  });
-  waves.sort((a, b)=>(b.channels - a.channels) || (waveTime(b.last) - waveTime(a.last)));
-  return waves;
-}
-// پست‌های ۱۲ ساعت اخیر که در کش ۱۰۰۰تایی جا نشدن (ستون‌های لازم فقط)
-async function loadWaveExtraPosts(){
-  const since = new Date(Date.now() - WAVE_WINDOW_H * 3600 * 1000).toISOString();
-  let oldest = null;
-  for(const p of POSTS_CACHE){ if(p.platform === 'bale' || !p.scraped_at) continue; if(!oldest || p.scraped_at < oldest) oldest = p.scraped_at; }
-  if(!oldest || oldest <= since) return [];
-  const out = [];
-  for(let page = 0; page < 6; page++){
-    const r = await api('/posts?select=id,channel_id,platform,title,text,link,ai_keywords,posted_at,scraped_at'
-      + '&platform=neq.bale&scraped_at=gte.' + encodeURIComponent(since) + '&scraped_at=lt.' + encodeURIComponent(oldest)
-      + '&order=scraped_at.desc&limit=1000&offset=' + (page * 1000));
-    if(!r.ok) break;
-    const rows = await r.json();
-    out.push(...rows.filter(p=>!HIDDEN_POST_IDS.has(Number(p.id))));
-    if(rows.length < 1000) break;
-  }
-  return out;
-}
-function renderNewsWaves(){
-  const list = document.getElementById('news-waves-list');
-  const empty = document.getElementById('news-waves-empty');
-  if(!list) return;
-  if(WAVE_STATE.forCache !== POSTS_CACHE){
-    WAVE_STATE = { forCache: POSTS_CACHE, extra: null, loading: true, result: null };
-    const st = WAVE_STATE;
-    loadWaveExtraPosts().catch(()=>[]).then(extra=>{
-      if(WAVE_STATE !== st) return;
-      const ids = new Set(POSTS_CACHE.map(p=>p.id));
-      st.extra = extra.filter(p=>!ids.has(p.id));
-      st.result = computeNewsWaves(POSTS_CACHE.concat(st.extra));
-      st.loading = false;
-      renderNewsWaves();
-      renderNgaKpis();
-    });
-  }
-  if(WAVE_STATE.loading){
-    list.innerHTML = '';
-    empty.textContent = 'در حال بررسی پست‌های ۱۲ ساعت اخیر…';
-    empty.style.display = '';
-    return;
-  }
-  const waves = WAVE_STATE.result || [];
-  empty.textContent = 'در ۱۲ ساعت اخیر خبری در ۵ کانال یا بیشتر پخش نشده است.';
-  empty.style.display = waves.length ? 'none' : '';
-  const fmtClock = t=>new Date(t).toLocaleTimeString('fa-IR', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Tehran' });
-  list.innerHTML = waves.slice(0, 6).map(w=>{
-    const live = Date.now() - waveTime(w.last) <= WAVE_LIVE_H * 3600 * 1000;
-    const spanH = (waveTime(w.last) - waveTime(w.first)) / 3600000;
-    const spanTxt = spanH < 1 ? 'در کمتر از یک ساعت' : ('طی ' + toFaDigits(Math.round(spanH)) + ' ساعت');
-    // امضای کانال (@آیدی/لینک) از متن نماینده حذف می‌شه
-    const repText = (w.rep.title || w.rep.text || '').replace(/https?:\/\/\S+/g, '').replace(/[🆔]?\s*@[\w_]+/gu, '').trim();
-    const postsHtml = w.posts.slice().reverse().map(p=>{
-      const url = safeUrl(p.link);
-      return `<div class="wave-post"><div class="wp-main"><span class="wp-ch">${escHtml(chName(p.channel_id))}</span><span class="wp-time">${fmtClock(waveTime(p))}</span>
-        <p class="wp-snip">${escHtml((p.title || p.text || '').slice(0, 220))}</p></div>
-        ${url !== '#' ? `<a href="${url}" target="_blank" rel="noopener" title="مشاهده در مبدأ">↗</a>` : ''}</div>`;
-    }).join('');
-    return `<div class="wave-card${live ? ' is-live' : ''}">
-      <div class="wave-top">
-        <span class="wave-count"><b>${toFaDigits(w.channels)}</b> کانال</span>
-        <span class="wave-span">${toFaDigits(w.posts.length)} پست، ${spanTxt}</span>
-        ${live ? '<span class="wave-live">در حال گسترش</span>' : ''}
-      </div>
-      <p class="wave-text">${escHtml(repText.slice(0, 400))}</p>
-      <div class="wave-meta">اولین انتشار: <b>${escHtml(chName(w.first.channel_id))}</b>، ساعت ${fmtClock(waveTime(w.first))}، آخرین: ${newsRelTime(w.last.posted_at || w.last.scraped_at)}</div>
-      ${w.kws.length ? `<div class="wave-kws">${w.kws.map(k=>`<span>${escHtml(k)}</span>`).join('')}</div>` : ''}
-      <details><summary>مشاهده‌ی ${toFaDigits(w.posts.length)} پست</summary><div class="wave-posts">${postsHtml}</div></details>
-    </div>`;
-  }).join('');
-}
-
-// ردیف شاخص‌های بالای «در یک نگاه» — امروز = از نیمه‌شب تهران؛ کارت موج‌ها بعد
-// از رسیدن نتیجه‌ی موج‌ها (ناهمگام) دوباره پر می‌شه
-function renderNgaKpis(){
-  const el = document.getElementById('nga-kpis');
-  if(!el) return;
-  const todayStartMs = iranTodayStartMs();
-  const isToday = p=>new Date(p.posted_at || p.scraped_at).getTime() >= todayStartMs;
-  const todayPosts = newsAnalyticsPosts().filter(isToday);
-  const activeCh = new Set(todayPosts.map(p=>p.channel_id)).size;
-  const allCh = newsAnalyticsChannels().length;
-  const claimsToday = POSTS_CACHE.filter(p=>p.platform === 'bale' && isToday(p)).length;
-  const waves = WAVE_STATE.loading ? null : (WAVE_STATE.result || []);
-  const live = waves ? waves.filter(w=>Date.now() - waveTime(w.last) <= WAVE_LIVE_H * 3600 * 1000).length : 0;
-  const now = new Date();
-  const weekday = now.toLocaleDateString('fa-IR', { weekday:'long', timeZone:'Asia/Tehran' });
-  const dateTxt = now.toLocaleDateString('fa-IR', { day:'numeric', month:'long', year:'numeric', timeZone:'Asia/Tehran' });
-  const aiTxt = NEWS_AI_INSIGHTS ? ('تحلیل هوشمند: ' + newsRelTime(NEWS_AI_INSIGHTS.computed_at)) : 'تحلیل هوشمند هنوز آماده نشده';
-  el.innerHTML = `
-    <div class="nga-kpi is-date"><span class="k-label">${escHtml(weekday)}</span><span class="k-val">${escHtml(dateTxt)}</span><span class="k-sub">${escHtml(aiTxt)}</span></div>
-    <div class="nga-kpi"><span class="k-label">اخبار امروز</span><span class="k-val">${toFaDigits(todayPosts.length)}</span><span class="k-sub">از نیمه‌شب تا الان</span></div>
-    <div class="nga-kpi"><span class="k-label">منابع فعال امروز</span><span class="k-val">${toFaDigits(activeCh)} <small>از ${toFaDigits(allCh)}</small></span><span class="k-sub">منبعی که امروز خبر داده</span></div>
-    <button type="button" class="nga-kpi${live ? ' is-alert' : ''}" onclick="document.getElementById('news-waves-panel').scrollIntoView({behavior:'smooth'})">
-      <span class="k-label">موج‌های خبری</span><span class="k-val">${waves ? toFaDigits(waves.length) : '…'}</span>
-      <span class="k-sub">${!waves ? 'در حال بررسی…' : live ? toFaDigits(live) + ' موج در حال گسترش' : '۱۲ ساعت اخیر'}</span></button>
-    <button type="button" class="nga-kpi" data-news-go="claims"><span class="k-label">ادعا و شایعه امروز</span><span class="k-val">${toFaDigits(claimsToday)}</span><span class="k-sub">مشاهده‌ی همه ←</span></button>`;
-}
-
-// ---- «اخبار منتخب» (هوش مصنوعی + ویرایش دستی مدیر — ۵.۲۶.۰، migration_044) ----
-// فهرست = سنجاق‌شده‌ها (news_pick_edits.action='pin'، به ترتیب sort_order، با مشخصات
-// ذخیره‌شده در pick — پس بعد از اجرای بعدی هوش مصنوعی هم می‌مونن) + انتخاب‌های هوش
-// مصنوعی به ترتیب امتیاز، بدون «حذف از منتخب»ها و پست‌های پنهان؛ جمعاً تا ۱۰ (سنجاق‌ها همیشه).
-let NEWS_PICK_EDITS = [];
-let NEWS_PICK_EDITS_MISSING = false;
-// true = خونده شد؛ خطای موقت (نه جدول نبودن) فهرست قبلی رو نگه می‌داره
-async function loadNewsPickEdits(){
-  try{
-    const r = await api('/news_pick_edits?select=*&order=sort_order.asc,id.asc');
-    NEWS_PICK_EDITS_MISSING = r.status === 404 || r.status === 400;
-    if(r.ok){ NEWS_PICK_EDITS = await r.json(); return true; }
-    if(NEWS_PICK_EDITS_MISSING) NEWS_PICK_EDITS = [];
-    return false;
-  }catch(e){ return false; }
-}
-const PICK_MAX = 10;
-// سنجاق‌هایی که واقعاً در فهرست دیده می‌شن (پست پنهان‌شده یا بی‌مشخصات نه)
-const pickVisiblePin = x=>x.action === 'pin' && x.pick && !HIDDEN_POST_IDS.has(Number(x.post_id));
-function newsPickItems(){
-  const pins = NEWS_PICK_EDITS.filter(pickVisiblePin);
-  const skip = new Set(NEWS_PICK_EDITS.map(x=>Number(x.post_id)));
-  const ai = (NEWS_AI_INSIGHTS?.selected_posts || [])
-    .filter(sp => !HIDDEN_POST_IDS.has(Number(sp.id)) && !skip.has(Number(sp.id)))
-    .map(sp => ({ sp, post: POSTS_CACHE.find(p=>p.id===sp.id) }))
-    .filter(x => x.post || x.sp.channel_id);
-  return [
-    ...pins.map(x=>({ sp: x.pick, post: POSTS_CACHE.find(p=>p.id===Number(x.post_id)), edit: x })),
-    ...ai.slice(0, Math.max(0, PICK_MAX - pins.length)),
-  ];
-}
-const PICK_IC = {
-  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>',
-  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
-  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>',
-  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>',
-};
-function renderNewsPicks(){
-  const selectedList = document.getElementById('news-analytics-selected-list');
-  const selectedEmpty = document.getElementById('news-analytics-selected-empty');
-  const selectedUpdatedEl = document.getElementById('news-selected-updated');
-  selectedUpdatedEl.textContent = NEWS_AI_INSIGHTS ? ('به‌روزرسانی: ' + newsRelTime(NEWS_AI_INSIGHTS.computed_at)) : '';
-  // از مهر ۱۴۰۵ هر مورد خودش channel_id/time/link/sources رو هم داره (news-insights
-  // خبرها رو خوشه‌بندی می‌کنه و sources = تعداد واقعی منابع همون خبره) — پس
-  // اگه پست در کش ۱۰۰۰تایی نبود هم نمایش داده می‌شه؛ ردیف‌های قدیمی (فقط id)
-  // مثل قبل از روی POSTS_CACHE
-  const aiSelected = newsPickItems();
-  const isAdmin = currentRole === 'app_admin';
-  const pinCount = aiSelected.filter(x=>x.edit).length;
-  selectedList.innerHTML = '';
-  selectedEmpty.style.display = aiSelected.length ? 'none' : '';
-  aiSelected.forEach(({sp, post:p, edit}, i)=>{
-    const text = sp.headline || (p && (p.title || (p.text||'').slice(0,140))) || '';
-    const chId = p ? p.channel_id : sp.channel_id;
-    const when = sp.time || (p && (p.posted_at||p.scraped_at));
-    // برچسب‌های معیار انتخاب (کاربر، مهر ۱۴۰۵: کوتاه، نه جمله‌ی توضیحی): «پرتکرار»
-    // از تعداد واقعی منابع (≥۵، همون آستانه‌ی موج خبری) + ۱–۲ برچسب تحلیلی هوش
-    // مصنوعی از فهرست ثابت TAGS در news-insights. ردیف‌های کمی قدیمی‌تر فقط
-    // criterion (یک برچسب) دارن
-    const tags = [];
-    if(sp.sources >= 5) tags.push('<span class="sel-tag is-wide">پرتکرار</span>');
-    const aiTags = Array.isArray(sp.tags) ? sp.tags : (sp.criterion ? [sp.criterion] : []);
-    aiTags.forEach(t=>tags.push(`<span class="sel-tag is-crit">${escHtml(t)}</span>`));
-    const srcTxt = sp.sources > 1 ? ` و ${toFaDigits(sp.sources - 1)} منبع دیگر` : '';
-    if(edit && isAdmin) tags.unshift('<span class="sel-tag is-pin">سنجاق‌شده</span>');
-    const pid = Number(edit ? edit.post_id : sp.id);
-    const ctl = !isAdmin ? '' : edit
-      ? `<div class="pick-ctl"><button type="button" data-pick="up" data-id="${edit.id}" ${i === 0 ? 'disabled' : ''} title="بالاتر" aria-label="بالاتر">${PICK_IC.up}</button><button type="button" data-pick="down" data-id="${edit.id}" ${i === pinCount - 1 ? 'disabled' : ''} title="پایین‌تر" aria-label="پایین‌تر">${PICK_IC.down}</button><button type="button" data-pick="unpin" data-id="${edit.id}">${PICK_IC.x}برداشتن سنجاق</button></div>`
-      : `<div class="pick-ctl"><button type="button" data-pick="pin" data-post="${pid}">${PICK_IC.pin}سنجاق</button><button type="button" data-pick="hide" data-post="${pid}">${PICK_IC.x}حذف از منتخب</button></div>`;
-    const el = document.createElement('div'); el.className = 'rank-item' + (edit && isAdmin ? ' is-pinned' : '');
-    el.innerHTML = `<span class="rank-num">${toFaDigits(i+1)}</span>
-      <div class="rc">${tags.length ? `<div class="sel-tags">${tags.join('')}</div>` : ''}<p>${escHtml(text)}</p>
-      <div class="rmeta"><span>${escHtml(chName(chId))}${srcTxt}${when ? '،' : ''}</span><span>${when ? newsRelTime(when) : ''}</span></div>${ctl}</div>`;
-    selectedList.appendChild(el);
-  });
-
-  if(isAdmin && NEWS_PICK_EDITS_MISSING) selectedList.insertAdjacentHTML('beforeend', '<p class="pick-missing">برای ویرایش این فهرست، فایل <b>db/migration_044_news_pick_edits.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.</p>');
-}
-// مشخصات لازم برای نمایش یه خبر منتخب — از خودِ پست (برای «افزودن به منتخب»)
-function pickFromPost(p){
-  const head = (p.title || String(p.text || '').replace(/\s+/g, ' ')).trim().slice(0, 160);
-  return { id: p.id, headline: head, sources: 1, posts: 1, channel_id: p.channel_id, time: p.posted_at || p.scraped_at, link: p.link || null, tags: [] };
-}
-async function upsertPickEdit(body){
-  const r = await api('/news_pick_edits?on_conflict=post_id', { method:'POST', headers:{ Prefer:'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(body) });
-  if(!r.ok) throw new Error('news_pick_edits ' + r.status);
-}
-function pickNextOrder(){ return NEWS_PICK_EDITS.filter(x=>x.action === 'pin').reduce((m, x)=>Math.max(m, x.sort_order), 0) + 1; }
-async function pickAfterChange(msg){
-  const fresh = await loadNewsPickEdits();
-  renderNewsPicks();
-  try{ renderNewsFeed(); }catch(e){}
-  if(!fresh) showToast((msg ? msg + ' ' : '') + 'فهرست تازه دریافت نشد؛ برای دیدن نتیجه صفحه را دوباره بارگذاری کنید.');
-  else if(msg) showToast(msg);
-}
-function pickFailMsg(){ return NEWS_PICK_EDITS_MISSING ? 'انجام نشد؛ اول migration_044 را در SQL Editor سوپابیس اجرا کنید.' : 'انجام نشد؛ اتصال اینترنت را بررسی و دوباره تلاش کنید.'; }
-document.getElementById('news-analytics-selected-list').addEventListener('click', async e=>{
-  const b = e.target.closest('[data-pick]'); if(!b || currentRole !== 'app_admin') return;
-  const act = b.dataset.pick;
-  b.disabled = true;
-  try{
-    if(act === 'pin' || act === 'hide'){
-      const sp = (NEWS_AI_INSIGHTS?.selected_posts || []).find(x=>Number(x.id) === Number(b.dataset.post));
-      if(!sp) return;
-      if(act === 'hide' && !await uiConfirm('حذف این خبر از «اخبار منتخب»\nخودِ پست در سایت می‌ماند؛ فقط از این فهرست برداشته می‌شود.')){ b.disabled = false; return; }
-      await upsertPickEdit(act === 'pin'
-        ? { post_id: Number(sp.id), action:'pin', title: sp.headline || null, pick: sp, sort_order: pickNextOrder() }
-        : { post_id: Number(sp.id), action:'hide', title: sp.headline || null, pick: null, sort_order: 0 });
-      await pickAfterChange(act === 'pin' ? 'سنجاق شد؛ در اجراهای بعدی هوش مصنوعی هم بالای فهرست می‌ماند.' : 'از «اخبار منتخب» برداشته شد.');
-    }else if(act === 'unpin'){
-      const r = await api('/news_pick_edits?id=eq.' + Number(b.dataset.id), { method:'DELETE' });
-      if(!r.ok) throw new Error('unpin ' + r.status);
-      await pickAfterChange('سنجاق برداشته شد.');
-    }else if(act === 'up' || act === 'down'){
-      // فقط سنجاق‌های دیده‌شده جابه‌جا می‌شن (هم‌سو با newsPickItems)؛ بقیه ته ترتیب
-      const pins = NEWS_PICK_EDITS.filter(pickVisiblePin);
-      const rest = NEWS_PICK_EDITS.filter(x=>x.action === 'pin' && !pickVisiblePin(x));
-      const i = pins.findIndex(x=>x.id === Number(b.dataset.id)), j = act === 'up' ? i - 1 : i + 1;
-      if(i < 0 || j < 0 || j >= pins.length) return;
-      // ترتیب از نو شماره‌گذاری می‌شه (sort_orderهای برابر هم درست جابه‌جا بشن)
-      [pins[i], pins[j]] = [pins[j], pins[i]];
-      const res = await Promise.all([...pins, ...rest].map((x, k)=>x.sort_order === k + 1 ? { ok:true } : api('/news_pick_edits?id=eq.' + x.id, { method:'PATCH', body: JSON.stringify({ sort_order: k + 1 }) })));
-      if(res.some(r=>!r.ok)) throw new Error('reorder');
-      await pickAfterChange('');
-    }
-  }catch(err){
-    console.error(err);
-    showToast(pickFailMsg());
-    b.disabled = false;
-  }
-});
-// «افزودن به منتخب» از روی کارت خبر (فقط مدیر)
-export function pickAddBtnHtml(p){
-  if(currentRole !== 'app_admin') return '';
-  const on = NEWS_PICK_EDITS.some(x=>Number(x.post_id) === Number(p.id) && x.action === 'pin');
-  return `<button type="button" class="post-hide-btn pick-add-btn" ${on ? 'disabled' : ''} onclick="addPostToPicks(${Number(p.id)})" title="این خبر بالای «اخبار منتخب» در تب «در یک نگاه» سنجاق می‌شود">${PICK_IC.pin}${on ? 'در اخبار منتخب' : 'افزودن به منتخب'}</button>`;
-}
-async function addPostToPicks(id){
-  const p = POSTS_CACHE.find(x=>x.id === id);
-  if(!p){ showToast('این خبر پیدا نشد؛ صفحه را دوباره بارگذاری کنید.'); return; }
-  try{
-    const sp = pickFromPost(p);
-    await upsertPickEdit({ post_id: id, action:'pin', title: sp.headline, pick: sp, sort_order: pickNextOrder() });
-    await pickAfterChange('به «اخبار منتخب» اضافه شد (بالای فهرست، در تب «در یک نگاه»).');
-  }catch(e){ console.error(e); showToast(pickFailMsg()); }
-}
-export function renderNewsAnalytics(){
-  renderNewsWaves();
-  // معیار محاسبات ۳ ویجت آماری این تب (روند/منابع/ابرکلمات): ۲۴ ساعت
-  // اخیر، سمت کلاینت. دو ویجت دیگه («اخبار منتخب»/«موضوعات پرتکرار») از
-  // هوش مصنوعی میان و مستقل از این متغیرن — NEWS_AI_INSIGHTS رو
-  // می‌خونن که سمت سرور، روی پنجره‌ی ۶ساعته‌ی خودش، روزی ۴ بار
-  // (نه هر بار بازکردن این تب) محاسبه شده
-  const posts = newsAnalyticsPosts(24);
-  const hasChart = typeof Chart !== 'undefined';
-  if(hasChart) applyChartDefaultsOnce();
-  // Chart.js تنبل‌لود می‌شه؛ بار اول بقیه‌ی ویجت‌ها رندر می‌شن و بعد از
-  // رسیدن کتابخونه، کل تب یه‌بار دیگه (این‌بار با نمودارها) رندر می‌شه
-  else if(!scriptRequested('vendor/chart.min.js')){
-    loadScriptOnce('vendor/chart.min.js').then(ok=>{ if(ok) renderNewsAnalytics(); });
-  }
-
-  // اخبار منتخب — تشخیص هوش مصنوعی (نه صرفاً جدیدترین). این خودِ
-  // renderNewsAnalytics() هیچی محاسبه نمی‌کنه — فقط آخرین ردیف
-  // news_ai_insights (که روزی ۴ بار از GitHub Actions پر می‌شه) رو نشون
-  // می‌ده؛ اگه هنوز هیچ تحلیلی اجرا نشده باشه، پیام «هنوز آماده نشده» میاد.
-  // headline از سمت هوش مصنوعی میاد (نه اسلایس خام متن پست) — یه جمله‌ی
-  // کامل و فارسی (اگه منبع انگلیسی بود، ترجمه‌شده)، نه نصفه‌رهاشده؛ لیبل
-  // «دلیل انتخاب» مهر ۱۴۰۵ به خواست کاربر برگشت — به‌صورت برچسب‌های کوتاه (پایین‌تر).
-  renderNewsPicks();
-
-  // آمار تولید خبر — امروز (نه ۲۴ ساعت اخیر؛ از نیمه‌شب تقویمی امروز به
-  // وقت ایران، صریح — نه ساعت محلی مرورگر) — فقط عدد کل، بدون تفکیک
-  // پلتفرم؛ بدون عنوان پنل، عدد توی کادر خودش سمت راست + تاریخ شمسی
-  // امروز سمت چپ همون ردیف
-  renderNgaKpis();
-
-  // جدیدترین ادعا یا شایعه — ۳ مورد اخیر از تب «ادعاها و شایعات»
-  // (platform=bale، همون فیلتری که خودِ تب claims استفاده می‌کنه)، فقط
-  // عنوان کافیه؛ posts.title رو collect_bale.py همیشه پر می‌کنه
-  const claimsRecentList = document.getElementById('news-claims-recent-list');
-  const claimsRecentEmpty = document.getElementById('news-claims-recent-empty');
-  const recentClaims = POSTS_CACHE.filter(p=>p.platform==='bale')
-    .sort((a,b)=> new Date(b.posted_at||b.scraped_at) - new Date(a.posted_at||a.scraped_at))
-    .slice(0,3);
-  claimsRecentList.innerHTML = '';
-  claimsRecentEmpty.style.display = recentClaims.length ? 'none' : '';
-  recentClaims.forEach((p,i)=>{
-    const text = p.title || (p.text||'').slice(0,140);
-    const el = document.createElement('div'); el.className = 'rank-item';
-    el.innerHTML = `<span class="rank-num">${toFaDigits(i+1)}</span>
-      <div class="rc"><p>${escHtml(text)}</p>
-      <div class="rmeta">${escHtml(chName(p.channel_id))} · ${newsRelTime(p.posted_at||p.scraped_at)}</div></div>`;
-    claimsRecentList.appendChild(el);
-  });
-
-  if(!hasChart) return; // بارگذاری Chart.js از CDN شکست خورده — بقیه‌ی نمودارها رو رد کن
-
-  // روند حجم اخبار — ۲۴ ساعت اخیر، به تفکیک ساعت
-  const hourLabels = [], hourCounts = [];
-  for(let i=23;i>=0;i--){
-    const d = new Date(); d.setMinutes(0,0,0); d.setHours(d.getHours()-i);
-    const next = new Date(d); next.setHours(d.getHours()+1);
-    const n = posts.filter(p=>{
-      const t = new Date(p.posted_at || p.scraped_at).getTime();
-      return t>=d.getTime() && t<next.getTime();
-    }).length;
-    hourLabels.push(d.toLocaleTimeString('fa-IR', {hour:'2-digit'}));
-    hourCounts.push(n);
-  }
-  if(newsTrendChart) newsTrendChart.destroy();
-  newsTrendChart = new Chart(document.getElementById('news-trend-chart'), {
-    type: 'line',
-    data: { labels: hourLabels, datasets: [{
-      data: hourCounts,
-      borderColor: '#b5651d',
-      borderWidth: 2.5,
-      backgroundColor: (context)=>{
-        const { ctx, chartArea } = context.chart;
-        if(!chartArea) return 'rgba(234,179,147,0.25)';
-        const g = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-        g.addColorStop(0, 'rgba(234,179,147,0.5)'); g.addColorStop(1, 'rgba(234,179,147,0.02)');
-        return g;
-      },
-      fill: true, tension: 0.35,
-      pointRadius: 2, pointBackgroundColor: '#b5651d', pointBorderColor: '#fff', pointBorderWidth: 1.5,
-      pointHoverRadius: 6, pointHoverBackgroundColor: '#b5651d', pointHoverBorderWidth: 2,
-    }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display:false } },
-      scales: {
-        y: { beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'rgba(20,27,36,0.06)' } },
-        x: { grid:{ display:false }, ticks:{ maxRotation:0, autoSkip:true, maxTicksLimit:8 } },
-      },
-    },
-  });
-
-  // حجم تولید محتوا به تفکیک منبع — ۲۴ ساعت اخیر، ۸ منبع برتر
-  const topSources = topChannelsByCount(posts).slice(0,8);
-  if(newsSourcesChart) newsSourcesChart.destroy();
-  newsSourcesChart = new Chart(document.getElementById('news-sources-chart'), {
-    type: 'bar',
-    data: {
-      labels: topSources.map(([id])=>{ const ch=chById(Number(id)); return ch ? (ch.title||ch.username) : id; }),
-      datasets: [{
-        data: topSources.map(([,n])=>n),
-        backgroundColor: horizontalBarGradient('#b5651d', '#EAB393'),
-        borderRadius: 6, maxBarThickness: 30, barPercentage: 0.65, categoryPercentage: 0.75,
-      }],
-    },
-    options: {
-      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display:false } },
-      scales: {
-        x: { beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'rgba(20,27,36,0.06)' } },
-        y: { grid:{ display:false } },
-      },
-    },
-  });
-
-  // موضوعات پرتکرار — تشخیص هوش مصنوعی (همون news_ai_insights بالا)؛ دونات
-  // چون درباره‌ی «سهم» موضوعات از هم‌دیگه‌ست، نه رتبه‌بندی مطلق
-  const topicCounts = (NEWS_AI_INSIGHTS?.topics || []).map(t=>[t.name, t.weight]);
-  const topicsBox = document.getElementById('news-topics-chart-box');
-  const topicsCanvas = document.getElementById('news-topics-chart');
-  const topicsEmpty = document.getElementById('news-topics-empty');
-  const topicsUpdatedEl = document.getElementById('news-topics-updated');
-  topicsUpdatedEl.textContent = NEWS_AI_INSIGHTS ? ('به‌روزرسانی: ' + newsRelTime(NEWS_AI_INSIGHTS.computed_at)) : '';
-  if(newsTopicsChart){ newsTopicsChart.destroy(); newsTopicsChart = null; }
-  if(!topicCounts.length){
-    topicsBox.style.display = 'none';
-    topicsEmpty.style.display = '';
-  }else{
-    topicsBox.style.display = '';
-    topicsEmpty.style.display = 'none';
-    newsTopicsChart = new Chart(topicsCanvas, {
-      type: 'doughnut',
-      data: {
-        labels: topicCounts.map(([name])=>name),
-        datasets: [{
-          data: topicCounts.map(([,n])=>n),
-          backgroundColor: TOPIC_DONUT_COLORS.slice(0, topicCounts.length),
-          borderColor: '#fff', borderWidth: 2, hoverOffset: 6,
-        }],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '62%',
-        plugins: { legend: { display:true, position:'bottom', rtl:true, labels:{ boxWidth:11, padding:12, font:{ size:12 } } } },
-      },
-    });
-  }
-}
+setupNewsPicks();
+setupNewsAnalytics();
+setupNewsletter();
 
 // ---- settings: categories & channels (real CRUD against Postgres) ----
 const catGridEl = document.getElementById('cat-grid');
@@ -6166,112 +5165,6 @@ function scrollToPackageCard(){
   const el = document.getElementById('pkg-flow');
   if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
 }
-// تب «روزنامه‌ها» — گرید صفحه‌ی اول روزنامه‌ها برای یه تاریخ انتخاب‌شده.
-// پیش‌فرض جدیدترین تاریخ موجوده (معمولاً امروز)، ولی چون cleanup_media.py
-// فقط عکس‌های قدیمی‌تر از ۳ روز رو پاک می‌کنه، تا وقتی پاک نشدن، تاریخ‌های
-// قبلی هم توی newspaper-date-tabs قابل‌انتخاب می‌مونن.
-export function renderNewspapers(){
-  const grid = document.getElementById('newspaper-grid');
-  const empty = document.getElementById('newspapers-empty');
-  if(!grid) return;
-  const withImage = NEWSPAPERS.filter(n => n.image_url);
-  NEWSPAPER_DATES = [...new Set(withImage.map(n => n.edition_date))].sort().reverse();
-  empty.style.display = NEWSPAPER_DATES.length ? 'none' : 'block';
-  if(!NEWSPAPER_DATES.length){
-    grid.innerHTML = '';
-    NEWSPAPER_TODAYS = [];
-    renderNewspaperDateTabs();
-    populateNewspaperSourceOptions();
-    return;
-  }
-  if(!newspaperState.date || !NEWSPAPER_DATES.includes(newspaperState.date)) newspaperState.date = NEWSPAPER_DATES[0];
-  renderNewspaperDateTabs();
-  NEWSPAPER_TODAYS = withImage.filter(n => n.edition_date === newspaperState.date);
-  populateNewspaperSourceOptions();
-  renderNewspaperGrid();
-}
-
-// «امروز» اینجا صریح از تاریخ تقویمی تهران گرفته می‌شه (نه تایم‌زون محلی
-// مرورگر بازدیدکننده) — بعد از گرفتن رشته‌ی YYYY-MM-DD تهران، بقیه‌ی
-// محاسبات روی همون رشته با UTC انجام می‌شه (چون edition_date خودش فقط
-// تاریخه، بدون ساعت؛ این‌جوری هیچ ابهام تایم‌زونی توی خودِ محاسبه نمی‌مونه)
-function newspaperDateLabel(dateStr){
-  const today = new Date().toLocaleDateString('en-CA', { timeZone:'Asia/Tehran' });
-  const diffDays = Math.round((new Date(today+'T00:00:00Z') - new Date(dateStr+'T00:00:00Z')) / 86400000);
-  if(diffDays === 0) return 'امروز';
-  if(diffDays === 1) return 'دیروز';
-  if(diffDays > 1) return toFaDigits(diffDays) + ' روز قبل';
-  return new Date(dateStr).toLocaleDateString('fa-IR'); // حالت غیرمنتظره (تاریخ در آینده)
-}
-
-function renderNewspaperDateTabs(){
-  const wrap = document.getElementById('newspaper-date-tabs');
-  if(!wrap) return;
-  // همیشه ۲ گزینه‌ی ثابت (امروز/دیروز) نشون داده می‌شه؛ چون RETENTION_DAYS
-  // فعلاً ۱ روزه، «۲ روز قبل» همیشه خالیه و حذف شد. فقط اونی که واقعاً
-  // توی NEWSPAPER_DATES داده داره کلیک‌پذیره، بقیه غیرفعالن
-  const todayStr = new Date().toLocaleDateString('en-CA', { timeZone:'Asia/Tehran' });
-  // تعداد روزها از مدت نگهداری رسانه (۱۲/۲۴ ساعت → ۲، ۲ روز → ۳، ۳ روز → ۴)
-  const nSlots = Math.max(2, Math.ceil(mediaRetentionHours() / 24) + 1);
-  const slots = Array.from({ length: nSlots }, (_, i) => i).map(offset => {
-    const d = new Date(todayStr + 'T00:00:00Z');
-    d.setUTCDate(d.getUTCDate() - offset);
-    return d.toISOString().slice(0, 10);
-  });
-  wrap.style.display = '';
-  wrap.innerHTML = slots.map(d => {
-    const label = newspaperDateLabel(d);
-    if(!NEWSPAPER_DATES.includes(d)) return `<button disabled>${label}</button>`;
-    return `<button class="${d === newspaperState.date ? 'active' : ''}" data-date="${d}">${label}</button>`;
-  }).join('');
-}
-
-// فقط خودِ گرید رو بازمی‌سازه (نه چک‌باکس‌های فیلتر) — تا با تغییر انتخاب
-// کاربر توی dropdown، خودِ dropdown بسته/rebuild نشه
-function renderNewspaperGrid(){
-  const grid = document.getElementById('newspaper-grid');
-  if(!grid) return;
-  const list = newspaperState.selected.length
-    ? NEWSPAPER_TODAYS.filter(n => newspaperState.selected.includes(n.slug))
-    : NEWSPAPER_TODAYS;
-  grid.innerHTML = list.map(n => `
-    <div class="newspaper-card">
-      <div class="newspaper-cover">
-        <img src="${escAttr(n.image_url)}" alt="${escAttr(n.title)}" loading="lazy" draggable="false" oncontextmenu="return false"
-             data-viewer-kind="image" data-viewer-src="${escAttr(n.image_url)}"${n.reader_url ? ` data-viewer-link="${escAttr(n.reader_url)}"` : ''} />
-      </div>
-      <div class="newspaper-title">${escAttr(n.title)}</div>
-    </div>`).join('');
-  wireMediaViewerClicks(grid);
-}
-
-function updateNewspaperSourceSummary(){
-  const summary = document.getElementById('newspaper-source-summary');
-  if(!summary) return;
-  const n = newspaperState.selected.length;
-  summary.textContent = n === 0 ? 'انتخاب روزنامه‌ها…' : toFaDigits(n) + ' روزنامه انتخاب‌شده';
-}
-
-function populateNewspaperSourceOptions(){
-  const list = document.getElementById('newspaper-source-list');
-  if(!list) return;
-  const validSlugs = new Set(NEWSPAPER_TODAYS.map(n=>n.slug));
-  newspaperState.selected = newspaperState.selected.filter(s=>validSlugs.has(s));
-  list.innerHTML = NEWSPAPER_TODAYS.map(n=>{
-    const checked = newspaperState.selected.includes(n.slug) ? 'checked' : '';
-    return `<label><input type="checkbox" value="${escAttr(n.slug)}" ${checked}> ${escAttr(n.title)}</label>`;
-  }).join('');
-  list.querySelectorAll('input[type=checkbox]').forEach(chk=>{
-    chk.addEventListener('change', ()=>{
-      const slug = chk.value;
-      if(chk.checked){ if(!newspaperState.selected.includes(slug)) newspaperState.selected.push(slug); }
-      else{ newspaperState.selected = newspaperState.selected.filter(x=>x!==slug); }
-      updateNewspaperSourceSummary();
-      renderNewspaperGrid();
-    });
-  });
-  updateNewspaperSourceSummary();
-}
 
 setupDocViewer();
 setupMediaViewer();
@@ -7194,7 +6087,6 @@ setInterval(renderDatebar, 15000);
 // زدن نیست؛ کارهای خودکار گیت‌هاب/Edge Functionها ثبت نمی‌شن). تا وقتی
 // migration_039 اجرا نشده، همه‌ی این‌ها بی‌صدا غیرفعال‌ان و بقیه‌ی سایت سالمه.
 var ACT_TAB = 'views';
-let HIDDEN_POST_IDS = new Set();
 let ACT_HIDDEN = null, ACT_AUDIT = null, ACT_VIEWS = null;
 let ACT_VIEWS_DAYS = 30, ACT_VIEWS_ROLE = 'app_viewer', ACT_AUDIT_FILTER = 'all', ACT_AUDIT_SHOW = 50;
 const ACT_TAB_INFO = {
@@ -7204,17 +6096,6 @@ const ACT_TAB_INFO = {
 };
 const ACT_MIGRATION_NOTE = 'برای این بخش، فایل <b>db/migration_039_admin_activity.sql</b> باید یک‌بار در SQL Editor سوپابیس اجرا شود.';
 
-// شناسه‌ی پست‌های پنهان برای هر دو نقش (تابع security definer فقط شناسه می‌ده، نه متن) —
-// لازمه چون «اخبار منتخب» هوش مصنوعی عنوان خبر رو جدا ذخیره کرده و بدون این فیلتر
-// پست پنهان‌شده رو باز هم نشون می‌داد
-async function loadHiddenPostIds(){
-  try{
-    const r = await api('/rpc/hidden_post_ids', { method:'POST', body:'{}' });
-    if(!r.ok){ HIDDEN_POST_IDS = new Set(); return; }
-    const rows = await r.json();
-    HIDDEN_POST_IDS = new Set((Array.isArray(rows) ? rows : []).map(x=>Number(x && typeof x === 'object' ? Object.values(x)[0] : x)));
-  }catch(e){ HIDDEN_POST_IDS = new Set(); }
-}
 export function postHideBtnHtml(p){
   return currentRole === 'app_admin' ? `<button type="button" class="post-hide-btn" onclick="hidePost(${Number(p.id)})" title="این پست برای همه‌ی بیننده‌ها پنهان می‌شود"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button>` : '';
 }
@@ -7228,7 +6109,7 @@ async function hidePost(id){
   if(!r.ok){ showToast(r.status === 400 ? 'اول باید migration_039 در سوپابیس اجرا شود' : 'پنهان کردن پست انجام نشد'); return; }
   HIDDEN_POST_IDS.add(id);
   setPostsCache(POSTS_CACHE.filter(p=>p.id !== id));
-  NEWSLETTER_POSTS = NEWSLETTER_POSTS.filter(np=>np.post_id !== id);
+  setNewsletterPosts(NEWSLETTER_POSTS.filter(np=>np.post_id !== id));
   ACT_HIDDEN = null;
   rerenderPostViews();
   showToast('پست پنهان شد');

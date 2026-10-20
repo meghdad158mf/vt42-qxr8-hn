@@ -2,8 +2,12 @@
 import { lsGet, lsSet } from '../../core/local-store.js';
 import { navMark } from '../../core/router.js';
 import { newsState, populateNewsSourceOptions, renderNewsFeed, updateNewsTopicVisibility } from './news-feed.js';
+import { renderDossierTab } from './dossier.js';
+import { renderNewsAnalytics } from './analytics.js';
+import { renderNewsletterTab } from './newsletter.js';
+import { renderNewspapers } from './newspapers.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
-import { firstVisibleTab, goToHawzaTab, renderDossierTab, renderNewsAnalytics, renderNewsletterTab, renderNewspapers, switchSection, viewerHidden } from '../../app.js';
+import { firstVisibleTab, goToHawzaTab, switchSection, viewerHidden } from '../../app.js';
 
 // میان‌برهای کارت‌های صفحه‌ی نخست به زیربخش‌های خودِ همون صفحه
 export function goToNewsTab(tab){

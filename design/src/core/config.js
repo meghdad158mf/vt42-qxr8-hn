@@ -6,4 +6,4 @@ export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // شماره‌ی ویرایش — تنها جای تعریفش همینه (صفحه‌ی ورود + فوتر از اینجا پر
 // می‌شن). با هر تغییری که منتشر می‌شه، عدد آخر یکی بالا می‌ره (CLAUDE.md).
 // ⚠️ نسخه‌ی فارسی داخل دو <span class="app-version"> صفحه هم باید هم‌زمان عوض بشه.
-export const APP_VERSION = '5.32.4';
+export const APP_VERSION = '5.32.5';
