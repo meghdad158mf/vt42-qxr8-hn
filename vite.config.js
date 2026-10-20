@@ -2,7 +2,7 @@
 //   dist/design/ita-monitoring-prototype.html  (آدرس سایت عوض نمی‌شود)
 //   dist/brand-kit/، dist/feature-kit/          (لینک‌های دانلود بسته‌ها)
 import { defineConfig } from 'vite';
-import { cpSync, existsSync, rmSync } from 'node:fs';
+import { cpSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname);
