@@ -1,0 +1,50 @@
+/* «آنچه درباره حوزه گفته می‌شود» */
+
+/* ---- «آنچه درباره حوزه گفته می‌شود» (۵.۲۳.۰) ---- */
+.news-feed.hab-feed{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); max-width:100%; margin:0; }
+@media (max-width:900px){ .news-feed.hab-feed{ grid-template-columns: minmax(0,1fr); } }
+.hab-card .news-title a{ color: inherit; display:block; text-align:start; }
+.hab-excerpt{ text-align:start; }
+.hab-card .news-title a:hover{ color: var(--accent-strong); }
+.hab-excerpt{ font-size:13px; line-height:1.95; color: var(--text-dim); margin:0; overflow-wrap:anywhere; }
+.hab-hl{ background: rgba(234,179,147,0.38); color: inherit; border-radius:4px; padding:0 2px; }
+.hab-flag{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:100px; background: rgba(234,179,147,0.18); color: var(--accent-strong); border:1px solid rgba(234,179,147,0.5); }
+.hab-terms{ display:flex; flex-wrap:wrap; gap:6px; }
+.hab-flag.is-link{ background: var(--surface-2); color: var(--text-dim); border-color: var(--border-strong); }
+.hab-term{ font-size:11px; font-weight:600; padding:2px 9px; border-radius:100px; background: var(--surface-2); color: var(--text-dim); border:1px solid var(--border); }
+.hab-admin{ display:flex; margin-top:8px; }
+.hab-summary{ font-size:12px; color: rgba(255,255,255,0.7); margin:-12px 0 12px; min-height:1em; }
+.hab-loading{ color: rgba(255,255,255,0.7); font-size:13px; text-align:center; grid-column:1/-1; }
+#hab-site{ max-width:220px; min-height:44px; padding:9px 12px; padding-inline-end:34px; border-radius: var(--radius-control); font-size:13px; font-family:inherit; background-color: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color:#fff; color-scheme:dark; }
+#hab-site{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important; }
+.news-feed.hab-feed{ align-items:stretch; }
+.hab-card .news-body{ display:flex; flex-direction:column; }
+.hab-card .news-foot{ margin-top:auto; }
+.hab-excerpt{ margin-bottom:12px !important; }
+@media (max-width:640px){ #hab-site{ max-width:none; width:100%; } }
+.crawl-site{ display:flex; align-items:center; gap:12px; padding:10px 8px; border-bottom:1px solid var(--border); }
+.crawl-site:last-child{ border-bottom:none; }
+.crawl-site-main{ flex:1; min-width:0; }
+.crawl-site-name{ font-size:13px; font-weight:700; color: var(--text); display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; }
+.crawl-site-host{ font-size:12px; font-weight:500; color: var(--text-faint); }
+.crawl-site-host:hover{ color: var(--accent-strong); }
+.crawl-site-status{ font-size:12px; color: var(--text-faint); margin-top:3px; padding-inline-start:14px; position:relative; }
+.crawl-site-status::before{ content:''; position:absolute; inset-inline-start:0; top:.55em; width:7px; height:7px; border-radius:50%; background: var(--border-strong); }
+.crawl-site.is-ok .crawl-site-status::before{ background: var(--ok); }
+.crawl-site.is-bad .crawl-site-status{ color: var(--danger); }
+.crawl-site.is-bad .crawl-site-status::before{ background: var(--danger); }
+.crawl-site.is-off{ opacity:.6; }
+.crawl-site-acts{ display:flex; gap:6px; flex:none; }
+.usr-act.is-del{ color: var(--danger); }
+#crawl-site-list{ max-height:520px; overflow:auto; }
+@media (max-width:640px){ .crawl-site{ flex-wrap:wrap; } .crawl-site-acts{ width:100%; justify-content:flex-end; } }
+.crawl-sug-wrap{ margin-top:18px; padding-top:14px; border-top:1px dashed var(--border-strong); }
+.crawl-sug-title{ font-size:14px; font-weight:800; color: var(--text); margin:0 0 6px; }
+.crawl-sug-kind{ font-size:11px; font-weight:700; padding:2px 9px; border-radius:100px; background: rgba(234,179,147,0.18); color: var(--accent-strong); border:1px solid rgba(234,179,147,0.5); }
+.crawl-sug .crawl-site-status::before{ display:none; }
+.crawl-sug .crawl-site-status{ padding-inline-start:0; }
+#crawl-sug-list{ max-height:420px; overflow:auto; }
+.hab-foot-acts{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.hab-card .is-translated{ color: var(--accent-strong); }
+.crawl-sug-kind.is-chan{ background: var(--surface-2); color: var(--text-dim); border-color: var(--border-strong); font-weight:600; }
+.crawl-edit .add-row{ margin:0; width:100%; }

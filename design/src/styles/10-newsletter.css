@@ -1,0 +1,50 @@
+/* خبرنامه مدارس و خروجی چاپی */
+
+/* ---- تب «خبرنامه مدارس» ---- */
+.newsletter-download-card{ text-align:center; max-width:420px; margin-inline:auto; }
+.newsletter-draft-item{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; padding:6px 0; border-bottom:1px solid var(--border); }
+.newsletter-draft-item:last-child{ border-bottom:none; }
+.newsletter-draft-item .txt{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#newsletter-admin-panel .add-row{ margin-top:10px; }
+/* #newsletter-print-view فقط یه ظرف مخفیِ staging برای ساخت DOM
+   خبرنامه‌ست (buildNewsletterPrintHtml) — هیچ‌وقت مستقیم نمایش داده
+   نمی‌شه. دانلود دیگه با window.print() نیست: چون Chromium در حالت
+   چاپ هدر position:fixed رو روی صفحات بعدی تکرار نمی‌کنه (محدودیت
+   واقعی موتور چاپ، نه باگ کد ما — با تولید PDF واقعی تست و تأیید شد)،
+   برای گرفتن هدر تکرارشونده‌ی واقعی روی هر صفحه، تولید فایل کامل به
+   jsPDF+html2canvas منتقل شد (downloadNewsletter/buildNewsletterPdf،
+   پایین‌تر): محتوا یک‌بار با html2canvas رندر می‌شه، بر اساس مرز واقعی
+   هر خبر/عنوان (بدون بریدن وسط یک خبر) به تصاویر صفحه‌ای برش می‌خوره،
+   و تصویر هدر روی هر صفحه دوباره چسبونده می‌شه — این‌جوری متن فارسی هم
+   دقیقاً همون‌جوری که مرورگر رندر کرده (RTL/اتصال حروف درست) توی PDF
+   میاد، چون فونت‌های پیش‌فرض jsPDF از حروف فارسی/عربی پشتیبانی نمی‌کنن. */
+#newsletter-print-view{ display:none; }
+.newsletter-page{ background:#fff; color:#222; direction:rtl; font-family:inherit; }
+/* تم روزنامه‌ای (به‌جای هدر کارتی قبلی): یه سربرگ/نیم‌تاج (masthead)
+   کلاسیک روزنامه — عنوان بزرگ وسط‌چین + خط دوتایی ضخیم/نازک زیرش،
+   بالای همه یه ردیف کوچیک (کیکر «نشریه‌ی داخلی» + تاریخ). طبق درخواست
+   کاربر برای جذابیت بصری بیشتر؛ بدون شماره صفحه، طبق تصمیم قبلی کاربر. */
+/* ⚠️ letter-spacing روی متن فارسی/RTL هیچ‌جای این بخش استفاده نشه —
+   حتی ۰.۵px هم باعث می‌شه html2canvas حروف رو کاملاً به‌هم بریزه (با
+   تست مجزا تأیید شد، جدا از باگ ZWNJ/pre-wrap بالاتر) */
+.newsletter-masthead{ text-align:center; margin-bottom:22px; }
+.newsletter-masthead-meta{ display:flex; align-items:center; justify-content:space-between; font-size:10px; color:#8a8a8a; padding-bottom:7px; }
+.newsletter-masthead-title{ font-size:38px; font-weight:900; color:#16202a; line-height:1.15; margin:2px 0 5px; }
+.newsletter-masthead-sub{ font-size:11px; color:#8f8f8f; margin-bottom:11px; }
+.newsletter-masthead-rule{ border-top:3.5px solid #16202a; }
+.newsletter-masthead-rule::after{ content:''; display:block; border-top:1.25px solid #16202a; margin-top:2.5px; }
+/* عنوان بخش‌ها به‌شکل «پرچم» روزنامه‌ای: متن وسط با خط از دو طرف،
+   به‌جای نوار رنگی کنارِ قبلی */
+.newsletter-page-title{ display:flex; align-items:center; gap:12px; margin:0 0 16px; break-after:avoid; }
+.newsletter-page-title::before, .newsletter-page-title::after{ content:''; flex:1; border-top:1.5px solid #16202a; }
+.newsletter-page-title span{ font-size:15px; font-weight:800; color:#16202a; white-space:nowrap; }
+/* دوستونه‌کردن متن با CSS multi-column (نه flex) چون flex زیر چاپ
+   درست صفحه‌بندی نمی‌شه (محتوای زیاد به‌جای ادامه به صفحه‌ی بعد، یا
+   بریده می‌شه یا کل ردیف با هم می‌پره) */
+.newsletter-flow-columns{ column-count:2; column-gap:28px; column-rule:1px solid #ccc; }
+.newsletter-item{ margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #eee; break-inside:avoid; -webkit-column-break-inside:avoid; }
+.newsletter-item:last-child{ border-bottom:none; }
+.newsletter-item-title{ font-weight:700; font-size:13px; color:#16202a; line-height:1.5; margin-bottom:6px; }
+.newsletter-item-num{ color:#c9895e; font-weight:800; }
+.newsletter-item-text{ font-size:11.5px; line-height:1.9; color:#333; white-space:pre-wrap; text-align:justify; }
+.newsletter-item-meta{ font-size:9.5px; color:#999; margin-top:6px; }

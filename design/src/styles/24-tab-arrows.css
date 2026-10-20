@@ -1,0 +1,18 @@
+/* دکمه‌ی فلش تب‌بار روی گوشی */
+
+/* دکمه‌ی فلش تب‌بار روی گوشی (۵.۲۹.۵، انتخاب کاربر از ۴ مدل: فلش/نوار پیشرفت/«N تب دیگر»/چندردیفه) —
+   کاربر نمی‌فهمید تب‌بار به چپ و راست می‌ره. setupTabBars هر نوار رو داخل .tab-bar-wrap می‌ذاره و
+   چسبان بودن به همین ظرف منتقل شده (فلش‌ها بیرون از mask محو نوار می‌مونن)؛ کلاس‌های has-end/has-start از updateTabFade */
+.tab-bar-wrap{ position:sticky; top:0; z-index:30; margin-bottom:16px; }
+.tab-bar-wrap > .news-page-tabs{ position:relative; margin-bottom:0; }
+.tab-arrow{ display:none; position:absolute; top:50%; transform:translateY(-50%); width:30px; height:30px; padding:0; border:none; border-radius:50%;
+  background: var(--accent); color:#16202a; align-items:center; justify-content:center; cursor:pointer; z-index:31;
+  box-shadow:0 2px 10px rgba(0,0,0,0.45); transition: opacity .2s ease; }
+.tab-arrow::before{ content:''; position:absolute; inset:-7px; }
+.tab-arrow svg{ width:16px; height:16px; }
+.tab-arrow.end{ left:2px; }
+.tab-arrow.start{ right:2px; }
+.tab-arrow:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+@media (max-width:700px){
+  .tab-bar-wrap.has-end .tab-arrow.end, .tab-bar-wrap.has-start .tab-arrow.start{ display:flex; }
+}

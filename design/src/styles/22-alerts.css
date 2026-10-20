@@ -1,0 +1,13 @@
+/* هشدار ایمیلی */
+
+/* ===== هشدار ایمیلی (۵.۲۷.۰) ===== */
+.sys-alerts-grid{ display:grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap:20px; align-items:start; }
+.sys-alerts-form{ display:flex; flex-direction:column; gap:10px; }
+.sys-alerts-form .field{ margin-bottom:0; }
+.sys-alerts-form .ce-check small{ font-size:11px; color: var(--text-faint); margin-inline-start:4px; }
+.sys-alerts-stat{ display:flex; flex-direction:column; gap:8px; }
+.sys-alerts-stat > div{ display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:8px 12px; border-radius:10px; background: var(--surface-2); }
+.sys-alerts-stat span{ color: var(--text-dim); }
+.sys-alerts-stat b{ color: var(--text); }
+.sys-alert-err{ font-size:13px; line-height:1.8; margin:0; padding:8px 12px; border-radius:10px; background: rgba(217,154,30,0.12); color:#8a5d06; }
+@media (max-width:760px){ .sys-alerts-grid{ grid-template-columns:1fr; } }

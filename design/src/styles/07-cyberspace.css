@@ -1,0 +1,138 @@
+/* کنشگری مجازی: افراد و مجموعه‌ها، فید پست‌ها */
+
+/* «افراد و مجموعه‌ها» (کنشگری مجازی) — گالری معرفی کنشگر به‌شکل جدول/لیست
+   فشرده (نه کارت‌های گرید)؛ سربرگ و ردیف‌ها با ته‌رنگ گرادیانی هلویی
+   (ته‌رنگ هلویی) تا نسبت به یه جدول خشک/اداری جذاب‌تر دیده بشه. ستون‌ها
+   با flex-wrap (نه grid ثابت) پیاده شدن تا زیر ۷۰۰px بدون اسکرول افقی
+   زیر هم بشکنن — سربرگ روی موبایل مخفی می‌شه چون دیگه با ستون‌ها هم‌تراز نیست. */
+.cyber-people-table{
+  border-radius: var(--radius-card); overflow:hidden; background: var(--surface);
+  border:1px solid rgba(181,101,29,0.2);
+  box-shadow: 0 20px 40px -20px rgba(10,15,22,0.45), 0 1px 0 rgba(255,255,255,0.7) inset;
+}
+.cpt-count-row{ padding:10px 18px; font-size:12px; color: var(--text-dim); border-bottom:1px solid rgba(181,101,29,.14); }
+.cpt-count-row b{ color: var(--accent-strong); font-weight:800; }
+.cpt-head{
+  display:flex; gap:16px; padding:13px 18px; font-size:11px; font-weight:700; color: var(--accent-strong);
+  background: linear-gradient(155deg, #fffaf5, #fbe9d7); border-bottom:1px solid rgba(181,101,29,.18);
+}
+@media (max-width:700px){ .cpt-head{ display:none; } }
+.cpt-row{
+  display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; padding:14px 18px; font-size:13px; color: var(--text);
+  border-top:1px solid var(--border); cursor:pointer; position:relative; transition: background .15s ease;
+}
+.cpt-row:first-of-type{ border-top:none; }
+.cpt-row::before{ content:''; position:absolute; inset-inline-start:0; top:0; bottom:0; width:3px; background:transparent; transition: background .15s ease; }
+.cpt-row:hover{ background: linear-gradient(90deg, rgba(234,179,147,.09), transparent 60%); }
+.cpt-row:hover::before{ background: var(--accent-strong); }
+.cpt-row:hover .cpt-arrow{ color: var(--accent-strong); transform: translateX(-3px); }
+
+.cpt-who{ display:flex; align-items:center; gap:11px; min-width:0; flex:1.5 1 140px; }
+.cpt-avatar-wrap{ position:relative; width:40px; height:40px; flex-shrink:0; }
+.cpt-avatar{
+  width:100%; height:100%; border-radius:50%; overflow:hidden; color: var(--accent-strong);
+  background: radial-gradient(120% 120% at 30% 20%, rgba(234,179,147,0.5), var(--bg));
+  display:flex; align-items:center; justify-content:center; box-shadow: 0 3px 8px -3px rgba(181,101,29,.4);
+}
+.cpt-avatar img{ width:100%; height:100%; object-fit:cover; }
+.cpt-avatar svg{ width:54%; }
+.cpt-dot{ position:absolute; bottom:-1px; inset-inline-end:-1px; width:11px; height:11px; border-radius:50%; border:2px solid var(--surface); }
+.cpt-dot.high{ background: var(--ok); }
+.cpt-dot.mid{ background: var(--accent-strong); }
+.cpt-dot.low{ background: var(--text-faint); }
+.cpt-dot.inactive{ background: var(--danger); }
+.cpt-who-txt{ min-width:0; }
+.cpt-name{ font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* «بستر فعالیت» — پلتفرم (ایتا/تلگرام) + لینک واقعی به خودِ کانال؛ قبلاً
+   این دو زیر نام کانال (.cpt-handle) می‌نشستن، طبق درخواست کاربر ستون
+   جدای خودشون شدن */
+.cpt-platform{ display:flex; flex-direction:column; justify-content:center; gap:1px; min-width:0; flex:0 0 128px; }
+.cpt-platform-name{ font-size:11px; font-weight:700; color: var(--text-dim); }
+.cpt-platform-link{ font-size:11px; color: var(--accent-strong); text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; direction:ltr; text-align:right; }
+.cpt-platform-link:hover{ text-decoration:underline; }
+
+.cpt-owner{ display:flex; align-items:center; gap:6px; font-size:12px; color: var(--text-dim); flex:1.2 1 120px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-inline-start:14px; }
+.cpt-owner svg{ width:13px; height:13px; opacity:.5; flex-shrink:0; }
+/* ستون‌های عدد/فعالیت/موضوع عرض ثابت دارن (نه flex:auto بر پایه‌ی محتوا) —
+   چون خیلی از کانال‌ها (مخصوصاً تازه‌اضافه‌شده‌ها) صاحب‌کانال/مخاطب/دسته‌بندی
+   خالی دارن، اگه عرض ستون بر اساس محتوا حساب بشه، ستون‌های خالی جمع می‌شن
+   به صفر و همه‌چیز بعدشون از زیر سربرگ جابه‌جا می‌شه (باگ واقعی گزارش‌شده).
+   محتوای این سه ستون هم وسط‌چینه، پس سربرگشون هم باید وسط‌چین بشه
+   (کلاس‌های .cpt-head-center روی خودِ سربرگ) وگرنه با اینکه عرض ستون‌ها
+   یکیه، متن سربرگ راست‌چین و پیل زیرش وسط‌چین به‌نظر ناهم‌تراز میان. */
+.cpt-num{ flex:0 0 90px; display:flex; align-items:center; justify-content:center; }
+.cpt-num-val{ direction:ltr; font-weight:800; font-size:14px; color: var(--accent-strong); display:inline-flex; align-items:center; gap:5px; }
+.cpt-num-val svg{ width:13px; height:13px; opacity:.6; }
+.cpt-activity-col{ flex:0 0 100px; display:flex; justify-content:center; }
+.cpt-activity{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:4px 10px; border-radius: var(--radius-pill); }
+.cpt-activity .dt{ width:5px; height:5px; border-radius:50%; background:currentColor; }
+.cpt-activity.high{ color: var(--ok); background: var(--ok-soft); }
+.cpt-activity.mid{ color: var(--accent-strong); background: var(--accent-soft); }
+.cpt-activity.low{ color: var(--text-faint); background: var(--surface-2); }
+.cpt-activity.inactive{ color: var(--danger); background: var(--danger-soft); }
+.cpt-tagcol{ flex:0 0 90px; display:flex; justify-content:center; }
+.cpt-tag{ font-size:11px; font-weight:600; color: var(--text-dim); background: var(--surface-2); border:1px solid var(--border-strong); border-radius: var(--radius-pill); padding:3px 9px; }
+.cpt-groupcol{ flex:0 0 110px; display:flex; justify-content:center; }
+.cpt-tag-khorasan{ color: var(--accent-strong); background: var(--accent-soft); border-color: transparent; }
+.cpt-arrow{ color: var(--text-faint); flex:0 0 20px; transition: transform .15s ease, color .15s ease; }
+.cpt-arrow svg{ width:14px; height:14px; display:block; }
+@media (max-width:700px){ .cpt-arrow{ display:none; } }
+.cpt-head-center{ text-align:center; }
+.cpt-sort-btn{ cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:3px; transition: color .15s ease; }
+.cpt-sort-btn.cpt-head-center{ justify-content:center; }
+.cpt-sort-btn:hover{ color: var(--text); }
+.cpt-sort-btn.active{ color: var(--text); }
+.cpt-sort-ind{ font-size:8px; opacity:.3; }
+.cpt-sort-btn.active .cpt-sort-ind{ opacity:1; }
+
+.toolbar{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+.toolbar select, .toolbar input{ background: var(--surface); border:1px solid var(--border-strong); color: var(--text); padding:9px 12px; border-radius:8px; font-size:13px; font-family:inherit; }
+.toolbar input{ flex:1; min-width:180px; }
+
+/* posts page: mobile-tile grid of vertical (portrait) cards */
+.posts-empty{ text-align:center; color: rgba(255,255,255,0.5); font-size:13px; padding:40px 0; }
+.posts-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:16px; }
+@media (max-width:520px){ .posts-grid{ grid-template-columns: repeat(2,1fr); gap:10px; } }
+
+.post-tile{
+  background: var(--surface);
+  border:1px solid var(--border);
+  border-inline-start:3px solid var(--accent);
+  border-radius: var(--radius);
+  padding:16px;
+  aspect-ratio: 3 / 4.4;
+  display:flex; flex-direction:column;
+  box-shadow: var(--shadow);
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.post-tile:hover{ transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--primary); }
+.pt-head{ display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.pt-head .avatar{ width:28px; height:28px; font-size:11px; background-size:cover; background-position:center; }
+.pt-who{ min-width:0; }
+.pt-who b{ display:block; font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pt-media{ background: var(--surface-2); border:1px dashed var(--border-strong); border-radius: var(--radius-control); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; height:64px; margin-bottom:10px; color: var(--text-faint); flex-shrink:0; }
+.pt-media svg{ width:18px; height:18px; }
+.pt-media b{ font-size:11px; font-weight:700; color: var(--text-dim); }
+.pt-media span{ font-size:11px; }
+.pt-media.has-img{ border:none; padding:0; height:110px; position:relative; overflow:hidden; background: var(--surface-2); }
+.pt-media.has-img img,
+.pt-media.has-img video{ width:100%; height:100%; object-fit:cover; display:block; cursor:zoom-in; }
+.pt-media-badge{ position:absolute; top:6px; inset-inline-end:6px; background:rgba(15,20,26,.6); color:#fff; border-radius:100px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+.pt-media-badge svg{ width:12px; height:12px; }
+.pt-media-link{ position:absolute; bottom:0; inset-inline-start:0; inset-inline-end:0; display:flex; align-items:center; justify-content:center; gap:4px; padding:5px 4px; font-size:11px; font-weight:600; color:#fff; background:linear-gradient(0deg, rgba(15,20,26,.78), rgba(15,20,26,0)); text-decoration:none; }
+.pt-media-link svg{ width:11px; height:11px; }
+.pt-text{ flex:1; font-size:13px; line-height:1.6; color: var(--text-dim); overflow:hidden; display:-webkit-box; -webkit-line-clamp:7; -webkit-box-orient:vertical; white-space:pre-wrap; }
+.pt-text.compact{ -webkit-line-clamp:3; }
+.pt-foot{ margin-top:12px; padding-top:10px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:11px; color: var(--text-faint); }
+.pt-foot .cat{ color: var(--accent-strong); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pt-foot .time{ flex-shrink:0; }
+
+.post{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; margin-bottom:10px; border-inline-start:3px solid var(--accent); }
+.post-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px; }
+.post-chan{ font-size:12px; color:#fff; background: var(--navy); padding:2px 9px; border-radius:100px; font-weight:600; }
+.post-time{ font-size:12px; color: var(--text-faint); }
+.post p{ margin:0; font-size:14px; color: var(--text); }
+.post-foot{ margin-top:9px; font-size:11px; color: var(--text-faint); display:flex; gap:6px; align-items:center; }
+.post-foot .cat{ color: var(--accent-strong); font-weight:600; }

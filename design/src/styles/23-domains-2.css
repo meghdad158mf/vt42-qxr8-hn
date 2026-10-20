@@ -1,0 +1,28 @@
+/* مدار دوم و عرصه‌های تازه */
+
+/* ---- مدار دوم و عرصه‌های تازه (۵.۲۸.۰) ---- */
+.domain-orbits{ margin-bottom:26px; }
+.domain-grid-2{ margin-top:38px; margin-bottom:0; }
+.domain-grid-2.is-empty{ display:none; }
+/* گوشی: همه‌ی عرصه‌ها یک جدول دوستونه‌ی پیوسته (دو ردیف مدار جدا نه) */
+@media (max-width:900px){
+  .domain-orbits{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; }
+  .domain-orbits > .domain-grid{ display:contents; }
+}
+.soon-panel, .ask-wrap{ max-width:560px; margin:48px auto; text-align:center; color: rgba(255,255,255,0.7); }
+.soon-panel-icon{ width:64px; height:64px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background: rgba(234,179,147,0.12); color: var(--accent); margin-bottom:14px; }
+.soon-panel-icon svg{ width:30px; height:30px; }
+.soon-panel h3, .ask-wrap h3{ font-size:16px; font-weight:800; color:#fff; margin-bottom:8px; }
+.soon-panel p, .ask-wrap p{ font-size:14px; line-height:2; }
+.ask-box{ display:flex; gap:8px; margin:20px 0 12px; }
+.ask-box input{ flex:1; min-width:0; height:44px; border-radius: var(--radius-control); border:1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color:#fff; padding:0 14px; font:inherit; font-size:14px; }
+.ask-box .btn{ height:44px; }
+.ask-examples{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.ask-examples span{ font-size:12px; color: rgba(255,255,255,0.55); border:1px solid rgba(255,255,255,0.14); border-radius: var(--radius-pill); padding:5px 12px; }
+.ask-wrap .ask-note{ font-size:12px; color: rgba(255,255,255,0.45); margin-top:18px; }
+.np-compare-soon{ display:flex; gap:12px; align-items:flex-start; margin-top:24px; padding:14px 16px; border:1px dashed rgba(255,255,255,0.18); border-radius:12px; color: rgba(255,255,255,0.6); font-size:13px; line-height:1.9; }
+.np-compare-soon svg{ width:26px; height:26px; color: var(--accent); flex-shrink:0; margin-top:2px; }
+.np-compare-soon b{ display:block; color:#fff; font-size:14px; }
+.laws-source-chips{ margin-top:2px; }
+.laws-card .news-title{ margin-bottom:4px; }
+.sec-pending-note{ margin-top:6px; font-size:12px; color:#b7800f; }

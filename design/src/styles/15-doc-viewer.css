@@ -1,0 +1,54 @@
+/* نمایشگر سند و اندازه‌ی لمسی */
+
+/* نمایشگر سند (بسته تحلیلی جریان، برنامه مدارس) */
+.dv-overlay{ background:rgba(6,9,13,0.92); padding:16px; }
+.dv-card{ width:min(1100px, 100%); height:min(92vh, 100%); display:flex; flex-direction:column; background: var(--surface); border-radius: var(--radius-card); overflow:hidden; box-shadow: 0 30px 70px -20px rgba(0,0,0,0.6); }
+.dv-head{ display:flex; align-items:center; gap:10px; padding:10px 12px 10px 14px; border-bottom:1px solid var(--border); }
+.dv-title{ flex:1; min-width:0; font-size:14px; font-weight:800; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv-count{ font-size:12px; color: var(--text-dim); white-space:nowrap; }
+.dv-tool{ width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background: var(--surface-2); color: var(--text-dim); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+.dv-tool svg{ width:18px; height:18px; }
+.dv-tool:hover{ color: var(--text); border-color: var(--border-strong); }
+.dv-tool.on{ background: var(--accent); color: var(--primary); border-color: var(--accent); }
+.dv-tool[hidden]{ display:none; }
+.dv-card .modal-close.dv-close{ position:static; width:40px; height:40px; flex-shrink:0; }
+.dv-stage{ flex:1; min-height:0; overflow:auto; background:#e9edf2; display:flex; align-items:flex-start; justify-content:center; padding:14px; touch-action:pan-x pan-y pinch-zoom; }
+.dv-stage img{ display:block; max-width:100%; max-height:100%; height:auto; margin:auto; border-radius:6px; box-shadow:0 6px 20px -10px rgba(0,0,0,0.35); cursor:zoom-in; background:#fff; }
+.dv-stage.zoomed{ align-items:flex-start; justify-content:flex-start; }
+.dv-stage.zoomed img{ max-width:none; max-height:none; width:200%; cursor:zoom-out; margin:0; }
+.dv-stage iframe{ width:100%; height:100%; border:none; border-radius:6px; background:#fff; }
+.dv-msg{ margin:auto; text-align:center; color: var(--text-dim); font-size:13px; line-height:2; max-width:360px; }
+.dv-msg svg{ width:46px; height:46px; color: var(--text-faint); display:block; margin:0 auto 8px; }
+.dv-msg b{ display:block; color: var(--text); font-size:14px; margin-bottom:4px; }
+.dv-action{ display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:11px 20px; min-height:44px; border-radius:999px; background: var(--navy); color:#fff; font-size:13px; font-weight:700; text-decoration:none; }
+.dv-nav{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-top:1px solid var(--border); }
+.dv-nav[hidden]{ display:none; }
+.dv-nav-btn{ display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--border-strong); background: var(--surface); color: var(--text); font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+.dv-nav-btn svg{ width:16px; height:16px; }
+.dv-nav-btn:disabled{ opacity:.35; cursor:default; }
+.dv-pages{ flex:1; display:flex; gap:6px; justify-content:center; overflow-x:auto; padding:2px; scrollbar-width:none; }
+.dv-pages button{ min-width:36px; height:36px; border-radius:9px; border:1px solid var(--border); background: var(--surface-2); color: var(--text-dim); font:inherit; font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0; }
+.dv-pages button.on{ background: var(--accent); color: var(--primary); border-color: var(--accent); }
+@media (max-width:640px){
+  .dv-overlay{ padding:0; }
+  .dv-card{ width:100%; height:100%; border-radius:0; }
+  .dv-stage{ padding:8px; }
+  .dv-pages{ display:none; }
+  .dv-count{ display:none; } /* شماره‌ی صفحه روی گوشی پایین، کنار قبلی/بعدی */
+  .dv-nav{ justify-content:space-between; }
+  .dv-nav::after{ content: attr(data-count); order:0; font-size:12px; color: var(--text-dim); }
+  .dv-nav #dv-next{ order:1; }
+}
+/* «جستجوی هوشمند» هنوز «به‌زودی»ه — تا وقتی کار نمی‌کنه جا نگیره */
+.news-smart-toggle{ display:none !important; }
+/* اندازه‌ی لمسی روی گوشی (حدود ۴۰–۴۴px) — دکمه‌های ریز «نمایش بیشتر»، «مشاهده‌ی منبع»، زمان و صفحه‌ها */
+@media (max-width:640px){
+  .news-card .news-more{ min-height:40px; margin-top:0; padding:0 2px; }
+  .news-card .news-link, .news-card .news-translate-btn{ display:inline-flex; align-items:center; min-height:40px; padding:0 4px; }
+  .news-seg > button{ min-height:44px; min-width:44px; }
+  .news-daterange-details .news-daterange-popover{ width:272px; min-width:0; }
+  .jdate select{ padding:7px 3px; font-size:12px; }
+  .jdate select[data-part="m"]{ min-width:76px; }
+  .news-region-chip{ min-height:40px; display:inline-flex; align-items:center; }
+  .pagination button, #news-pagination button, #posts-pagination button{ min-height:44px; min-width:44px; }
+}
