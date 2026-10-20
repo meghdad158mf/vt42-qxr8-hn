@@ -1,8 +1,8 @@
 name: Site tests
 
-# آزمون‌های مرورگر سایت (tests/e2e) با داده‌ی ساختگی، روی همان خروجی ساخته‌شده‌ای
-# که منتشر می‌شود (dist/). روی هر PR به شاخه‌ی زنده؛ اگر قرمز شد، PR ادغام نشود
-# (گزارش کامل در Artifacts). انتشار خودِ سایت: pages.yml
+# بررسی ایستا (eslint)، آزمون‌های واحد هسته (tests/unit) و آزمون‌های مرورگر سایت (tests/e2e)
+# با داده‌ی ساختگی، روی همان خروجی ساخته‌شده‌ای که منتشر می‌شود (dist/). روی هر PR به شاخه‌ی
+# زنده؛ اگر قرمز شد، PR ادغام نشود (گزارش کامل در Artifacts). انتشار خودِ سایت: pages.yml
 on:
   pull_request:
     branches: [claude/new-project-8ekywm]
@@ -23,6 +23,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run lint
+      - run: npm run test:unit
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:dist

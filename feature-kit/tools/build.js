@@ -5,7 +5,7 @@
 //   NODE_PATH=/opt/node22/lib/node_modules node feature-kit/tools/build.js
 // خروجی: feature-kit/فهرست امکانات سامانه جریان.zip (+ پیش‌نمایش صفحه‌ها در OUT اگه env OUT داده بشه)
 //
-// {{VERSION}} از APP_VERSION فرانت‌اند و {{DATE}} تاریخ شمسی امروز (تهران) پر می‌شن.
+// {{VERSION}} از APP_VERSION فرانت‌اند (design/src/core/config.js) و {{DATE}} تاریخ شمسی امروز (تهران) پر می‌شن.
 // مبدل markdown عمداً کوچیکه و فقط همین‌ها رو می‌فهمه: # ## (تیتر)، - (فهرست، تورفتگی ۲ فاصله)،
 // **پررنگ**، `کد`، --- (خط جداکننده) و پاراگراف ساده.
 
@@ -85,8 +85,8 @@ function tocHtml(md){
 }
 
 function build(logoPng){
-  const html = fs.readFileSync(path.join(ROOT, 'design', 'ita-monitoring-prototype.html'), 'utf8');
-  const version = (html.match(/const APP_VERSION = '([\d.]+)'/) || [])[1] || '';
+  const config = fs.readFileSync(path.join(ROOT, 'design', 'src', 'core', 'config.js'), 'utf8');
+  const version = (config.match(/APP_VERSION = '([\d.]+)'/) || [])[1] || '';
   const date = new Date().toLocaleDateString('fa-IR-u-ca-persian', { timeZone: 'Asia/Tehran', day: 'numeric', month: 'long', year: 'numeric' });
   const md = fs.readFileSync(SRC, 'utf8').replace(/\{\{VERSION\}\}/g, fa(version)).replace(/\{\{DATE\}\}/g, date);
   const title = md.match(/^# (.*)$/m)[1];
