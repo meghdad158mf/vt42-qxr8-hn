@@ -1,5 +1,6 @@
 // تاریخ: تبدیل شمسی ↔ میلادی و مرز «امروز/دیروز» بر اساس نیمه‌شب تهران
 // ⚠️ هیچ‌وقت setHours(0,0,0,0) خام یا Math.floor روی تفاضل مستقیم — همیشه iranTodayStartMs/tehranDayDiff
+import { toFaDigits } from './text.js';
 
 export const JALALI_MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 export function jalaliToGregorian(jy, jm, jd){
@@ -65,3 +66,20 @@ export function tehranDayDiff(dateStr){
   const eventDayStartMs = new Date(eventDateStr + 'T00:00:00+03:30').getTime();
   return Math.round((iranTodayStartMs() - eventDayStartMs) / 86400000);
 }
+
+// زمان نسبی کارت‌ها: «همین الان»، «۵ دقیقه پیش»، «دیروز»…
+export function newsRelTime(dateStr){
+  if(!dateStr) return '';
+  const d = new Date(dateStr);
+  const diffMs = Date.now() - d.getTime();
+  const mins = Math.floor(diffMs/60000);
+  if(mins < 1) return 'همین الان';
+  if(mins < 60) return toFaDigits(mins)+' دقیقه پیش';
+  const hours = Math.floor(mins/60);
+  if(hours < 24) return toFaDigits(hours)+' ساعت پیش';
+  const days = Math.floor(hours/24);
+  if(days === 1) return 'دیروز';
+  if(days < 7) return toFaDigits(days)+' روز پیش';
+  return d.toLocaleDateString('fa-IR');
+}
+

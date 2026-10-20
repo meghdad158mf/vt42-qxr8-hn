@@ -12,9 +12,12 @@ export const test = base.extend({
   siteSettings: [[], { option: true }],
   // و با test.use({ mockData: { جدول: [...] } }) داده‌ی یه جدول ساختگی رو
   mockData: [{}, { option: true }],
+  // و با test.use({ mockPatch: { apply(data){...} } }) داده‌ی پیش‌فرض رو کمی عوض کنه
+  // (تابع خالی نمی‌شه — Playwright تابع رو تعریف fixture حساب می‌کنه)
+  mockPatch: [null, { option: true }],
 
-  page: async ({ page, context, siteSettings, mockData }, use) => {
-    await mockSupabase(context, { settings: siteSettings, data: mockData });
+  page: async ({ page, context, siteSettings, mockData, mockPatch }, use) => {
+    await mockSupabase(context, { settings: siteSettings, data: mockData, patch: mockPatch && mockPatch.apply });
     // پنجره‌ی معرفی و کارت نصب جلوی کلیک‌ها رو نگیرن
     await context.addInitScript(() => {
       try {

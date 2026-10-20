@@ -1,6 +1,9 @@
 // دکمه‌های صفحه‌بندی فهرست‌ها (قبلی/شماره‌ها/بعدی)
 import { toFaDigits } from '../core/text.js';
 
+// اندازه‌ی هر صفحه‌ی فیدها (اخبار، کنشگری، یادداشت‌ها، قوانین…)
+export const NEWS_PAGE_SIZE = 12;
+
 // دکمه‌های صفحه‌بندی مشترک (اخبار و رویدادها، پست‌های کنشگری مجازی)
 export function renderPagination(wrapId, cur, totalPages, goFn){
   const wrap = document.getElementById(wrapId);
