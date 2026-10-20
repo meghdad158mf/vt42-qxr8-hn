@@ -1,16 +1,33 @@
-// بدنه‌ی برنامه — مرحله‌ی ۳ ماژولار کردن (۵.۳۲.۲): کل اسکریپت قبلی صفحه، حالا یه ES module.
-// هسته (تنظیمات، نشست، api، متن/جست‌وجو/تاریخ، اعتبارسنجی، تاریخچه‌ی مرورگر) در core/ جدا شده؛
-// بقیه در مرحله‌های بعد به ui/، features/<بخش> و admin/ تقسیم می‌شه (CLAUDE.md، «ماژولار کردن»).
+// بدنه‌ی برنامه — کل اسکریپت قبلی صفحه، حالا یه ES module. جدا شده تا الان: هسته در core/
+// (مرحله‌ی ۳، ۵.۳۲.۲) و اجزای رابط در ui/ (مرحله‌ی ۴، ۵.۳۲.۳: پنجره‌ها، پیام/تأیید، منوها، تب‌بارها،
+// نمایشگر سند/عکس، صفحه‌بندی…). بقیه در مرحله‌های بعد به features/<بخش> و admin/ (CLAUDE.md، «ماژولار کردن»).
 import { SUPABASE_URL, SUPABASE_ANON_KEY, APP_VERSION } from './core/config.js';
 import { authToken, currentRole, saveSession, clearSession } from './core/session.js';
 import { api, SESSION_EXPIRED, resetSessionExpired } from './core/api.js';
 import { setErrorContext } from './core/error-reporting.js';
 import { escAttr, escHtml, safeUrl, claimsTextDisplay, toFaDigits, faTitle, faNum, faDigitsToEn, faDigitsToLatin, needsTranslation } from './core/text.js';
 import { searchNorm, searchHay } from './core/search.js';
-import { JALALI_MONTHS, jalaliToGregorian, jalaliMonthLength, calParts, jalaliMonthStarts, iranTodayStartMs, tehranDayDiff } from './core/date.js';
+import { JALALI_MONTHS, calParts, jalaliMonthStarts, iranTodayStartMs, tehranDayDiff } from './core/date.js';
 import { nidValid, normalizeIrMobile } from './core/validate.js';
 import { loadScriptOnce, scriptRequested } from './core/load-script.js';
 import { navMark, navRestoring, startRouter, restoreScrollY } from './core/router.js';
+import { lsGet, lsSet } from './core/local-store.js';
+import { signStoragePaths } from './core/signed-urls.js';
+import { ICONS } from './ui/icons.js';
+import { setupAmbient } from './ui/ambient.js';
+import { showToast } from './ui/toast.js';
+import { uiConfirm, setupConfirm } from './ui/confirm.js';
+import { bindModal } from './ui/modal.js';
+import { setupMenus, closeNavMenu, closeAdminMenu } from './ui/menus.js';
+import { setupTabBars, updateTabInk, restoreLastTab, peekTabBar } from './ui/tabs.js';
+import { scrollToListTop, updateToTop, setupToTop } from './ui/scroll.js';
+import { setupKeyboardButtons } from './ui/keyboard.js';
+import { wireMediaViewerClicks, setupMediaViewer } from './ui/media-viewer.js';
+import { openDocViewer, setupDocViewer } from './ui/doc-viewer.js';
+import { setupJalaliRange } from './ui/jalali-range.js';
+import { renderPagination } from './ui/pagination.js';
+import { setMobileFilterCount, setupMobileFilters } from './ui/mobile-filters.js';
+import { cardAdminControls } from './ui/card-controls.js';
 
 // ⚠️ پل موقت: دستگیره‌های درون HTML (onclick="…" در صفحه و در HTMLهایی که همین فایل می‌سازه)
 // فقط تابع سراسری رو می‌بینن، ولی تابع‌های یه module سراسری نیستن. این فهرست تا جایگزینی همه‌ی
@@ -18,78 +35,26 @@ import { navMark, navRestoring, startRouter, restoreScrollY } from './core/route
 // اینجا اضافه نکن — به‌جاش addEventListener. tests/unit/inline-handlers.test.js هم‌خوانیش رو می‌سنجه.
 Object.assign(window, {
   addCrawlSuggestion, addDossierManualPost, addNewsletterManualPost, addPostToPicks, autoMatchDossierTopic,
-  bulkChanBack, bulkChanPreview, bulkChanSave, changePassword, clearPostsFocus, closeAdminMenu, closeBulkChan,
-  closeChanEditor, closeDeleteChannelModal, closeDocViewer, closeIntro, closeJobLog, closeMediaViewer,
-  closeNavMenu, closePwModal, closeUserEditor, copyJobLog, deleteCrawlSite, deleteDossierTopic,
-  deleteDossierTopicPost, downloadBackup, downloadNewsletter, dvGo, dvToggleZoom, editDossierTopicKeywords,
-  editPostKeywords, exportPosts, exportReport, goToHawzaTab, goToNewsTab, goToPeopleTab, goToPosTab,
-  goToUploadsTab, handleLogin, hideHawzaMention, hidePost, ignoreCrawlSuggestion, introGo, logout,
-  openBulkChan, openIntro, openSiteSettingsPanel, openUserEditor, openUsersSection, otpBack, otpChooseSms,
-  otpResend, otpShow, otpSubmit, publishAnnouncement, publishNewsletter, removeNewsletterDraftItem,
-  renderDossierTopicAdminList, renderNewsFeed, renderSystemStatus, retryLoadAll, retryMaintenance,
-  saveAlertSettings, saveCrawlSite, saveDossierTopicKeywords, saveHiddenSections, saveMaintenance,
-  saveMediaRetention, savePostKeywords, saveSmsConfig, saveUser, saveViewerPasswordLogin, scrollToDomainGrid,
-  scrollToPackageCard, scrollToPageTop, searchDossierManualAdd, searchNewsletterManualAdd, sendSmsTest,
-  setHawzaTab, setNewsPageTab, setNewsView, setUploadsTab, submitFeedback, subscribeNotify,
-  suggestNewsletterSection, switchSection, testAlertEmail, toggleAdminMenu, toggleCrawlSite,
-  toggleDossierText, toggleDossierTopicActive, toggleDossierTopicPostExcluded, toggleMobileFilters,
-  toggleMoreText, toggleNavMenu, toggleNewsText, togglePasswordVisibility, togglePoliticalFigureText,
-  togglePostText, translateMention, translatePost, uiConfirmClose, unhidePost, unlockLogin, usrDownload
+  bulkChanBack, bulkChanPreview, bulkChanSave, changePassword, clearPostsFocus, closeUserEditor, copyJobLog,
+  deleteCrawlSite, deleteDossierTopic, deleteDossierTopicPost, downloadBackup, downloadNewsletter,
+  editDossierTopicKeywords, editPostKeywords, exportPosts, exportReport, goToNewsTab, goToUploadsTab,
+  handleLogin, hideHawzaMention, hidePost, ignoreCrawlSuggestion, introGo, logout, openBulkChan, openIntro,
+  openSiteSettingsPanel, openUserEditor, otpBack, otpChooseSms, otpResend, otpShow, otpSubmit,
+  publishAnnouncement, publishNewsletter, removeNewsletterDraftItem, renderDossierTopicAdminList,
+  renderNewsFeed, renderSystemStatus, retryLoadAll, retryMaintenance, saveAlertSettings, saveCrawlSite,
+  saveDossierTopicKeywords, saveHiddenSections, saveMaintenance, saveMediaRetention, savePostKeywords,
+  saveSmsConfig, saveUser, saveViewerPasswordLogin, scrollToDomainGrid, scrollToPackageCard,
+  searchDossierManualAdd, searchNewsletterManualAdd, sendSmsTest, setHawzaTab, setNewsPageTab, setNewsView,
+  setUploadsTab, submitFeedback, subscribeNotify, suggestNewsletterSection, switchSection, testAlertEmail,
+  toggleCrawlSite, toggleDossierText, toggleDossierTopicActive, toggleDossierTopicPostExcluded,
+  toggleMoreText, toggleNewsText, togglePasswordVisibility, togglePoliticalFigureText, togglePostText,
+  translateMention, translatePost, unhidePost, unlockLogin, usrDownload
 });
 
 // خطاهای مرورگر: جای فعلی کاربر و دستگاه برای گزارش (core/error-reporting.js)
 setErrorContext({ place: ()=>navCurrentState().key, device: ()=>sysDeviceLabel(navigator.userAgent) });
 
-// ambient dot-field — quiet tactile backdrop, paused under reduced-motion
-(function(){
-  const cv = document.getElementById('ambient');
-  const ctx = cv.getContext('2d');
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let w,h,dpr;
-  function size(){
-    dpr = Math.min(window.devicePixelRatio||1, 2);
-    w = cv.width = innerWidth*dpr; h = cv.height = innerHeight*dpr;
-    cv.style.width = innerWidth+'px'; cv.style.height = innerHeight+'px';
-  }
-  const GAP = 34;
-  function draw(t){
-    ctx.clearRect(0,0,w,h);
-    const cols = Math.ceil(w/(GAP*dpr))+1, rows = Math.ceil(h/(GAP*dpr))+1;
-    for(let y=0;y<rows;y++){
-      for(let x=0;x<cols;x++){
-        const px = x*GAP*dpr, py = y*GAP*dpr;
-        const wobble = reduced ? 0 : Math.sin((t||0)/2600 + x*0.5 + y*0.5)*1.2;
-        const alt = (x+y)%2===0;
-        ctx.beginPath();
-        ctx.arc(px, py+wobble*dpr, 1*dpr, 0, Math.PI*2);
-        ctx.fillStyle = alt ? 'rgba(58,80,104,0.14)' : 'rgba(181,101,29,0.10)';
-        ctx.fill();
-      }
-    }
-  }
-  size();
-  window.addEventListener('resize', ()=>{ size(); if(reduced) draw(0); });
-  if(reduced){ draw(0); }
-  else{ requestAnimationFrame(function loop(t){ draw(t); requestAnimationFrame(loop); }); }
-})();
-
-const ICONS = {
-  video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="M15.5 10l6-3.2v10.4l-6-3.2"/></svg>',
-  photo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15.5l-5.5-5-6.5 6.5-2.5-2.5-3 3"/></svg>',
-  person: '<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="34" r="17"/><path d="M16 96c0-24 15-40 34-40s34 16 34 40"/></svg>',
-  doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
-  download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>',
-  external: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 4h6v6M20 4l-9 9"/><path d="M9 5H5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1v-4"/></svg>',
-  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 6.5c-1.8-1.3-4.3-2-7-2v13.5c2.7 0 5.2.7 7 2 1.8-1.3 4.3-2 7-2V4.5c-2.7 0-5.2.7-7 2z"/><path d="M12 6.5v13.5"/></svg>',
-  graduation: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11.5v4.5c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v6"/></svg>',
-  bulb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"/></svg>',
-  audio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="2.5" y="13" width="5" height="7" rx="2"/><rect x="16.5" y="13" width="5" height="7" rx="2"/></svg>',
-  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v4M9 22h6"/></svg>',
-  interview: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.4 0-2.7-.3-3.9-.9L3 20l1-4.9A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 0 1 12.5 3 8.5 8.5 0 0 1 21 11.5z"/></svg>',
-  newspaper: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h13v13a3 3 0 0 0 3 3H7a3 3 0 0 1-3-3V4z"/><path d="M17 8h3v9a3 3 0 0 1-3 3"/><path d="M7.5 8h6M7.5 11h6M7.5 14h4"/></svg>',
-  userLine: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg>',
-  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M2.5 19c0-3.3 2.8-5.6 6.5-5.6s6.5 2.3 6.5 5.6"/><path d="M16 8.2a3 3 0 1 1 1.2 5.7"/><path d="M18 13.6c2.6.6 3.5 2.6 3.5 4.7"/></svg>'
-};
+setupAmbient();
 
 const adminLinks = document.getElementById('admin-menu');
 
@@ -264,57 +229,20 @@ async function subscribeNotify(){
   }
 }
 
-const adminMenuBtn = document.getElementById('admin-menu-btn');
-function toggleAdminMenu(){
-  const open = adminLinks.classList.toggle('open');
-  adminMenuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+// منوها: رفتن از دکمه‌های data-nav (منوی بخش‌ها) و data-admin-go (منوی مدیریت)
+function navMenuGo(key){
+  const [s, t] = key.split('/');
+  if(s === 'overview') return goToNewsTab(t || 'analytics');
+  if(s === 'people') return goToPeopleTab(t || 'figures');
+  if(s === 'hawza') return goToHawzaTab(t || 'news');
+  if(s === 'positions' && t) return goToPosTab(t);
+  switchSection(s);   // posts/feed و public/trends هم: خودِ بخش (با تب آخر/پیش‌فرض)
 }
-function closeAdminMenu(){
-  adminLinks.classList.remove('open');
-  adminMenuBtn.setAttribute('aria-expanded', 'false');
+function adminMenuGo(key){
+  if(key === 'users') openUsersSection();
+  else switchSection(key);
 }
-const navMenuEl = document.getElementById('nav-menu');
-const navMenuBtn = document.getElementById('nav-menu-btn');
-// پررنگ‌کردن جای فعلی کاربر در منو — فقط موقع باز شدن منو حساب می‌شه
-function updateNavMenuCurrent(){
-  const st = navCurrentState();
-  const t = st.t || (st.s === 'hawza' ? 'news' : null);
-  const exact = t ? st.s + '/' + t : null;
-  let hasExact = false;
-  navMenuEl.querySelectorAll('button[data-nav]').forEach(b=>{
-    const isExact = b.dataset.nav === exact;
-    if(isExact) hasExact = true;
-    b.classList.toggle('is-current', isExact);
-    b.classList.toggle('is-current-group', b.dataset.nav === st.s);
-    b.removeAttribute('aria-current');
-  });
-  // بخشی که زیرشاخه‌ی منو نداره (صفحه نخست، برنامه مدارس، بسته تحلیلی...) خودش پررنگ می‌شه
-  navMenuEl.querySelectorAll('button[data-nav]').forEach(b=>{
-    if(b.classList.contains('is-current') || (!hasExact && b.dataset.nav === st.s)){ b.classList.add('is-current'); b.setAttribute('aria-current', 'page'); }
-  });
-}
-function toggleNavMenu(){
-  if(!navMenuEl.classList.contains('open')) updateNavMenuCurrent();
-  const open = navMenuEl.classList.toggle('open');
-  navMenuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-}
-function closeNavMenu(){
-  navMenuEl.classList.remove('open');
-  navMenuBtn.setAttribute('aria-expanded', 'false');
-}
-document.addEventListener('click', e=>{
-  if(adminLinks.classList.contains('open') && !adminLinks.contains(e.target)) closeAdminMenu();
-  if(navMenuEl.classList.contains('open') && !navMenuEl.contains(e.target)) closeNavMenu();
-  // دراپ‌داون‌های <details> (انتخاب رسانه‌ها/سمت/تخصص و بازه‌ی زمانی) پیش‌فرض
-  // مرورگر فقط با کلیک دوباره روی summary بسته می‌شن — با کلیک بیرونشون هم
-  // ببندشون، مثل بقیه‌ی منوهای سفارشی سایت
-  document.querySelectorAll('details.news-source-details[open], details.news-daterange-details[open], details.chan-domains-details[open], details.chan-row-domains-details[open]').forEach(d=>{
-    if(!d.contains(e.target)) d.removeAttribute('open');
-  });
-});
-document.addEventListener('keydown', e=>{
-  if(e.key === 'Escape'){ closeAdminMenu(); closeNavMenu(); }
-});
+setupMenus({ current: navCurrentState, navigate: navMenuGo, adminGo: adminMenuGo });
 
 // آکاردئون بخش‌های صفحه‌ی «تنظیمات» — هر بار یه details.settings-accordion
 // باز می‌شه، بقیه‌شون بسته می‌شن (تک‌بخش باز، بقیه جمع)
@@ -603,6 +531,7 @@ function closeIntro(){
   document.getElementById('intro-modal').classList.remove('active');
   try{ localStorage.setItem('jarian_intro_seen', '1'); }catch(e){}
 }
+bindModal('intro-modal', closeIntro);
 // بار اول بیننده در این مرورگر (مدیر سایت رو می‌شناسه) — نه وقتی پنجره‌ی دیگری بازه
 function maybeShowIntro(){
   if(currentRole === 'app_admin') return;
@@ -620,6 +549,7 @@ function closeDeleteChannelModal(){
   PENDING_DELETE_CHANNEL = null;
   document.getElementById('delete-channel-modal').classList.remove('active');
 }
+bindModal('delete-channel-modal', closeDeleteChannelModal);
 document.getElementById('confirm-delete-channel-btn').addEventListener('click', async ()=>{
   if(!PENDING_DELETE_CHANNEL) return;
   const ch = PENDING_DELETE_CHANNEL;
@@ -743,119 +673,6 @@ const PEOPLE_TAB_INFO = {
   archive: 'تولیدات تحلیلی سایر نهادها، جدا از بسته‌های تحلیلی خودِ جریان.'
 };
 
-// ---- تب‌بارها (همه‌ی بخش‌ها): آیکون، خط هلویی لغزان، سایه‌ی لبه‌ی گوشی، رفتن
-// تب فعال به دید و یادآوری آخرین تب. آیکون از data-ic.
-const TAB_ICONS = {
-  analytics: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
-  claims: '<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/>',
-  study: '<path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/>',
-  website: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18 14 14 0 010-18z"/>',
-  newspapers: '<path d="M4 5h13v14H6a2 2 0 01-2-2V5z"/><path d="M17 9h3v8a2 2 0 01-2 2M8 9h5M8 13h5"/>',
-  dossier: '<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/>',
-  newsletter: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
-  feed: '<rect x="4" y="3" width="16" height="18" rx="2.5"/><rect x="7" y="6" width="10" height="6" rx="1"/><path d="M7 15.5h10M7 18h6"/>',
-  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 4.5a3.5 3.5 0 010 7M21.5 20a6.5 6.5 0 00-4-6"/>',
-  orgs: '<path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6M9 11h.01M15 11h.01"/>',
-  figures: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/>',
-  archive: '<path d="M3 20h18M5 20V5h3v15M9 20V8h3v12"/><path d="M13.6 8.6l2.9-.8 3.4 11.6-2.9.8z"/>',
-  hawza: '<path d="M4 21V11a8 8 0 0116 0v10M4 21h16M12 3v2M9 21v-5a3 3 0 016 0v5"/>',
-  about: '<path d="M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2h-7l-5 4v-4H5a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M8.5 9h2v2c0 1.3-.7 2.1-2 2.4M13.5 9h2v2c0 1.3-.7 2.1-2 2.4"/>',
-  notify: '<path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 003.4 0"/>',
-  feedback: '<path d="M21 11.5a8.4 8.4 0 01-1.2 4.4L21 20l-4.3-1.1a8.5 8.5 0 114.3-7.4z"/>',
-  // ۵.۲۸.۰: تب‌های عرصه‌های تازه
-  leader: '<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
-  maraji: '<path d="M12 6.5C10.3 5 7.8 4.5 4 4.5v13c3.8 0 6.3.5 8 2 1.7-1.5 4.2-2 8-2v-13c-3.8 0-6.3.5-8 2z"/><path d="M12 6.5v13"/>',
-  imams: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3M8 21h8"/>',
-  thinktank: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/>',
-  trends: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8M7.5 12l2-2.2 1.8 1.6 2.2-2.6"/>',
-  mood: '<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',
-};
-function lsGet(k, def){ try{ const v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; }catch(e){ return def; } }
-function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
-
-function updateTabInk(bar, noAnim){
-  const ink = bar.querySelector('.tab-ink'), origin = bar.querySelector('.tab-ink-origin');
-  const act = bar.querySelector('button.active');
-  if(!ink || !origin || !bar.offsetParent) return;          // بخش مخفیه — با switchSection دوباره
-  if(!act){ ink.style.width = '0'; return; }
-  const first = ink.dataset.placed !== '1';
-  if(first || noAnim) ink.classList.add('no-anim');
-  const a = act.getBoundingClientRect(), o = origin.getBoundingClientRect();
-  const inset = 10;
-  ink.style.width = Math.max(0, a.width - inset*2) + 'px';
-  ink.style.transform = `translateX(${a.left - o.left + inset}px)`;
-  ink.dataset.placed = '1';
-  if(ink.classList.contains('no-anim')) requestAnimationFrame(()=>requestAnimationFrame(()=>ink.classList.remove('no-anim')));
-  // گوشی: اگه تب فعال بیرون نوار باشه، نوار خودش اسکرول می‌کنه تا دیده بشه
-  if(bar.scrollWidth > bar.clientWidth + 2){
-    const b = bar.getBoundingClientRect();
-    if(a.left < b.left + 8 || a.right > b.right - 8){
-      const cur = bar.scrollLeft, delta = (a.left + a.width/2) - (b.left + b.width/2);
-      bar.scrollTo({ left: cur + delta, behavior: (first || noAnim) ? 'auto' : 'smooth' });
-    }
-  }
-  updateTabFade(bar);
-}
-// سایه‌ی محو لبه‌های نوار روی گوشی، فقط سمتی که تب دیگه‌ای پشتش هست (RTL: شروع = راست)
-function updateTabFade(bar){
-  const max = bar.scrollWidth - bar.clientWidth;
-  const pos = Math.abs(bar.scrollLeft);
-  const hasStart = max > 2 && pos > 2, hasEnd = max > 2 && pos < max - 2;
-  // محو کمی پهن‌تر از دکمه‌ی فلش تا متن تب زیرش نره
-  bar.style.setProperty('--fs', hasStart ? '44px' : '0px');
-  bar.style.setProperty('--fe', hasEnd ? '44px' : '0px');
-  const wrap = bar.parentElement;
-  if(wrap && wrap.classList.contains('tab-bar-wrap')){
-    wrap.classList.toggle('has-start', hasStart);
-    wrap.classList.toggle('has-end', hasEnd);
-  }
-}
-function updateStuckTabBars(){
-  document.querySelectorAll('.section.active .news-page-tabs').forEach(bar=>{
-    bar.classList.toggle('is-stuck', window.scrollY > 0 && bar.getBoundingClientRect().top <= 0.5);
-  });
-}
-function refreshAllTabBars(noAnim){
-  document.querySelectorAll('.news-page-tabs').forEach(bar=>updateTabInk(bar, noAnim));
-}
-function setupTabBars(){
-  document.querySelectorAll('.news-page-tabs').forEach(bar=>{
-    if(bar.dataset.tabsReady) return;
-    bar.dataset.tabsReady = '1';
-    bar.querySelectorAll('button').forEach(b=>{
-      const ic = TAB_ICONS[b.dataset.ic];
-      if(ic) b.insertAdjacentHTML('afterbegin', `<svg class="tab-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>`);
-      // تغییر کلاس active (از هر هندلری) → خط هلویی به تب جدید سُر می‌خوره
-      new MutationObserver(()=>updateTabInk(bar)).observe(b, { attributes:true, attributeFilter:['class'] });
-    });
-    bar.insertAdjacentHTML('beforeend', '<span class="tab-ink" aria-hidden="true"></span><span class="tab-ink-origin" aria-hidden="true" style="position:absolute;left:0;top:0;width:0;height:0"></span>');
-    bar.addEventListener('scroll', ()=>updateTabFade(bar), { passive:true });
-    // فلش‌های گوشی: «پایان» (چپ، تب‌های بعدی) و «شروع» (راست)؛ هر بار ~۷۰٪ عرض نوار
-    const wrap = document.createElement('div');
-    wrap.className = 'tab-bar-wrap';
-    bar.parentNode.insertBefore(wrap, bar);
-    wrap.appendChild(bar);
-    wrap.insertAdjacentHTML('beforeend',
-      '<button type="button" class="tab-arrow end" aria-label="تب‌های بعدی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>' +
-      '<button type="button" class="tab-arrow start" aria-label="تب‌های قبلی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>');
-    wrap.querySelectorAll('.tab-arrow').forEach(a=>a.addEventListener('click', ()=>{
-      const step = bar.clientWidth * 0.7 * (a.classList.contains('end') ? -1 : 1);   // RTL: به چپ = scrollLeft منفی‌تر
-      bar.scrollBy({ left: step, behavior: 'smooth' });
-    }));
-  });
-  window.addEventListener('resize', ()=>refreshAllTabBars(true));
-  window.addEventListener('scroll', updateStuckTabBars, { passive:true });
-  if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>refreshAllTabBars(true));
-}
-
-// «کنشگری مجازی» و «یادداشت‌ها»: آخرین تب باز‌شده با ورود ساده به بخش برمی‌گرده
-function restoreLastTab(barId, dataKey, storeKey){
-  const want = lsGet(storeKey, null);
-  const bar = document.getElementById(barId);
-  if(!want || !bar) return;
-  const btn = bar.querySelector(`button[data-${dataKey}="${want}"]`);
-  if(btn && !btn.disabled && !btn.classList.contains('active')) btn.click();
-}
 setupTabBars();
 
 // پنل مشترک «شبکه‌های اجتماعی/وب‌سایت‌ها/ادعاها» که «اخبار حوزه» (بخش «درباره
@@ -2058,6 +1875,7 @@ async function openJobLog(job){
   }
 }
 function closeJobLog(){ document.getElementById('job-log-modal').classList.remove('active'); }
+bindModal('job-log-modal', closeJobLog);
 async function copyJobLog(){
   try{ await navigator.clipboard.writeText(JOB_LOG_TEXT); showToast('متن گزارش کپی شد؛ می‌توانید آن را برای پشتیبانی بفرستید.'); }
   catch(e){ showToast('کپی ممکن نشد؛ متن را دستی انتخاب و کپی کنید.'); }
@@ -2536,16 +2354,6 @@ function filteredNewsPosts(){
 const NEWS_PAGE_SIZE = 12;
 
 
-// دکمه‌ی «فیلترها» در نمای گوشی: فیلترهای جانبی پشت یه دکمه جمع می‌شن
-function toggleMobileFilters(btn){
-  const box = btn.closest('[data-mfilters]');
-  if(box) box.classList.toggle('m-open');
-  btn.classList.toggle('active', box && box.classList.contains('m-open'));
-}
-function setMobileFilterCount(boxSel, n){
-  const el = document.querySelector(boxSel+' .m-filter-count');
-  if(el) el.textContent = n ? toFaDigits(n) : '';
-}
 function updateMobileFilterBadges(){
   const topic = document.querySelector('#news-topic-row .news-topic-chip.active');
   setMobileFilterCount('#news-study-panel',
@@ -3197,23 +3005,6 @@ async function translatePost(id){
 function renderNewsPagination(totalPages){
   renderPagination('news-pagination', newsState.page, totalPages, goNewsPage);
 }
-// دکمه‌های صفحه‌بندی مشترک (اخبار و رویدادها، پست‌های کنشگری مجازی)
-function renderPagination(wrapId, cur, totalPages, goFn){
-  const wrap = document.getElementById(wrapId);
-  if(!wrap) return;
-  if(totalPages <= 1){ wrap.innerHTML = ''; return; }
-  const pages = [...new Set([1, totalPages, cur-1, cur, cur+1].filter(p=>p>=1 && p<=totalPages))].sort((a,b)=>a-b);
-  let html = `<button ${cur===1?'disabled':''} data-page="${cur-1}">قبلی</button>`;
-  let prev = 0;
-  pages.forEach(p=>{
-    if(prev && p - prev > 1) html += `<span class="dots">…</span>`;
-    html += `<button class="${p===cur?'active':''}" data-page="${p}">${toFaDigits(p)}</button>`;
-    prev = p;
-  });
-  html += `<button ${cur===totalPages?'disabled':''} data-page="${cur+1}">بعدی</button>`;
-  wrap.innerHTML = html;
-  wrap.onclick = e=>{ const b = e.target.closest('button[data-page]'); if(b) goFn(Number(b.dataset.page)); };
-}
 
 function goNewsPage(p){
   newsState.page = p;
@@ -3282,34 +3073,6 @@ function applyNewsDateRange(){
   newsState.page = 1;
   updateDateRangeSummary();
   renderNewsFeed();
-}
-// انتخاب‌گر شمسی بازه (به‌جای تقویم میلادی مرورگر): سه فهرست روز/ماه/سال برای هر سر بازه؛
-// با انتخاب هر کدوم، بقیه از امروز پر می‌شن. newsState.dateFrom/dateTo همون رشته‌ی میلادی
-// YYYY-MM-DD می‌مونه تا فیلتر دست نخوره.
-function setupJalaliRange(details, onPick){
-  const today = calParts(new Date(), 'persian');
-  details.querySelectorAll('.jdate').forEach(box=>{
-    const opt = (v, t)=>`<option value="${v}">${t}</option>`;
-    let days = opt('', 'روز'), months = opt('', 'ماه'), years = opt('', 'سال');
-    for(let d = 1; d <= 31; d++) days += opt(d, toFaDigits(d));
-    JALALI_MONTHS.forEach((m, i)=>{ months += opt(i + 1, m); });
-    for(let y = today.year; y >= today.year - 2; y--) years += opt(y, toFaDigits(y));
-    box.innerHTML = `<select data-part="d" aria-label="روز">${days}</select><select data-part="m" aria-label="ماه">${months}</select><select data-part="y" aria-label="سال">${years}</select>`;
-    box.addEventListener('change', ()=>{
-      const get = k=>box.querySelector(`select[data-part="${k}"]`);
-      // با اولین انتخاب، بخش‌های خالی از امروز پر می‌شن
-      if(!get('y').value) get('y').value = today.year;
-      if(!get('m').value) get('m').value = today.month;
-      if(!get('d').value) get('d').value = today.day;
-      const jy = +get('y').value, jm = +get('m').value;
-      let jd = +get('d').value;
-      const ml = jalaliMonthLength(jy, jm);
-      if(jd > ml){ jd = ml; get('d').value = ml; }
-      const g = jalaliToGregorian(jy, jm, jd);
-      const iso = g[0] + '-' + String(g[1]).padStart(2, '0') + '-' + String(g[2]).padStart(2, '0');
-      onPick(box.dataset.which, iso);
-    });
-  });
 }
 setupJalaliRange(document.getElementById('news-daterange-details'), (which, iso)=>{
   if(which === 'from') newsState.dateFrom = iso; else newsState.dateTo = iso;
@@ -4787,28 +4550,6 @@ function filteredPosts(){
   });
 }
 
-// صفحه‌ی بعد/قبل فهرست: برگشت به ابتدای فهرست. ⚠️ scrollIntoView روی تب‌بار جواب نمی‌ده —
-// تب‌بار sticky‌ه و مرورگر اون رو «همین الان دیده می‌شه» حساب می‌کرد، پس کاربر ته صفحه‌ی جدید می‌موند
-function scrollToListTop(el){
-  if(!el) return;
-  const bar = document.querySelector('.section.active .news-page-tabs');
-  const barH = bar ? bar.getBoundingClientRect().height : 0;
-  const y = el.getBoundingClientRect().top + window.scrollY - barH - 12;
-  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-}
-// روی گوشی فقط ۳ تب از ۷ تب دیده می‌شه — اولین بار در هر نشست، نوار تب‌ها یه تکون کوچیک
-// به سمت تب‌های پنهان می‌خوره تا کاربر بفهمه بیشتر هست
-function peekTabBar(key){
-  const bar = document.querySelector('#sec-' + key + ' .news-page-tabs');
-  if(!bar || bar.scrollWidth - bar.clientWidth < 8) return;
-  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  try{ if(sessionStorage.getItem('jarian_tabpeek_' + key)) return; sessionStorage.setItem('jarian_tabpeek_' + key, '1'); }catch(e){ return; }
-  setTimeout(()=>{
-    const start = bar.scrollLeft;
-    bar.scrollTo({ left: start - 90, behavior: 'smooth' });
-    setTimeout(()=>bar.scrollTo({ left: start, behavior: 'smooth' }), 700);
-  }, 900);
-}
 // لمس خودِ متن پست = «نمایش بیشتر» (دکمه‌ی کوچیکش روی گوشی سخت زده می‌شد)؛ اگه کاربر
 // داره متن رو انتخاب می‌کنه یا متن کوتاهه (دکمه مخفیه)، کاری نمی‌کنه
 document.addEventListener('click', e=>{
@@ -4820,37 +4561,6 @@ document.addEventListener('click', e=>{
   if(more && more.style.display !== 'none' && more.offsetParent) more.click();
 });
 
-
-function wireMediaViewerClicks(root){
-  root.querySelectorAll('[data-viewer-kind]').forEach(node=>{
-    node.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      openMediaViewer(node.dataset.viewerKind, node.dataset.viewerSrc, node.dataset.viewerLink || null);
-    });
-  });
-}
-
-function openMediaViewer(kind, url, linkUrl){
-  const body = document.getElementById('media-viewer-body');
-  // ۵.۲۲.۱: آدرس از data-* (رمزگشایی‌شده) می‌آد و برای وب‌سایت‌ها از خودِ فید RSS — دوباره escape + فقط http(s)
-  const src = safeUrl(url);
-  body.innerHTML = kind==='video'
-    ? `<video src="${src}" controls autoplay playsinline></video>`
-    : `<img src="${src}" alt="">`;
-  const linkEl = document.getElementById('media-viewer-link');
-  if(linkUrl && /^https?:\/\//i.test(String(linkUrl).trim())){
-    linkEl.href = linkUrl;
-    linkEl.innerHTML = `${ICONS.external}مشاهده در مبدأ`;
-    linkEl.style.display = 'flex';
-  } else {
-    linkEl.style.display = 'none';
-  }
-  document.getElementById('media-viewer').classList.add('active');
-}
-function closeMediaViewer(){
-  document.getElementById('media-viewer').classList.remove('active');
-  document.getElementById('media-viewer-body').innerHTML = '';
-}
 
 function postMediaBlock(p){
   const isMedia = p.media_type && p.media_type!=='none';
@@ -6173,6 +5883,7 @@ function closeChanEditor(){
   ceEl('chan-editor-modal').classList.remove('active');
   CE_CHANNEL = null; CE_AVATAR_FILE = null;
 }
+bindModal('chan-editor-modal', closeChanEditor);
 
 
 // ---- افزودن گروهی منابع (۵.۲۶.۰) ----
@@ -6190,6 +5901,7 @@ function openBulkChan(){
   setTimeout(()=>document.getElementById('bulk-chan-text').focus(), 50);
 }
 function closeBulkChan(){ document.getElementById('bulk-chan-modal').classList.remove('active'); }
+bindModal('bulk-chan-modal', closeBulkChan);
 function bulkChanBack(){ document.getElementById('bulk-chan-step1').hidden = false; document.getElementById('bulk-chan-step2').hidden = true; }
 document.getElementById('bulk-chan-file').addEventListener('change', async e=>{
   const f = e.target.files[0]; e.target.value = '';
@@ -6987,30 +6699,8 @@ function renderMagazineCarousel(){
   });
 }
 
-// دکمه‌ی «بالای صفحه» (۵.۲۰.۰) — به‌روزرسانی فقط یک‌بار در هر فریم
-const TO_TOP_EL = document.getElementById('to-top');
-let TO_TOP_RAF = 0;
-function updateToTop(){
-  TO_TOP_RAF = 0;
-  const show = window.scrollY > window.innerHeight * 1.5;
-  TO_TOP_EL.classList.toggle('show', show);
-  if(!show) return;
-  const ann = document.getElementById('ann-bar');
-  const lift = (window.innerWidth <= 640 && ann && ann.childElementCount) ? ann.offsetHeight + 26 : 0;
-  TO_TOP_EL.style.bottom = lift ? lift + 'px' : '';
-}
-window.addEventListener('scroll', ()=>{ if(!TO_TOP_RAF) TO_TOP_RAF = requestAnimationFrame(updateToTop); }, { passive:true });
-window.addEventListener('resize', ()=>{ if(!TO_TOP_RAF) TO_TOP_RAF = requestAnimationFrame(updateToTop); }, { passive:true });
-// Enter/فاصله روی کارت‌ها و میان‌برهای صفحه‌ی نخست (div/a با role=button) = کلیک
-document.addEventListener('keydown', e=>{
-  if(e.key !== 'Enter' && e.key !== ' ') return;
-  const el = e.target;
-  if(el && el.matches && el.matches('.domain-card[role="button"], .pkg-tile[role="button"]')){ e.preventDefault(); el.click(); }
-});
-function scrollToPageTop(){
-  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  window.scrollTo({ top:0, behavior: reduce ? 'auto' : 'smooth' });
-}
+setupToTop();
+setupKeyboardButtons();
 
 // سه کارت راهنمای سریع زیر هرو — فقط اسکرول توی همون صفحه‌ی نخست،
 // نه switchSection (چون هر سه مقصد از قبل توی همین sec-dashboard هستن)
@@ -7129,110 +6819,9 @@ function populateNewspaperSourceOptions(){
   updateNewspaperSourceSummary();
 }
 
-// فایل‌ها در bucket خصوصی Storage هستن — با یک signed URL کوتاه‌عمر در یک سربرگ جدید باز می‌شن
-// (نه لینک مستقیم/دانلود دائمی — این جلوی دانلود عادی رو می‌گیره، ولی جلوی اسکرین‌شات یا کاربر فنی مصمم رو نه)
-// ---- نمایشگر سند (۵.۱۹.۰) ----
-// items: [{ kind:'image'|'pdf'|'file', url, name, label }] — پنجره همون لحظه‌ی کلیک باز می‌شه
-// (قبل از گرفتن لینک امن)، پس مرورگر بلاکش نمی‌کنه؛ «باز کردن/دانلود» یه لینک واقعیه
-var DV = { items: [], i: 0, zoom: false };
-const DV_TTL = 600; // لینک امن ۱۰ دقیقه‌ای برای ورق زدن (قبلاً ۶۰ ثانیه برای باز کردن تک‌فایل)
-async function signStoragePaths(bucket, paths){
-  const res = await fetch(SUPABASE_URL + '/storage/v1/object/sign/' + bucket, {
-    method: 'POST',
-    headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ expiresIn: DV_TTL, paths }),
-  });
-  if(!res.ok) throw new Error('sign failed');
-  const out = await res.json();
-  const map = new Map((Array.isArray(out) ? out : []).filter(x => x && x.signedURL && !x.error).map(x => [x.path, SUPABASE_URL + '/storage/v1' + x.signedURL]));
-  return paths.map(p => map.get(p) || null);
-}
-function openDocViewer(title, loader, startIndex){
-  DV = { items: [], i: startIndex || 0, zoom: false };
-  document.getElementById('dv-title').textContent = faTitle(title);
-  document.getElementById('dv-stage').innerHTML = '<div class="dv-msg">در حال آماده‌سازی…</div>';
-  document.getElementById('dv-count').textContent = '';
-  document.getElementById('dv-nav').hidden = true;
-  document.getElementById('dv-zoom').hidden = true;
-  document.getElementById('dv-open').hidden = true;
-  document.getElementById('doc-viewer').classList.add('active');
-  Promise.resolve().then(loader).then(items=>{
-    DV.items = (items || []).filter(x => x && x.url);
-    if(!DV.items.length) throw new Error('empty');
-    DV.i = Math.min(Math.max(0, DV.i), DV.items.length - 1);
-    dvRender();
-  }).catch(()=>{
-    document.getElementById('dv-stage').innerHTML = '<div class="dv-msg"><b>باز کردن فایل ممکن نشد</b>اتصال اینترنت را بررسی کنید و دوباره امتحان کنید.</div>';
-  });
-}
-function closeDocViewer(){
-  document.getElementById('doc-viewer').classList.remove('active');
-  document.getElementById('dv-stage').innerHTML = '';
-}
-const DV_FILE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>';
-function dvRender(){
-  const it = DV.items[DV.i];
-  const stage = document.getElementById('dv-stage');
-  const n = DV.items.length;
-  stage.classList.toggle('zoomed', DV.zoom && it.kind === 'image');
-  stage.scrollTop = 0; stage.scrollLeft = 0;
-  const openEl = document.getElementById('dv-open');
-  openEl.href = it.url; openEl.hidden = false;
-  if(it.kind === 'image'){
-    openEl.removeAttribute('download');
-    stage.innerHTML = `<img src="${escAttr(it.url)}" alt="${escAttr(it.label || '')}" onclick="dvToggleZoom()">`;
-  }else if(it.kind === 'pdf'){
-    // نمایش PDF داخل صفحه فقط روی رایانه قابل‌اعتماده؛ گوشی‌ها (مخصوصاً اندروید) iframe‌ی PDF رو نشون نمی‌دن
-    const inline = window.matchMedia('(min-width: 761px)').matches;
-    stage.innerHTML = inline
-      ? `<iframe src="${escAttr(it.url)}" title="${escAttr(it.label || 'PDF')}"></iframe>`
-      : `<div class="dv-msg">${DV_FILE_ICON}<b>${escHtml(faTitle(it.label) || 'فایل PDF')}</b>برای خواندن، فایل را در نمایشگر PDF گوشی باز کنید.<br><a class="dv-action" href="${escAttr(it.url)}" target="_blank" rel="noopener">باز کردن PDF</a></div>`;
-  }else{
-    openEl.setAttribute('download', '');
-    stage.innerHTML = `<div class="dv-msg">${DV_FILE_ICON}<b>${escHtml(faTitle(it.label) || 'فایل')}</b>پیش‌نمایش این نوع فایل در سایت ممکن نیست.<br><a class="dv-action" href="${escAttr(it.url)}" target="_blank" rel="noopener" download>دانلود فایل</a></div>`;
-  }
-  document.getElementById('dv-zoom').hidden = it.kind !== 'image';
-  document.getElementById('dv-zoom').classList.toggle('on', DV.zoom && it.kind === 'image');
-  const countTxt = n > 1 ? ('صفحه‌ی ' + toFaDigits(DV.i + 1) + ' از ' + toFaDigits(n)) : '';
-  document.getElementById('dv-count').textContent = countTxt;
-  const nav = document.getElementById('dv-nav');
-  nav.hidden = n < 2;
-  nav.dataset.count = countTxt;
-  document.getElementById('dv-prev').disabled = DV.i === 0;
-  document.getElementById('dv-next').disabled = DV.i === n - 1;
-  const pages = document.getElementById('dv-pages');
-  pages.innerHTML = n > 1 ? DV.items.map((_, k)=>`<button type="button" class="${k === DV.i ? 'on' : ''}" onclick="dvGo(${k - DV.i})" aria-label="صفحه‌ی ${toFaDigits(k + 1)}">${toFaDigits(k + 1)}</button>`).join('') : '';
-  const cur = pages.querySelector('.on'); if(cur) cur.scrollIntoView({ block:'nearest', inline:'center' });
-  // صفحه‌ی بعد پیش‌بارگذاری شه تا ورق زدن بی‌مکث باشه
-  const nx = DV.items[DV.i + 1]; if(nx && nx.kind === 'image'){ const im = new Image(); im.src = nx.url; }
-}
-function dvGo(delta){
-  const j = DV.i + delta;
-  if(j < 0 || j >= DV.items.length) return;
-  DV.i = j; DV.zoom = false; dvRender();
-}
-function dvToggleZoom(){
-  const it = DV.items[DV.i]; if(!it || it.kind !== 'image') return;
-  DV.zoom = !DV.zoom; dvRender();
-}
-document.addEventListener('keydown', e=>{
-  if(!document.getElementById('doc-viewer').classList.contains('active')) return;
-  // راست‌به‌چپ: صفحه‌ی بعد سمت چپه
-  if(e.key === 'ArrowLeft'){ dvGo(1); e.preventDefault(); }
-  else if(e.key === 'ArrowRight'){ dvGo(-1); e.preventDefault(); }
-  else if(e.key === 'Escape'){ closeDocViewer(); }
-});
-(function(){
-  const stage = document.getElementById('dv-stage');
-  let x0 = null, y0 = null;
-  stage.addEventListener('touchstart', e=>{ if(e.touches.length === 1 && !DV.zoom){ x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } else x0 = null; }, { passive:true });
-  stage.addEventListener('touchend', e=>{
-    if(x0 === null) return;
-    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
-    x0 = null;
-    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) dvGo(dx > 0 ? 1 : -1); // کشیدن به راست = صفحه‌ی بعد (راست‌به‌چپ)
-  }, { passive:true });
-})();
+setupDocViewer();
+setupMediaViewer();
+setupMobileFilters();
 function openMagazineViewer(m){
   const files = Array.isArray(m.files) ? m.files : [];
   openDocViewer(m.title, async ()=>{
@@ -7416,20 +7005,6 @@ function openArchiveViewer(m){
       return { kind: isPdf ? 'pdf' : 'image', url: urls[k], label: title + (files.length > 1 ? ' — ' + (isPdf ? 'فایل ' : 'صفحه‌ی ') + toFaDigits(k + 1) : '') };
     });
   });
-}
-
-// کنترل‌های مدیر زیر جلدها (جابه‌جایی + حذف) — قبلاً پیکان‌های ۲۲×۱۸ و یه «✕» بی‌برچسب
-function cardAdminControls(i, total, onMove, onDelete, label){
-  const box = document.createElement('div'); box.className = 'card-admin';
-  const mk = (cls, html, title, fn, disabled)=>{
-    const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.innerHTML = html;
-    b.title = title; b.setAttribute('aria-label', title); b.disabled = !!disabled;
-    b.addEventListener('click', fn); box.appendChild(b); return b;
-  };
-  mk('card-move', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>', 'انتقال به قبل', () => onMove(-1), i === 0);
-  mk('card-move', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>', 'انتقال به بعد', () => onMove(1), i === total - 1);
-  mk('card-del', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span>حذف</span>', 'حذف ' + label, onDelete);
-  return box;
 }
 
 async function moveArchiveReport(m, direction){
@@ -7629,6 +7204,7 @@ function closePwModal(){
   document.getElementById('pw-modal').classList.remove('active');
   PW_ROLE = null;
 }
+bindModal('pw-modal', closePwModal);
 document.getElementById('pw-show').addEventListener('change', e=>{
   ['pw-new','pw-new2'].forEach(id=> document.getElementById(id).type = e.target.checked ? 'text' : 'password');
 });
@@ -8003,42 +7579,7 @@ function exportReport(){
   });
 }
 
-// پیام کوتاه پایین صفحه — زمان نمایش به اندازه‌ی متن (پیام‌های بلندِ قبلاً alert هم اینجا میان)
-let TOAST_TIMER = null;
-function showToast(msg, ms){
-  const t=document.getElementById('toast');
-  if(msg) t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(TOAST_TIMER);
-  TOAST_TIMER = setTimeout(()=>t.classList.remove('show'), ms || Math.min(7000, Math.max(2200, (t.textContent || '').length * 55)));
-}
-// پنجره‌ی تأیید یکسان سایت (۵.۲۱.۰) — Promise<boolean>. خط اول پیام = تیتر، بقیه = توضیح.
-// دکمه‌ی تأیید برای «حذف»/«پنهان» قرمز و با همون فعل؛ «برگشت» گوشی/Esc = انصراف
-let UI_CONFIRM_RESOLVE = null;
-function uiConfirm(msg){
-  return new Promise(res=>{
-    if(UI_CONFIRM_RESOLVE) UI_CONFIRM_RESOLVE(false);
-    UI_CONFIRM_RESOLVE = res;
-    const [title, ...rest] = String(msg).split('\n');
-    document.getElementById('ui-confirm-title').textContent = title;
-    const txt = document.getElementById('ui-confirm-text');
-    txt.textContent = rest.join(' ');
-    txt.style.display = rest.length ? '' : 'none';
-    const ok = document.getElementById('ui-confirm-ok');
-    const del = /حذف/.test(title), hide = /پنهان/.test(title);
-    ok.textContent = del ? 'حذف' : hide ? 'پنهان کن' : 'تأیید';
-    ok.classList.toggle('danger', del || hide);
-    ok.classList.toggle('primary', !(del || hide));
-    document.getElementById('ui-confirm-modal').classList.add('active');
-    setTimeout(()=>ok.focus(), 30);
-  });
-}
-function uiConfirmClose(v){
-  document.getElementById('ui-confirm-modal').classList.remove('active');
-  const r = UI_CONFIRM_RESOLVE; UI_CONFIRM_RESOLVE = null;
-  if(r) r(v);
-}
-document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && UI_CONFIRM_RESOLVE) uiConfirmClose(false); });
+setupConfirm();
 
 async function loadNotifySubscribers(){
   const r = await api('/notify_subscribers?select=*&order=created_at.desc');

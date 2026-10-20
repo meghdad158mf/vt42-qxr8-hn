@@ -69,6 +69,8 @@ function buildData(now = Date.now()) {
 export const TEST_NID = { viewer: '0013542419', admin: '0499370899' };
 export const TEST_ADMIN_PASSWORD = 'adminpw';
 
+const PNG_1X1 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+
 const RPC = {
   monitored_source_counts: () => ({ channels: 24, newspapers: 38, crawl: 31 }),
   hidden_post_ids: () => [],
@@ -109,11 +111,17 @@ export async function mockSupabase(context, options = {}) {
     const req = route.request();
     if (req.method() === 'OPTIONS') return json(route, 200);
     const url = new URL(req.url());
+    let body = {};
+    try { body = JSON.parse(req.postData() || '{}'); } catch (e) { /* بدنه‌ی غیر JSON */ }
+    // لینک امن فایل‌های خصوصی (نمایشگر سند): امضا → آدرس ساختگی، و خودِ فایل = یه عکس ۱×۱
+    const sign = url.pathname.match(/^\/storage\/v1\/object\/sign\/([^/]+)/);
+    if (sign && req.method() === 'POST') {
+      return json(route, 200, (body.paths || []).map((p) => ({ path: p, signedURL: `/object/sign/${sign[1]}/${p}?token=t` })));
+    }
+    if (sign) return route.fulfill({ status: 200, contentType: 'image/png', body: PNG_1X1 });
     const m = url.pathname.match(/\/rest\/v1\/(rpc\/)?([a-z_]+)/);
     if (!m) return json(route, 200, []);
     const [, isRpc, name] = m;
-    let body = {};
-    try { body = JSON.parse(req.postData() || '{}'); } catch (e) { /* بدنه‌ی غیر JSON */ }
 
     if (isRpc) {
       if (name === 'otp_request') {
