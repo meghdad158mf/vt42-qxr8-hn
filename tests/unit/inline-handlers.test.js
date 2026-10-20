@@ -2,13 +2,16 @@
 // در Object.assign(window, …) باشه (وگرنه دکمه بی‌صدا کار نمی‌کنه)، و هر نامی که دیگه
 // صدا زده نمی‌شه باید از فهرست حذف بشه تا پل در مرحله‌های بعد واقعاً کوچیک بشه.
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
-const app = readFileSync(new URL('../../design/src/app.js', import.meta.url), 'utf8');
+const SRC = new URL('../../design/src/', import.meta.url);
+const app = readFileSync(new URL('app.js', SRC), 'utf8');
 const html = readFileSync(new URL('../../design/ita-monitoring-prototype.html', import.meta.url), 'utf8');
+// همه‌ی ماژول‌های design/src (HTMLهایی که onclick دارن رو هر کدوم ممکنه بسازه)
+const modules = readdirSync(SRC, { recursive: true }).filter((f) => f.endsWith('.js')).map((f) => readFileSync(new URL(f, SRC), 'utf8'));
 
-// تابع‌های سطح بالای app.js (کد بدون تورفتگی)
-const topFns = new Set([...app.matchAll(/^(?:async )?function (\w+)\s*\(/gm)].map((m) => m[1]));
+// تابع‌های سطح بالای ماژول‌ها (کد بدون تورفتگی، export یا نه)
+const topFns = new Set(modules.flatMap((s) => [...s.matchAll(/^(?:export )?(?:async )?function (\w+)\s*\(/gm)].map((m) => m[1])));
 const bridge = (() => {
   const m = app.match(/^Object\.assign\(window, \{([\s\S]*?)\}\);/m);
   return new Set(m ? m[1].split(',').map((s) => s.trim()).filter(Boolean) : []);
@@ -23,7 +26,7 @@ function handlerNames(text) {
   }
   return out;
 }
-const used = new Set([...handlerNames(html), ...handlerNames(app)]);
+const used = new Set([handlerNames(html), ...modules.map(handlerNames)].flatMap((s) => [...s]));
 
 describe('پل موقت دستگیره‌های درون HTML', () => {
   it('پل پیدا شد', () => expect(bridge.size).toBeGreaterThan(0));

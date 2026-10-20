@@ -7,7 +7,7 @@ import { api, SESSION_EXPIRED, resetSessionExpired } from './core/api.js';
 import { setErrorContext } from './core/error-reporting.js';
 import { escAttr, escHtml, safeUrl, claimsTextDisplay, toFaDigits, faTitle, faNum, faDigitsToEn, faDigitsToLatin, needsTranslation } from './core/text.js';
 import { searchNorm, searchHay } from './core/search.js';
-import { JALALI_MONTHS, calParts, jalaliMonthStarts, iranTodayStartMs, tehranDayDiff } from './core/date.js';
+import { JALALI_MONTHS, calParts, jalaliMonthStarts, iranTodayStartMs, tehranDayDiff, newsRelTime } from './core/date.js';
 import { nidValid, normalizeIrMobile } from './core/validate.js';
 import { loadScriptOnce, scriptRequested } from './core/load-script.js';
 import { navMark, navRestoring, startRouter, restoreScrollY } from './core/router.js';
@@ -25,9 +25,14 @@ import { setupKeyboardButtons } from './ui/keyboard.js';
 import { wireMediaViewerClicks, setupMediaViewer } from './ui/media-viewer.js';
 import { openDocViewer, setupDocViewer } from './ui/doc-viewer.js';
 import { setupJalaliRange } from './ui/jalali-range.js';
-import { renderPagination } from './ui/pagination.js';
+import { renderPagination, NEWS_PAGE_SIZE } from './ui/pagination.js';
 import { setMobileFilterCount, setupMobileFilters } from './ui/mobile-filters.js';
 import { cardAdminControls } from './ui/card-controls.js';
+import { CATEGORIES, CHANNELS, POSTS_CACHE, REGIONS, catNameOf, chById, chInitials, chName, regionNameOf, setCategories, setChannels, setPostsCache, setRegions } from './data/store.js';
+import { setupPostTools } from './features/news/post-tools.js';
+import { NEWS_CURRENT_TAB, NEWS_TABS, activateNewsStudy, goToNewsTab, placeNewsStudyPanel, setNewsPageTab, setupNewsTabs } from './features/news/news-tabs.js';
+import { NEWS_PLATFORM_ICON, NEWS_PLATFORM_LABEL } from './ui/platforms.js';
+import { NEWS_TOPICS, loadNewsTopics, newsState, populateNewsSourceOptions, renderNewsFeed, renderNewsRegionChips, renderNewsTopicRow, setupNewsFeed } from './features/news/news-feed.js';
 
 // ⚠️ پل موقت: دستگیره‌های درون HTML (onclick="…" در صفحه و در HTMLهایی که همین فایل می‌سازه)
 // فقط تابع سراسری رو می‌بینن، ولی تابع‌های یه module سراسری نیستن. این فهرست تا جایگزینی همه‌ی
@@ -37,18 +42,17 @@ Object.assign(window, {
   addCrawlSuggestion, addDossierManualPost, addNewsletterManualPost, addPostToPicks, autoMatchDossierTopic,
   bulkChanBack, bulkChanPreview, bulkChanSave, changePassword, clearPostsFocus, closeUserEditor, copyJobLog,
   deleteCrawlSite, deleteDossierTopic, deleteDossierTopicPost, downloadBackup, downloadNewsletter,
-  editDossierTopicKeywords, editPostKeywords, exportPosts, exportReport, goToNewsTab, goToUploadsTab,
-  handleLogin, hideHawzaMention, hidePost, ignoreCrawlSuggestion, introGo, logout, openBulkChan, openIntro,
-  openSiteSettingsPanel, openUserEditor, otpBack, otpChooseSms, otpResend, otpShow, otpSubmit,
-  publishAnnouncement, publishNewsletter, removeNewsletterDraftItem, renderDossierTopicAdminList,
-  renderNewsFeed, renderSystemStatus, retryLoadAll, retryMaintenance, saveAlertSettings, saveCrawlSite,
-  saveDossierTopicKeywords, saveHiddenSections, saveMaintenance, saveMediaRetention, savePostKeywords,
-  saveSmsConfig, saveUser, saveViewerPasswordLogin, scrollToDomainGrid, scrollToPackageCard,
-  searchDossierManualAdd, searchNewsletterManualAdd, sendSmsTest, setHawzaTab, setNewsPageTab, setNewsView,
+  editDossierTopicKeywords, exportPosts, exportReport, goToUploadsTab, handleLogin, hideHawzaMention,
+  hidePost, ignoreCrawlSuggestion, introGo, logout, openBulkChan, openIntro, openSiteSettingsPanel,
+  openUserEditor, otpBack, otpChooseSms, otpResend, otpShow, otpSubmit, publishAnnouncement,
+  publishNewsletter, removeNewsletterDraftItem, renderDossierTopicAdminList, renderSystemStatus, retryLoadAll,
+  retryMaintenance, saveAlertSettings, saveCrawlSite, saveDossierTopicKeywords, saveHiddenSections,
+  saveMaintenance, saveMediaRetention, saveSmsConfig, saveUser, saveViewerPasswordLogin, scrollToDomainGrid,
+  scrollToPackageCard, searchDossierManualAdd, searchNewsletterManualAdd, sendSmsTest, setHawzaTab,
   setUploadsTab, submitFeedback, subscribeNotify, suggestNewsletterSection, switchSection, testAlertEmail,
   toggleCrawlSite, toggleDossierText, toggleDossierTopicActive, toggleDossierTopicPostExcluded,
-  toggleMoreText, toggleNewsText, togglePasswordVisibility, togglePoliticalFigureText, togglePostText,
-  translateMention, translatePost, unhidePost, unlockLogin, usrDownload
+  toggleMoreText, togglePasswordVisibility, togglePoliticalFigureText, togglePostText, translateMention,
+  unhidePost, unlockLogin, usrDownload
 });
 
 // خطاهای مرورگر: جای فعلی کاربر و دستگاه برای گزارش (core/error-reporting.js)
@@ -590,7 +594,7 @@ const TITLES = {
   ask: 'از جریان بپرس',
 };
 
-function switchSection(key){
+export function switchSection(key){
   navMark();
   if(key === 'feedback'){ key = 'users'; setTimeout(()=>document.getElementById('usr-feedback-panel').scrollIntoView({ block:'start' }), 400); } // بخش قدیمی، حالا قسمت دوم «کاربران»
   if(viewerHidden(key)) key = 'dashboard'; // بخش پنهان از بیننده‌ها (تنظیمات بخش‌ها ← نمایش سایت)
@@ -630,13 +634,7 @@ function switchSection(key){
   peekTabBar(key);
 }
 
-// میان‌برهای کارت‌های صفحه‌ی نخست به زیربخش‌های خودِ همون صفحه
-function goToNewsTab(tab){
-  if(tab === 'hawza'){ goToHawzaTab('news'); return; } // تب قدیمی، حالا بخش «درباره حوزه»
-  switchSection('overview');
-  setNewsPageTab(tab);
-}
-function goToHawzaTab(tab){
+export function goToHawzaTab(tab){
   if(HAWZA_TAB_INFO[tab]){ HAWZA_TAB = tab; lsSet('jarian_last_hawza_tab', tab); }
   switchSection('hawza'); // خودش تب HAWZA_TAB رو باز می‌کنه
 }
@@ -650,18 +648,6 @@ function goToPeopleTab(tab){
   const tabBtn = document.querySelector('#people-page-tabs button[data-people-tab="'+tab+'"]');
   if(tabBtn) tabBtn.click();
 }
-// متن زیرنویس هر تب (سه گروه: اخبار و رویدادها / کنشگری مجازی / یادداشت‌ها)
-// — یه خط کوتاه هدف همون تب رو توضیح می‌ده؛ در setNewsPageTab و دو هندلر
-// کلیک posts-page-tabs/people-page-tabs مصرف می‌شه
-const NEWS_TAB_INFO = {
-  analytics: 'خلاصه‌ی هوشمند اخبار مهم و موضوعات پرتکرار اخیر.',
-  claims: 'ادعاها و شایعات منتشرشده در اخبار رسانه ها همراه با توضیحات',
-  study: 'پست‌های منتشر شده در صفحات شبکه‌های اجتماعی',
-  website: 'مقالات سایت‌های خبری رسمی، با امکان جست‌وجوی موضوعی و ترجمه‌ی خودکار.',
-  newspapers: 'صفحه‌ی اول روزنامه‌های کشور، جمع‌آوری‌شده‌ی روزانه از کیوسک مطبوعات.',
-  dossier: 'اخبار مرتبط با چند موضوع خاص و گروه‌بندی‌شده.',
-  newsletter: 'خبرنامه‌ی روزانه‌ی قابل‌دانلود، متشکل از اخبار منتخب.'
-};
 const POSTS_TAB_INFO = {
   feed: 'پست‌های منتشرشده‌ی کانال‌های کنشگر فضای مجازی، قابل‌فیلتر بر اساس کانال، دسته و زمان.',
   people: 'فهرست کانال‌های کنشگر به‌همراه صاحب کانال، تعداد مخاطب و سطح فعالیت هرکدام.'
@@ -675,44 +661,6 @@ const PEOPLE_TAB_INFO = {
 
 setupTabBars();
 
-// پنل مشترک «شبکه‌های اجتماعی/وب‌سایت‌ها/ادعاها» که «اخبار حوزه» (بخش «درباره
-// حوزه») هم ازش استفاده می‌کنه — جابه‌جایی خودِ عنصر، نه کپی
-const NEWS_TABS = ['analytics','claims','study','website','newspapers','dossier','newsletter'];
-let NEWS_CURRENT_TAB = (t=>NEWS_TABS.includes(t) ? t : 'analytics')(lsGet('jarian_last_news_tab', 'analytics'));
-let NEWS_STUDY_HOME = null;
-function placeNewsStudyPanel(where){
-  const panel = document.getElementById('news-study-panel');
-  if(!NEWS_STUDY_HOME){
-    NEWS_STUDY_HOME = document.createComment('news-study-panel-home');
-    panel.parentNode.insertBefore(NEWS_STUDY_HOME, panel);
-  }
-  if(where === 'hawza'){
-    const slot = document.getElementById('hawza-news-slot');
-    if(panel.parentNode !== slot) slot.appendChild(panel);
-  }else if(NEWS_STUDY_HOME.nextSibling !== panel){
-    NEWS_STUDY_HOME.parentNode.insertBefore(panel, NEWS_STUDY_HOME.nextSibling);
-  }
-}
-// تنظیم پنل مشترک برای یه منبع (social/website/hawza/claims) و رندر فید
-function activateNewsStudy(platform){
-  // جست‌وجوی یه تب نباید بی‌صدا روی تب بعدی هم اعمال بمونه (کاربر فکر می‌کرد خبرهای اون تب کمه)
-  if(newsState.platform !== platform && newsState.query){
-    newsState.query = '';
-    document.getElementById('news-search-input').value = '';
-    document.querySelectorAll('.news-topic-chip').forEach(c=>c.classList.toggle('active', c.dataset.kw === ''));
-  }
-  newsState.platform = platform;
-  newsState.page = 1;
-  // تب «ادعاها و شایعات» فقط یه منبع (کانال بله) داره — فیلتر منطقه و
-  // دراپ‌داون چندانتخابی رسانه‌ها بی‌معنیه، پس مخفی می‌شن
-  const isClaims = platform === 'claims';
-  document.getElementById('news-region-row').style.display = isClaims ? 'none' : '';
-  document.getElementById('news-source-details').style.display = isClaims ? 'none' : '';
-  document.getElementById('news-filter-divider-1').style.display = isClaims ? 'none' : '';
-  updateNewsTopicVisibility();
-  populateNewsSourceOptions();
-  renderNewsFeed();
-}
 // «درباره حوزه» دو تب داره: «اخبار حوزه» (پنل مشترک اخبار) و «آنچه درباره حوزه
 // گفته می‌شود» (خزنده، hawza_mentions — ۵.۲۳.۰)
 const HAWZA_TAB_INFO = {
@@ -1154,52 +1102,12 @@ function setupHawzaAbout(){
 }
 setupHawzaAbout();
 
-function setNewsPageTab(tab){
-  if(viewerHidden('overview/' + tab)) tab = firstVisibleTab('overview') || tab;
-  navMark();
-  NEWS_CURRENT_TAB = tab;
-  lsSet('jarian_last_news_tab', tab);
-  placeNewsStudyPanel('overview');
-  const subEl = document.getElementById('news-tab-subtitle');
-  if(subEl) subEl.querySelector('span').textContent = NEWS_TAB_INFO[tab] || '';
-  document.getElementById('news-tab-study').classList.toggle('active', tab==='study');
-  document.getElementById('news-tab-website').classList.toggle('active', tab==='website');
-  document.getElementById('news-tab-claims').classList.toggle('active', tab==='claims');
-  document.getElementById('news-tab-newspapers').classList.toggle('active', tab==='newspapers');
-  document.getElementById('news-tab-analytics').classList.toggle('active', tab==='analytics');
-  document.getElementById('news-tab-dossier').classList.toggle('active', tab==='dossier');
-  document.getElementById('news-tab-newsletter').classList.toggle('active', tab==='newsletter');
-  document.getElementById('news-feed').classList.toggle('social-tab', tab==='study');
-  // «شبکه‌های اجتماعی»، «وب‌سایت‌ها» و «ادعاها و شایعات» (+ «اخبار حوزه» در بخش «درباره حوزه»)
-  // یه پنل مشترک (news-study-panel) رو با فیلترها/جست‌وجو/صفحه‌بندی
-  // یکسان به اشتراک می‌ذارن — فقط newsState.platform عوض می‌شه که
-  // newsChannels() بر اساسش کانال‌های پیام‌رسان/وب‌سایت/حوزه/بله رو
-  // برمی‌گردونه
-  const showStudy = tab==='study' || tab==='website' || tab==='claims';
-  document.getElementById('news-study-panel').style.display = showStudy ? '' : 'none';
-  document.getElementById('news-newspapers-panel').style.display = tab==='newspapers' ? '' : 'none';
-  document.getElementById('news-analytics-panel').style.display = tab==='analytics' ? '' : 'none';
-  document.getElementById('news-dossier-panel').style.display = tab==='dossier' ? '' : 'none';
-  document.getElementById('news-newsletter-panel').style.display = tab==='newsletter' ? '' : 'none';
-  if(showStudy) activateNewsStudy(tab==='website' ? 'website' : tab==='claims' ? 'claims' : 'social');
-  if(tab==='newspapers') renderNewspapers();
-  if(tab==='analytics') renderNewsAnalytics();
-  if(tab==='dossier') renderDossierTab();
-  if(tab==='newsletter') renderNewsletterTab();
-}
-
-// ---- real data state ----
-let CHANNELS = [];    // {id, platform, username, title, type, category_id, active}
-let CATEGORIES = [];  // {id, name, color}
-let REGIONS = [];     // {id, name}
 let PROFILE_GROUPS = []; // {id, name, kind:'figures'|'orgs', sort_order} — گروه‌های گالری «یادداشت‌ها»
 let CHANNEL_PROFILE_GROUPS = []; // {id, channel_id, group_id} — عضویت چندگانه‌ی کانال در گروه‌ها
-let NEWS_TOPICS = []; // {id, name, keywords, sort_order} — موضوعات جستجوی ذخیره‌شده («اخبار رسمی»)
 let DOSSIER_TOPICS = []; // {id, name, keywords, active, sort_order} — موضوعات موقت «پرونده‌های موضوعی»
 let DOSSIER_TOPIC_POSTS = []; // {id, topic_id, post_id, source, excluded} — پست‌های منتسب به هر موضوع
 let NEWSLETTER_POSTS = []; // {id, section, post_id, sort_order, posts:{...}} — مجموعه‌ی فعلیِ منتشرشده‌ی «خبرنامه مدارس» (بدون آرشیو)؛ posts رکورد کامل پست embedشده‌ست (نه فقط id) چون POSTS_CACHE سقف ۱۰۰۰تایی داره و پست‌های ادعا/شایعه (کمیاب‌تر) زود ازش بیرون می‌افتن — نگاه کن به buildNewsletterPrintHtml
 let NEWSLETTER_DRAFT = { claims: [], news: [], dossier: [] }; // پیش‌نویس در‌حال‌ویرایش مدیر (فقط حافظه، تا «انتشار» زده نشه ذخیره نمی‌شه)
-let POSTS_CACHE = []; // {id, channel_id, platform, platform_post_id, text, media_type, posted_at, scraped_at, views, forwards, link}
 let MAGAZINES = [];   // {id, title, issue_no, publish_date, file_type, files, cover_url, uploaded_at}
 let ARCHIVE_REPORTS = [];   // {id, title, source_org, publish_date, file_type, files, cover_url, uploaded_at}
 let FEEDBACK_LIST = [];     // {id, name, message, created_at} — فقط با ورود مدیر به تب «نظرات کاربران» لود می‌شه
@@ -1211,51 +1119,7 @@ const newspaperState = { selected: [], date: null };  // date=null یعنی جد
 let SCHOOL_REPORTS = []; // {id, title, image_url, media_storage_path, sort_order, uploaded_at, file_type, file_name} — گزارش‌های تحلیل Power BI (تصویر/PDF/اکسل)
 let NEWS_AI_INSIGHTS = null; // {id, computed_at, window_hours, selected_posts:[{id,headline,score,tags,sources,posts,channel_id,time,link}], topics:[{name,weight}]} — آخرین تحلیل هوش مصنوعی تب «در یک نگاه» (روزی ۴ بار از GitHub Actions، نه هر بار بازکردن تب)
 
-function chById(id){ return CHANNELS.find(c=>c.id===id); }
-function chName(id){ const c=chById(id); return c ? (c.title || c.username) : '؟'; }
-function chInitials(id){
-  const n = chName(id).replace(/^[«»"'”“'`\s]+/,'').trim();
-  return n.slice(0,2) || '؟؟';
-}
 function chAvatar(id){ return `<span class="avatar">${escHtml(chInitials(id))}</span>`; }
-function catNameOf(channelId){
-  const ch = chById(channelId);
-  const cat = ch && CATEGORIES.find(c=>c.id===ch.category_id);
-  return cat ? cat.name : '';
-}
-
-// ---- اخبار رسمی — بخش مطالعه (فاز ۱) ----
-function regionNameOf(id){
-  const r = REGIONS.find(x=>x.id===id);
-  return r ? r.name : '';
-}
-const NEWS_PLATFORM_LABEL = { website: 'وب‌سایت', telegram: 'تلگرام', eitaa: 'ایتا', bale: 'بله' };
-const NEWS_PLATFORM_ICON = {
-  website: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 010 18 13 13 0 010-18z"/></svg>',
-  telegram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3L2 11l6 2m14-10l-4 18-8-6m12-12L8 13"/></svg>',
-  eitaa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-8.9 8.4 8.6 8.6 0 01-3.4-.7L3 20l1-4.8A8.4 8.4 0 1121 11.5z"/></svg>',
-  bale: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-8.9 8.4 8.6 8.6 0 01-3.4-.7L3 20l1-4.8A8.4 8.4 0 1121 11.5z"/></svg>',
-};
-const newsState = { region: '', time: 'all', sources: [], query: '', page: 1, dateFrom: '', dateTo: '', platform: 'social' };
-
-// platform: 'social' = پیام‌رسان‌ها (ایتا/تلگرام)، 'website' = سایت‌های خبری عمومی،
-// 'hawza' = سایت‌های خبری اختصاصی حوزه (هم platform=website ولی show_in_hawza=true،
-// برای همین از سطل 'website' مستثنا می‌شن تا دوبار نمایش داده نشن)،
-// 'claims' = کانال بله «ادعاها و شایعات»
-function newsChannels(){
-  return CHANNELS.filter(c => {
-    if(!c.show_in_news) return false;
-    if(newsState.platform === 'website') return c.platform === 'website' && !c.show_in_hawza;
-    if(newsState.platform === 'hawza') return c.platform === 'website' && !!c.show_in_hawza;
-    if(newsState.platform === 'claims') return c.platform === 'bale';
-    return c.platform !== 'website' && c.platform !== 'bale';
-  });
-}
-
-function newsPosts(){
-  const newsChanIds = new Set(newsChannels().map(c=>c.id));
-  return POSTS_CACHE.filter(p=>newsChanIds.has(p.channel_id));
-}
 
 // صفحه‌ی «وضعیت سامانه» (sec-status، فقط مدیر). همه‌ی بررسی‌ها فقط با باز
 // کردن همین صفحه اجرا می‌شن، نه در بارگذاری عادی سایت.
@@ -2247,114 +2111,8 @@ document.addEventListener('click', e=>{
   if(b && !b.disabled) runJobManually(b.dataset.job, b);
 });
 
-function newsRelTime(dateStr){
-  if(!dateStr) return '';
-  const d = new Date(dateStr);
-  const diffMs = Date.now() - d.getTime();
-  const mins = Math.floor(diffMs/60000);
-  if(mins < 1) return 'همین الان';
-  if(mins < 60) return toFaDigits(mins)+' دقیقه پیش';
-  const hours = Math.floor(mins/60);
-  if(hours < 24) return toFaDigits(hours)+' ساعت پیش';
-  const days = Math.floor(hours/24);
-  if(days === 1) return 'دیروز';
-  if(days < 7) return toFaDigits(days)+' روز پیش';
-  return d.toLocaleDateString('fa-IR');
-}
 
-function renderNewsRegionChips(){
-  const row = document.getElementById('news-region-row');
-  if(!row) return;
-  row.innerHTML = '<span class="news-region-chip active" data-r="">همه رسانه‌ها</span>' +
-    REGIONS.map(r=>`<span class="news-region-chip" data-r="${r.id}">${escHtml(r.name)}</span>`).join('');
-  newsState.region = '';
-}
-
-function renderNewsTopicRow(){
-  const row = document.getElementById('news-topic-row');
-  if(!row) return;
-  row.innerHTML = '<span class="news-topic-chip active" data-kw="">همه</span>' +
-    NEWS_TOPICS.map(t=>`<span class="news-topic-chip" data-kw="${escAttr(t.keywords)}">${escAttr(t.name)}</span>`).join('');
-  updateNewsTopicVisibility();
-}
-// ردیف موضوعات فقط توی تب «وب‌سایت‌ها» معنا داره (جایی که این فیچر برای
-// مرور مقالات موضوعی سایت‌های خبری ساخته شده) — توی «شبکه‌های اجتماعی»
-// و «ادعاها و شایعات» عمداً مخفیه
-function updateNewsTopicVisibility(){
-  const wrap = document.getElementById('news-topic-filter-row');
-  if(!wrap) return;
-  wrap.style.display = (newsState.platform === 'website' && NEWS_TOPICS.length) ? '' : 'none';
-}
-
-function updateNewsSourceSummary(){
-  const summary = document.getElementById('news-source-summary');
-  if(!summary) return;
-  const n = newsState.sources.length;
-  summary.textContent = n === 0 ? 'انتخاب رسانه‌ها…' : toFaDigits(n) + ' رسانه انتخاب‌شده';
-}
-
-function populateNewsSourceOptions(){
-  const list = document.getElementById('news-source-list');
-  if(!list) return;
-  // منابعی که دیگه بین کانال‌های فعلی نیستن (مثلاً حذف شدن) از فیلتر انتخاب‌شده هم پاک بشن
-  const validIds = new Set(newsChannels().map(c=>String(c.id)));
-  newsState.sources = newsState.sources.filter(id=>validIds.has(id));
-  list.innerHTML = newsChannels().map(c=>{
-    const id = String(c.id);
-    const checked = newsState.sources.includes(id) ? 'checked' : '';
-    return `<label><input type="checkbox" value="${id}" ${checked}> ${escAttr(c.title||c.username)}</label>`;
-  }).join('');
-  list.querySelectorAll('input[type=checkbox]').forEach(chk=>{
-    chk.addEventListener('change', ()=>{
-      const id = chk.value;
-      if(chk.checked){ if(!newsState.sources.includes(id)) newsState.sources.push(id); }
-      else{ newsState.sources = newsState.sources.filter(x=>x!==id); }
-      newsState.page = 1;
-      updateNewsSourceSummary();
-      renderNewsFeed();
-    });
-  });
-  updateNewsSourceSummary();
-}
-
-function filteredNewsPosts(){
-  return newsPosts().filter(p=>{
-    const ch = chById(p.channel_id);
-    // تب «اخبار حوزه»: فقط پست‌هایی که هوش مصنوعی صریحاً سیاسی/اجتماعی
-    // تشخیص داده (posts.hawza_relevant===true) نشون داده می‌شن — پست‌های
-    // تازه‌ی هنوز-بررسی‌نشده (NULL) و پست‌های غیرسیاسی/غیراجتماعی (false)
-    // هر دو مخفی می‌مونن؛ نگاه کن به Edge Function extract-post-keywords
-    if(newsState.platform === 'hawza' && p.hawza_relevant !== true) return false;
-    if(newsState.region && String(ch.region_id) !== newsState.region) return false;
-    if(newsState.sources.length && !newsState.sources.includes(String(p.channel_id))) return false;
-    if(newsState.time === 'custom'){
-      const postedMs = p.posted_at ? new Date(p.posted_at).getTime() : (p.scraped_at ? new Date(p.scraped_at).getTime() : 0);
-      if(newsState.dateFrom && postedMs < new Date(newsState.dateFrom+'T00:00:00').getTime()) return false;
-      if(newsState.dateTo && postedMs > new Date(newsState.dateTo+'T23:59:59').getTime()) return false;
-    }else if(newsState.time !== 'all'){
-      // نیمه‌شب تقویمی تهران، نه فاصله‌ی خام از همین لحظه — تابع
-      // tehranDayDiff رو ببین (کنار iranTodayStartMs)
-      const diffDays = tehranDayDiff(p.posted_at || p.scraped_at);
-      if(newsState.time === 'today' && diffDays !== 0) return false;
-      if(newsState.time === 'yesterday' && diffDays !== 1) return false;
-      if(newsState.time === 'week' && (diffDays < 0 || diffDays > 6)) return false;
-    }
-    if(newsState.query){
-      // یه موضوعِ ذخیره‌شده چندتا کلیدواژه‌ی جدا با ویرگول می‌فرسته — این‌ها
-      // با OR چک می‌شن (کافیه پست حداقل یکی رو داشته باشه)، نه AND؛ برای
-      // جستجوی دستی معمولی (بدون ویرگول) رفتار قبلی (تطبیق کامل عبارت) حفظ می‌شه.
-      const hay = searchHay(p);
-      const terms = newsState.query.split(/[,،]/).map(searchNorm).filter(Boolean);
-      if(terms.length && !terms.some(t=>hay.includes(t))) return false;
-    }
-    return true;
-  }).sort((a,b)=> new Date(b.posted_at||b.scraped_at) - new Date(a.posted_at||a.scraped_at));
-}
-
-const NEWS_PAGE_SIZE = 12;
-
-
-function updateMobileFilterBadges(){
+export function updateMobileFilterBadges(){
   const topic = document.querySelector('#news-topic-row .news-topic-chip.active');
   setMobileFilterCount('#news-study-panel',
     ((newsState.time !== 'all' || newsState.dateFrom || newsState.dateTo) ? 1 : 0)
@@ -2366,83 +2124,6 @@ function updateMobileFilterBadges(){
     + (catEl && catEl.value ? 1 : 0) + (postsTime ? 1 : 0));
 }
 
-function renderNewsFeed(){
-  updateMobileFilterBadges();
-  const feed = document.getElementById('news-feed');
-  const empty = document.getElementById('news-empty');
-  if(!feed) return;
-  const fullList = filteredNewsPosts();
-  empty.style.display = fullList.length ? 'none' : 'block';
-  const totalPages = Math.max(1, Math.ceil(fullList.length / NEWS_PAGE_SIZE));
-  if(newsState.page > totalPages) newsState.page = totalPages;
-  if(newsState.page < 1) newsState.page = 1;
-  const start = (newsState.page - 1) * NEWS_PAGE_SIZE;
-  const list = fullList.slice(start, start + NEWS_PAGE_SIZE);
-  renderNewsPagination(totalPages);
-  const isAdmin = currentRole === 'app_admin';
-  feed.innerHTML = list.map(p=>{
-    const ch = chById(p.channel_id) || {};
-    const topic = catNameOf(p.channel_id);
-    const isClaims = ch.platform === 'bale';
-    const isRealVideo = p.media_type === 'video' && p.media_path && /\.mp4($|\?)/i.test(p.media_path);
-    const hasThumb = !!p.media_path && (p.media_type === 'photo' || (p.media_type === 'video' && !isRealVideo));
-    const thumbBadge = p.media_type === 'video' ? `<span class="pt-media-badge">${ICONS.video}</span>` : '';
-    // کانال بله (تب «ادعاها و شایعات») هیچ‌وقت عکس نداره — به‌جای باکس
-    // خالی placeholder، کارت کاملاً متنی (تمام‌عرض) طراحی می‌شه
-    // اگه خودِ پست عکس نداره، عکس پیش‌فرض همون کانال (اگه از پنل «مدیریت
-    // کانال‌ها» آپلود شده باشه) به‌جای باکس خالی placeholder نشون داده می‌شه
-    const thumbHtml = isClaims ? '' : hasThumb
-      ? `<div class="news-thumb" style="position:relative">${thumbBadge}<img src="${escAttr(p.media_path)}" alt="" loading="lazy" data-viewer-kind="image" data-viewer-src="${escAttr(p.media_path)}"${p.media_type==='video' && p.link ? ` data-viewer-link="${escAttr(p.link)}"` : ''} /></div>`
-      : ch.avatar_url
-        ? `<div class="news-thumb"><img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" /></div>`
-        : `<div class="news-thumb placeholder">${ICONS.doc}</div>`;
-    return `
-    <div class="news-card">
-      ${thumbHtml}
-      <div class="news-body">
-        <div class="news-head">
-          <span class="news-source">${isClaims ? 'ادعا یا شایعه' : escHtml(ch.title||ch.username||'؟')}</span>
-          ${isClaims ? '' : `<span class="news-platform">${NEWS_PLATFORM_ICON[ch.platform]||''}${NEWS_PLATFORM_LABEL[ch.platform]||ch.platform}</span>`}
-          ${ch.region_id ? `<span class="news-region">${escHtml(regionNameOf(ch.region_id))}</span>` : ''}
-          <span class="news-time">${newsRelTime(p.posted_at||p.scraped_at)}</span>
-        </div>
-        ${p.title ? `<h3 class="news-title" id="news-title-${p.id}">${escHtml(p.title)}</h3>` : ''}
-        <p class="news-text${isClaims ? ' claims-text' : ''}" id="news-text-${p.id}">${claimsTextDisplay(p.text)}</p>
-        <button class="news-more" onclick="toggleNewsText(${p.id})" id="news-more-${p.id}">
-          نمایش بیشتر
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="news-foot">
-          <div>${topic ? `<span class="news-topic">${escHtml(topic)}</span>` : ''}</div>
-          <div style="display:flex; gap:10px; align-items:center;">
-            ${ch.platform === 'website' && needsTranslation(p) ? `<button type="button" class="news-translate-btn" id="news-translate-btn-${p.id}" onclick="translatePost(${p.id})">ترجمه به فارسی</button>` : ''}
-            ${isRealVideo ? `<a class="news-link" href="${safeUrl(p.media_path)}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}
-            ${(!isClaims && p.link) ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
-          </div>
-        </div>
-        ${isAdmin ? `
-        <div class="news-kw-row" id="news-kw-row-${p.id}" style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px;">
-          <div class="news-kw-chips" id="news-kw-chips-${p.id}">${keywordChipsHtml(p.ai_keywords)}</div>
-          <button type="button" class="news-kw-edit-btn" onclick="editPostKeywords(${p.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>ویرایش کلیدواژه</button>
-          ${isClaims ? '' : pickAddBtnHtml(p)}
-          ${postHideBtnHtml(p)}
-        </div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-  wireMediaViewerClicks(feed);
-  // دکمه‌ی «نمایش بیشتر» فقط وقتی نشون داده بشه که متن واقعاً از ۳ خط رد شده
-  // باشه — وگرنه برای پست‌های کوتاه، کلیک روش هیچ تغییری ایجاد نمی‌کرد.
-  // فونت فارسی سفارشی (IRANSansX) به‌صورت async لود می‌شه؛ اگه اندازه‌گیری
-  // قبل از لود کامل فونت انجام بشه، ارتفاع متن با فونت جایگزین محاسبه
-  // می‌شه و ممکنه اشتباهاً «سرریز نشده» تشخیص داده بشه — برای همین بعد از
-  // آماده‌شدن فونت‌ها هم یه‌بار دیگه چک می‌کنیم.
-  updateNewsMoreButtons(list);
-  if(document.fonts && document.fonts.status !== 'loaded'){
-    document.fonts.ready.then(()=> updateNewsMoreButtons(list));
-  }
-}
-
 // ---- تب «پرونده‌های موضوعی» — اخبار مرتبط با موضوعات موقت/چرخشی، دسته‌بندی‌شده
 // بر اساس dossier_topic_posts (فقط موضوعات active، فقط excluded=false) ----
 // فیلتر «بازه‌ی زمانی» از نیمه‌شب تقویمی تهران حساب می‌شه (tehranDayDiff،
@@ -2451,7 +2132,7 @@ function renderNewsFeed(){
 // انتخاب/نمایش داده می‌شه (نه accordion چندبازِ قبلی)
 let dossierState = { time: 'all', topicId: null };
 
-function renderDossierTab(){
+export function renderDossierTab(){
   const sidebar = document.getElementById('dossier-sidebar');
   const wrap = document.getElementById('dossier-groups');
   const empty = document.getElementById('dossier-empty');
@@ -2594,7 +2275,7 @@ function initNewsletterDraft(){
   });
 }
 
-function renderNewsletterTab(){
+export function renderNewsletterTab(){
   const statusEl = document.getElementById('newsletter-download-status');
   const downloadBtn = document.getElementById('newsletter-download-btn');
   if(NEWSLETTER_POSTS.length){
@@ -2877,233 +2558,10 @@ async function buildNewsletterPdf(){
   doc.save(`khabarnameh-madares-${fileDate}.pdf`);
 }
 
-// ---- کلیدواژه‌های هوش مصنوعی (posts.ai_keywords) — نمایش/ویرایش فقط
-// برای مدیر، زیر پست‌های تب‌های «شبکه‌های اجتماعی»/«وب‌سایت‌ها» — برای
-// بازبینی رندوم/اصلاح دستی کیفیت استخراج خودکار (نکاه به Edge Function
-// extract-post-keywords). NULL یعنی هنوز بررسی نشده؛ آرایه‌ی خالی یعنی
-// بررسی شد ولی کلیدواژه‌ی معناداری نداشت.
-function keywordChipsHtml(keywords){
-  if(keywords == null) return '<span class="news-kw-chip empty">هنوز بررسی نشده</span>';
-  if(!keywords.length) return '<span class="news-kw-chip empty">بدون کلیدواژه</span>';
-  return keywords.map(k=>`<span class="news-kw-chip">${escAttr(k)}</span>`).join('');
-}
+setupNewsFeed();
+setupPostTools();
+setupNewsTabs();
 
-function editPostKeywords(id){
-  const rowEl = document.getElementById('news-kw-row-'+id);
-  const p = POSTS_CACHE.find(x=>x.id===id);
-  if(!rowEl || !p) return;
-  const current = (p.ai_keywords||[]).join('، ');
-  rowEl.innerHTML = `
-    <input type="text" id="news-kw-input-${id}" value="${escAttr(current)}" placeholder="کلیدواژه‌ها، جدا با ویرگول" style="flex:1;font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);font-family:inherit;" />
-    <button type="button" class="news-kw-edit-btn" onclick="savePostKeywords(${id})">ذخیره</button>
-    <button type="button" class="news-kw-edit-btn" onclick="renderNewsFeed()">انصراف</button>
-  `;
-  document.getElementById('news-kw-input-'+id).focus();
-}
-
-async function savePostKeywords(id){
-  const inputEl = document.getElementById('news-kw-input-'+id);
-  if(!inputEl) return;
-  const keywords = inputEl.value.split(/[,،]/).map(k=>k.trim()).filter(Boolean);
-  const r = await api('/posts?id=eq.'+id, {method:'PATCH', headers:{Prefer:'return=minimal'}, body: JSON.stringify({ai_keywords: keywords, ai_keywords_extracted_at: new Date().toISOString()})});
-  if(!r.ok){ showToast('انجام نشد؛ اتصال را بررسی کنید و دوباره امتحان کنید.'); return; }
-  const p = POSTS_CACHE.find(x=>x.id===id);
-  if(p) p.ai_keywords = keywords;
-  renderNewsFeed();
-}
-
-function updateNewsMoreButtons(list){
-  list.forEach(p=>{
-    const textEl = document.getElementById('news-text-'+p.id);
-    const moreBtn = document.getElementById('news-more-'+p.id);
-    if(!textEl || !moreBtn) return;
-    const overflowing = textEl.scrollHeight > textEl.clientHeight + 1;
-    moreBtn.style.display = overflowing ? '' : 'none';
-  });
-}
-
-// ترجمه‌ی اختیاری/به‌درخواست هر پست به فارسی — با هوش مصنوعی (لیارا AI
-// Gateway، مدل openai/gpt-4o-mini) از طریق یه Supabase Edge Function
-// (`supabase/functions/translate`) که کلید API لیارا رو سمت سرور نگه
-// می‌داره؛ فرانت‌اند مستقیم به لیارا وصل نمی‌شه چون اون کلید (برخلاف anon
-// key) پولیه و هیچ RLSای ازش محافظت نمی‌کنه. توکن ورود خودِ کاربر
-// (`authToken`) برای Edge Function فرستاده می‌شه تا فقط کاربر واردشده
-// (مدیر/بیننده) بتونه ازش استفاده کنه.
-async function aiTranslate(postId){
-  // فقط شناسه‌ی پست فرستاده می‌شه، نه خودِ متن — تابع سمت سرور خودش متن
-  // واقعی رو با توکن همون کاربر از دیتابیس می‌خونه (نگاه کن به توضیح
-  // بالای supabase/functions/translate/index.ts)
-  const r = await fetch(SUPABASE_URL + '/functions/v1/translate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
-    body: JSON.stringify({ postId }),
-  });
-  if(!r.ok) throw new Error('translate request failed');
-  return await r.json(); // { title, text }
-}
-
-const NEWS_TRANSLATION_CACHE = {}; // id -> {title, text} — تا با toggle رفت‌وبرگشت دوباره درخواست نزنیم
-
-function resetNewsTextExpand(id){
-  const t = document.getElementById('news-text-'+id);
-  const b = document.getElementById('news-more-'+id);
-  if(!t || !b) return;
-  t.classList.remove('expanded');
-  b.classList.remove('open');
-  b.firstChild.textContent = 'نمایش بیشتر ';
-}
-
-async function translatePost(id){
-  const p = POSTS_CACHE.find(x=>x.id===id);
-  const btn = document.getElementById('news-translate-btn-'+id);
-  const textEl = document.getElementById('news-text-'+id);
-  const titleEl = document.getElementById('news-title-'+id);
-  if(!p || !btn || !textEl) return;
-
-  // چون ترجمه به‌جای متن اصلی می‌شینه (نه زیرش)، طول کارت عوض نمی‌شه —
-  // برای همینم بعد از هر جایگزینی باید هم حالت «نمایش بیشتر» ریست بشه هم
-  // سرریز متن با اندازه‌ی جدید دوباره چک بشه
-  if(textEl.classList.contains('is-translated')){
-    textEl.innerHTML = claimsTextDisplay(p.text);
-    textEl.classList.remove('is-translated');
-    if(titleEl){ titleEl.textContent = p.title; titleEl.classList.remove('is-translated'); }
-    btn.textContent = 'ترجمه به فارسی';
-    resetNewsTextExpand(id);
-    updateNewsMoreButtons([p]);
-    return;
-  }
-  const cached = NEWS_TRANSLATION_CACHE[id];
-  if(cached){
-    textEl.innerHTML = escHtml(cached.text);
-    textEl.classList.add('is-translated');
-    if(titleEl && cached.title){ titleEl.textContent = cached.title; titleEl.classList.add('is-translated'); }
-    btn.textContent = 'بازگشت به متن اصلی';
-    resetNewsTextExpand(id);
-    updateNewsMoreButtons([p]);
-    return;
-  }
-  const originalLabel = btn.textContent;
-  btn.textContent = 'در حال ترجمه…';
-  btn.disabled = true;
-  try{
-    const { title: titleFa, text: textFa } = await aiTranslate(id);
-    NEWS_TRANSLATION_CACHE[id] = { title: titleFa, text: textFa };
-    textEl.innerHTML = escHtml(textFa);
-    textEl.classList.add('is-translated');
-    if(titleEl && titleFa){ titleEl.textContent = titleFa; titleEl.classList.add('is-translated'); }
-    btn.textContent = 'بازگشت به متن اصلی';
-    resetNewsTextExpand(id);
-    updateNewsMoreButtons([p]);
-  }catch(e){
-    btn.textContent = originalLabel;
-    showToast('ترجمه ناموفق بود، دوباره امتحان کنید');
-  }finally{
-    btn.disabled = false;
-  }
-}
-
-function renderNewsPagination(totalPages){
-  renderPagination('news-pagination', newsState.page, totalPages, goNewsPage);
-}
-
-function goNewsPage(p){
-  newsState.page = p;
-  renderNewsFeed();
-  scrollToListTop(document.querySelector('#news-study-panel .news-filters'));
-}
-
-function toggleNewsText(postId){
-  const t = document.getElementById('news-text-'+postId);
-  const b = document.getElementById('news-more-'+postId);
-  if(!t || !b) return;
-  const isOpen = t.classList.toggle('expanded');
-  b.classList.toggle('open', isOpen);
-  b.firstChild.textContent = isOpen ? 'بستن ' : 'نمایش بیشتر ';
-}
-
-function setNewsView(mode){
-  const feed = document.getElementById('news-feed');
-  feed.classList.toggle('grid-view', mode === 'grid');
-  document.getElementById('news-view-list-btn').classList.toggle('active', mode === 'list');
-  document.getElementById('news-view-grid-btn').classList.toggle('active', mode === 'grid');
-}
-
-document.getElementById('news-search-input').addEventListener('input', e=>{
-  newsState.query = e.target.value.trim();
-  newsState.page = 1;
-  document.querySelectorAll('.news-topic-chip').forEach(c=>c.classList.remove('active'));
-  const allTopicChip = document.querySelector('.news-topic-chip[data-kw=""]');
-  if(allTopicChip) allTopicChip.classList.add('active');
-  renderNewsFeed();
-});
-function updateDateRangeSummary(){
-  const summary = document.getElementById('news-daterange-summary');
-  const details = document.getElementById('news-daterange-details');
-  if(!summary) return;
-  const hasValue = !!(newsState.dateFrom || newsState.dateTo);
-  if(hasValue){
-    const f = newsState.dateFrom ? new Date(newsState.dateFrom).toLocaleDateString('fa-IR') : '…';
-    const t = newsState.dateTo ? new Date(newsState.dateTo).toLocaleDateString('fa-IR') : '…';
-    summary.textContent = f + ' تا ' + t;
-  }else{
-    summary.textContent = 'بازه زمانی';
-  }
-  if(details) details.classList.toggle('has-value', hasValue);
-}
-
-function clearNewsDateRange(){
-  newsState.dateFrom = ''; newsState.dateTo = '';
-  document.querySelectorAll('#news-daterange-details .jdate select').forEach(sel=>{ sel.value = ''; });
-  updateDateRangeSummary();
-}
-
-document.getElementById('news-time-seg').addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || !b.dataset.t) return;
-  document.querySelectorAll('#news-time-seg > button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  newsState.time = b.dataset.t;
-  newsState.page = 1;
-  clearNewsDateRange();
-  document.getElementById('news-daterange-details').removeAttribute('open');
-  renderNewsFeed();
-});
-function applyNewsDateRange(){
-  newsState.time = 'custom';
-  document.querySelectorAll('#news-time-seg > button').forEach(x=>x.classList.remove('active'));
-  newsState.page = 1;
-  updateDateRangeSummary();
-  renderNewsFeed();
-}
-setupJalaliRange(document.getElementById('news-daterange-details'), (which, iso)=>{
-  if(which === 'from') newsState.dateFrom = iso; else newsState.dateTo = iso;
-  applyNewsDateRange();
-});
-document.getElementById('news-daterange-clear').addEventListener('click', (e)=>{
-  e.stopPropagation();
-  clearNewsDateRange();
-  newsState.time = 'all';
-  document.querySelectorAll('#news-time-seg > button').forEach(x=>x.classList.toggle('active', x.dataset.t==='all'));
-  document.getElementById('news-daterange-details').removeAttribute('open');
-  newsState.page = 1;
-  renderNewsFeed();
-});
-document.getElementById('news-region-row').addEventListener('click', e=>{
-  const chip = e.target.closest('.news-region-chip'); if(!chip) return;
-  document.querySelectorAll('.news-region-chip').forEach(c=>c.classList.remove('active'));
-  chip.classList.add('active');
-  newsState.region = chip.dataset.r;
-  newsState.page = 1;
-  renderNewsFeed();
-});
-document.getElementById('news-topic-row').addEventListener('click', e=>{
-  const chip = e.target.closest('.news-topic-chip'); if(!chip) return;
-  document.querySelectorAll('.news-topic-chip').forEach(c=>c.classList.remove('active'));
-  chip.classList.add('active');
-  newsState.query = chip.dataset.kw;
-  document.getElementById('news-search-input').value = chip.dataset.kw;
-  newsState.page = 1;
-  renderNewsFeed();
-});
 document.getElementById('newspaper-date-tabs').addEventListener('click', e=>{
   const b = e.target.closest('button'); if(!b || !b.dataset.date) return;
   newspaperState.date = b.dataset.date;
@@ -3125,15 +2583,15 @@ document.getElementById('dossier-sidebar').addEventListener('click', e=>{
 
 async function loadChannels(){
   const r = await api('/channels?select=*&order=added_at.desc');
-  CHANNELS = r.ok ? await r.json() : [];
+  setChannels(r.ok ? await r.json() : []);
 }
 async function loadCategories(){
   const r = await api('/categories?select=*&order=name.asc');
-  CATEGORIES = r.ok ? await r.json() : [];
+  setCategories(r.ok ? await r.json() : []);
 }
 async function loadRegions(){
   const r = await api('/regions?select=*&order=id.asc');
-  REGIONS = r.ok ? await r.json() : [];
+  setRegions(r.ok ? await r.json() : []);
 }
 async function loadProfileGroups(){
   const r = await api('/profile_groups?select=*&order=sort_order.asc,id.asc');
@@ -3142,10 +2600,6 @@ async function loadProfileGroups(){
 async function loadChannelProfileGroups(){
   const r = await api('/channel_profile_groups?select=id,channel_id,group_id');
   CHANNEL_PROFILE_GROUPS = r.ok ? await r.json() : [];
-}
-async function loadNewsTopics(){
-  const r = await api('/news_topics?select=*&order=sort_order.asc');
-  NEWS_TOPICS = r.ok ? await r.json() : [];
 }
 async function loadDossierTopics(){
   const r = await api('/dossier_topics?select=*&order=sort_order.asc');
@@ -3178,7 +2632,7 @@ async function loadPosts(){
   const hawzaReq = loadHawzaPosts();
   const claimsReq = loadClaimsPosts();
   const r = await mainReq;
-  POSTS_CACHE = r.ok ? await r.json() : [];
+  setPostsCache(r.ok ? await r.json() : []);
   const [hawzaExtra, claimsExtra] = await Promise.all([hawzaReq, claimsReq]);
   const existingIds = new Set(POSTS_CACHE.map(p=>p.id));
   for(const p of [...hawzaExtra, ...claimsExtra]){
@@ -3186,7 +2640,7 @@ async function loadPosts(){
   }
   // پست‌های پنهان‌شده (migration_039): بیننده از خودِ دیتابیس نمی‌گیره، مدیر
   // می‌گیره ولی در هیچ فید/تحلیلی نشون داده نمی‌شن (فقط «گزارش فعالیت»)
-  POSTS_CACHE = POSTS_CACHE.filter(p=>!p.hidden_at);
+  setPostsCache(POSTS_CACHE.filter(p=>!p.hidden_at));
 }
 
 // تب «اخبار حوزه» روی همون POSTS_CACHE سوار می‌شه (بخش «تب «اخبار حوزه»»ی
@@ -3419,8 +2873,8 @@ function visHidden(key){
   const it = SITE_VIS_ITEMS.find(x=>x.key === sec);
   return !key.includes('/') && !!it && it.tabs.length > 0 && it.tabs.every(([t])=>h.has(sec + '/' + t));
 }
-function viewerHidden(key){ return currentRole !== 'app_admin' && visHidden(key); }
-function firstVisibleTab(sec){
+export function viewerHidden(key){ return currentRole !== 'app_admin' && visHidden(key); }
+export function firstVisibleTab(sec){
   const it = SITE_VIS_ITEMS.find(x=>x.key === sec);
   const t = it && it.tabs.find(([t])=>!visHidden(sec + '/' + t));
   return t ? t[0] : null;
@@ -5296,7 +4750,7 @@ function renderNgaKpis(){
     <button type="button" class="nga-kpi${live ? ' is-alert' : ''}" onclick="document.getElementById('news-waves-panel').scrollIntoView({behavior:'smooth'})">
       <span class="k-label">موج‌های خبری</span><span class="k-val">${waves ? toFaDigits(waves.length) : '…'}</span>
       <span class="k-sub">${!waves ? 'در حال بررسی…' : live ? toFaDigits(live) + ' موج در حال گسترش' : '۱۲ ساعت اخیر'}</span></button>
-    <button type="button" class="nga-kpi" onclick="goToNewsTab('claims')"><span class="k-label">ادعا و شایعه امروز</span><span class="k-val">${toFaDigits(claimsToday)}</span><span class="k-sub">مشاهده‌ی همه ←</span></button>`;
+    <button type="button" class="nga-kpi" data-news-go="claims"><span class="k-label">ادعا و شایعه امروز</span><span class="k-val">${toFaDigits(claimsToday)}</span><span class="k-sub">مشاهده‌ی همه ←</span></button>`;
 }
 
 // ---- «اخبار منتخب» (هوش مصنوعی + ویرایش دستی مدیر — ۵.۲۶.۰، migration_044) ----
@@ -5431,7 +4885,7 @@ document.getElementById('news-analytics-selected-list').addEventListener('click'
   }
 });
 // «افزودن به منتخب» از روی کارت خبر (فقط مدیر)
-function pickAddBtnHtml(p){
+export function pickAddBtnHtml(p){
   if(currentRole !== 'app_admin') return '';
   const on = NEWS_PICK_EDITS.some(x=>Number(x.post_id) === Number(p.id) && x.action === 'pin');
   return `<button type="button" class="post-hide-btn pick-add-btn" ${on ? 'disabled' : ''} onclick="addPostToPicks(${Number(p.id)})" title="این خبر بالای «اخبار منتخب» در تب «در یک نگاه» سنجاق می‌شود">${PICK_IC.pin}${on ? 'در اخبار منتخب' : 'افزودن به منتخب'}</button>`;
@@ -5445,7 +4899,7 @@ async function addPostToPicks(id){
     await pickAfterChange('به «اخبار منتخب» اضافه شد (بالای فهرست، در تب «در یک نگاه»).');
   }catch(e){ console.error(e); showToast(pickFailMsg()); }
 }
-function renderNewsAnalytics(){
+export function renderNewsAnalytics(){
   renderNewsWaves();
   // معیار محاسبات ۳ ویجت آماری این تب (روند/منابع/ابرکلمات): ۲۴ ساعت
   // اخیر، سمت کلاینت. دو ویجت دیگه («اخبار منتخب»/«موضوعات پرتکرار») از
@@ -6716,7 +6170,7 @@ function scrollToPackageCard(){
 // پیش‌فرض جدیدترین تاریخ موجوده (معمولاً امروز)، ولی چون cleanup_media.py
 // فقط عکس‌های قدیمی‌تر از ۳ روز رو پاک می‌کنه، تا وقتی پاک نشدن، تاریخ‌های
 // قبلی هم توی newspaper-date-tabs قابل‌انتخاب می‌مونن.
-function renderNewspapers(){
+export function renderNewspapers(){
   const grid = document.getElementById('newspaper-grid');
   const empty = document.getElementById('newspapers-empty');
   if(!grid) return;
@@ -7761,7 +7215,7 @@ async function loadHiddenPostIds(){
     HIDDEN_POST_IDS = new Set((Array.isArray(rows) ? rows : []).map(x=>Number(x && typeof x === 'object' ? Object.values(x)[0] : x)));
   }catch(e){ HIDDEN_POST_IDS = new Set(); }
 }
-function postHideBtnHtml(p){
+export function postHideBtnHtml(p){
   return currentRole === 'app_admin' ? `<button type="button" class="post-hide-btn" onclick="hidePost(${Number(p.id)})" title="این پست برای همه‌ی بیننده‌ها پنهان می‌شود"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button>` : '';
 }
 function rerenderPostViews(){
@@ -7773,7 +7227,7 @@ async function hidePost(id){
   const r = await api('/posts?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ hidden_at: new Date().toISOString() }) });
   if(!r.ok){ showToast(r.status === 400 ? 'اول باید migration_039 در سوپابیس اجرا شود' : 'پنهان کردن پست انجام نشد'); return; }
   HIDDEN_POST_IDS.add(id);
-  POSTS_CACHE = POSTS_CACHE.filter(p=>p.id !== id);
+  setPostsCache(POSTS_CACHE.filter(p=>p.id !== id));
   NEWSLETTER_POSTS = NEWSLETTER_POSTS.filter(np=>np.post_id !== id);
   ACT_HIDDEN = null;
   rerenderPostViews();
@@ -7785,7 +7239,7 @@ async function unhidePost(id){
   const rows = await r.json().catch(()=>[]);
   HIDDEN_POST_IDS.delete(id);
   if(rows[0] && !POSTS_CACHE.some(p=>p.id === id)){
-    POSTS_CACHE = POSTS_CACHE.concat(rows).sort((a,b)=>String(b.scraped_at||'').localeCompare(String(a.scraped_at||'')));
+    setPostsCache(POSTS_CACHE.concat(rows).sort((a,b)=>String(b.scraped_at||'').localeCompare(String(a.scraped_at||''))));
   }
   if(ACT_HIDDEN) ACT_HIDDEN = ACT_HIDDEN.filter(p=>p.id !== id);
   renderActHidden();

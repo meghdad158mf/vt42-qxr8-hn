@@ -100,9 +100,11 @@ function json(route, status, body, extraHeaders = {}) {
  * سوپابیس و Edge Functionها رو برای یه context مرورگر شبیه‌سازی می‌کنه.
  * options.settings: ردیف‌های site_settings (مثلاً ورود اضطراری)
  * options.data: جدول‌هایی که جای داده‌ی پیش‌فرض می‌شینن، مثل { login_events: [...] }
+ * options.patch(data): تغییر کوچیک روی داده‌ی پیش‌فرض (مثلاً متن انگلیسی برای یه پست)
  */
 export async function mockSupabase(context, options = {}) {
   const data = Object.assign(buildData(), options.data || {});
+  if (options.patch) options.patch(data);
   const settings = options.settings || [];
 
   await context.route('**/functions/v1/**', (route) => json(route, 200, {}));
