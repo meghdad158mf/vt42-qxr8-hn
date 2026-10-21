@@ -32,19 +32,6 @@ export async function subscribeNotify(){
     btn.disabled = false;
   }
 }
-// ---- مدار دوم صفحه‌ی نخست: سوراخ‌های mask پشت کارت‌های دیده‌شده ----
-// کارت‌ها وسط‌چین‌اند (فاصله‌ی مراکز ۱۸۶px)؛ با کارت پنهان/«به‌زودی» (بیننده) جای
-// سوراخ‌ها از نو حساب می‌شه تا قوس پشت جای خالی بریده دیده نشه
-export function layoutOrbit2(){
-  const grid = document.querySelector('.domain-grid-2');
-  if(!grid) return;
-  const cards = [...grid.querySelectorAll('.domain-card')].filter(c=>getComputedStyle(c).display !== 'none');
-  grid.classList.toggle('is-empty', !cards.length);
-  const g = document.getElementById('dom-orbit2-holes');
-  if(!g) return;
-  const n = cards.length;
-  g.innerHTML = cards.map((c, i)=>`<circle cx="${(i - (n - 1) / 2) * 186}" cy="74" r="58" fill="url(#dom-orbit2-hole)"/>`).join('');
-}
 // «بسته تحلیلی جریان» صفحه‌ی نخست — جلد ۵ شماره‌ی اول (به ترتیب مدیر) روی قوس
 // جلدهای بسته: ردیف بالا ۴ جلد (مدار کوچک‌تر) و ردیف پایین ۵ جلد (مدار بزرگ)
 // هر ردیف مدار خودش را دارد؛ ردیف دوم با همان هندسه‌ی ردیف اول و ضریب ۰٫۷۵

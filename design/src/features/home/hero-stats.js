@@ -65,14 +65,13 @@ export async function renderDashHeroStats(){
 
   // «بخش رصد» — زیربخش‌های عرصه‌هایی که بیننده زیر همین هرو در «عرصه‌های رصد و پایش» می‌بینه
   // (خواست کاربر: ملاک تب‌ها باشن، نه خودِ عرصه‌ها): هر تب = یک بخش، عرصه‌ی بی‌تب = یک بخش؛
-  // کارت‌های «به‌زودی»، بخش/تب‌های پنهان‌شده از «نمایش سایت» و تب‌های هنوز راه‌نیفتاده نه
-  const DOMAIN_PLACEHOLDER_TABS = new Set(['public/trends']); // «در حال راه‌اندازی» — با راه‌افتادن از اینجا برداشته بشه
+  // کارت‌های «به‌زودی» و بخش/تب‌های پنهان‌شده از «نمایش سایت» نه
   const domainCount = [...document.querySelectorAll('.domain-card[data-vis]')]
     .filter(c=>!c.classList.contains('soon-item') && !visHidden(c.dataset.vis))
     .reduce((n, c)=>{
       const it = SITE_VIS_ITEMS.find(x=>x.key === c.dataset.vis);
       if(!it || !it.tabs.length) return n + 1;
-      return n + it.tabs.filter(([t])=>!DOMAIN_PLACEHOLDER_TABS.has(it.key + '/' + t) && !visHidden(it.key + '/' + t)).length;
+      return n + it.tabs.filter(([t])=>!visHidden(it.key + '/' + t)).length;
     }, 0);
 
   const magazinesCount = MAGAZINES.length; // «بسته تحلیلی» — مجلات خودِ جریان

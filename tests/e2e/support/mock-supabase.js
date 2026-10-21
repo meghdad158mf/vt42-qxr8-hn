@@ -25,7 +25,7 @@ function buildData(now = Date.now()) {
       subscriber_count: 1200 * i, is_khorasan_talabeh: i % 4 === 0,
       show_in_news: i <= 14, show_in_cyberspace: i > 10, show_in_people: i > 6 && i < 16, show_in_orgs: i > 15,
       show_in_hawza: i === 6, show_in_positions: i > 18, positions_tab: 'maraji', show_in_thinktanks: i === 9,
-      show_in_laws: i === 12, laws_source: 'majles', active: true, type: 'news_agency',
+      active: true, type: 'news_agency',
     });
   }
   const posts = [];

@@ -1,4 +1,4 @@
-// عرصه‌ها و صفحه‌ی نخست که در مرحله‌ی ۷ ماژولار شدن (design/src/features/{hawza,laws,home,schools,reports,announcements}):
+// عرصه‌ها و صفحه‌ی نخست که در مرحله‌ی ۷ ماژولار شدن (design/src/features/{hawza,home,schools,reports,announcements}):
 // دکمه‌هایی که از onclick به listener رفتن، تب‌های «درباره حوزه»، معرفی سامانه و گزارش‌های مدارس
 import { test, expect, openAs } from './support/fixtures.js';
 
@@ -49,18 +49,17 @@ test.describe('آنچه درباره حوزه گفته می‌شود', () => {
   });
 });
 
-test.describe('قوانین و مصوبات', () => {
-  test.use({ mockPatch: { apply(data) { data.posts.forEach((p) => { p.text = Array(8).fill(p.text).join(' '); }); } } });
-  test('«نمایش بیشتر» متن مصوبه را باز و بسته می‌کند', async ({ page }) => {
-    await openAs(page, 'viewer', 'laws');
-    const more = page.locator('#laws-feed [data-lw-more]:visible').first();
-    const text = page.locator('#lw-post-text-' + (await more.getAttribute('data-lw-more')));
-    await more.click();
-    await expect(text).toHaveClass(/expanded/);
-    await more.click();
-    await expect(text).not.toHaveClass(/expanded/);
-    expect(page.appErrors).toEqual([]);
-  });
+// ۵.۳۳.۰: «درباره مردم»، «قوانین و مصوبات» و «از جریان بپرس» حذف شدند (خواست کاربر)
+test('صفحه‌ی نخست: شش عرصه در یک مدار، و پیوند قدیمی عرصه‌های حذف‌شده به صفحه‌ی نخست می‌رود', async ({ page }) => {
+  await openAs(page, 'admin');
+  await expect(page.locator('.domain-orbits .domain-card')).toHaveCount(6);
+  await expect(page.locator('.domain-grid')).toHaveCount(1);
+  await expect(page.locator('#nav-menu [data-nav^="laws"], #nav-menu [data-nav^="public"], #nav-menu [data-nav^="ask"]')).toHaveCount(0);
+  for (const old of ['laws', 'public/trends', 'ask']) {
+    await openAs(page, 'viewer', old);
+    await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  }
+  expect(page.appErrors).toEqual([]);
 });
 
 test('صفحه‌ی نخست: دکمه‌های دسترسی سریع به عرصه‌ها و بسته‌ها اسکرول می‌کنند', async ({ page }) => {
