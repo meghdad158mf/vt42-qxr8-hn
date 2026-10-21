@@ -1,0 +1,56 @@
+/* برنامه مدارس، موضوعات، پرونده‌های موضوعی */
+
+/* schools — گزارش‌های تحلیل Power BI؛ هر عکس تمام‌عرض و پشت‌سرهم روی صفحه (نه گرید تامبنیل) */
+.school-report-list{ display:flex; flex-direction:column; gap:32px; margin-bottom:20px; }
+.school-report-block{ position:relative; }
+.school-report-full-img{ width:100%; height:auto; display:block; border-radius: var(--radius); box-shadow: var(--shadow); }
+.school-report-caption{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; padding:12px 4px 0; }
+.school-report-title{ font-size:14px; font-weight:700; color:#fff; }
+.school-report-date{ font-size:11px; color: rgba(255,255,255,0.4); }
+.school-report-img-btn{ display:block; position:relative; width:100%; padding:0; border:none; background:none; cursor:zoom-in; border-radius: var(--radius); }
+.school-report-zoom{ position:absolute; bottom:12px; left:12px; display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:999px; background:rgba(22,32,42,0.82); color:#fff; font-size:12px; font-weight:700; font-family:inherit; }
+.school-report-zoom svg{ width:15px; height:15px; }
+.school-report-file-text{ display:flex; flex-direction:column; gap:3px; flex:1; min-width:0; text-align:right; }
+.school-report-file-action{ flex-shrink:0; padding:9px 16px; min-height:40px; display:inline-flex; align-items:center; border-radius:999px; background: var(--navy); color:#fff; font-size:13px; font-weight:700; }
+.school-report-file-icon.sch-pdf{ color:#c0392b; }
+.school-report-file-icon.sch-excel{ color:#1d7a46; }
+.sch-month-row{ margin-bottom:16px; }
+.sch-month-title{ margin-bottom:-14px; }
+.school-report-file-card{ width:100%; font:inherit; text-align:inherit; display:flex; align-items:center; gap:14px; background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:16px 18px; box-shadow: var(--shadow); cursor:pointer; }
+.school-report-file-icon{ width:34px; height:34px; color: var(--text-faint); flex-shrink:0; }
+.school-report-file-card .school-report-title{ color: var(--text); }
+.school-report-file-card .school-report-date{ color: var(--text-faint); }
+
+/* چک‌باکس‌لیست چندانتخابی سمت/حوزه‌ی تخصصی وقتی داخل فرم (روی پس‌زمینه‌ی روشن پنل) باشه،
+   نه توار فیلتر تیره — رنگ‌های .news-source-details پیش‌فرض برای زمینه‌ی تیره طراحی شده */
+.field .news-source-details{ margin-inline-start:0; width:100%; }
+.field .news-source-details summary{ background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); width:100%; box-sizing:border-box; justify-content:space-between; }
+.field .news-source-list{ inset-inline-end:0; color-scheme:light; }
+.field .news-source-list label{ color: var(--text-dim); }
+
+/* categories (managed inside settings now) */
+.cat-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:12px; max-height:260px; overflow-y:auto; padding-inline-end:4px; }
+@media (max-width:860px){ .cat-grid{ grid-template-columns: repeat(2,1fr); } }
+@media (max-width:560px){ .cat-grid{ grid-template-columns: 1fr; } }
+.cat-card{ background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius-control); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px; border-inline-start:3px solid var(--accent); }
+.cat-card .name{ font-size:13px; font-weight:700; }
+.cat-card .cc-actions{ display:flex; align-items:center; gap:8px; }
+.cat-card .count{ font-size:12px; color: var(--accent-strong); font-family: ui-monospace,monospace; font-weight:700; }
+
+/* پنل مدیریت موضوعات «پرونده‌های موضوعی» — کارت هر موضوع + لیست پست‌های منتسب + افزودن دستی */
+.dossier-topic-card{ background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius-control); padding:12px 14px; margin-bottom:10px; border-inline-start:3px solid var(--accent); }
+.dossier-topic-card.inactive{ opacity:.55; }
+.dossier-topic-card-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.dossier-topic-card-head .name{ font-size:13px; font-weight:700; }
+.dossier-topic-card-head .kw{ font-size:11px; color: var(--text-faint); margin-top:2px; }
+.dossier-topic-card-actions{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.dossier-topic-posts{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); display:flex; flex-direction:column; gap:6px; max-height:140px; overflow-y:auto; }
+.dossier-topic-post-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; }
+.dossier-topic-post-row .txt{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dossier-topic-post-row.excluded .txt{ opacity:.5; text-decoration:line-through; }
+.dossier-topic-empty{ font-size:12px; color: var(--text-faint); }
+.dossier-manual-add{ margin-top:10px; }
+.dossier-manual-add input{ width:100%; background: var(--surface); border:1px solid var(--border-strong); color: var(--text); padding:7px 10px; border-radius: var(--radius-control); font-size:12px; font-family:inherit; }
+.dossier-manual-results{ max-height:160px; overflow-y:auto; margin-top:6px; display:flex; flex-direction:column; gap:4px; }
+.dossier-manual-result-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:11px; padding:5px 8px; border-radius:6px; background: var(--surface); }
+.dossier-manual-result-row .txt{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

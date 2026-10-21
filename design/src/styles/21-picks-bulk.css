@@ -1,0 +1,43 @@
+/* ویرایش اخبار منتخب و افزودن گروهی منابع */
+
+/* ===== اخبار منتخب: ویرایش مدیر + افزودن گروهی منابع (۵.۲۶.۰) ===== */
+.sel-tag.is-pin{ background: var(--navy); color:#fff; }
+.rank-item.is-pinned{ background: rgba(234,179,147,0.08); border-radius:10px; }
+.pick-ctl{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.pick-ctl button{ display:inline-flex; align-items:center; gap:4px; font:inherit; font-size:12px; font-weight:700; height:28px; padding:0 10px; border-radius:999px; border:1px solid var(--border-strong); background: var(--surface); color: var(--text-dim); cursor:pointer; }
+.pick-ctl button svg{ width:14px; height:14px; }
+.pick-ctl button:hover:not(:disabled){ border-color: var(--accent-strong); color: var(--accent-strong); }
+.pick-ctl button:disabled{ opacity:.4; cursor:default; }
+.pick-ctl button[data-pick="up"], .pick-ctl button[data-pick="down"]{ width:28px; padding:0; justify-content:center; }
+.pick-missing{ font-size:12px; color: var(--text-faint); margin:8px 0 0; }
+.pick-add-btn svg{ width:14px; height:14px; }
+.pick-add-btn:disabled{ opacity:.55; cursor:default; }
+.bulk-chan-card{ max-width:760px; }
+.bulk-help{ font-size:13px; color: var(--text-dim); line-height:1.9; margin:0 0 12px; }
+#bulk-chan-text{ width:100%; box-sizing:border-box; resize:vertical; font:inherit; font-size:13px; line-height:1.9; padding:10px 12px; border-radius: var(--radius-control); border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); }
+.bulk-row{ display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
+.bulk-row .field{ flex:1; min-width:180px; margin-bottom:0; }
+.bulk-row select{ width:100%; font:inherit; font-size:13px; padding:9px 12px; border-radius: var(--radius-control); border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); }
+.bulk-file{ cursor:pointer; }
+.bulk-sum{ font-size:13px; color: var(--text-dim); line-height:1.8; margin:0 0 10px; }
+.bulk-sum b{ color: var(--ok); }
+.bulk-table-wrap{ max-height:300px; overflow:auto; border:1px solid var(--border); border-radius:10px; margin-bottom:14px; }
+.bulk-sum .bulk-cut{ color:#b3261e; }
+.btn[hidden]{ display:none !important; } /* .btn{display:inline-flex} صفت hidden رو بی‌اثر می‌کرد */
+.bulk-table{ width:100%; border-collapse:collapse; font-size:13px; }
+.bulk-table th{ position:sticky; top:0; background: var(--surface-2); text-align:right; font-size:12px; color: var(--text-faint); padding:8px; }
+.bulk-table td{ padding:6px 8px; border-top:1px solid var(--border); vertical-align:middle; }
+.bulk-table tr.dup td, .bulk-table tr.bad td{ color: var(--text-faint); }
+.bulk-table td small{ display:block; font-size:11px; color: var(--text-faint); margin-top:2px; }
+.bulk-table input{ width:100%; box-sizing:border-box; font:inherit; font-size:13px; padding:5px 8px; border-radius:8px; border:1px solid var(--border-strong); background: var(--surface); color: var(--text); }
+.bulk-handle{ max-width:240px; overflow-wrap:anywhere; text-align:left; }
+.bulk-badge{ display:inline-block; font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px; }
+.bulk-badge.new{ background: var(--ok-soft); color: var(--ok); }
+.bulk-badge.dup{ background: rgba(217,154,30,0.14); color:#8a5d06; }
+.bulk-badge.bad{ background: rgba(220,60,60,0.1); color: var(--danger); }
+.bulk-common{ border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:6px; }
+.bulk-sub{ font-size:13px; font-weight:800; color: var(--text); margin-bottom:8px; }
+.bulk-secs{ display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:12px; }
+.bulk-secs small{ font-size:11px; color: var(--text-faint); margin-inline-start:4px; }
+.bulk-note{ font-size:12px; color: var(--text-faint); margin:10px 0 0; }
+@media (max-width:640px){ .bulk-table th:first-child, .bulk-table td:first-child{ display:none; } .bulk-handle{ max-width:120px; } }

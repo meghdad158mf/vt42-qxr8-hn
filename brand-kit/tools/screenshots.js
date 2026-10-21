@@ -32,7 +32,10 @@ const mk = d=>fs.mkdirSync(path.join(OUT,d),{recursive:true});
       let body=[]; if(t==='channels') body=channels; if(t==='news_ai_insights') body=[insight];
       if(t==='magazines') body=Array.from({length:5},(_,i)=>({id:i+1,title:'بسته تحلیلی جریان — شماره '+(5-i),sort_order:i}));
       if(t==='posts'){ if(url.includes('scraped_at=lt.')||url.includes('hawza_relevant')) body=[]; else if(url.includes('platform=eq.bale')) body=posts.filter(p=>p.platform==='bale'); else body=posts; }
-      route.fulfill({status:200,contentType:'application/json',headers:{'content-range':'0-0/12480','access-control-expose-headers':'content-range'},body:JSON.stringify(body)});
+      if(t==='rpc' && url.includes('monitored_source_counts')) body={channels:channels.length,newspapers:38,crawl:31};
+      // شمارش‌ها (count=exact) — «رصد امروز» و یافته‌های خزنده عدد جدا بگیرن، نه همون کل
+      const total = /scraped_at=gte|edition_date=eq/.test(url) ? (t==='posts' ? 486 : t==='newspapers' ? 36 : 12) : t==='hawza_mentions' ? 3150 : t==='newspapers' ? 2240 : 12480;
+      route.fulfill({status:200,contentType:'application/json',headers:{'content-range':'0-0/'+total,'access-control-expose-headers':'content-range'},body:JSON.stringify(body)});
     });
     await ctx.route('**/functions/v1/**', r=>r.fulfill({status:200,contentType:'application/json',body:'{}'}));
   };
@@ -71,7 +74,8 @@ const mk = d=>fs.mkdirSync(path.join(OUT,d),{recursive:true});
   const c1 = await shot(1920,1080,1,'desktop-1920x1080',desktop); await c1.close();
   const mobile = [
     ['01-home-hero', `switchSection('dashboard'); window.scrollTo(0,0)`],
-    ['02-home-domains', toEl('.domain-grid')],
+    // روی گوشی .domain-grid با display:contents جعبه نداره؛ ۹۰px بالاتر تا تیتر بخش هم دیده بشه
+    ['02-home-domains', `(()=>{ const e=document.querySelector('.domain-orbits'); window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 90); })()`],
     ['03-news-at-a-glance', `goToNewsTab('analytics'); window.scrollTo(0,0)`],
   ];
   const c2 = await shot(390,844,3,'mobile',mobile); await c2.close();

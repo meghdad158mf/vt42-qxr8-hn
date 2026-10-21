@@ -22,14 +22,12 @@ NULL رو می‌گیره (posted_at DESC، + سهمیه‌ی جدا و تضمی
   SUPABASE_URL, SUPABASE_ANON_KEY, ADMIN_PASSWORD
 """
 
-import os
 import sys
 
 import requests
+from jarian_common import SUPABASE_URL, SUPABASE_ANON_KEY, login, require_env
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+require_env()
 
 REQUEST_TIMEOUT = 120  # پاسخ هوش مصنوعی روی دسته‌ای از پست‌ها ممکنه چند ثانیه طول بکشه
 # ⚠️ از ۳۰ به ۸۰ افزایش یافت (۱ مهر ۱۴۰۵) — با چک واقعی دیتابیس مشخص شد
@@ -45,17 +43,6 @@ BATCH_LIMIT = 80
 # داره (هر فراخوانی فقط ~۳۰ پست رو تموم می‌کنه، بقیه برای بعد می‌مونن) —
 # برای همین هر اجرا چند دور پشت‌سرهم تابع رو صدا می‌زنه (به درخواست کاربر: ۲ دور).
 ROUNDS = 2
-
-
-def login() -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/rpc/login",
-        headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-        json={"password": ADMIN_PASSWORD},
-        timeout=30,
-    )
-    r.raise_for_status()
-    return r.json()["token"]
 
 
 def run_round(token: str) -> dict | None:
@@ -76,7 +63,7 @@ def run_round(token: str) -> dict | None:
 
 
 def main() -> None:
-    token = login()
+    token = login(30)
     ok_rounds = 0
     total = 0
     for i in range(1, ROUNDS + 1):

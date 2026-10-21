@@ -3,7 +3,8 @@
 // داده‌ها همیشه زنده بمونن. فایل‌های ثابت هم‌دامنه (فونت/تصویر/کتابخونه/آیکون)
 // cache-first؛ خودِ صفحه network-first تا هر انتشار جدید فوراً دیده بشه.
 // با تغییر فهرست فایل‌های ثابت یا منطق این فایل، CACHE رو یک شماره بالا ببر.
-const CACHE = 'jarian-static-v6';
+// v7 (۵.۳۲.۰): ساخت با Vite — فونت و تصویرهای HTML/CSS با نام hash‌دار در assets/
+const CACHE = 'jarian-static-v7';
 const PRECACHE = [
   'ita-monitoring-prototype.html',
   'manifest.webmanifest',
@@ -11,7 +12,6 @@ const PRECACHE = [
   'icons/icon-512.png',
   'icons/icon.svg',
   'icons/jarian-mark.svg',
-  'fonts/IRANSansXV.woff2',
   'vendor/gsap.min.js',
 ];
 
@@ -47,7 +47,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  if (/\/(fonts|images|vendor|icons)\//.test(url.pathname)) {
+  // assets/ = خروجی Vite با نام hash‌دار (محتوای هر نام هرگز عوض نمی‌شه، پس cache-first امنه)
+  if (/\/(assets|fonts|images|vendor|icons)\//.test(url.pathname)) {
     event.respondWith(
       caches.match(req).then(hit => hit || fetch(req).then(res => {
         if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }

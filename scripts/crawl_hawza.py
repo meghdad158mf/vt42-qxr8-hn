@@ -37,7 +37,6 @@ SUPABASE_ANON_KEY، ADMIN_PASSWORD.
 
 import hashlib
 import json
-import os
 import re
 import sys
 import time
@@ -50,6 +49,7 @@ from urllib.parse import unquote, urljoin, urlparse, urlunparse
 import feedparser
 import requests
 import trafilatura
+from jarian_common import SUPABASE_URL, SUPABASE_ANON_KEY, login, require_env
 
 DRY_RUN = "--dry-run" in sys.argv
 # فقط برای آزمایش: --only=نام۱,نام۲ (با --dry-run) و --debug (چاپ جزئیات کشف خبرها)
@@ -598,17 +598,7 @@ def classify(title: str, text: str) -> dict | None:
 # ---------- پایگاه داده ----------
 
 if not DRY_RUN:
-    SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-    SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-    ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
-
-
-def login() -> str:
-    r = requests.post(f"{SUPABASE_URL}/rest/v1/rpc/login",
-                      headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-                      json={"password": ADMIN_PASSWORD}, timeout=REQUEST_TIMEOUT)
-    r.raise_for_status()
-    return r.json()["token"]
+    require_env()
 
 
 def db(token: str, method: str, path: str, **kw):
@@ -820,7 +810,7 @@ def main() -> None:
     if DRY_RUN:
         rows = [{"id": None, "name": n, "url": u, "sitemap_url": s} for n, u, s in DEFAULT_SITES if not ONLY or n in ONLY]
     else:
-        token = login()
+        token = login(REQUEST_TIMEOUT)
         r = db(token, "GET", "crawl_sites", params={"select": "id,name,url,sitemap_url,active", "order": "id"})
         r.raise_for_status()
         all_sites = r.json()

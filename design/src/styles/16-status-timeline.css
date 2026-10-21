@@ -1,0 +1,36 @@
+/* برنامه‌ی اجرا در وضعیت سامانه */
+
+/* «برنامه‌ی اجرا» در وضعیت سامانه (۵.۲۲.۳): جدول ساعتی امروز — ستون = ساعت (۰۰ راست)، عدد خانه = دقیقه */
+.hg-sum{ font-size:12px; font-weight:600; color: var(--text-dim); margin-bottom:10px; }
+.hg-sum.warn{ color:#b45309; }
+.hg-wrap{ overflow-x:auto; padding-bottom:4px; }
+.hg{ display:grid; grid-template-columns: 160px repeat(24, minmax(30px,1fr)); gap:3px; align-items:center; min-width:900px; }
+.hg-n{ font-size:12px; font-weight:700; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-inline-end:6px; position:sticky; right:0; background: var(--surface); z-index:2; align-self:stretch; display:flex; align-items:center; box-shadow:-4px 0 0 var(--surface); }
+.hg-corner{ font-size:11px; font-weight:600; color: var(--text-faint); }
+.hg-h{ font-size:11px; font-weight:700; color: var(--text-faint); text-align:center; padding:2px 0; border-radius:6px; }
+.hg-h.cur{ color: var(--primary); background: var(--accent); }
+.hg-load{ height:20px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color: var(--text-faint); border-radius:6px; }
+.hg-load.multi{ color: var(--accent-strong); background: rgba(234,179,147,0.18); }
+.hg-c{ height:26px; border-radius:6px; background: var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; font-style:normal; font-variant-numeric:tabular-nums; transition: box-shadow .12s ease; }
+.hg-c.is-slot{ cursor:default; position:relative; }
+/* هم‌زمان با کار دیگر در همان دقیقه: نقطه‌ی سرمه‌ای گوشه‌ی خانه */
+.hg-c.same::after{ content:''; position:absolute; top:3px; left:3px; width:6px; height:6px; border-radius:50%; background: var(--primary); box-shadow:0 0 0 1.5px #fff; }
+.hg-c.plan, .hg-c.wait{ background:#e5e7eb; color:#4b5563; }
+.hg-c.ok{ background:#16a34a; color:#fff; }
+.hg-c.late{ background:#eab308; color:#3f2d00; }
+.hg-c.bad{ background: var(--danger); color:#fff; }
+.hg-c.skip{ background:#9ca3af; color:#fff; }
+.hg-c.run{ background: var(--accent-strong); color:#fff; }
+.hg-c.miss{ background: repeating-linear-gradient(45deg, rgba(217,67,60,0.5) 0 3px, rgba(217,67,60,0.15) 3px 6px); color:#9a2a22; }
+.hg-c.cur:not(.is-slot), .hg-load.cur{ box-shadow: inset 0 0 0 1.5px rgba(181,101,29,0.45); }
+.hg-c.is-slot.cur{ box-shadow: 0 0 0 2px var(--accent-strong); }
+.hg .col-hi.hg-c, .hg .col-hi.hg-load{ box-shadow: 0 0 0 2px var(--primary); }
+.hg .col-hi.hg-h{ color:#fff; background: var(--primary); }
+.hg-leg{ display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:12px; font-size:12px; color: var(--text-dim); align-items:center; }
+.hg-leg span{ display:inline-flex; align-items:center; gap:6px; }
+.hg-leg .hg-c{ width:28px; height:20px; font-size:10px; }
+.hg-leg-note{ flex-basis:100%; color: var(--text-faint); }
+@media (max-width:640px){
+  .hg{ grid-template-columns: 112px repeat(24, 30px); min-width:0; width:max-content; }
+  .hg-n{ font-size:11px; }
+}

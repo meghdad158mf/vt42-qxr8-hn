@@ -1,0 +1,130 @@
+// عرصه‌ها و صفحه‌ی نخست که در مرحله‌ی ۷ ماژولار شدن (design/src/features/{hawza,laws,home,schools,reports,announcements}):
+// دکمه‌هایی که از onclick به listener رفتن، تب‌های «درباره حوزه»، معرفی سامانه و گزارش‌های مدارس
+import { test, expect, openAs } from './support/fixtures.js';
+
+const ago = (h) => new Date(Date.now() - h * 3600e3).toISOString();
+const MENTIONS = [
+  { id: 1, url: 'https://news.example/1', site: 'news.example', site_name: 'Example News', title: 'Qom seminary clerics react to the new law', excerpt: 'Grand Ayatollah statements were discussed in the Qom seminary.', kind: 'site', matched_terms: ['حوزه علمیه'], hits: 2, in_title: true, published_at: ago(2), scraped_at: ago(2), hidden_at: null },
+  { id: 2, url: 'https://eitaa.com/x/5', site: 'eitaa.com', site_name: 'کانال آزمایشی', title: 'نشست طلاب حوزه علمیه مشهد', excerpt: 'طلاب و اساتید حوزه علمیه مشهد درباره‌ی تحولات اجتماعی گفت‌وگو کردند.', kind: 'social', matched_terms: ['طلاب'], hits: 3, in_title: true, published_at: ago(5), scraped_at: ago(5), hidden_at: null },
+];
+
+test('درباره حوزه: دو تب با دکمه‌های خودشان و آدرس هر تب', async ({ page }) => {
+  await openAs(page, 'viewer', 'hawza/news');
+  await page.locator('#hawza-tab-about').click();
+  await expect(page.locator('#hawza-about-panel')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#hawza/about');
+  await page.locator('#hawza-tab-news').click();
+  await expect(page.locator('#hawza-about-panel')).toBeHidden();
+  await expect(page.locator('#sec-hawza #news-study-panel')).toBeVisible();
+  expect(page.appErrors).toEqual([]);
+});
+
+test.describe('آنچه درباره حوزه گفته می‌شود', () => {
+  test.use({ mockData: { hawza_mentions: MENTIONS } });
+
+  test('ترجمه‌ی خبر خارجی و بازگشت به متن اصلی', async ({ page }) => {
+    await page.route('**/functions/v1/translate', (r) => r.fulfill({ json: { title: 'واکنش روحانیون حوزه علمیه قم به قانون تازه', text: 'بیانات مراجع در حوزه علمیه قم بررسی شد.' } }));
+    await openAs(page, 'viewer', 'hawza/about');
+    const btn = page.locator('#hab-feed [data-hab-translate="1"]');
+    await btn.click();
+    await expect(page.locator('#hab-title-1')).toHaveClass(/is-translated/);
+    await expect(btn).toHaveText('بازگشت به متن اصلی');
+    await btn.click();
+    await expect(page.locator('#hab-title-1')).not.toHaveClass(/is-translated/);
+    expect(page.appErrors).toEqual([]);
+  });
+
+  test('مدیر: پنهان کردن خبر بعد از تأیید', async ({ page }) => {
+    await openAs(page, 'admin', 'hawza/about');
+    await expect(page.locator('#hab-feed article')).toHaveCount(2);
+    await page.locator('#hab-feed [data-hab-hide="2"]').click();
+    await expect(page.locator('#ui-confirm-modal')).toHaveClass(/active/);
+    const [req] = await Promise.all([
+      page.waitForRequest((r) => r.url().includes('/rest/v1/hawza_mentions?id=eq.2') && r.method() === 'PATCH'),
+      page.locator('#ui-confirm-ok').click(),
+    ]);
+    expect(JSON.parse(req.postData()).hidden_at).toBeTruthy();
+    await expect(page.locator('#hab-feed article')).toHaveCount(1);
+    expect(page.appErrors).toEqual([]);
+  });
+});
+
+test.describe('قوانین و مصوبات', () => {
+  test.use({ mockPatch: { apply(data) { data.posts.forEach((p) => { p.text = Array(8).fill(p.text).join(' '); }); } } });
+  test('«نمایش بیشتر» متن مصوبه را باز و بسته می‌کند', async ({ page }) => {
+    await openAs(page, 'viewer', 'laws');
+    const more = page.locator('#laws-feed [data-lw-more]:visible').first();
+    const text = page.locator('#lw-post-text-' + (await more.getAttribute('data-lw-more')));
+    await more.click();
+    await expect(text).toHaveClass(/expanded/);
+    await more.click();
+    await expect(text).not.toHaveClass(/expanded/);
+    expect(page.appErrors).toEqual([]);
+  });
+});
+
+test('صفحه‌ی نخست: دکمه‌های دسترسی سریع به عرصه‌ها و بسته‌ها اسکرول می‌کنند', async ({ page }) => {
+  await openAs(page, 'viewer');
+  const inView = (sel) => page.evaluate((s) => {
+    const r = document.querySelector(s).getBoundingClientRect();
+    return r.top < window.innerHeight && r.bottom > 0;
+  }, sel);
+  await page.locator('[data-home-scroll="package"]').click();
+  await expect.poll(() => inView('#pkg-flow')).toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.locator('[data-home-scroll="domains"]').click();
+  await expect.poll(() => inView('.section-label')).toBe(true);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('صفحه‌ی نخست: «اطلاع از انتشار» با دکمه و با Enter ثبت می‌شود', async ({ page }) => {
+  await openAs(page, 'viewer');
+  const phone = page.locator('#notify-phone');
+  await phone.fill('۰۹۱۲ ۱۲۳ ۴۵۶۷');
+  const isPost = (r) => r.url().includes('/rest/v1/notify_subscribers') && r.method() === 'POST';
+  const [req] = await Promise.all([page.waitForRequest(isPost), page.locator('#notify-subscribe-btn').click()]);
+  expect(JSON.parse(req.postData()).phone).toBe('09121234567');
+  await phone.fill('09351112233');
+  await Promise.all([page.waitForRequest(isPost), phone.press('Enter')]);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('معرفی سامانه: باز شدن از فوتر، قبلی/بعدی و رفتن به «در یک نگاه»', async ({ page }) => {
+  await openAs(page, 'viewer');
+  await page.locator('.app-footer-intro').click();
+  const modal = page.locator('#intro-modal');
+  await expect(modal).toHaveClass(/active/);
+  await expect(page.locator('#intro-prev')).toBeHidden();
+  await page.locator('#intro-next').click();
+  await expect(page.locator('#intro-prev')).toBeVisible();
+  await page.locator('#intro-prev').click();
+  await expect(page.locator('#intro-prev')).toBeHidden();
+  await page.locator('#intro-next').click();
+  await page.locator('#intro-next').click();
+  await page.locator('#intro-next').click();
+  await expect(modal).not.toHaveClass(/active/);
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#overview/analytics');
+  expect(page.appErrors).toEqual([]);
+});
+
+test.describe('برنامه مدارس', () => {
+  test.use({
+    mockData: {
+      school_reports: [
+        { id: 1, title: 'گزارش مهر', file_type: 'image', media_storage_path: 'r1.png', image_url: null, uploaded_at: '2026-10-10T08:00:00Z', sort_order: 0 },
+        { id: 2, title: 'گزارش شهریور', file_type: 'pdf', media_storage_path: 'r2.pdf', image_url: null, uploaded_at: '2026-09-10T08:00:00Z', sort_order: 1 },
+      ],
+    },
+  });
+  test('چیپ ماه و بزرگ‌نمایی گزارش در نمایشگر سند', async ({ page }) => {
+    await openAs(page, 'viewer', 'schools');
+    const chips = page.locator('#sch-month-row [data-m]');
+    await expect(chips).toHaveCount(3);
+    await chips.nth(1).click();
+    await expect(chips.nth(1)).toHaveClass(/active/);
+    await expect(page.locator('#school-report-list .school-report-block')).toHaveCount(1);
+    await page.locator('#school-report-list .school-report-img-btn').click();
+    await expect(page.locator('#doc-viewer')).toHaveClass(/active/);
+    expect(page.appErrors).toEqual([]);
+  });
+});

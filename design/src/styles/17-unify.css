@@ -1,0 +1,43 @@
+/* یکدست‌سازی رابط (۵.۲۲.۰) */
+
+/* ---- یکدست‌سازی رابط (۵.۲۲.۰) ---- */
+/* خانواده‌ی دکمه‌ها (۵.۲۲.۰): دکمه‌ی عمل = قرصی، کادر فرم = گوشه‌ی ۱۰، آیتم منو/فهرست = ۸؛
+   ارتفاع استاندارد ۴۰ و برای عمل‌های ریز داخل ردیف/کارت ۳۲ — تب‌ها دست‌نخورده */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:40px; padding:8px 20px; line-height:1.4; box-sizing:border-box; }
+.btn.btn-sm{ min-height:32px; padding:0 12px; font-size:12px; }
+.usr-act, .chan-item-edit, .sys-run-btn, .usr-chip, .usr-quick, .upl-del, .news-kw-edit-btn, .post-hide-btn{
+  display:inline-flex; align-items:center; justify-content:center; min-height:32px; padding-block:0; border-radius:999px; box-sizing:border-box;
+}
+.upl-goto{ border-radius:999px; min-height:40px; }
+.pkg-more-btn{ min-height:40px; }
+.fmt{ min-height:40px; border-radius: var(--radius-control); }
+.del-btn{ border-radius:999px; }
+.news-seg{ border-radius: var(--radius-control); }
+.news-seg > button, .news-seg .news-daterange-details summary{ border-radius:8px; }
+/* فید کانال «یادداشت‌ها» روی گوشی: دکمه‌های زمان یک ردیف تمام‌عرض، جست‌وجو ردیف بعد */
+@media (max-width:640px){
+  #political-figures-filter-time{ width:100%; box-sizing:border-box; }
+  #political-figures-filter-time > button{ flex:1 1 auto; padding-inline:6px; white-space:nowrap; }
+  #pf-feed-view .toolbar > .news-search-box{ flex:1 1 100%; min-width:0; }
+}
+/* فهرست‌های کشویی: همه یک شکل — ارتفاع ۴۰، گوشه‌ی کنترل، فلش CSS به‌جای «▾» متنی و فلش بومی مرورگر
+   (!important روی longhandها چون قانون‌های قبلی shorthand «background:» دارن و تصویر رو پاک می‌کنن) */
+select:not([multiple]):not(.jdate select){
+  -webkit-appearance:none; appearance:none; min-height:40px; box-sizing:border-box;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23646f80' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important; background-repeat:no-repeat !important;
+  background-position:left 12px center !important; background-size:14px 14px !important;
+  padding-inline-end:34px !important; cursor:pointer;
+}
+#posts-tab-feed .toolbar select{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important; }
+.news-source-details summary{ min-height:40px; box-sizing:border-box; font-size:13px; }
+.wave-card details summary::after, .wave-card details[open] summary::after,
+.news-source-details summary::after, .chan-domains-details summary::after, .chan-row-domains-details summary::after,
+.news-source-details[open] summary::after, .chan-domains-details[open] summary::after, .chan-row-domains-details[open] summary::after,
+.settings-accordion > summary.panel-head::after, .settings-accordion[open] > summary.panel-head::after{
+  content:''; display:inline-block; flex-shrink:0; width:14px; height:14px; margin-inline-start:8px; background:currentColor; opacity:.75;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center/14px no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center/14px no-repeat; transition:transform .2s ease;
+}
+.wave-card details[open] summary::after,
+.news-source-details[open] summary::after, .chan-domains-details[open] summary::after, .chan-row-domains-details[open] summary::after,
+.settings-accordion[open] > summary.panel-head::after{ transform:rotate(180deg); }
+.settings-accordion > summary.panel-head::after{ color: var(--text-faint); width:16px; height:16px; -webkit-mask-size:16px; mask-size:16px; }

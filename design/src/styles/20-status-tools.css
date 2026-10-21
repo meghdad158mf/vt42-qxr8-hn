@@ -1,0 +1,44 @@
+/* نگهداری رسانه، سابقه‌ی ظرفیت، خطاهای مرورگر، گزارش اجرا */
+
+/* ===== وضعیت سامانه: نگهداری رسانه، سابقه‌ی ظرفیت، خطاهای مرورگر، گزارش اجرا (۵.۲۵.۰) ===== */
+.sys-btn-row{ display:flex; flex-wrap:wrap; gap:6px; }
+.sys-ret{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+.sys-ret label{ display:flex; flex-direction:column; gap:2px; font-size:13px; color: var(--text); }
+.sys-ret label span{ font-size:12px; color: var(--text-faint); }
+.sys-ret-ctl{ display:flex; gap:8px; align-items:center; }
+.sys-ret-ctl select{ font:inherit; font-size:13px; padding:7px 12px; border-radius: var(--radius-control); border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); max-width:100%; }
+.sys-cap-tabs{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.sys-cap-seg{ display:flex; gap:6px; flex-wrap:wrap; }
+.sys-cap-tiles{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+.sys-cap-tile{ border:1px solid var(--border); border-radius:12px; background: var(--surface-2); padding:10px 12px; display:flex; flex-direction:column; gap:2px; }
+.sys-cap-tile span{ font-size:12px; color: var(--text-dim); }
+.sys-cap-tile b{ font-size:17px; color: var(--text); }
+.sys-cap-tile small{ font-size:11px; color: var(--text-faint); }
+.sys-cap-grid{ display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:20px; }
+.sys-cap-sub{ font-size:12px; font-weight:700; color: var(--text-dim); margin-bottom:8px; }
+.sys-cap-cat{ display:grid; grid-template-columns: 150px minmax(0,1fr) 150px; align-items:center; gap:10px; font-size:12px; padding:5px 0; }
+.sys-cap-cat-name{ color: var(--text); }
+.sys-cap-cat-bar{ height:8px; background: var(--surface-2); border-radius:999px; overflow:hidden; }
+.sys-cap-cat-bar i{ display:block; height:100%; background: var(--accent); border-radius:999px; }
+.sys-cap-cat-val{ color: var(--text-dim); white-space:nowrap; text-align:left; }
+.sys-cap-cat-val em{ display:block; font-style:normal; font-size:11px; color: var(--text-faint); }
+.sys-cap-chart{ height:120px; }
+.sys-cap-proj{ margin:14px 0 0; font-size:13px; color: var(--text-dim); line-height:1.8; padding:8px 12px; border-radius:10px; background: var(--surface-2); }
+.sys-cap-proj.warn{ background: rgba(217,154,30,0.12); color:#8a5d06; }
+.sys-cap-proj.bad{ background: rgba(220,60,60,0.1); color: var(--danger); }
+.sys-cerr-row{ display:grid; grid-template-columns: minmax(0,1fr) auto; gap:4px 12px; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+.sys-cerr-row:last-child{ border-bottom:none; }
+.sys-cerr-row.warn{ border-inline-start:3px solid #d99a1e; padding-inline-start:10px; }
+.sys-cerr-msg{ font-size:13px; font-weight:700; color: var(--text); overflow-wrap:anywhere; text-align:start; }
+.sys-cerr-meta{ grid-column:1; font-size:12px; color: var(--text-faint); }
+.sys-cerr-row .btn{ grid-row:1 / span 2; grid-column:2; }
+.job-log-card{ max-width:760px; }
+.job-log-meta{ font-size:13px; color: var(--text-dim); line-height:1.8; margin:0 0 10px; }
+.job-log-meta b.ok{ color: var(--ok); } .job-log-meta b.bad{ color: var(--danger); }
+.job-log-body{ background:#0f1720; color:#d7dee8; border-radius:10px; padding:10px 12px; max-height:52vh; overflow:auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; line-height:1.7; text-align:left; margin-bottom:14px; }
+.job-log-line{ display:flex; gap:10px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.job-log-line.step{ color:#EAB393; font-weight:700; margin-top:6px; }
+.job-log-line.err{ color:#ff8a80; font-weight:700; }
+.job-log-t{ color:#6f7d8f; flex:none; }
+@media (max-width:900px){ .sys-cap-tiles{ grid-template-columns:repeat(2, minmax(0,1fr)); } .sys-cap-grid{ grid-template-columns:1fr; } }
+@media (max-width:640px){ .sys-cap-cat{ grid-template-columns: 100px minmax(0,1fr) 120px; } .sys-ret-ctl{ width:100%; } .sys-ret-ctl select{ flex:1; min-width:0; } .job-log-t{ display:none; } }

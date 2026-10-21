@@ -1,0 +1,40 @@
+/* کوتاه‌تر شدن صفحه‌ها روی گوشی */
+
+/* ---- کوتاه‌تر شدن صفحه‌ها روی گوشی (۵.۲۹.۵، خواست کاربر: موارد ۳ تا ۶ بازبینی نمای گوشی) ---- */
+@media (max-width:640px){
+  /* عرصه‌های صفحه‌ی نخست سه‌ستونه با آیکون کوچک‌تر (قبلاً دوستونه، ۵ ردیف) */
+  .domain-orbits{ gap:18px 12px; }
+  .domain-grid > .domain-card{ width:calc((100% - 24px) / 3); padding:4px 2px; }
+  .domain-icon.is-illustrated, .domain-icon.is-illustrated img{ width:92px; height:92px; max-width:92px; }
+  .domain-icon.is-illustrated{ margin-bottom:6px; }
+  .domain-card h3{ font-size:13px; line-height:1.6; }
+  /* «چرا جریان» جمع‌وجورتر: تیتر و خط کوتاه هم‌تراز با متن، فاصله‌ی داخلی کمتر */
+  .why-jarian-grid{ gap:12px; text-align:start; }
+  .why-jarian-item{ padding:18px 18px 20px; }
+  .why-jarian-item .why-jarian-tag{ margin-bottom:8px; }
+  .why-jarian-item .why-jarian-bar{ margin:0 0 10px; }
+}
+@media (max-width:560px){
+  /* گالری چهره‌ها/سازمان‌ها سه‌تایی (قبلاً دوتایی با دایره‌ی ۸۸px) */
+  .pf-logo-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px 6px; }
+  .pf-logo{ width:72px; height:72px; font-size:26px; }
+  .pf-logo-card{ gap:8px; padding:8px 2px; }
+  .pf-logo-name{ font-size:13px; line-height:1.6; }
+  .pf-logo-meta{ margin-top:-5px; }
+}
+/* «افراد و مجموعه‌ها» روی گوشی: هر کانال یه کارت فشرده‌ی چهارخطه —
+   نام + مخاطب، بستر و لینک، صاحب کانال، برچسب‌ها در یک خط (قبلاً هر خونه یه خط جدا) */
+@media (max-width:700px){
+  .cpt-row{ display:grid; grid-template-columns:auto auto auto minmax(0,1fr) auto; align-items:center; gap:6px 6px; padding:12px 14px; }
+  .cpt-who{ grid-column:1 / 5; grid-row:1; }
+  .cpt-num{ grid-column:5; grid-row:1; justify-content:flex-end; }
+  .cpt-platform{ grid-column:1 / -1; grid-row:2; flex-direction:row; align-items:center; justify-content:flex-start; gap:6px; }
+  .cpt-platform-name::after{ content:'،'; }
+  .cpt-owner{ grid-column:1 / -1; grid-row:3; margin-inline-start:0; }
+  .cpt-activity-col{ grid-column:1; grid-row:4; }
+  .cpt-tagcol{ grid-column:2; grid-row:4; }
+  .cpt-groupcol{ grid-column:3; grid-row:4; }
+  .cpt-row > :empty{ display:none; }
+  .cpt-activity, .cpt-tag, .cpt-num-val{ white-space:nowrap; }
+  .cpt-num-val svg{ flex-shrink:0; }
+}

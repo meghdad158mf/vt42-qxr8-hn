@@ -1,0 +1,167 @@
+/* پوسته‌ی داشبورد: نوار بالا، منوی بخش‌ها و منوی مدیریت */
+
+/* ---------- DASHBOARD SHELL (unified dark canvas, topbar + content float as light cards) ---------- */
+#view-dash{
+  display:none; min-height:100vh; overflow-x:clip;
+  background:
+    radial-gradient(120% 60% at 25% 0%, rgba(234,179,147,0.07), transparent 55%),
+    radial-gradient(90% 50% at 100% 0%, rgba(142,163,184,0.1), transparent 55%),
+    linear-gradient(160deg, var(--primary), var(--primary-2));
+}
+#view-dash.active{ display:block; }
+
+.main{ padding: 22px 28px 60px; max-width: 1180px; margin: 0 auto; }
+
+/* بسته تحلیلی جریان — کارت واحد که کاروسل «مجلات جریان» قبلی و توضیح ۱۰بخشی
+   قبلی (که جدا و زیر هم بودن) رو با هم ترکیب می‌کنه، زیر یه عنوان یکتا،
+   تا با تب جدید «دیدن سایر بسته‌های تحلیلی» (که زیر همین کارت میاد) اشتباه نشه */
+
+.app-footer{ margin-top:56px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.14); }
+.app-footer-top{ display:flex; justify-content:space-between; gap:32px; flex-wrap:wrap; }
+.app-footer-brand{ display:flex; flex-direction:column; align-items:flex-start; gap:5px; flex-shrink:0; max-width:320px; }
+.app-footer-title{ font-size:14px; font-weight:700; color:#fff; }
+.app-footer-tagline{ font-size:13px; font-weight:500; color: rgba(255,255,255,0.62); line-height:1.6; }
+.app-footer-brand small{ font-size:11px; font-weight:600; color: rgba(255,255,255,0.4); }
+.app-footer-intro{ font:inherit; font-size:12px; font-weight:700; color: var(--accent); background:none; border:none; padding:2px 0; cursor:pointer; text-decoration:underline; text-underline-offset:3px; align-self:flex-start; }
+.app-footer-intro:hover{ color:#fff; }
+.app-footer-org{ display:flex; gap:32px; flex-wrap:wrap; }
+.afo-item{ display:flex; flex-direction:column; gap:5px; font-size:12px; max-width:250px; }
+.afo-item b{ color: rgba(255,255,255,0.85); font-weight:700; font-size:11px; }
+.afo-item span{ color: rgba(255,255,255,0.62); line-height:1.7; }
+/* نوار تاریخ/ساعت/مناسبت — زیر کارت‌های آمار هرو صفحه‌ی نخست؛ مدل «ساده و بی‌کادر»
+   (انتخاب کاربر از ۸ مدل، مهر ۱۴۰۵): خط اول تاریخ‌ها + ساعت وسط‌چین، خط دوم مناسبت
+   بین دو خط تزئینی هلویی. روز بی‌مناسبت فقط خط اول */
+.datebar{ display:flex; flex-direction:column; align-items:center; gap:10px; max-width:980px; margin:48px auto 0; text-align:center; }
+.datebar .db-top{ display:flex; align-items:center; justify-content:center; gap:6px 16px; flex-wrap:wrap; color: rgba(255,255,255,0.62); font-size:13px; }
+.datebar .db-top b{ color:#fff; font-size:14px; font-weight:700; }
+.datebar .db-clock{ display:inline-flex; align-items:center; gap:5px; color:#fff; font-weight:700; }
+.datebar .db-clock svg{ width:14px; height:14px; opacity:.6; }
+.datebar .db-occ{ display:flex; align-items:center; gap:10px; width:100%; color:#EAB393; font-weight:700; font-size:14px; }
+.datebar .db-occ svg{ width:14px; height:14px; flex-shrink:0; }
+.datebar .db-occ .ln{ flex:1; min-width:24px; height:1px; background: linear-gradient(90deg, transparent, rgba(234,179,147,0.5)); }
+.datebar .db-occ .ln:last-child{ background: linear-gradient(90deg, rgba(234,179,147,0.5), transparent); }
+.datebar .db-occ .t{ max-width:80%; }
+@media (max-width:640px){
+  .datebar{ margin-top:34px; gap:8px; }
+  .datebar .db-top{ font-size:12px; gap:4px 12px; }
+  .datebar .db-hide-m{ display:none; }
+  .datebar .db-occ{ font-size:13px; gap:8px; }
+}
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  margin-bottom:28px; padding:0 0 18px; flex-wrap:wrap;
+  background:none; border-bottom:1px solid rgba(255,255,255,0.12);
+}
+.topbar-brand{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+.topbar-badge{ width:30px; height:30px; border-radius:9px; background: rgba(234,179,147,0.14); color: var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.topbar-badge svg{ width:15px; height:15px; }
+.nav-menu-badge-btn{ border:none; padding:0; cursor:pointer; transition: background .15s ease; }
+.nav-menu-badge-btn:hover{ background: rgba(234,179,147,0.24); }
+.topbar-brand-text{ display:flex; align-items:baseline; gap:7px; line-height:1.4; font-size:15px; }
+.topbar-brand-text b{ font-weight:600; color: rgba(255,255,255,0.55); }
+.topbar-brand-text .sep{ color: rgba(255,255,255,0.3); }
+.topbar-brand-text #sec-title{ font-weight:700; color:#fff; }
+.topbar-right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.topbar-status{ display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color: rgba(255,255,255,0.5); }
+.topbar-status .dot2{ width:6px; height:6px; border-radius:50%; background: var(--ok); animation: pulse 1.8s infinite; flex-shrink:0; }
+.topbar .chip-btn.ghost{ color: rgba(255,255,255,0.6); }
+.topbar .chip-btn.ghost:hover{ color:#fff; background: rgba(255,255,255,0.1); }
+
+/* admin-only shortcuts (export / settings), grouped under one dropdown, top-left of every page */
+.admin-menu{ position:relative; }
+.admin-menu.open{ z-index:70; } /* منوی باز روی کارت‌های اطلاعیه (#ann-bar، z-index ۶۰) — ۵.۲۰.۰ */
+.chip-btn{ display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color: var(--text-dim); background: var(--surface); border:1px solid var(--border); padding:7px 13px; border-radius: var(--radius-pill); cursor:pointer; font-family:inherit; transition: color .15s ease, border-color .15s ease, background .15s ease; }
+.chip-btn svg{ width:14px; height:14px; flex-shrink:0; }
+.chip-btn:hover{ color: var(--text); border-color: var(--border-strong); background: var(--surface-2); }
+.chip-btn.ghost{ background:none; color: var(--text-faint); }
+#admin-menu-btn .chev{ transition: transform .15s ease; }
+.admin-menu.open #admin-menu-btn .chev{ transform: rotate(180deg); }
+.admin-menu-list{
+  position:absolute; inset-inline-end:0; top: calc(100% + 8px); z-index:20; min-width:168px;
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-control);
+  box-shadow: var(--shadow-hover); padding:6px; display:flex; flex-direction:column; gap:2px;
+  opacity:0; visibility:hidden; transform:translateY(-6px); transition: opacity .15s ease, transform .15s ease, visibility .15s;
+}
+.admin-menu.open .admin-menu-list{ opacity:1; visibility:visible; transform:translateY(0); }
+#nav-menu-list.nav-menu-grid{
+  inset-inline-end:auto; inset-inline-start:0;
+  display:grid; grid-template-columns: repeat(2, 1fr); gap:4px 30px;
+  min-width:420px; max-width:90vw; padding:16px;
+  max-height: calc(100vh - 90px); overflow-y:auto;
+  background: linear-gradient(155deg, #fffaf5, #fdf0e3);
+  border-color: rgba(181,101,29,0.22);
+  box-shadow: 0 30px 60px -18px rgba(0,0,0,0.55), 0 0 0 1px rgba(181,101,29,0.12),
+    inset 0 0 0 1px rgba(0,0,0,0.06), inset 0 2px 10px rgba(0,0,0,0.08);
+}
+.nav-menu-col{ display:flex; flex-direction:column; gap:2px; }
+@media (max-width:640px){
+  #nav-menu-list.nav-menu-grid{ grid-template-columns:1fr; min-width:220px; gap:2px; padding:6px; }
+  /* گوشی: «صفحه نخست» و «بسته تحلیلی جریان» بالای فهرست بلند عرصه‌ها */
+  .nav-menu-col-top{ order:-1; padding-bottom:4px; margin-bottom:4px; border-bottom:1px solid rgba(181,101,29,0.2); }
+}
+.admin-menu-list button{
+  display:flex; align-items:center; gap:8px; width:100%; text-align:right; font-family:inherit;
+  font-size:13px; font-weight:600; color: var(--text-dim); background:none; border:none; cursor:pointer;
+  padding:9px 10px; border-radius: 6px; transition: background .15s ease, color .15s ease;
+}
+.nav-menu-toplevel-title{
+  font-size:12px; font-weight:800; color: var(--accent-strong); text-align:right;
+  padding:9px 10px 7px; margin-bottom:2px; margin-top:14px; border-bottom:1px solid rgba(181,101,29,0.2);
+}
+.nav-menu-toplevel-title:first-child{ margin-top:0; }
+.admin-menu-list button.nav-menu-toplevel-btn{ font-size:12px; font-weight:800; color: var(--accent-strong); }
+.admin-menu-list button.nav-menu-group-title-btn{
+  font-size:12px; font-weight:800; color: var(--text); padding-right:18px; margin-top:6px;
+}
+.admin-menu-list button.nav-menu-group-title-btn:first-child{ margin-top:0; }
+.admin-menu-list button.nav-menu-sub{ position:relative; padding-right:32px; font-weight:600; font-size:12px; color: var(--text); }
+.admin-menu-list button.nav-menu-sub::before{
+  content:''; position:absolute; right:20px; top:50%; transform:translateY(-50%);
+  width:7px; height:1px; background: rgba(181,101,29,0.35);
+}
+.admin-menu-list button:hover{ background: var(--surface-2); color: var(--text); }
+/* جای فعلی کاربر در منوی «بخش‌ها» (updateNavMenuCurrent، ۵.۲۰.۰) */
+.admin-menu-list button.is-current-group{ color: var(--accent-strong); }
+.admin-menu-list button.is-current,
+.admin-menu-list button.is-current:hover{ background: rgba(234,179,147,0.3); color: var(--accent-strong); font-weight:800; }
+.admin-menu-list svg{ width:14px; height:14px; flex-shrink:0; }
+/* نشانگرهای هشدار منوی «مدیریت» (refreshAdminAlerts): نقطه‌ی زرد/قرمز کنار «وضعیت
+   سامانه»، شمار نظرهای خونده‌نشده کنار «نظرات کاربران»، و یه نقطه روی خودِ دکمه */
+/* تعداد مواردی که نیاز به توجه دارن؛ رنگ = بدترین سطح (زرد/قرمز)؛ ریز موارد در title */
+.am-dot{ margin-inline-start:auto; min-width:18px; height:18px; padding:0 5px; border-radius:9px; display:none; align-items:center; justify-content:center; flex-shrink:0; font-size:11px; font-weight:800; color:#fff; line-height:1; }
+.am-dot.warn{ display:inline-flex; background:#d9a23a; }
+.am-dot.bad{ display:inline-flex; background:#e05a4f; }
+.am-badge{ margin-inline-start:auto; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background: var(--accent); color: var(--primary); font-size:11px; font-weight:800; display:none; align-items:center; justify-content:center; line-height:1; }
+.am-badge.show{ display:inline-flex; }
+#admin-menu-btn{ position:relative; }
+.am-btn-dot{ position:absolute; top:-3px; inset-inline-start:-3px; width:11px; height:11px; border-radius:50%; border:2px solid var(--primary); display:none; }
+.am-btn-dot.info{ display:block; background: var(--accent); }
+.am-btn-dot.warn{ display:block; background:#e0b04a; }
+.am-btn-dot.bad{ display:block; background:#e05a4f; animation: amPulse 2s ease-in-out infinite; }
+@keyframes amPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(224,90,79,0.5); } 50%{ box-shadow:0 0 0 5px rgba(224,90,79,0); } }
+@media (prefers-reduced-motion: reduce){ .am-btn-dot.bad{ animation:none; } }
+.topbar-divider{ width:1px; height:18px; background: rgba(255,255,255,0.34); }
+@media (max-width:640px){
+  .topbar{ flex-wrap:nowrap; gap:8px; }
+  .topbar-status{ font-size:0; gap:0; }
+  .topbar-divider{ display:none; }
+  .topbar-brand{ gap:7px; min-width:0; }
+  .topbar-badge{ width:32px; height:32px; }
+  .topbar-badge svg{ width:16px; height:16px; }
+  /* دکمه‌ی منو روی گوشی تنها راه رفتن به بخش‌هاست — ناحیه‌ی لمس حدود ۴۴px (۵.۲۰.۰) */
+  .nav-menu-badge-btn{ position:relative; }
+  .nav-menu-badge-btn::after{ content:''; position:absolute; inset:-6px; }
+  .topbar-brand-text{ font-size:13px; overflow:hidden; }
+  .topbar-brand-text b, .topbar-brand-text .sep{ display:none; }
+  .topbar-brand-text #sec-title{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .topbar-right{ flex-wrap:nowrap; gap:6px; flex-shrink:0; }
+  .topbar #admin-menu-btn{ padding:6px 9px; font-size:0; gap:0; }
+  .topbar #admin-menu-btn svg{ width:15px; height:15px; }
+  .topbar #admin-menu-btn .chev{ display:none; }
+  .topbar .chip-btn.ghost{ padding:6px 10px; font-size:11px; }
+}
+.seg-compact{ margin-bottom:0; }
+.seg-compact button{ padding:7px 14px; font-size:12px; }
+
+.section{ display:none; }
+.section.active{ display:block; animation: rise .35s ease both; }
