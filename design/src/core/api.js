@@ -17,3 +17,21 @@ export function api(path, opts){
     return r;
   });
 }
+
+// شمارش دقیق و تاریخی (نه محدود به limit صفحه‌بندی‌شده‌ی کش‌های محلی مثل POSTS_CACHE) —
+// با هدر count=exact پستگرست، بدون نیاز به دانلود واقعی ردیف‌ها، از Content-Range می‌خونیم
+// column پیش‌فرض 'id'ه (همه‌ی جدول‌های اصلی این ستون رو دارن)؛ برای Viewهایی
+// که ستون id ندارن (مثل newspaper_unique_slugs، migration_030)، باید صریح
+// یه ستون واقعاً موجود پاس داده بشه — وگرنه PostgREST با ۴۰۰ رد می‌کنه.
+export async function fetchExactCount(path, column){
+  try{
+    const col = column || 'id';
+    const sep = path.includes('?') ? '&' : '?';
+    const r = await api(path + sep + 'select=' + col + '&limit=1', { headers: { Prefer: 'count=exact', Range: '0-0' } });
+    if(!r.ok) return 0;
+    const cr = r.headers.get('content-range');
+    if(!cr) return 0;
+    const total = cr.split('/')[1];
+    return total === '*' ? 0 : (parseInt(total, 10) || 0);
+  }catch(e){ return 0; }
+}

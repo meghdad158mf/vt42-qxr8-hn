@@ -1,19 +1,19 @@
 // بدنه‌ی برنامه — کل اسکریپت قبلی صفحه، حالا یه ES module. جدا شده تا الان: هسته در core/
 // (مرحله‌ی ۳، ۵.۳۲.۲) و اجزای رابط در ui/ (مرحله‌ی ۴، ۵.۳۲.۳: پنجره‌ها، پیام/تأیید، منوها، تب‌بارها،
 // نمایشگر سند/عکس، صفحه‌بندی…)، داده‌ی مشترک در data/، و عرصه‌ها در features/: اخبار و رویدادها (مرحله‌ی ۵،
-// ۵.۳۲.۴–۵)، کنشگری مجازی، یادداشت‌ها و مواضع مراجع و علماء (مرحله‌ی ۶، ۵.۳۲.۶). بقیه در مرحله‌های بعد به
-// features/<بخش> و admin/ (CLAUDE.md، «ماژولار کردن»).
+// ۵.۳۲.۴–۵)، کنشگری مجازی، یادداشت‌ها و مواضع مراجع و علماء (مرحله‌ی ۶، ۵.۳۲.۶)، درباره حوزه، قوانین،
+// برنامه مدارس، بسته تحلیلی، اطلاعیه‌ها و صفحه‌ی نخست (مرحله‌ی ۷، ۵.۳۲.۷). اینجا مونده: ورود، ناوبری و
+// بارگذاری داده، و بخش‌های مدیریت (مرحله‌ی ۸ به admin/) — CLAUDE.md، «ماژولار کردن».
 import { SUPABASE_URL, SUPABASE_ANON_KEY, APP_VERSION } from './core/config.js';
 import { authToken, currentRole, saveSession, clearSession } from './core/session.js';
-import { api, SESSION_EXPIRED, resetSessionExpired } from './core/api.js';
+import { api, SESSION_EXPIRED, resetSessionExpired, fetchExactCount } from './core/api.js';
 import { setErrorContext } from './core/error-reporting.js';
-import { escAttr, escHtml, safeUrl, claimsTextDisplay, toFaDigits, faTitle, faNum, faDigitsToEn, faDigitsToLatin, needsTranslation } from './core/text.js';
-import { searchNorm, searchHay } from './core/search.js';
-import { JALALI_MONTHS, calParts, jalaliMonthStarts, iranTodayStartMs, tehranDayDiff, newsRelTime, matchesTime } from './core/date.js';
+import { escAttr, escHtml, safeUrl, toFaDigits, faTitle, faNum, faDigitsToEn, faDigitsToLatin, needsTranslation } from './core/text.js';
+import { searchNorm } from './core/search.js';
+import { calParts, jalaliMonthStarts, newsRelTime } from './core/date.js';
 import { nidValid, normalizeIrMobile } from './core/validate.js';
 import { navMark, navRestoring, startRouter, restoreScrollY } from './core/router.js';
 import { lsGet, lsSet } from './core/local-store.js';
-import { signStoragePaths } from './core/signed-urls.js';
 import { ICONS } from './ui/icons.js';
 import { setupAmbient } from './ui/ambient.js';
 import { showToast } from './ui/toast.js';
@@ -21,33 +21,42 @@ import { uiConfirm, setupConfirm } from './ui/confirm.js';
 import { bindModal } from './ui/modal.js';
 import { setupMenus, closeNavMenu, closeAdminMenu } from './ui/menus.js';
 import { setupTabBars, updateTabInk, restoreLastTab, peekTabBar } from './ui/tabs.js';
-import { scrollToListTop, updateToTop, setupToTop } from './ui/scroll.js';
+import { setupToTop } from './ui/scroll.js';
 import { setupKeyboardButtons } from './ui/keyboard.js';
-import { wireMediaViewerClicks, setupMediaViewer } from './ui/media-viewer.js';
-import { openDocViewer, setupDocViewer } from './ui/doc-viewer.js';
+import { setupMediaViewer } from './ui/media-viewer.js';
+import { setupDocViewer } from './ui/doc-viewer.js';
 import { setupJalaliRange } from './ui/jalali-range.js';
-import { renderPagination, NEWS_PAGE_SIZE } from './ui/pagination.js';
 import { setMobileFilterCount, setupMobileFilters } from './ui/mobile-filters.js';
-import { cardAdminControls } from './ui/card-controls.js';
 import { CATEGORIES, CHANNELS, POSTS_CACHE, REGIONS, catNameOf, chById, chInitials, chName, regionNameOf, setCategories, setChannels, setPostsCache, setRegions, HIDDEN_POST_IDS, loadHiddenPostIds, CHANNEL_PROFILE_GROUPS, PROFILE_GROUPS, setChannelProfileGroups, setProfileGroups } from './data/store.js';
 import { setupPostTools } from './features/news/post-tools.js';
-import { NEWS_CURRENT_TAB, NEWS_TABS, activateNewsStudy, goToNewsTab, placeNewsStudyPanel, setNewsPageTab, setupNewsTabs } from './features/news/news-tabs.js';
-import { NEWS_PLATFORM_ICON, NEWS_PLATFORM_LABEL } from './ui/platforms.js';
+import { NEWS_CURRENT_TAB, NEWS_TABS, goToNewsTab, setNewsPageTab, setupNewsTabs } from './features/news/news-tabs.js';
+import { NEWS_PLATFORM_LABEL } from './ui/platforms.js';
 import { NEWS_TOPICS, loadNewsTopics, newsState, populateNewsSourceOptions, renderNewsFeed, renderNewsRegionChips, renderNewsTopicRow, setupNewsFeed } from './features/news/news-feed.js';
 import { loadNewsPickEdits, setupNewsPicks } from './features/news/picks.js';
 import { DOSSIER_TOPICS, DOSSIER_TOPIC_POSTS, loadDossierTopicPosts, loadDossierTopics, renderDossierTab, setupDossierTab } from './features/news/dossier.js';
 import { loadNewsAiInsights } from './features/news/insights.js';
 import { NEWSLETTER_POSTS, loadNewsletterPosts, setNewsletterPosts, setupNewsletter } from './features/news/newsletter.js';
-import { NEWSPAPERS, loadNewspapers, renderNewspaperDateTabs, renderNewspapers, setupNewspapers } from './features/news/newspapers.js';
+import { loadNewspapers, renderNewspaperDateTabs, renderNewspapers, setupNewspapers } from './features/news/newspapers.js';
 import { renderNewsAnalytics, setupNewsAnalytics } from './features/news/analytics.js';
 import { ARCHIVE_REPORTS, deleteArchiveReport, loadArchiveReports, renderArchiveReports } from './features/people/archive.js';
 import { populatePostFilters, postsGroupFilter, postsSelectedChannels, postsTime, renderPosts, setupPostsFeed } from './features/cyberspace/posts-feed.js';
 import { goToPeopleTab, setupPeopleTabs, syncPeopleTab } from './features/people/people-tabs.js';
-import { closePfChannel, openPfChannel, pfSelectedChannel, placePfPanel, populatePoliticalFiguresSourceOptions, renderPoliticalFigures, secPendingNote, secRelevant, setupProfileGallery, resetPfExtraCache } from './features/people/profile-gallery.js';
+import { closePfChannel, openPfChannel, pfSelectedChannel, placePfPanel, populatePoliticalFiguresSourceOptions, renderPoliticalFigures, setupProfileGallery, resetPfExtraCache } from './features/people/profile-gallery.js';
 import { POS_TAB, POS_TAB_INFO, POS_TAB_LABEL, goToPosTab, setPosTab, setupPositionsTabs } from './features/positions/positions.js';
 import { renderChannelCards, renderCyberPeopleGrid, setupCyberPeople } from './features/cyberspace/cyber-people.js';
 import { setupCardTextTap } from './ui/card-text-tap.js';
 import { setupCyberTabs } from './features/cyberspace/cyber-tabs.js';
+import { ANNOUNCEMENTS, ANN_TABLE_MISSING, annIsLive, annItemHtml, loadAnnouncements, renderAnnBar, setupInstallPrompt } from './features/announcements/ann-bar.js';
+import { HAWZA_TAB, HAWZA_TAB_INFO, goToHawzaTab, setHawzaTab, setupHawzaTabs } from './features/hawza/hawza-tabs.js';
+import { setupHawzaAbout } from './features/hawza/hawza-about.js';
+import { maybeShowIntro, setupIntro } from './features/home/intro.js';
+import { LAWS_SOURCES, lawsSourceOf, openLaws, renderLaws, resetLawsCache, setupLaws } from './features/laws/laws.js';
+import { layoutOrbit2, setupHome } from './features/home/home.js';
+import { MAGAZINES, deleteMagazine, loadMagazines, renderMagazines } from './features/reports/magazines.js';
+import { renderDashHeroStats } from './features/home/hero-stats.js';
+import { SCHOOL_REPORTS, deleteSchoolReport, loadSchoolReports, renderSchoolReports, schoolReportSrc, setupSchoolReports } from './features/schools/school-reports.js';
+import { setupDatebar } from './features/home/datebar.js';
+import { SITE_VIS_ITEMS } from './data/site-sections.js';
 
 // ⚠️ پل موقت: دستگیره‌های درون HTML (onclick="…" در صفحه و در HTMLهایی که همین فایل می‌سازه)
 // فقط تابع سراسری رو می‌بینن، ولی تابع‌های یه module سراسری نیستن. این فهرست تا جایگزینی همه‌ی
@@ -57,15 +66,14 @@ Object.assign(window, {
   addCrawlSuggestion, addDossierManualPost, autoMatchDossierTopic, bulkChanBack, bulkChanPreview,
   bulkChanSave, changePassword, closeUserEditor, copyJobLog, deleteCrawlSite, deleteDossierTopic,
   deleteDossierTopicPost, downloadBackup, editDossierTopicKeywords, exportPosts, exportReport,
-  goToUploadsTab, handleLogin, hideHawzaMention, hidePost, ignoreCrawlSuggestion, introGo, logout,
-  openBulkChan, openIntro, openSiteSettingsPanel, openUserEditor, otpBack, otpChooseSms, otpResend,
-  otpShow, otpSubmit, publishAnnouncement, renderDossierTopicAdminList, renderSystemStatus,
-  retryLoadAll, retryMaintenance, saveAlertSettings, saveCrawlSite, saveDossierTopicKeywords,
-  saveHiddenSections, saveMaintenance, saveMediaRetention, saveSmsConfig, saveUser,
-  saveViewerPasswordLogin, scrollToDomainGrid, scrollToPackageCard, searchDossierManualAdd, sendSmsTest,
-  setHawzaTab, setUploadsTab, submitFeedback, subscribeNotify, switchSection, testAlertEmail,
-  toggleCrawlSite, toggleDossierTopicActive, toggleDossierTopicPostExcluded, toggleMoreText,
-  togglePasswordVisibility, translateMention, unhidePost, unlockLogin, usrDownload
+  goToUploadsTab, handleLogin, hidePost, ignoreCrawlSuggestion, logout, openBulkChan,
+  openSiteSettingsPanel, openUserEditor, otpBack, otpChooseSms, otpResend, otpShow, otpSubmit,
+  publishAnnouncement, renderDossierTopicAdminList, renderSystemStatus, retryLoadAll, retryMaintenance,
+  saveAlertSettings, saveCrawlSite, saveDossierTopicKeywords, saveHiddenSections, saveMaintenance,
+  saveMediaRetention, saveSmsConfig, saveUser, saveViewerPasswordLogin, searchDossierManualAdd,
+  sendSmsTest, setUploadsTab, submitFeedback, switchSection, testAlertEmail, toggleCrawlSite,
+  toggleDossierTopicActive, toggleDossierTopicPostExcluded, togglePasswordVisibility, unhidePost,
+  unlockLogin, usrDownload
 });
 
 // خطاهای مرورگر: جای فعلی کاربر و دستگاه برای گزارش (core/error-reporting.js)
@@ -130,49 +138,6 @@ async function retryLoadAll(){
   btn.disabled = false; btn.textContent = 'تلاش دوباره';
 }
 
-// شمارش دقیق و تاریخی (نه محدود به limit صفحه‌بندی‌شده‌ی کش‌های محلی مثل POSTS_CACHE) —
-// با هدر count=exact پستگرست، بدون نیاز به دانلود واقعی ردیف‌ها، از Content-Range می‌خونیم
-// column پیش‌فرض 'id'ه (همه‌ی جدول‌های اصلی این ستون رو دارن)؛ برای Viewهایی
-// که ستون id ندارن (مثل newspaper_unique_slugs، migration_030)، باید صریح
-// یه ستون واقعاً موجود پاس داده بشه — وگرنه PostgREST با ۴۰۰ رد می‌کنه.
-async function fetchExactCount(path, column){
-  try{
-    const col = column || 'id';
-    const sep = path.includes('?') ? '&' : '?';
-    const r = await api(path + sep + 'select=' + col + '&limit=1', { headers: { Prefer: 'count=exact', Range: '0-0' } });
-    if(!r.ok) return 0;
-    const cr = r.headers.get('content-range');
-    if(!cr) return 0;
-    const total = cr.split('/')[1];
-    return total === '*' ? 0 : (parseInt(total, 10) || 0);
-  }catch(e){ return 0; }
-}
-
-// برای شمارش «خبرگزاری» توی هرو صفحه‌ی نخست — تعداد عنوان‌های یکتای روزنامه
-// (از کل جدول، نه فقط چند روز اخیر مثل NEWSPAPERS نمایشی) رو می‌خواد. یکتاسازی
-// با View دیتابیسی newspaper_unique_slugs (migration_030) انجام می‌شه، نه با
-// گرفتن کل ستون slug و Set کردنش توی جاوااسکریپت — چون اون روش قبلی به سقف
-// «Max Rows» سوپابیس (۱۰۰۰ ردیف واقعی در هر پاسخ، مستقل از limit کلاینت) می‌خورد
-// و بعد از رد شدن جدول newspapers از ۱۰۰۰ ردیف، عنوان‌های یکتای جدیدتر از
-// شمارش جا می‌موندن. الان فقط *تعداد* رو با همون ترفند Content-Range
-// (fetchExactCount، بدون انتقال ردیف‌های واقعی) می‌گیریم — این هیچ‌وقت به آن
-// سقف نمی‌خوره.
-// «منبع رصد» صفحه‌ی نخست = منابعی که الان رصد می‌شن، هر منبع یک‌بار (خواست کاربر، ۵.۳۰.۰):
-// منابع فعال «مدیریت منابع» + روزنامه‌های ۳۰ روز اخیر + سایت‌های خزنده‌ی «درباره حوزه» که در
-// «مدیریت منابع» نیستن — RPC monitored_source_counts (migration_049؛ crawl_sites فقط برای مدیر
-// خواندنیه). تا migration اجرا نشده: منابع فعال + روزنامه‌های ۳۰ روز اخیر از NEWSPAPERS.
-async function fetchMonitoredSourceCount(){
-  try{
-    const r = await api('/rpc/monitored_source_counts', { method:'POST', body:'{}' });
-    if(r.ok){
-      const d = await r.json();
-      if(d && typeof d.channels === 'number') return d.channels + (+d.newspapers || 0) + (+d.crawl || 0);
-    }
-  }catch(e){}
-  const since = new Date(iranTodayStartMs() - 30 * 864e5).toISOString().slice(0, 10);
-  return CHANNELS.filter(c=>c.active !== false).length
-    + new Set(NEWSPAPERS.filter(n=>n.edition_date >= since).map(n=>n.slug)).size;
-}
 
 async function doLogin(password){
   const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/login', {
@@ -219,32 +184,7 @@ function logout(){
 }
 
 
-async function subscribeNotify(){
-  const input = document.getElementById('notify-phone');
-  const btn = document.getElementById('notify-subscribe-btn');
-  const phone = normalizeIrMobile(input.value);
-  if(!/^09\d{9}$/.test(phone)){ showToast('شماره موبایل معتبر نیست — مثال: ۰۹۱۲xxxxxxx'); return; }
-  btn.disabled = true;
-  try{
-    const r = await api('/notify_subscribers', {
-      method: 'POST',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ phone }),
-    });
-    if(r.ok){
-      showToast('ثبت شد — به‌محض انتشار بسته جدید به شما پیامک اطلاع‌رسانی ارسال می‌شود');
-      input.value = '';
-    }else if(r.status === 409){
-      showToast('این شماره قبلاً ثبت شده است');
-    }else{
-      showToast('ثبت‌نام ناموفق بود — دوباره امتحان کنید');
-    }
-  }catch(e){
-    showToast('خطا در ارتباط با سرور');
-  }finally{
-    btn.disabled = false;
-  }
-}
+setupHome();
 
 // منوها: رفتن از دکمه‌های data-nav (منوی بخش‌ها) و data-admin-go (منوی مدیریت)
 function navMenuGo(key){
@@ -524,37 +464,7 @@ function focusLoginPassword(){
   try{ if(window.matchMedia('(pointer:fine)').matches) document.getElementById(id).focus({ preventScroll:true }); }catch(e){}
 }
 
-let INTRO_STEP = 0;
-function introRender(){
-  document.querySelectorAll('#intro-modal .intro-step').forEach(el=>{ el.hidden = Number(el.dataset.step) !== INTRO_STEP; });
-  document.querySelectorAll('#intro-modal .intro-dots span').forEach((d, i)=>d.classList.toggle('on', i === INTRO_STEP));
-  document.getElementById('intro-prev').style.visibility = INTRO_STEP ? 'visible' : 'hidden';
-  document.getElementById('intro-next').textContent = INTRO_STEP === 2 ? 'رفتن به «در یک نگاه»' : 'بعدی';
-}
-function introGo(d){
-  if(INTRO_STEP === 2 && d > 0){
-    // بستن پنجره یه history.back() می‌زنه (ورودی «modal» دکمه‌ی برگشت)؛ رفتن به تب باید بعد از
-    // اون popstate باشه، وگرنه برگشت دوباره صفحه‌ی قبلی رو برمی‌گردونه
-    let done = false; const go = ()=>{ if(done) return; done = true; goToNewsTab('analytics'); };
-    window.addEventListener('popstate', ()=>setTimeout(go, 0), { once:true });
-    closeIntro(); setTimeout(go, 600);
-    return;
-  }
-  INTRO_STEP = Math.max(0, Math.min(2, INTRO_STEP + d));
-  introRender();
-}
-function openIntro(){ INTRO_STEP = 0; introRender(); document.getElementById('intro-modal').classList.add('active'); }
-function closeIntro(){
-  document.getElementById('intro-modal').classList.remove('active');
-  try{ localStorage.setItem('jarian_intro_seen', '1'); }catch(e){}
-}
-bindModal('intro-modal', closeIntro);
-// بار اول بیننده در این مرورگر (مدیر سایت رو می‌شناسه) — نه وقتی پنجره‌ی دیگری بازه
-function maybeShowIntro(){
-  if(currentRole === 'app_admin') return;
-  try{ if(localStorage.getItem('jarian_intro_seen')) return; }catch(e){ return; }
-  setTimeout(()=>{ if(!document.querySelector('.modal-overlay.active') && document.getElementById('view-dash').classList.contains('active')) openIntro(); }, 900);
-}
+setupIntro();
 
 let PENDING_DELETE_CHANNEL = null;
 function openDeleteChannelModal(ch){
@@ -647,399 +557,18 @@ export function switchSection(key){
   peekTabBar(key);
 }
 
-export function goToHawzaTab(tab){
-  if(HAWZA_TAB_INFO[tab]){ HAWZA_TAB = tab; lsSet('jarian_last_hawza_tab', tab); }
-  switchSection('hawza'); // خودش تب HAWZA_TAB رو باز می‌کنه
-}
-
 setupTabBars();
 
-// «درباره حوزه» دو تب داره: «اخبار حوزه» (پنل مشترک اخبار) و «آنچه درباره حوزه
-// گفته می‌شود» (خزنده، hawza_mentions — ۵.۲۳.۰)
-const HAWZA_TAB_INFO = {
-  news: 'اخبار سیاسی و اجتماعی منتشرشده در پایگاه‌های خبری حوزوی.',
-  about: 'خبرهای سایت‌های خبری و پست‌های کانال‌های ایتا، تلگرام و بله که درباره‌ی حوزه، روحانیت، مراجع تقلید و طلاب هستند؛ هر ۳ ساعت به‌صورت خودکار جست‌وجو می‌شوند.',
-};
-let HAWZA_TAB = (t=>HAWZA_TAB_INFO[t] ? t : 'news')(lsGet('jarian_last_hawza_tab', 'news'));
-function setHawzaTab(tab){
-  if(!HAWZA_TAB_INFO[tab]) tab = 'news';
-  if(viewerHidden('hawza/' + tab)) tab = firstVisibleTab('hawza') || tab;
-  navMark();
-  HAWZA_TAB = tab;
-  lsSet('jarian_last_hawza_tab', tab);
-  document.getElementById('hawza-tab-news').classList.toggle('active', tab === 'news');
-  document.getElementById('hawza-tab-about').classList.toggle('active', tab === 'about');
-  const sub = document.querySelector('#hawza-tab-subtitle span');
-  if(sub) sub.textContent = HAWZA_TAB_INFO[tab];
-  document.getElementById('hawza-about-panel').style.display = tab === 'about' ? '' : 'none';
-  if(tab === 'about'){
-    placeNewsStudyPanel('overview'); // پنل مشترک اخبار سر جای خودش (و مخفی) برگرده
-    openHawzaAbout();
-    return;
-  }
-  placeNewsStudyPanel('hawza');
-  document.getElementById('news-study-panel').style.display = '';
-  document.getElementById('news-feed').classList.remove('social-tab');
-  activateNewsStudy('hawza');
-}
+setupHawzaTabs();
 
 setupPositionsTabs();
 
-// ---- «قوانین و مصوبات» (۵.۲۸.۰، مدار دوم) ----
-// بدون تب: یک فید از منابع show_in_laws با فیلتر «مرجع صادرکننده» (channels.laws_source).
-// داده فقط با باز شدن بخش (کوئری اختصاصی، نه POSTS_CACHE — منابع کم‌تکرارن) و ۱۰ دقیقه کش.
-var LAWS_SOURCES = ['حوزه علمیه خراسان', 'دولت', 'مجلس', 'قوه قضاییه', 'شوراهای عالی', 'استان خراسان رضوی', 'سایر'];
-var LAWS_POSTS = null, LAWS_AT = 0, LAWS_KEY = '', LAWS_LOADING = null;
-var LAWS_STATE = { q:'', time:'', src:'', page:1, key:'' };
-function lawsChannels(){ return CHANNELS.filter(c=>c.show_in_laws); }
-function lawsSourceOf(ch){ return (ch && String(ch.laws_source || '').trim()) || 'سایر'; }
-async function loadLawsPosts(force){
-  const ids = lawsChannels().map(c=>c.id).sort((a,b)=>a-b);
-  const key = ids.join(',');
-  if(!force && LAWS_POSTS && key === LAWS_KEY && Date.now() - LAWS_AT < 600000) return;
-  if(!ids.length){ LAWS_POSTS = []; LAWS_KEY = key; LAWS_AT = Date.now(); return; }
-  if(LAWS_LOADING) return LAWS_LOADING;
-  LAWS_LOADING = (async()=>{
-    try{
-      const r = await api('/posts?select=*&channel_id=in.(' + key + ')&order=scraped_at.desc&limit=600');
-      if(r.ok){ LAWS_POSTS = (await r.json()).filter(p=>!p.hidden_at); LAWS_KEY = key; LAWS_AT = Date.now(); }
-      else if(!LAWS_POSTS) LAWS_POSTS = [];
-    }catch(e){ if(!LAWS_POSTS) LAWS_POSTS = []; }
-    finally{ LAWS_LOADING = null; }
-  })();
-  return LAWS_LOADING;
-}
-async function openLaws(){
-  renderLaws();
-  await loadLawsPosts();
-  renderLaws();
-}
-function goLawsPage(p){
-  LAWS_STATE.page = p;
-  renderLaws();
-  scrollToListTop(document.querySelector('#sec-laws .laws-filters'));
-}
-function renderLaws(){
-  const feed = document.getElementById('laws-feed'), empty = document.getElementById('laws-empty');
-  if(!feed) return;
-  const chans = lawsChannels();
-  const byId = new Map(chans.map(c=>[c.id, c]));
-  const counts = {};
-  chans.forEach(c=>{ const s = lawsSourceOf(c); counts[s] = (counts[s] || 0) + 1; });
-  const srcs = LAWS_SOURCES.filter(s=>counts[s]).concat(Object.keys(counts).filter(s=>!LAWS_SOURCES.includes(s)));
-  if(LAWS_STATE.src && !counts[LAWS_STATE.src]) LAWS_STATE.src = '';
-  const chips = document.getElementById('laws-source-chips');
-  chips.style.display = srcs.length > 1 ? '' : 'none';
-  chips.innerHTML = [`<button type="button" class="news-topic-chip${LAWS_STATE.src ? '' : ' active'}" data-src="">همه</button>`]
-    .concat(srcs.map(s=>`<button type="button" class="news-topic-chip${LAWS_STATE.src === s ? ' active' : ''}" data-src="${escAttr(s)}">${escHtml(s)}</button>`)).join('');
-  if(LAWS_POSTS === null){
-    feed.innerHTML = '';
-    empty.textContent = 'در حال بارگذاری…'; empty.style.display = 'block';
-    renderPagination('laws-pagination', 1, 1, goLawsPage);
-    return;
-  }
-  const q = searchNorm(LAWS_STATE.q);
-  const filtered = LAWS_POSTS.filter(p=>{
-    const ch = byId.get(p.channel_id); if(!ch) return false;
-    if(HIDDEN_POST_IDS.has(p.id)) return false;
-    if(!secRelevant(p)) return false; // فقط مصوبه/موضع رسمی به تشخیص هوش مصنوعی (۵.۲۹.۰)
-    if(LAWS_STATE.src && lawsSourceOf(ch) !== LAWS_STATE.src) return false;
-    if(!matchesTime(p.scraped_at, LAWS_STATE.time)) return false;
-    if(q && !searchHay(p).includes(q)) return false;
-    return true;
-  });
-  const key = [LAWS_STATE.q, LAWS_STATE.time, LAWS_STATE.src].join('|');
-  if(key !== LAWS_STATE.key){ LAWS_STATE.key = key; LAWS_STATE.page = 1; }
-  const pages = Math.max(1, Math.ceil(filtered.length / NEWS_PAGE_SIZE));
-  if(LAWS_STATE.page > pages) LAWS_STATE.page = pages;
-  const list = filtered.slice((LAWS_STATE.page - 1) * NEWS_PAGE_SIZE, LAWS_STATE.page * NEWS_PAGE_SIZE);
-  renderPagination('laws-pagination', LAWS_STATE.page, pages, goLawsPage);
-  if(!filtered.length){
-    empty.textContent = !chans.length
-      ? (currentRole === 'app_admin' ? 'هنوز منبعی برای این بخش انتخاب نشده است. در «تنظیمات بخش‌ها ← مدیریت منابع»، بخش «قوانین و مصوبات» را برای منابع موردنظر تیک بزنید.' : 'هنوز مطلبی در این بخش منتشر نشده است.')
-      : !LAWS_POSTS.length ? 'هنوز مطلبی از منابع این بخش جمع‌آوری نشده است؛ مطالب با اجرای بعدی جمع‌آوری می‌رسند.'
-      : !LAWS_POSTS.some(secRelevant) ? 'هنوز مصوبه یا موضع رسمی تازه‌ای ثبت نشده است.'
-      : 'مطلبی با این فیلتر پیدا نشد.';
-    const note = secPendingNote(LAWS_POSTS);
-    if(note) empty.textContent += ' ' + note;
-    empty.style.display = 'block';
-  }else{
-    const note = secPendingNote(LAWS_POSTS);
-    empty.textContent = note; empty.style.display = note ? 'block' : 'none';
-  }
-  const admin = currentRole === 'app_admin';
-  feed.innerHTML = list.map(p=>{
-    const ch = byId.get(p.channel_id) || {};
-    const hasThumb = !!p.media_path && p.media_type === 'photo';
-    return `
-    <div class="news-card laws-card">
-      ${hasThumb ? `<div class="news-thumb"><img src="${escAttr(p.media_path)}" alt="" loading="lazy" data-viewer-kind="image" data-viewer-src="${escAttr(p.media_path)}" /></div>` : ''}
-      <div class="news-body">
-        <div class="news-head">
-          <span class="news-source">${escHtml(ch.title || ch.username || '؟')}</span>
-          <span class="news-platform">${NEWS_PLATFORM_ICON[ch.platform] || ''}${NEWS_PLATFORM_LABEL[ch.platform] || ch.platform || ''}</span>
-          <span class="news-time">${newsRelTime(p.posted_at || p.scraped_at)}</span>
-        </div>
-        ${p.title ? `<h4 class="news-title" dir="auto">${escHtml(p.title)}</h4>` : ''}
-        <p class="news-text" id="lw-post-text-${p.id}">${claimsTextDisplay(p.text)}</p>
-        <button class="news-more" onclick="toggleMoreText('lw', ${p.id})" id="lw-post-more-${p.id}">
-          نمایش بیشتر
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="news-foot">
-          <div><span class="news-topic">${escHtml(lawsSourceOf(ch))}</span></div>
-          <div>${p.link ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}</div>
-        </div>
-        ${admin ? `<div class="post-admin-row">${postHideBtnHtml(p)}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-  wireMediaViewerClicks(feed);
-  updateMoreButtons('lw', list);
-  if(document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(()=>updateMoreButtons('lw', list));
-}
-// «نمایش بیشتر» عمومی برای فیدهای تازه (پیشوند id جدا تا با فیدهای دیگر تصادم نکند)
-function updateMoreButtons(prefix, list){
-  list.forEach(p=>{
-    const t = document.getElementById(prefix + '-post-text-' + p.id), b = document.getElementById(prefix + '-post-more-' + p.id);
-    if(t && b) b.style.display = t.scrollHeight > t.clientHeight + 1 ? '' : 'none';
-  });
-}
-function toggleMoreText(prefix, id){
-  const t = document.getElementById(prefix + '-post-text-' + id), b = document.getElementById(prefix + '-post-more-' + id);
-  if(!t || !b) return;
-  const open = t.classList.toggle('expanded');
-  b.classList.toggle('open', open);
-  b.firstChild.textContent = open ? 'بستن ' : 'نمایش بیشتر ';
-}
-document.getElementById('laws-search').addEventListener('input', e=>{ LAWS_STATE.q = e.target.value; renderLaws(); });
-document.getElementById('laws-time-seg').addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || b.dataset.t === undefined) return;
-  document.querySelectorAll('#laws-time-seg > button').forEach(x=>x.classList.toggle('active', x === b));
-  LAWS_STATE.time = b.dataset.t; renderLaws();
-});
-document.getElementById('laws-source-chips').addEventListener('click', e=>{
-  const b = e.target.closest('[data-src]'); if(!b) return;
-  LAWS_STATE.src = b.dataset.src; renderLaws();
-});
+setupLaws();
 
-// ---- مدار دوم صفحه‌ی نخست: سوراخ‌های mask پشت کارت‌های دیده‌شده ----
-// کارت‌ها وسط‌چین‌اند (فاصله‌ی مراکز ۱۸۶px)؛ با کارت پنهان/«به‌زودی» (بیننده) جای
-// سوراخ‌ها از نو حساب می‌شه تا قوس پشت جای خالی بریده دیده نشه
-function layoutOrbit2(){
-  const grid = document.querySelector('.domain-grid-2');
-  if(!grid) return;
-  const cards = [...grid.querySelectorAll('.domain-card')].filter(c=>getComputedStyle(c).display !== 'none');
-  grid.classList.toggle('is-empty', !cards.length);
-  const g = document.getElementById('dom-orbit2-holes');
-  if(!g) return;
-  const n = cards.length;
-  g.innerHTML = cards.map((c, i)=>`<circle cx="${(i - (n - 1) / 2) * 186}" cy="74" r="58" fill="url(#dom-orbit2-hole)"/>`).join('');
-}
-
-// ---- «آنچه درباره حوزه گفته می‌شود» (خزنده، ۵.۲۳.۰) ----
-// داده: hawza_mentions (scripts/crawl_hawza.py، migration_041). فقط با باز شدن
-// همین تب گرفته می‌شه (نه در loadAll) و تا ۱۰ دقیقه کش می‌مونه.
-let HAB_ROWS = null, HAB_LOADED_AT = 0, HAB_LOADING = null, HAB_ERROR = '';
-const HAB_STATE = { q:'', time:'', kind:'', scope:'', site:'', page:1 };
-// کلید منبع در فیلتر: سایت = دامنه، پست شبکه‌ی اجتماعی = نام کانال
-const habSourceKey = x => x.kind === 'social' ? 'ch:' + (x.site_name || x.site) : x.site;
-const HAB_PAGE_SIZE = 12;
-// همون عبارت‌های TERMS در scripts/crawl_hawza.py — فقط برای پررنگ کردن در گزیده‌ی
-// متن؛ با تغییر فهرست خزنده، این هم هم‌سو بشه. [\s‌]+ = فاصله یا نیم‌فاصله
-const HAB_HL_RX = (()=>{
-  const pats = ['حوزه(?:[\\s\\u200c]+(?:ی|های|ها)|\\u200c(?:ی|های|ها))?[\\s\\u200c]+علمیه', 'حوزوی(?:ان|ها)?', 'طلاب', 'طلبه(?:[\\s\\u200c]*(?:ها|ای))?',
-    'روحانیت', 'روحانیون', 'مراجع(?:[\\s\\u200c]+عظام)?(?:[\\s\\u200c]+تقلید)?', 'مرجع[\\s\\u200c]+تقلید', 'جامعه[\\s\\u200c]+مدرسین',
-    'شورای[\\s\\u200c]+عالی[\\s\\u200c]+حوزه(?:[\\s\\u200c]*(?:های|ها))?', 'مدارس[\\s\\u200c]+علمیه', 'مدرسه(?:[\\s\\u200c]*ی)?[\\s\\u200c]+علمیه', 'معممین', 'عمامه'];
-  return new RegExp('(?<![\\p{L}\\p{N}])(?:' + pats.join('|').replace(/ی/g, '[یي]').replace(/ک/g, '[کك]') + ')(?![\\p{L}\\p{N}])', 'gu');
-})();
-function habHighlight(text){
-  return escHtml(text).replace(HAB_HL_RX, m=>`<mark class="hab-hl">${m}</mark>`);
-}
-async function loadHawzaMentions(force){
-  if(!force && HAB_ROWS && Date.now() - HAB_LOADED_AT < 600000) return;
-  if(HAB_LOADING) return HAB_LOADING;
-  HAB_LOADING = (async()=>{
-    try{
-      const r = await api('/hawza_mentions?select=id,url,site,site_name,title,excerpt,kind,matched_terms,hits,in_title,published_at,scraped_at,hidden_at&order=scraped_at.desc&limit=600');
-      if(!r.ok){
-        HAB_ERROR = (r.status === 404 || r.status === 400) ? 'missing' : 'error';
-        HAB_ROWS = HAB_ROWS || [];
-        return;
-      }
-      HAB_ERROR = '';
-      HAB_ROWS = (await r.json()).filter(x=>!x.hidden_at);
-      HAB_LOADED_AT = Date.now();
-    }catch(e){
-      HAB_ERROR = 'error'; HAB_ROWS = HAB_ROWS || [];
-    }finally{ HAB_LOADING = null; }
-  })();
-  return HAB_LOADING;
-}
-function habTime(x){ return x.published_at || x.scraped_at; }
-async function openHawzaAbout(){
-  if(!HAB_ROWS) document.getElementById('hab-feed').innerHTML = '<p class="hab-loading">در حال دریافت خبرها…</p>';
-  await loadHawzaMentions();
-  populateHabSites();
-  renderHawzaAbout();
-}
-function populateHabSites(){
-  const sel = document.getElementById('hab-site');
-  const counts = {};
-  (HAB_ROWS || []).filter(x=>!HAB_STATE.kind || (HAB_STATE.kind === 'social') === (x.kind === 'social')).forEach(x=>{
-    const k = habSourceKey(x);
-    counts[k] = counts[k] || { name: (x.site_name || x.site) + (x.kind === 'social' ? ' (' + (NEWS_PLATFORM_LABEL[x.site] || x.site) + ')' : ''), n:0 };
-    counts[k].n++;
-  });
-  const opts = Object.entries(counts).sort((a,b)=>b[1].n - a[1].n);
-  sel.innerHTML = '<option value="">همه‌ی منابع</option>' + opts.map(([k,v])=>`<option value="${escAttr(k)}">${escHtml(v.name)} (${toFaDigits(v.n)})</option>`).join('');
-  sel.value = counts[HAB_STATE.site] ? HAB_STATE.site : '';
-  HAB_STATE.site = sel.value;
-}
-function filteredHawzaMentions(){
-  const terms = HAB_STATE.q.split(/[,،]/).map(searchNorm).filter(Boolean);
-  return (HAB_ROWS || []).filter(x=>{
-    if(HAB_STATE.kind && (HAB_STATE.kind === 'social') !== (x.kind === 'social')) return false;
-    if(HAB_STATE.site && habSourceKey(x) !== HAB_STATE.site) return false;
-    if(HAB_STATE.scope === 'title' && !x.in_title) return false;
-    if(HAB_STATE.time){
-      const d = tehranDayDiff(habTime(x));
-      if(HAB_STATE.time === 'today' && d !== 0) return false;
-      if(HAB_STATE.time === 'yesterday' && d !== 1) return false;
-      if(HAB_STATE.time === 'week' && d > 6) return false;
-    }
-    if(terms.length){
-      const hay = searchNorm((x.title || '') + ' ' + (x.excerpt || '') + ' ' + (x.site_name || ''));
-      if(!terms.some(t=>hay.includes(t))) return false;
-    }
-    return true;
-  }).sort((a,b)=>String(habTime(b) || '').localeCompare(String(habTime(a) || '')));
-}
-function renderHawzaAbout(){
-  const feed = document.getElementById('hab-feed');
-  const empty = document.getElementById('hab-empty');
-  const sum = document.getElementById('hab-summary');
-  setMobileFilterCount('#hawza-about-panel', (HAB_STATE.time ? 1 : 0) + (HAB_STATE.kind ? 1 : 0) + (HAB_STATE.scope ? 1 : 0) + (HAB_STATE.site ? 1 : 0));
-  if(HAB_ERROR === 'missing'){
-    feed.innerHTML = ''; sum.textContent = ''; document.getElementById('hab-pagination').innerHTML = '';
-    empty.style.display = 'block';
-    empty.textContent = currentRole === 'app_admin'
-      ? 'جدول این بخش هنوز ساخته نشده است؛ فایل db/migration_041_hawza_crawler.sql را در SQL Editor سوپابیس اجرا کنید.'
-      : 'این بخش به‌زودی راه‌اندازی می‌شود.';
-    return;
-  }
-  const list = filteredHawzaMentions();
-  const total = (HAB_ROWS || []).length;
-  const totalPages = Math.max(1, Math.ceil(list.length / HAB_PAGE_SIZE));
-  HAB_STATE.page = Math.min(Math.max(1, HAB_STATE.page), totalPages);
-  const page = list.slice((HAB_STATE.page - 1) * HAB_PAGE_SIZE, HAB_STATE.page * HAB_PAGE_SIZE);
-  const siteCount = new Set(list.map(habSourceKey)).size;
-  sum.textContent = list.length
-    ? toFaDigits(list.length) + ' مطلب از ' + toFaDigits(siteCount) + ' منبع' + (list.length !== total ? ' (از ' + toFaDigits(total) + ' مطلب)' : '')
-    : '';
-  empty.style.display = list.length ? 'none' : 'block';
-  empty.textContent = HAB_ERROR === 'error' ? 'دریافت خبرها انجام نشد؛ اتصال اینترنت را بررسی و صفحه را دوباره باز کنید.'
-    : total ? 'خبری با این فیلترها پیدا نشد.'
-    : 'هنوز خبری پیدا نشده است؛ خزنده هر ۳ ساعت سایت‌های خبری و کانال‌ها را جست‌وجو می‌کند.';
-  const isAdmin = currentRole === 'app_admin';
-  feed.innerHTML = page.map(x=>{
-    const terms = (x.matched_terms || []).slice(0, 4);
-    return `
-    <article class="news-card hab-card">
-      <div class="news-body">
-        <div class="news-head">
-          <span class="news-source">${escHtml(x.site_name || x.site)}</span>
-          ${x.kind === 'social' ? `<span class="news-platform">${NEWS_PLATFORM_ICON[x.site] || ''}${escHtml(NEWS_PLATFORM_LABEL[x.site] || x.site)}</span>` : ''}
-          ${x.kind === 'link' ? '<span class="hab-flag is-link" title="این سایت در فهرست منابع خزنده نیست؛ از لینک یک مطلب مرتبط پیدا شد">یافته از لینک</span>' : ''}
-          <span class="news-time" title="${escAttr(habTime(x) ? new Date(habTime(x)).toLocaleString('fa-IR', { timeZone:'Asia/Tehran' }) : '')}">${newsRelTime(habTime(x))}</span>
-          ${x.in_title ? '<span class="hab-flag">اشاره در تیتر</span>' : ''}
-        </div>
-        <h3 class="news-title"><a id="hab-title-${Number(x.id)}" dir="auto" href="${safeUrl(x.url)}" target="_blank" rel="noopener">${habHighlight(x.title || '')}</a></h3>
-        ${x.excerpt ? `<p class="hab-excerpt" id="hab-ex-${Number(x.id)}" dir="auto">${habHighlight(x.excerpt)}</p>` : ''}
-        <div class="news-foot">
-          <div class="hab-terms">${terms.map(t=>`<span class="hab-term">${escHtml(t)}</span>`).join('')}</div>
-          <div class="hab-foot-acts">
-            ${needsTranslation({ title: x.title, text: x.excerpt }) ? `<button type="button" class="news-translate-btn" id="hab-tr-btn-${Number(x.id)}" onclick="translateMention(${Number(x.id)})">ترجمه به فارسی</button>` : ''}
-            <a class="news-link" href="${safeUrl(x.url)}" target="_blank" rel="noopener">${x.kind === 'social' ? 'مشاهده‌ی پست ↗' : 'متن کامل در منبع ↗'}</a>
-          </div>
-        </div>
-        ${isAdmin ? `<div class="hab-admin"><button type="button" class="post-hide-btn" onclick="hideHawzaMention(${Number(x.id)})" title="این خبر برای همه‌ی بیننده‌ها پنهان می‌شود (مثلاً اگر واقعاً درباره‌ی حوزه نیست)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button></div>` : ''}
-      </div>
-    </article>`;
-  }).join('');
-  renderPagination('hab-pagination', HAB_STATE.page, totalPages, goHabPage);
-}
-// ترجمه‌ی خبرهای خارجی (انگلیسی/عربی): فقط تیتر و گزیده — متن کامل ذخیره نمی‌شه.
-// ورودی تابع translate فقط شناسه است (mentionId)، مثل aiTranslate پست‌ها
-const HAB_TRANSLATION = {};
-async function translateMention(id){
-  const x = (HAB_ROWS || []).find(r=>r.id === id);
-  const btn = document.getElementById('hab-tr-btn-' + id);
-  const tEl = document.getElementById('hab-title-' + id);
-  const eEl = document.getElementById('hab-ex-' + id);
-  if(!x || !btn || !tEl) return;
-  const show = tr=>{
-    tEl.innerHTML = habHighlight(tr ? (tr.title || x.title) : x.title);
-    tEl.classList.toggle('is-translated', !!tr);
-    if(eEl){ eEl.innerHTML = habHighlight(tr ? (tr.text || x.excerpt) : x.excerpt); eEl.classList.toggle('is-translated', !!tr); }
-    btn.textContent = tr ? 'بازگشت به متن اصلی' : 'ترجمه به فارسی';
-  };
-  if(tEl.classList.contains('is-translated')){ show(null); return; }
-  if(HAB_TRANSLATION[id]){ show(HAB_TRANSLATION[id]); return; }
-  btn.textContent = 'در حال ترجمه…';
-  btn.disabled = true;
-  try{
-    const r = await fetch(SUPABASE_URL + '/functions/v1/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
-      body: JSON.stringify({ mentionId: id }),
-    });
-    if(!r.ok) throw new Error('translate failed');
-    HAB_TRANSLATION[id] = await r.json();
-    show(HAB_TRANSLATION[id]);
-  }catch(e){
-    btn.textContent = 'ترجمه به فارسی';
-    showToast('ترجمه انجام نشد؛ چند لحظه بعد دوباره امتحان کنید.');
-  }finally{
-    btn.disabled = false;
-  }
-}
-function goHabPage(p){
-  HAB_STATE.page = p;
-  renderHawzaAbout();
-  scrollToListTop(document.querySelector('#hawza-about-panel .news-filters'));
-}
-async function hideHawzaMention(id){
-  if(!await uiConfirm('این خبر برای همه‌ی بیننده‌ها پنهان شود؟\nبرای خبرهایی که خزنده اشتباهی «درباره حوزه» تشخیص داده است.')) return;
-  const r = await api('/hawza_mentions?id=eq.' + id, { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ hidden_at: new Date().toISOString() }) });
-  if(!r.ok){ showToast('پنهان کردن خبر انجام نشد؛ دوباره امتحان کنید.'); return; }
-  HAB_ROWS = (HAB_ROWS || []).filter(x=>x.id !== id);
-  populateHabSites();
-  renderHawzaAbout();
-  showToast('خبر پنهان شد');
-}
-function setupHawzaAbout(){
-  const search = document.getElementById('hab-search');
-  let t = null;
-  search.addEventListener('input', ()=>{ clearTimeout(t); t = setTimeout(()=>{ HAB_STATE.q = search.value.trim(); HAB_STATE.page = 1; renderHawzaAbout(); }, 200); });
-  [['hab-time-seg', 't', 'time'], ['hab-kind-seg', 'k', 'kind'], ['hab-scope-seg', 's', 'scope']].forEach(([id, ds, key])=>{
-    document.getElementById(id).addEventListener('click', e=>{
-      const b = e.target.closest('button');
-      if(!b || b.dataset[ds] === undefined) return;
-      document.querySelectorAll('#'+id+' > button').forEach(x=>x.classList.toggle('active', x === b));
-      HAB_STATE[key] = b.dataset[ds]; HAB_STATE.page = 1;
-      if(key === 'kind') populateHabSites();
-      renderHawzaAbout();
-    });
-  });
-  document.getElementById('hab-site').addEventListener('change', e=>{ HAB_STATE.site = e.target.value; HAB_STATE.page = 1; renderHawzaAbout(); });
-}
 setupHawzaAbout();
 
-let MAGAZINES = [];   // {id, title, issue_no, publish_date, file_type, files, cover_url, uploaded_at}
 let FEEDBACK_LIST = [];     // {id, name, message, created_at} — فقط با ورود مدیر به تب «نظرات کاربران» لود می‌شه
 let NOTIFY_SUBSCRIBERS = []; // {id, phone, created_at, notified_at} — فقط با ورود مدیر به تب «خروجی‌گیری» لود می‌شه
-let SCHOOL_REPORTS = []; // {id, title, image_url, media_storage_path, sort_order, uploaded_at, file_type, file_name} — گزارش‌های تحلیل Power BI (تصویر/PDF/اکسل)
 
 function chAvatar(id){ return `<span class="avatar">${escHtml(chInitials(id))}</span>`; }
 
@@ -2124,116 +1653,8 @@ async function loadClaimsPosts(){
   const r = await api('/posts?select=*&platform=eq.bale&order=posted_at.desc&limit=300');
   return r.ok ? await r.json() : [];
 }
-async function loadMagazines(){
-  const r = await api('/magazines?select=*&order=sort_order.asc,uploaded_at.desc');
-  MAGAZINES = r.ok ? await r.json() : [];
-}
-async function loadSchoolReports(){
-  const r = await api('/school_reports?select=*&order=sort_order.asc,uploaded_at.desc');
-  SCHOOL_REPORTS = r.ok ? await r.json() : [];
-  await signSchoolReports(SCHOOL_REPORTS);
-}
-// bucket «school-reports» از مهر ۱۴۰۵ خصوصیه (migration_038) — عکس‌ها با signed URL چندساعته
-// نمایش داده می‌شن و فایل‌های PDF/اکسل با signed URL شصت‌ثانیه‌ای باز می‌شن (مثل مجلات).
-// تا وقتی migration اجرا نشده، امضا شکست می‌خوره و نشانی عمومی قبلی (image_url) استفاده می‌شه.
-const SCHOOL_REPORT_IMG_TTL = 6 * 3600;
-function schoolReportPath(r){
-  if(r.media_storage_path) return r.media_storage_path;
-  const m = /\/school-reports\/([^?]+)$/.exec(r.image_url || '');
-  return m ? m[1] : null;
-}
-function schoolReportSrc(r){ return r.signed_url || r.image_url; }
-async function signSchoolReports(rows){
-  const paths = [...new Set(rows.map(schoolReportPath).filter(Boolean))];
-  if(!paths.length) return;
-  try{
-    const res = await fetch(SUPABASE_URL + '/storage/v1/object/sign/school-reports', {
-      method: 'POST',
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ expiresIn: SCHOOL_REPORT_IMG_TTL, paths }),
-    });
-    if(!res.ok) throw new Error('sign failed');
-    const out = await res.json();
-    const map = new Map((Array.isArray(out) ? out : []).filter(x => x && x.signedURL && !x.error).map(x => [x.path, SUPABASE_URL + '/storage/v1' + x.signedURL]));
-    rows.forEach(r => { r.signed_url = map.get(schoolReportPath(r)) || null; });
-  }catch(e){
-    rows.forEach(r => { r.signed_url = null; });
-  }
-}
 
 
-
-async function renderDashHeroStats(){
-  const wrap = document.getElementById('dash-hero-stats');
-  if(!wrap) return;
-
-  // پنج کارت = مسیر کار سامانه از منبع تا تحلیل (۵.۳۰.۰، خواست کاربر: کارت‌ها «منطقی و به هم
-  // مرتبط» باشن): از کجا (منبع رصد) ← چقدر (محتوای رصد شده) ← زنده بودن (رصد امروز) ← در چه
-  // حوزه‌هایی (بخش رصد) ← حاصل کار (بسته تحلیلی). قبلاً «خبرگزاری»/«کنشگر مجازی» (دو زیرمجموعه‌ی
-  // ناقص منابع) و «مدارس علمیه» (عدد دستی ۱۲۶) بود.
-  // همه‌ی عددها با count=exact از خودِ جدول‌ها (نه از کش‌های محدود POSTS_CACHE/NEWSPAPERS).
-  // «محتوای رصد شده»/«رصد امروز» = پست‌ها + روزنامه‌ها + یافته‌های خزنده‌ی «درباره حوزه» از سایت‌ها
-  // (hawza_mentions با post_id خالی؛ یافته‌های شبکه‌های اجتماعی خودشون پست‌ان و دوباره شمرده نمی‌شن).
-  // scraped_at فقط موقع درج اول پر می‌شه (کالکتورها روی upsert دوباره‌اش نمی‌نویسن)، پس پست
-  // قدیمیِ دوباره‌اسکن‌شده در «رصد امروز» نمیاد.
-  const todayIso = encodeURIComponent(new Date(iranTodayStartMs()).toISOString());
-  const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Tehran', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
-  const CRAWL_ONLY = '/hawza_mentions?post_id=is.null&hidden_at=is.null';
-  const [postsTotal, newspapersTotal, crawlTotal, postsToday, newspapersToday, crawlToday, sources] = await Promise.all([
-    fetchExactCount('/posts'),
-    fetchExactCount('/newspapers'),
-    fetchExactCount(CRAWL_ONLY),
-    fetchExactCount('/posts?scraped_at=gte.' + todayIso),
-    fetchExactCount('/newspapers?edition_date=eq.' + todayStr),
-    fetchExactCount(CRAWL_ONLY + '&scraped_at=gte.' + todayIso),
-    fetchMonitoredSourceCount(),
-  ]);
-  const trackedContentCount = postsTotal + newspapersTotal + crawlTotal;
-  const todayCount = postsToday + newspapersToday + crawlToday;
-  const sourceCount = sources;
-
-  // «بخش رصد» — زیربخش‌های عرصه‌هایی که بیننده زیر همین هرو در «عرصه‌های رصد و پایش» می‌بینه
-  // (خواست کاربر: ملاک تب‌ها باشن، نه خودِ عرصه‌ها): هر تب = یک بخش، عرصه‌ی بی‌تب = یک بخش؛
-  // کارت‌های «به‌زودی»، بخش/تب‌های پنهان‌شده از «نمایش سایت» و تب‌های هنوز راه‌نیفتاده نه
-  const DOMAIN_PLACEHOLDER_TABS = new Set(['public/trends']); // «در حال راه‌اندازی» — با راه‌افتادن از اینجا برداشته بشه
-  const domainCount = [...document.querySelectorAll('.domain-card[data-vis]')]
-    .filter(c=>!c.classList.contains('soon-item') && !visHidden(c.dataset.vis))
-    .reduce((n, c)=>{
-      const it = SITE_VIS_ITEMS.find(x=>x.key === c.dataset.vis);
-      if(!it || !it.tabs.length) return n + 1;
-      return n + it.tabs.filter(([t])=>!DOMAIN_PLACEHOLDER_TABS.has(it.key + '/' + t) && !visHidden(it.key + '/' + t)).length;
-    }, 0);
-
-  const magazinesCount = MAGAZINES.length; // «بسته تحلیلی» — مجلات خودِ جریان
-
-  const ic = d => `<span class="dash-hero-stat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span>`;
-  const stat = (icon, value, label) => `<div class="dash-hero-stat">${ic(icon)}<span class="dash-hero-stat-t"><b data-value="${value}">۰</b><span class="dash-hero-stat-l">${label}</span></span></div>`;
-  wrap.innerHTML =
-    stat('<circle cx="12" cy="12" r="2"/><path d="M8.5 15.5a5 5 0 010-7M15.5 8.5a5 5 0 010 7M5.6 18.4a9 9 0 010-12.8M18.4 5.6a9 9 0 010 12.8"/>', sourceCount, 'منبع رصد') +
-    stat('<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>', trackedContentCount, 'محتوای رصد شده') +
-    stat('<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>', todayCount, 'رصد امروز') +
-    stat('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.4-6.4"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', domainCount, 'بخش رصد') +
-    stat('<path d="M2 5.5c2.5-1 6-1 10 1.5 4-2.5 7.5-2.5 10-1.5V19c-2.5-1-6-1-10 1.5C8 18 4.5 18 2 19z"/><path d="M12 7v13.5"/>', magazinesCount, 'بسته تحلیلی');
-  animateHeroStatCounters(wrap);
-}
-
-// «۳۷٬۹۶۶» — جداکننده‌ی هزارگان فارسی برای خوانایی عددهای بزرگ
-function fmtHeroStat(n){ return toFaDigits(String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '٬')); }
-function animateHeroStatCounters(wrap){
-  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  wrap.querySelectorAll('.dash-hero-stat b').forEach((el, i) => {
-    const target = Number(el.dataset.value) || 0;
-    if(reduceMotion || typeof gsap === 'undefined' || !target){
-      el.textContent = fmtHeroStat(target);
-      return;
-    }
-    const counter = { val: 0 };
-    gsap.to(counter, {
-      val: target, duration: 1.1, delay: 0.15 + i * 0.05, ease: 'power2.out',
-      onUpdate: () => { el.textContent = fmtHeroStat(Math.round(counter.val)); },
-    });
-  });
-}
 
 async function loadAll(){
   // loadPosts() قبلاً بعد از این Promise.all و پشت‌سرش می‌اومد (کاملاً
@@ -2271,26 +1692,11 @@ async function loadAll(){
   applySiteVisibility();
 }
 
-// ---- schools page: گزارش‌های تحلیل Power BI — هر عکس تمام‌عرض، پشت‌سرهم ----
-
 // ---- نمایش سایت: حالت تعمیر + روشن/خاموش کردن بخش‌ها (migration_042) ----
 // جدول site_settings: key='maintenance' → {on, message, until}، key='hidden_sections' →
 // آرایه‌ی «بخش» یا «بخش/تب» پنهان از بیننده‌ها. مدیر همه‌چیز رو با برچسب «پنهان» می‌بینه.
 // این فقط پنهان‌کردن رابطه (داده‌ها با RLS همچنان خواندنی‌ان) — برای «در دست ساخت»/مشکل موقت.
-// بخش/تب جدید → به SITE_VIS_ITEMS (و اگه تب‌بار تازه‌ست، به visTargets) اضافه بشه.
-// var (نه const/let): switchSection و setNewsPageTab ممکنه پیش از رسیدن اجرا به این خط صدا زده بشن
-var SITE_VIS_ITEMS = [
-  { key:'overview', name:'اخبار و رویدادها', tabs:[['analytics','در یک نگاه'],['claims','ادعاها و شایعات'],['study','شبکه‌های اجتماعی'],['website','وب‌سایت‌ها'],['newspapers','روزنامه‌ها'],['dossier','پرونده‌های موضوعی'],['newsletter','خبرنامه مدارس']] },
-  { key:'people', name:'یادداشت‌ها', tabs:[['orgs','تحلیل سازمان‌ها'],['figures','چهره‌ها و فعالان سیاسی'],['thinktanks','اندیشکده‌ها و پژوهشگاه‌ها'],['archive','بسته‌های تحلیلی']] },
-  { key:'hawza', name:'درباره حوزه', tabs:[['news','اخبار حوزه'],['about','آنچه درباره حوزه گفته می‌شود']] },
-  { key:'posts', name:'کنشگری مجازی', tabs:[['feed','پست‌های منتشر شده'],['people','افراد و مجموعه‌ها']] },
-  { key:'schools', name:'برنامه مدارس', tabs:[] },
-  { key:'positions', name:'مواضع مراجع و علماء', tabs:[['leader','رهبر انقلاب'],['maraji','مراجع و علماء'],['hawza','حوزه‌های علمیه'],['imams','ائمه جمعه'],['orgs','تشکل‌ها و نخبگان']] },
-  { key:'public', name:'درباره مردم', tabs:[['trends','جست‌وجوهای داغ مردم']] },
-  { key:'laws', name:'قوانین و مصوبات', tabs:[] },
-  { key:'ask', name:'از جریان بپرس', tabs:[] },
-  { key:'reports', name:'بسته تحلیلی جریان', tabs:[] },
-];
+// فهرست بخش‌ها و تب‌ها: SITE_VIS_ITEMS در data/site-sections.js
 const MAINT_DEFAULT_MSG = 'سامانه در حال به‌روزرسانی است و به‌زودی در دسترس خواهد بود.';
 var SITE_SETTINGS = { maintenance:{ on:false, message:'', until:'' }, hidden_sections:[] };
 var SITE_SETTINGS_MISSING = false;
@@ -2306,7 +1712,7 @@ async function loadSiteSettings(){
 function maintOn(){ return !!(SITE_SETTINGS.maintenance && SITE_SETTINGS.maintenance.on); }
 function siteHiddenSet(){ const h = SITE_SETTINGS.hidden_sections; return new Set(Array.isArray(h) ? h : []); }
 // key = «بخش» یا «بخش/تب»؛ بخشی که همه‌ی تب‌هاش خاموشه هم پنهان حساب می‌شه
-function visHidden(key){
+export function visHidden(key){
   if(!key || key === 'dashboard') return false;
   const h = siteHiddenSet(), sec = key.split('/')[0];
   if(h.has(sec) || h.has(key)) return true;
@@ -2524,82 +1930,7 @@ async function unlockLogin(ip){
   refreshAdminAlerts();
 }
 
-// ---- «اطلاعیه برای کاربران» (migration_036) ----
-// نوار بالای همه‌ی صفحه‌ها (#ann-bar). «عادی»: کاربر می‌بنده و دیگه نمی‌بینه
-// (localStorage)؛ «مهم»: بستن فقط تا ورود بعدی (sessionStorage). بیننده با RLS فقط
-// فعالِ منقضی‌نشده رو می‌گیره؛ مدیر همه رو (فهرست مدیریت) و فیلتر همین‌جا انجام می‌شه.
-// جدول هنوز ساخته نشده (۴۰۴/۴۰۰) → بی‌صدا هیچی نشون نده؛ صفحه‌ی مدیر راهنمای migration.
-let ANNOUNCEMENTS = [];
-let ANN_TABLE_MISSING = false;
-async function loadAnnouncements(){
-  try{
-    const r = await api('/announcements?select=*&order=created_at.desc&limit=50');
-    ANN_TABLE_MISSING = r.status === 404 || r.status === 400;
-    ANNOUNCEMENTS = r.ok ? await r.json() : [];
-  }catch(e){ ANNOUNCEMENTS = []; }
-}
-const annIsLive = a => a.active && (!a.expires_at || new Date(a.expires_at).getTime() > Date.now());
-const ANN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1zM15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13"/></svg>';
-function annItemHtml(a, closable){
-  const imp = a.level === 'important';
-  return `<div class="ann-item ${imp ? 'important' : 'info'}" data-ann="${a.id || ''}" role="status"><span class="ann-ic">${ANN_ICON}</span><span class="ann-body"><b>${imp ? 'اطلاعیه‌ی مهم' : 'اطلاعیه'}</b><span class="ann-text">${escHtml(a.message)}</span></span>${closable ? '<button type="button" class="ann-close" aria-label="بستن اطلاعیه">✕</button>' : ''}</div>`;
-}
-function annDismissed(){
-  let a = [], b = [];
-  try{ a = JSON.parse(localStorage.getItem('jarian_ann_dismissed') || '[]'); }catch(e){}
-  try{ b = JSON.parse(sessionStorage.getItem('jarian_ann_dismissed_s') || '[]'); }catch(e){}
-  return new Set([...a, ...b]);
-}
-function renderAnnBar(){
-  const bar = document.getElementById('ann-bar');
-  if(!bar) return;
-  const hidden = annDismissed();
-  const list = ANNOUNCEMENTS.filter(a => annIsLive(a) && !hidden.has(a.id)).slice(0, 3);
-  bar.innerHTML = list.map(a => annItemHtml(a, true)).join('');
-  bar.querySelectorAll('.ann-close').forEach(btn => btn.addEventListener('click', () => {
-    const item = btn.closest('.ann-item'); const id = Number(item.dataset.ann);
-    const a = ANNOUNCEMENTS.find(x => x.id === id);
-    const key = a && a.level === 'important' ? 'jarian_ann_dismissed_s' : 'jarian_ann_dismissed';
-    const store = key.endsWith('_s') ? sessionStorage : localStorage;
-    try{ const arr = JSON.parse(store.getItem(key) || '[]'); arr.push(id); store.setItem(key, JSON.stringify(arr.slice(-50))); }catch(e){}
-    renderAnnBar();
-  }));
-  renderInstallCard();
-  try{ updateToTop(); }catch(e){} // روی گوشی دکمه‌ی «بالای صفحه» بالای کارت‌ها می‌ره
-}
-// ---- دعوت «نصب جریان روی گوشی» (۵.۲۱.۰) ----
-// سایت PWA است ولی هیچ‌جا گفته نمی‌شد. کارت کوچک در همون جای اطلاعیه‌ها (#ann-bar) تا چیدمان
-// صفحه عوض نشه؛ فقط روی گوشی/تبلت، فقط وقتی نصب نشده، و با «بستن» برای همیشه (jarian_install_dismissed).
-// اندروید/کروم: دکمه‌ی «نصب» (beforeinstallprompt)؛ آیفون: راهنمای «Add to Home Screen».
-let DEFERRED_INSTALL = null;
-window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); DEFERRED_INSTALL = e; renderInstallCard(); });
-window.addEventListener('appinstalled', ()=>{ DEFERRED_INSTALL = null; try{ localStorage.setItem('jarian_install_dismissed', '1'); }catch(e){} renderInstallCard(); });
-function isIOSDevice(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
-function renderInstallCard(){
-  const bar = document.getElementById('ann-bar');
-  if(!bar) return;
-  const old = bar.querySelector('.install-item'); if(old) old.remove();
-  let off = false;
-  try{ off = !!localStorage.getItem('jarian_install_dismissed'); }catch(e){}
-  const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
-  const touch = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
-  const ios = isIOSDevice();
-  if(off || standalone || !touch || !authToken || !(DEFERRED_INSTALL || ios)) return;
-  const el = document.createElement('div');
-  el.className = 'ann-item info install-item'; el.setAttribute('role', 'status');
-  el.innerHTML = `<span class="ann-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 7.5v7m-3-3l3 3 3-3M10.5 18.5h3"/></svg></span>`
-    + `<span class="ann-body"><b>نصب جریان روی گوشی</b><span class="ann-text">${ios ? 'در سافاری دکمه‌ی اشتراک‌گذاری (مربع با فلش رو به بالا) را بزنید و «Add to Home Screen» را انتخاب کنید؛ جریان مثل یک برنامه روی صفحه‌ی گوشی می‌نشیند.' : 'جریان را مثل یک برنامه روی صفحه‌ی گوشی داشته باشید تا با یک لمس باز شود.'}</span>${ios ? '' : '<button type="button" class="btn primary install-btn">نصب</button>'}</span>`
-    + '<button type="button" class="ann-close" aria-label="بستن">✕</button>';
-  el.querySelector('.ann-close').addEventListener('click', ()=>{ try{ localStorage.setItem('jarian_install_dismissed', '1'); }catch(e){} el.remove(); try{ updateToTop(); }catch(e){} });
-  const btn = el.querySelector('.install-btn');
-  if(btn) btn.addEventListener('click', async ()=>{
-    if(!DEFERRED_INSTALL) return;
-    DEFERRED_INSTALL.prompt();
-    try{ const r = await DEFERRED_INSTALL.userChoice; if(r && r.outcome === 'accepted'){ try{ localStorage.setItem('jarian_install_dismissed', '1'); }catch(e){} } }catch(e){}
-    DEFERRED_INSTALL = null; el.remove();
-  });
-  bar.appendChild(el);
-}
+setupInstallPrompt();
 function updateAnnPreview(){
   const msg = document.getElementById('ann-msg').value.trim();
   document.getElementById('ann-counter').textContent = toFaDigits(document.getElementById('ann-msg').value.length) + ' / ۳۰۰';
@@ -2920,122 +2251,13 @@ export function renderUploadLists(){
   });
 }
 
-// «برنامه مدارس» (۵.۱۹.۰): گزارش‌ها زیر تیتر ماه (شمسی، از تاریخ بارگذاری) + چیپ‌های ماه برای
-// پیدا کردن گزارش یه ماه خاص؛ تصویرها با کلیک در نمایشگر سند باز می‌شن (بزرگ‌نمایی + ورق زدن
-// بین همه‌ی گزارش‌های تصویری)؛ PDF/اکسل کارت جدا با نوع فایل و «مشاهده/دانلود»
-var SCHOOL_MONTH = '';
-const SCH_TYPE = {
-  pdf:   { label:'PDF',  action:'مشاهده', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>' },
-  excel: { label:'اکسل', action:'دانلود', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/></svg>' },
-};
-function schoolMonthKey(r){
-  if(!r.uploaded_at) return '';
-  const p = calParts(new Date(r.uploaded_at), 'persian');
-  return p.year + '-' + String(p.month).padStart(2, '0');
-}
-function schoolMonthLabel(key){
-  const [y, m] = key.split('-').map(Number);
-  return (JALALI_MONTHS[m - 1] || '') + ' ' + toFaDigits(y);
-}
-function openSchoolImage(r){
-  const imgs = SCHOOL_REPORTS.filter(x => (x.file_type || 'image') === 'image');
-  openDocViewer('گزارش‌های برنامه مدارس', ()=> imgs.map(x => ({ kind:'image', url: schoolReportSrc(x), label: x.title || '' })), Math.max(0, imgs.indexOf(r)));
-}
-function openSchoolReportFile(r){
-  const path = schoolReportPath(r);
-  const kind = (r.file_type === 'pdf') ? 'pdf' : 'file';
-  openDocViewer(r.title || 'گزارش', async ()=>{
-    let url = null;
-    if(path){ try{ url = (await signStoragePaths('school-reports', [path]))[0]; }catch(e){} }
-    return [{ kind, url: url || r.image_url, label: r.title || '' }];
-  });
-}
-function renderSchoolReports(){
-  renderUploadLists();
-  const list = document.getElementById('school-report-list');
-  const empty = document.getElementById('school-reports-empty');
-  if(!list) return;
-  const isAdmin = currentRole === 'app_admin';
-  empty.style.display = SCHOOL_REPORTS.length ? 'none' : 'block';
-  // چیپ‌های ماه (فقط وقتی بیش از یک ماه هست)
-  const months = [...new Set(SCHOOL_REPORTS.map(schoolMonthKey).filter(Boolean))].sort().reverse();
-  if(SCHOOL_MONTH && !months.includes(SCHOOL_MONTH)) SCHOOL_MONTH = '';
-  const row = document.getElementById('sch-month-row');
-  row.style.display = months.length > 1 ? '' : 'none';
-  row.innerHTML = [`<button type="button" class="news-topic-chip${SCHOOL_MONTH ? '' : ' active'}" data-m="">همه</button>`]
-    .concat(months.map(k => `<button type="button" class="news-topic-chip${SCHOOL_MONTH === k ? ' active' : ''}" data-m="${k}">${schoolMonthLabel(k)}</button>`)).join('');
-  list.innerHTML = '';
-  let lastMonth = null;
-  SCHOOL_REPORTS.forEach(r => {
-    const mk = schoolMonthKey(r);
-    if(SCHOOL_MONTH && mk !== SCHOOL_MONTH) return;
-    if(months.length > 1 && mk && mk !== lastMonth){
-      lastMonth = mk;
-      const h = document.createElement('h4'); h.className = 'pf-group-title sch-month-title';
-      h.textContent = schoolMonthLabel(mk);
-      list.appendChild(h);
-    }
-    const el = document.createElement('div'); el.className = 'school-report-block';
-    const type = r.file_type || 'image';
-    const dateStr = r.uploaded_at ? new Date(r.uploaded_at).toLocaleDateString('fa-IR') : '';
-    const titleText = escHtml(faTitle(r.title) || 'گزارش بدون عنوان');
-    if(type === 'image'){
-      el.innerHTML = `<button type="button" class="school-report-img-btn" aria-label="بزرگ‌نمایی ${escAttr(r.title || 'گزارش')}"><img class="school-report-full-img" src="${escAttr(schoolReportSrc(r))}" alt="${escAttr(r.title||'')}" loading="lazy" /><span class="school-report-zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg>بزرگ‌نمایی</span></button>
-        <div class="school-report-caption">
-          <span class="school-report-title">${titleText}</span>
-          <span class="school-report-date">${dateStr}</span>
-        </div>`;
-      el.querySelector('.school-report-img-btn').addEventListener('click', () => openSchoolImage(r));
-    }else{
-      const t = SCH_TYPE[type] || SCH_TYPE.pdf;
-      el.innerHTML = `
-        <button type="button" class="school-report-file-card">
-          <span class="school-report-file-icon sch-${type}">${t.icon}</span>
-          <span class="school-report-file-text"><span class="school-report-title">${titleText}</span><span class="school-report-date">${t.label}، ${dateStr}</span></span>
-          <span class="school-report-file-action">${t.action}</span>
-        </button>`;
-      el.querySelector('.school-report-file-card').addEventListener('click', () => openSchoolReportFile(r));
-    }
-    if(isAdmin){
-      const del = document.createElement('button'); del.className = 'del-btn'; del.textContent = '✕';
-      del.title = 'حذف گزارش'; del.setAttribute('aria-label', 'حذف گزارش');
-      del.style.cssText = 'position:absolute;top:8px;left:8px;background:rgba(20,27,36,0.6);color:#fff;z-index:2;';
-      del.addEventListener('click', e => { e.stopPropagation(); deleteSchoolReport(r); });
-      el.style.position = 'relative';
-      el.appendChild(del);
-    }
-    list.appendChild(el);
-  });
-}
-document.getElementById('sch-month-row').addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b) return;
-  SCHOOL_MONTH = b.dataset.m || '';
-  renderSchoolReports();
-});
+setupSchoolReports();
 
 function detectSchoolReportFileType(file){
   const name = (file.name || '').toLowerCase();
   if(/\.pdf$/.test(name)) return 'pdf';
   if(/\.(xlsx|xls|csv)$/.test(name)) return 'excel';
   return 'image';
-}
-
-async function deleteSchoolReport(r){
-  if(!await uiConfirm('این گزارش حذف شود؟')) return;
-  try{
-    if(r.media_storage_path){
-      await fetch(SUPABASE_URL + '/storage/v1/object/remove/school-reports', {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prefixes: [r.media_storage_path] }),
-      });
-    }
-    await api('/school_reports?id=eq.'+r.id, {method:'DELETE'});
-    await loadSchoolReports(); renderSchoolReports();
-    showToast('گزارش حذف شد');
-  }catch(e){
-    showToast('حذف ناموفق بود');
-  }
 }
 
 // ---- کمک‌تابع‌های بارگذاری (۵.۲۰.۰): سقف حجم، ترتیب صفحه‌ها، پیام خطای قابل‌فهم و
@@ -3582,7 +2804,7 @@ async function bulkChanSave(){
     const added = (await r.json()).length;
     closeBulkChan();
     await loadChannels();
-    resetPfExtraCache(); LAWS_AT = 0;
+    resetPfExtraCache(); resetLawsCache();
     renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
     renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures();
     loadCrawlSites();
@@ -3659,7 +2881,7 @@ ceEl('ce-save-btn').addEventListener('click', async ()=>{
     current.forEach(gid=>{ if(!wanted.has(gid)) ops.push(api('/channel_profile_groups?channel_id=eq.'+id+'&group_id=eq.'+gid, {method:'DELETE'})); });
     await Promise.all(ops);
     await Promise.all([loadChannels(), loadChannelProfileGroups()]);
-    resetPfExtraCache(); LAWS_AT = 0; // عضویت بخش‌های تازه عوض شده باشه، داده‌ی جدا دوباره گرفته بشه
+    resetPfExtraCache(); resetLawsCache(); // عضویت بخش‌های تازه عوض شده باشه، داده‌ی جدا دوباره گرفته بشه
     closeChanEditor();
     renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
     renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures(); renderProfileGroupAdmin();
@@ -4179,167 +3401,12 @@ async function addDossierManualPost(topicId, postId){
   renderDossierTopicAdminList();
 }
 
-// ---- magazines library (بخش تحلیلی) ----
-const MAG_TYPE_LABEL = { pdf:'PDF', images:'چند عکس' };
-
-function renderMagazines(){
-  renderUploadLists();
-  const grid = document.getElementById('magazine-grid');
-  const empty = document.getElementById('magazines-empty');
-  const isAdmin = currentRole === 'app_admin';
-  grid.innerHTML = '';
-  empty.style.display = MAGAZINES.length ? 'none' : 'block';
-  MAGAZINES.forEach((m, i)=>{
-    const files = Array.isArray(m.files) ? m.files : [];
-    const meta = [
-      m.issue_no ? ('شماره ' + toFaDigits(m.issue_no)) : '',
-      m.publish_date ? new Date(m.publish_date).toLocaleDateString('fa-IR') : '',
-      m.file_type === 'images' ? (toFaDigits(files.length) + ' صفحه') : 'PDF',
-    ].filter(Boolean).map(escHtml).join('، ');
-    // هم‌شکل کارت‌های «بسته‌های تحلیلی» یادداشت‌ها: جلد بلند + عنوان + یه دکمه‌ی «مطالعه» (قبلاً
-    // آیکون کوچیک به‌جای جلد و برای هر صفحه‌ی شماره‌ی عکسی یه دکمه‌ی «مشاهده N» جدا)
-    const el = document.createElement('div'); el.className = 'magazine-card archive-report-card mag-issue-card';
-    el.innerHTML = `<div class="archive-report-poster">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
-      <div class="mag-title">${escHtml(faTitle(m.title))}</div>
-      <div class="mag-meta">${meta}</div>
-      <div class="mag-actions"></div>`;
-    const actions = el.querySelector('.mag-actions');
-    if(files.length){
-      el.querySelector('.archive-report-poster').style.cursor = 'pointer';
-      el.querySelector('.archive-report-poster').addEventListener('click', () => openMagazineViewer(m));
-      const btn = document.createElement('button');
-      btn.className = 'btn primary mag-read-btn'; btn.textContent = 'مطالعه';
-      btn.addEventListener('click', () => openMagazineViewer(m));
-      actions.appendChild(btn);
-    }
-    if(isAdmin) actions.appendChild(cardAdminControls(i, MAGAZINES.length, d => moveMagazine(m, d), () => deleteMagazine(m), 'مجله‌ی ' + m.title));
-    grid.appendChild(el);
-  });
-  renderMagazineCarousel();
-}
-
-// «بسته تحلیلی جریان» صفحه‌ی نخست — جلد ۵ شماره‌ی اول (به ترتیب مدیر) روی قوس
-// جلدهای بسته: ردیف بالا ۴ جلد (مدار کوچک‌تر) و ردیف پایین ۵ جلد (مدار بزرگ)
-// هر ردیف مدار خودش را دارد؛ ردیف دوم با همان هندسه‌ی ردیف اول و ضریب ۰٫۷۵
-// مدار هر ردیف عیناً مثل مدار عرصه‌های صفحه‌ی نخست: ردیف بزرگ (۵ جلد) = مدار اول،
-// ردیف کوچک (۴ جلد) = مدار دوم با ضریب ۰٫۷۵. مرکز جلدها روی همان خط مرکز آیکون‌هاست.
-function pkgOrbitSvg(ri, n){
-  const big = ri === 1, id = 'pkg-orbit-' + ri;
-  const d1 = big ? 'M -562 24 Q 0 184, 562 24' : 'M -421.5 36.5 Q 0 156.5, 421.5 36.5';
-  const d2 = big ? 'M -512 2 Q 0 122, 512 2' : 'M -384 20 Q 0 110, 384 20';
-  const ex = big ? 562 : 421.5, ey = big ? 24 : 36.5;
-  const kt = big ? '0;.65;1' : '0;.51;1', v = big ? '-1159;130;130' : '-874;130;130';
-  const holes = Array.from({length: n}, (_, i) => `<rect x="${(i - (n - 1) / 2) * 186 - 61}" y="-6" width="122" height="159" rx="8" fill="#000"/>`).join('');
-  const streak = (w, o, d) => `<use href="#${id}-path" stroke-width="${w}" stroke-opacity="${o}" stroke-dasharray="${d} 2278"><animate attributeName="stroke-dashoffset" values="${v}" keyTimes="${kt}" dur="9s" repeatCount="indefinite"/></use>`;
-  return `<svg class="pkg-orbit" viewBox="-600 -100 1200 360" aria-hidden="true"><defs>
-      <mask id="${id}-mask" maskUnits="userSpaceOnUse" x="-600" y="-100" width="1200" height="360"><rect x="-600" y="-100" width="1200" height="360" fill="#fff"/>${holes}</mask>
-      <path id="${id}-path" d="${d1}"/>
-      <path id="${id}-path2" d="${d2}"/>
-    </defs>
-    <g mask="url(#${id}-mask)">
-      <use href="#${id}-path" fill="none" stroke="#EAB393" stroke-opacity=".32" stroke-width="1.3"/>
-      <use href="#${id}-path2" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="1"/>
-      <g class="flow" fill="none" stroke="#EAB393" stroke-linecap="round">${streak(3, 1, 18)}${streak(2, 0.45, 55)}${streak(1.4, 0.18, 110)}</g>
-    </g>
-    <circle cx="${-ex}" cy="${ey}" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="${-ex}" cy="${ey}" r="2.2" fill="#EAB393" fill-opacity=".5"/>
-    <circle cx="${ex}" cy="${ey}" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="${ex}" cy="${ey}" r="2.2" fill="#EAB393" fill-opacity=".5"/>
-  </svg>`;
-}
-function pkgTile(m){
-  const files = Array.isArray(m.files) ? m.files : [];
-  const tile = document.createElement('div'); tile.className = 'pkg-tile';
-  tile.setAttribute('role', 'button'); tile.tabIndex = 0;
-  tile.innerHTML = `<div class="pkg-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
-    <div class="pkg-title">${escHtml(m.issue_no ? 'شماره ' + toFaDigits(String(m.issue_no)) : faTitle(m.title))}</div>`;
-  tile.addEventListener('click', () => { if(files.length) openMagazineViewer(m); });
-  return tile;
-}
-function renderMagazineCarousel(){
-  const wrap = document.getElementById('pkg-covers');
-  if(!wrap) return;
-  wrap.innerHTML = '';
-  if(!MAGAZINES.length){
-    wrap.innerHTML = '<div class="pkg-empty">هنوز شماره‌ای بارگذاری نشده.</div>';
-    return;
-  }
-  const items = MAGAZINES.slice(0, 9);
-  const rows = items.length > 4 ? [items.slice(0, 4), items.slice(4)] : [items];
-  rows.forEach((list, ri)=>{
-    const row = document.createElement('div'); row.className = 'pkg-row';
-    row.innerHTML = pkgOrbitSvg(rows.length === 2 ? ri : 0, list.length);
-    const covers = document.createElement('div'); covers.className = 'pkg-covers';
-    list.forEach(m => covers.appendChild(pkgTile(m)));
-    row.appendChild(covers);
-    wrap.appendChild(row);
-  });
-}
-
 setupToTop();
 setupKeyboardButtons();
-
-// سه کارت راهنمای سریع زیر هرو — فقط اسکرول توی همون صفحه‌ی نخست،
-// نه switchSection (چون هر سه مقصد از قبل توی همین sec-dashboard هستن)
-function scrollToDomainGrid(){
-  const el = document.querySelector('.section-label');
-  if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
-}
-function scrollToPackageCard(){
-  const el = document.getElementById('pkg-flow');
-  if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
-}
 
 setupDocViewer();
 setupMediaViewer();
 setupMobileFilters();
-function openMagazineViewer(m){
-  const files = Array.isArray(m.files) ? m.files : [];
-  openDocViewer(m.title, async ()=>{
-    if(!files.length) return [];
-    const urls = await signStoragePaths('magazines', files);
-    const isPdf = m.file_type === 'pdf';
-    return files.map((f, k)=>({ kind: isPdf ? 'pdf' : 'image', url: urls[k], label: m.title + (files.length > 1 ? ' — صفحه‌ی ' + toFaDigits(k + 1) : '') }));
-  });
-}
-
-async function moveMagazine(m, direction){
-  const idx = MAGAZINES.findIndex(x=>x.id===m.id);
-  const swapIdx = idx + direction;
-  if(swapIdx < 0 || swapIdx >= MAGAZINES.length) return;
-  const other = MAGAZINES[swapIdx];
-  const aOrder = m.sort_order || 0, bOrder = other.sort_order || 0;
-  await Promise.all([
-    api('/magazines?id=eq.'+m.id, {method:'PATCH', body: JSON.stringify({sort_order: bOrder})}),
-    api('/magazines?id=eq.'+other.id, {method:'PATCH', body: JSON.stringify({sort_order: aOrder})}),
-  ]);
-  await loadMagazines(); renderMagazines();
-}
-
-async function deleteMagazine(m){
-  if(!await uiConfirm('مجله‌ی «' + m.title + '» حذف شود؟ فایل‌های آن هم برای همیشه پاک می‌شوند.')) return;
-  try{
-    const files = Array.isArray(m.files) ? m.files : [];
-    if(files.length){
-      await fetch(SUPABASE_URL + '/storage/v1/object/remove/magazines', {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prefixes: files }),
-      });
-    }
-    if(m.cover_url && m.cover_url.includes('/magazine-covers/')){
-      const coverPath = m.cover_url.split('/magazine-covers/')[1];
-      await fetch(SUPABASE_URL + '/storage/v1/object/remove/magazine-covers', {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prefixes: [coverPath] }),
-      });
-    }
-    await api('/magazines?id=eq.'+m.id, {method:'DELETE'});
-    await loadMagazines(); renderMagazines();
-    showToast('مجله حذف شد');
-  }catch(e){
-    showToast('حذف ناموفق بود');
-  }
-}
 
 async function uploadMagazineFile(file){
   const safeName = file.name.replace(/[^\w.\-]+/g, '_');
@@ -5013,99 +4080,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
 
-// ---- نوار تاریخ/ساعت/مناسبت (مهر ۱۴۰۵، خواست کاربر) ----
-// تاریخ شمسی، قمری و میلادی + ساعت تهران + مناسبت امروز. قمری با تقویم نجومی
-// umalqura مرورگره؛ تقویم رسمی ایران (رؤیت هلال) گاهی ±۱ روز فرق داره — اگه
-// کاربر گفت قمری یه روز جلو/عقبه، فقط HIJRI_OFFSET رو عوض کن (+۱ یعنی یه روز
-// جلوتر). مناسبت‌های قمری هم از همین تاریخ اصلاح‌شده حساب می‌شن.
-const HIJRI_OFFSET = -1; // مهر ۱۴۰۵: کاربر تأیید کرد ۸ مهر = ۱۸ ربیع‌الثانی (umalqura یه روز جلو بود)
-const HIJRI_MONTHS = ['محرم','صفر','ربیع‌الاول','ربیع‌الثانی','جمادی‌الاول','جمادی‌الثانی','رجب','شعبان','رمضان','شوال','ذی‌القعده','ذی‌الحجه'];
-// کلید «ماه-روز»؛ «L-ماه» = روز آخر اون ماه قمری (۲۹ یا ۳۰)
-// ملی + سیاسی‌اجتماعی + انقلاب اسلامی + دفاع مقدس و مقاومت (کاربر، مهر ۱۴۰۵)
-const OCC_SOLAR = {
-  '1-1':'عید نوروز', '1-2':'تعطیلات نوروز', '1-3':'تعطیلات نوروز', '1-4':'تعطیلات نوروز',
-  '1-12':'روز جمهوری اسلامی', '1-13':'روز طبیعت', '1-20':'روز ملی فناوری هسته‌ای', '1-29':'روز ارتش',
-  '2-1':'روز بزرگداشت سعدی', '2-10':'روز ملی خلیج فارس', '2-12':'روز معلم', '2-25':'روز بزرگداشت فردوسی',
-  '2-30':'سالروز شهادت رئیس‌جمهور شهید رئیسی و همراهان',
-  '3-3':'آزادسازی خرمشهر؛ روز مقاومت، ایثار و پیروزی', '3-14':'رحلت امام خمینی (ره)', '3-15':'قیام ۱۵ خرداد',
-  '3-23':'سالروز تجاوز رژیم صهیونیستی به ایران و آغاز جنگ ۱۲ روزه',
-  '4-3':'سالروز پایان جنگ ۱۲ روزه', '4-7':'شهادت آیت‌الله بهشتی و یاران امام؛ روز قوه قضاییه',
-  '4-8':'بمباران شیمیایی سردشت؛ روز مبارزه با سلاح‌های شیمیایی', '4-12':'حمله‌ی ناو آمریکایی به هواپیمای مسافربری ایران',
-  '4-14':'روز قلم', '4-27':'سالروز پذیرش قطعنامه‌ی ۵۹۸', '4-30':'قیام ۳۰ تیر ۱۳۳۱',
-  '5-14':'سالروز صدور فرمان مشروطیت', '5-17':'روز خبرنگار', '5-26':'سالروز بازگشت آزادگان', '5-28':'کودتای ۲۸ مرداد ۱۳۳۲',
-  '6-8':'شهادت رجایی و باهنر؛ روز مبارزه با تروریسم', '6-17':'قیام ۱۷ شهریور ۱۳۵۷', '6-31':'آغاز جنگ تحمیلی و هفته دفاع مقدس',
-  '7-1':'آغاز سال تحصیلی', '7-5':'سالروز شکست حصر آبادان', '7-7':'شهادت فرماندهان دفاع مقدس؛ روز آتش‌نشانی و ایمنی',
-  '7-8':'روز بزرگداشت مولوی', '7-13':'روز نیروی انتظامی', '7-20':'روز بزرگداشت حافظ',
-  '8-13':'روز دانش‌آموز و مبارزه با استکبار جهانی', '9-5':'روز بسیج مستضعفان',
-  '9-7':'سالروز شهادت دانشمند هسته‌ای محسن فخری‌زاده', '9-16':'روز دانشجو', '9-30':'شب یلدا',
-  '10-9':'روز بصیرت و میثاق امت با ولایت', '10-13':'سالروز شهادت سردار سلیمانی و ابومهدی المهندس',
-  '10-19':'قیام مردم قم (۱۳۵۶)', '10-26':'سالروز فرار شاه (۱۳۵۷)',
-  '11-12':'بازگشت امام خمینی (ره) و آغاز دهه فجر', '11-22':'پیروزی انقلاب اسلامی', '11-29':'قیام مردم تبریز (۱۳۵۶)',
-  '12-22':'روز بزرگداشت شهدا', '12-25':'بمباران شیمیایی حلبچه', '12-29':'روز ملی شدن صنعت نفت',
-};
-// مقاومت و فلسطین — تاریخ میلادی
-const OCC_GREG = {
-  '5-15':'روز نکبت (سالروز اشغال فلسطین)', '7-31':'سالروز شهادت اسماعیل هنیه', '9-27':'سالروز شهادت سید حسن نصرالله',
-  '10-7':'سالروز عملیات طوفان الاقصی', '10-16':'سالروز شهادت یحیی سنوار', '11-29':'روز جهانی همبستگی با مردم فلسطین',
-};
-const OCC_LUNAR = {
-  '1-1':'آغاز ماه محرم', '1-9':'تاسوعای حسینی', '1-10':'عاشورای حسینی', '1-25':'شهادت امام سجاد (ع)',
-  '2-20':'اربعین حسینی', '2-28':'رحلت پیامبر اکرم (ص) و شهادت امام حسن مجتبی (ع)', 'L-2':'شهادت امام رضا (ع)',
-  '3-8':'شهادت امام حسن عسکری (ع)', '3-12':'آغاز هفته وحدت', '3-17':'ولادت پیامبر اکرم (ص) و امام جعفر صادق (ع)',
-  '4-10':'وفات حضرت معصومه (س)', '5-5':'ولادت حضرت زینب (س) و روز پرستار',
-  '6-3':'شهادت حضرت فاطمه زهرا (س)', '6-20':'ولادت حضرت فاطمه زهرا (س) و روز زن',
-  '7-1':'ولادت امام محمد باقر (ع)', '7-3':'شهادت امام علی النقی (ع)', '7-10':'ولادت امام محمد تقی (ع)',
-  '7-13':'ولادت امام علی (ع) و روز پدر', '7-15':'وفات حضرت زینب (س)', '7-25':'شهادت امام موسی کاظم (ع)', '7-27':'عید مبعث',
-  '8-3':'ولادت امام حسین (ع) و روز پاسدار', '8-4':'ولادت حضرت ابوالفضل (ع) و روز جانباز', '8-5':'ولادت امام سجاد (ع)',
-  '8-11':'ولادت حضرت علی اکبر (ع) و روز جوان', '8-15':'ولادت حضرت قائم (عج)',
-  '9-1':'آغاز ماه مبارک رمضان', '9-15':'ولادت امام حسن مجتبی (ع)', '9-19':'ضربت خوردن امام علی (ع)', '9-21':'شهادت امام علی (ع)',
-  '10-1':'عید سعید فطر', '10-2':'تعطیل به مناسبت عید فطر', '10-25':'شهادت امام جعفر صادق (ع)',
-  '11-1':'ولادت حضرت معصومه (س) و روز دختران', '11-11':'ولادت امام رضا (ع)', 'L-11':'شهادت امام محمد تقی (ع)',
-  '12-1':'سالروز ازدواج حضرت علی (ع) و حضرت فاطمه (س)', '12-7':'شهادت امام محمد باقر (ع)', '12-9':'روز عرفه',
-  '12-10':'عید سعید قربان', '12-15':'ولادت امام علی النقی (ع)', '12-18':'عید سعید غدیر خم', '12-24':'روز مباهله',
-};
-function hijriParts(date){ return calParts(new Date(date.getTime() + HIJRI_OFFSET * 864e5), 'islamic-umalqura'); }
-function todayOccasions(now){
-  const out = [];
-  const sh = calParts(now, 'persian');
-  if(OCC_SOLAR[sh.month + '-' + sh.day]) out.push(OCC_SOLAR[sh.month + '-' + sh.day]);
-  const hj = hijriParts(now);
-  if(OCC_LUNAR[hj.month + '-' + hj.day]) out.push(OCC_LUNAR[hj.month + '-' + hj.day]);
-  if(hijriParts(new Date(now.getTime() + 864e5)).day === 1 && OCC_LUNAR['L-' + hj.month]) out.push(OCC_LUNAR['L-' + hj.month]);
-  // روز جهانی قدس: آخرین جمعه‌ی ماه رمضان
-  const wd = new Intl.DateTimeFormat('en-US', { weekday:'short', timeZone:'Asia/Tehran' }).format(now);
-  if(hj.month === 9 && wd === 'Fri' && hijriParts(new Date(now.getTime() + 7 * 864e5)).month !== 9) out.push('روز جهانی قدس');
-  const gr = calParts(now, 'gregory');
-  if(OCC_GREG[gr.month + '-' + gr.day]) out.push(OCC_GREG[gr.month + '-' + gr.day]);
-  return out;
-}
-let DATEBAR_KEY = '';
-function renderDatebar(){
-  const el = document.getElementById('datebar');
-  if(!el) return;
-  const now = new Date();
-  const clock = now.toLocaleTimeString('fa-IR', { hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'Asia/Tehran' });
-  const shp = calParts(now, 'persian');
-  const dayKey = shp.year + '-' + shp.month + '-' + shp.day;
-  if(DATEBAR_KEY === dayKey && el.firstChild){
-    el.querySelector('.db-clock b').textContent = clock;
-    return;
-  }
-  DATEBAR_KEY = dayKey;
-  // ترکیب weekday با تاریخ در Chromium به‌هم‌ریخته درمیاد («۱۴۰۵ مهر ۷, سه‌شنبه») — دستی سرهم می‌شه
-  const shamsi = now.toLocaleDateString('fa-IR', { weekday:'long', timeZone:'Asia/Tehran' }) + ' '
-    + now.toLocaleDateString('fa-IR', { day:'numeric', month:'long', year:'numeric', timeZone:'Asia/Tehran' });
-  const hj = hijriParts(now);
-  const hijri = toFaDigits(hj.day) + ' ' + HIJRI_MONTHS[hj.month - 1] + ' ' + toFaDigits(hj.year);
-  const greg = now.toLocaleDateString('fa-IR-u-ca-gregory', { day:'numeric', month:'long', year:'numeric', timeZone:'Asia/Tehran' });
-  const occ = todayOccasions(now);
-  const star = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>';
-  el.innerHTML = `<div class="db-top"><b>${escHtml(shamsi)}</b><span>${escHtml(hijri)}</span><span class="db-hide-m">${escHtml(greg)}</span>
-      <span class="db-clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>${clock}</b></span></div>
-    ${occ.length ? `<div class="db-occ"><span class="ln"></span>${star}<span class="t">${escHtml(occ.join('، '))}</span>${star}<span class="ln"></span></div>` : ''}`;
-}
-renderDatebar();
-setInterval(renderDatebar, 15000);
+setupDatebar();
 
 // ---- «گزارش فعالیت» (فقط مدیر، migration_039) ----
 // سه قسمت: پنهان‌کردن پست (دکمه زیر هر پست برای مدیر + فهرست/بازگرداندن)،
