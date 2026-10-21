@@ -40,7 +40,8 @@ function buildData(now = Date.now()) {
       ai_keywords: ['تورم', 'دولت', 'مشهد'], hawza_relevant: true, section_relevant: true, hidden_at: null,
     });
   }
-  const today = new Date(now).toISOString().slice(0, 10);
+  // تاریخ امروزِ تهران (مثل خودِ سایت) — با تاریخ UTC، بین ۲۰:۳۰ تا ۲۴ UTC «امروز» روزنامه‌ها خالی می‌شد
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tehran' }).format(new Date(now));
   return {
     channels, posts,
     categories: [{ id: 1, name: 'خبرگزاری' }, { id: 2, name: 'سیاسی' }, { id: 3, name: 'فرهنگی' }],
