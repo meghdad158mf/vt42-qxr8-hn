@@ -12,15 +12,13 @@ const VIEWER_ROUTES = [
   'posts/feed', 'posts/people',
   'schools',
   'positions/leader', 'positions/maraji', 'positions/hawza', 'positions/imams', 'positions/orgs',
-  'public/trends',
-  'laws',
   'reports',
 ];
 const ADMIN_ROUTES = [
   'status', 'settings', 'users',
   'activity/views', 'activity/hidden', 'activity/audit',
   'uploads/magazines', 'uploads/archive', 'uploads/schools',
-  'announce', 'export', 'ask',
+  'announce', 'export',
 ];
 
 async function expectRoute(page, route) {

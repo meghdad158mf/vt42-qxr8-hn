@@ -16,8 +16,8 @@ test('منوی بخش‌ها: هر گزینه به بخش و تب خودش می�
     await expect(page.locator('#nav-menu')).not.toHaveClass(/open/);
     const [s, t] = key.split('/');
     expect(await sectionOf(page), key).toBe('sec-' + s);
-    // posts/feed و public/trends فقط خودِ بخش رو باز می‌کنن (تب آخر/پیش‌فرض)
-    if (t && !['posts', 'public'].includes(s)) await expect.poll(() => page.evaluate(() => location.hash), key).toContain(`#${s}/${t}`);
+    // posts/feed فقط خودِ بخش رو باز می‌کنه (تب آخر/پیش‌فرض)
+    if (t && s !== 'posts') await expect.poll(() => page.evaluate(() => location.hash), key).toContain(`#${s}/${t}`);
   }
   expect(page.appErrors).toEqual([]);
 });

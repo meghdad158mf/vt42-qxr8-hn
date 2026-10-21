@@ -1,7 +1,7 @@
 // بدنه‌ی برنامه — کل اسکریپت قبلی صفحه، حالا یه ES module. جدا شده تا الان: هسته در core/
 // (مرحله‌ی ۳، ۵.۳۲.۲) و اجزای رابط در ui/ (مرحله‌ی ۴، ۵.۳۲.۳: پنجره‌ها، پیام/تأیید، منوها، تب‌بارها،
 // نمایشگر سند/عکس، صفحه‌بندی…)، داده‌ی مشترک در data/، و عرصه‌ها در features/: اخبار و رویدادها (مرحله‌ی ۵،
-// ۵.۳۲.۴–۵)، کنشگری مجازی، یادداشت‌ها و مواضع مراجع و علماء (مرحله‌ی ۶، ۵.۳۲.۶)، درباره حوزه، قوانین،
+// ۵.۳۲.۴–۵)، کنشگری مجازی، یادداشت‌ها و مواضع مراجع و علماء (مرحله‌ی ۶، ۵.۳۲.۶)، درباره حوزه،
 // برنامه مدارس، بسته تحلیلی، اطلاعیه‌ها و صفحه‌ی نخست (مرحله‌ی ۷، ۵.۳۲.۷)، و بخش‌های مدیریت در admin/
 // (مرحله‌ی ۸، ۵.۳۲.۸–۹) که بسته‌ی جدایی‌ه و فقط برای مدیر با loadAdmin() بار می‌شه. اینجا مونده: ورود،
 // ناوبری و بارگذاری داده — CLAUDE.md، «ماژولار کردن».
@@ -44,8 +44,7 @@ import { loadAnnouncements, renderAnnBar, setupInstallPrompt } from './features/
 import { HAWZA_TAB, HAWZA_TAB_INFO, goToHawzaTab, setHawzaTab, setupHawzaTabs } from './features/hawza/hawza-tabs.js';
 import { setupHawzaAbout } from './features/hawza/hawza-about.js';
 import { maybeShowIntro, setupIntro } from './features/home/intro.js';
-import { openLaws, renderLaws, setupLaws } from './features/laws/laws.js';
-import { layoutOrbit2, setupHome } from './features/home/home.js';
+import { setupHome } from './features/home/home.js';
 import { loadMagazines, renderMagazines } from './features/reports/magazines.js';
 import { renderDashHeroStats } from './features/home/hero-stats.js';
 import { loadSchoolReports, renderSchoolReports, setupSchoolReports } from './features/schools/school-reports.js';
@@ -196,7 +195,7 @@ function navMenuGo(key){
   if(s === 'people') return goToPeopleTab(t || 'figures');
   if(s === 'hawza') return goToHawzaTab(t || 'news');
   if(s === 'positions' && t) return goToPosTab(t);
-  switchSection(s);   // posts/feed و public/trends هم: خودِ بخش (با تب آخر/پیش‌فرض)
+  switchSection(s);   // posts/feed هم: خودِ بخش (با تب آخر/پیش‌فرض)
 }
 function adminMenuGo(key){
   const a = admin();
@@ -513,7 +512,6 @@ export function switchSection(key){
   if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
   if(key === 'people') syncPeopleTab();
   if(key === 'positions') setPosTab(POS_TAB);
-  if(key === 'laws') openLaws();
   if(key === 'posts' || key === 'people') ensureVisibleTab(key);
   // بخش تازه دیده‌شده — خط هلویی تب‌هاش بدون انیمیشن سر جاش قرار بگیره
   requestAnimationFrame(()=>document.querySelectorAll('#sec-'+key+' .news-page-tabs').forEach(bar=>updateTabInk(bar, true)));
@@ -525,8 +523,6 @@ setupTabBars();
 setupHawzaTabs();
 
 setupPositionsTabs();
-
-setupLaws();
 
 setupHawzaAbout();
 
@@ -692,7 +688,6 @@ function visTargets(){
   document.querySelectorAll('#hawza-page-tabs button[id^="hawza-tab-"]').forEach(b=>out.push([b, 'hawza/' + b.id.slice(10)]));
   document.querySelectorAll('#posts-page-tabs button[data-posts-tab]').forEach(b=>out.push([b, 'posts/' + b.dataset.postsTab]));
   document.querySelectorAll('#positions-page-tabs button[data-pos-tab]').forEach(b=>out.push([b, 'positions/' + b.dataset.posTab]));
-  document.querySelectorAll('#public-page-tabs button[data-public-tab]').forEach(b=>out.push([b, 'public/' + b.dataset.publicTab]));
   return out;
 }
 export function applySiteVisibility(){
@@ -707,10 +702,9 @@ export function applySiteVisibility(){
       el.appendChild(b);
     }
   });
-  // قوس «مدار» برای دقیقاً پنج کارت جای‌گذاری شده — با کارت پنهان کنار می‌ره
+  // قوس «مدار» برای دقیقاً شش کارت جای‌گذاری شده — با کارت پنهان کنار می‌ره
   const grid = document.querySelector('.domain-grid');
   if(grid) grid.classList.toggle('vis-partial', !admin && !!grid.querySelector('.domain-card.vis-off'));
-  layoutOrbit2();
   document.getElementById('maint-admin-bar').hidden = !(admin && maintOn());
   requestAnimationFrame(()=>document.querySelectorAll('.section.active .news-page-tabs').forEach(bar=>updateTabInk(bar, true)));
 }
@@ -872,7 +866,7 @@ export function postHideBtnHtml(p){
   return currentRole === 'app_admin' ? `<button type="button" class="post-hide-btn" data-hide-post="${Number(p.id)}" title="این پست برای همه‌ی بیننده‌ها پنهان می‌شود"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button>` : '';
 }
 export function rerenderPostViews(){
-  [renderNewsFeed, renderPosts, renderPoliticalFigures, renderDossierTab, renderLaws].forEach(fn=>{ try{ fn(); }catch(e){ console.error(e); } });
+  [renderNewsFeed, renderPosts, renderPoliticalFigures, renderDossierTab].forEach(fn=>{ try{ fn(); }catch(e){ console.error(e); } });
   if(document.getElementById('sec-overview').classList.contains('active') && NEWS_CURRENT_TAB === 'analytics'){ try{ renderNewsAnalytics(); }catch(e){ console.error(e); } }
 }
 
@@ -907,7 +901,6 @@ function navCurrentState(){
     if((t === 'figures' || t === 'orgs' || t === 'thinktanks') && pfSelectedChannel) ch = pfSelectedChannel;
   }
   else if(s === 'positions'){ t = POS_TAB; if(pfSelectedChannel) ch = pfSelectedChannel; }
-  else if(s === 'public') t = 'trends';
   else if(s === 'uploads' || s === 'activity') t = admin()?.navTab(s) ?? null;
   else if(s === 'hawza') t = HAWZA_TAB;
   const key = [s, t, ch].filter(x=>x !== null && x !== undefined && x !== '').join('/');

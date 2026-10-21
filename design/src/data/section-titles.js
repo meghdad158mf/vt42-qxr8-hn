@@ -19,8 +19,5 @@ export const TITLES = {
   users: 'کاربران',
   activity: 'گزارش فعالیت',
   positions: 'مواضع مراجع و علماء',
-  public: 'درباره مردم',
-  laws: 'قوانین و مصوبات',
-  ask: 'از جریان بپرس',
 };
 

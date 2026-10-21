@@ -27,7 +27,7 @@
 | `src/core/` | هسته‌ی خالص: تنظیمات و شماره‌ی نسخه، نشست، `api()`، گزارش خطا، متن امن (`escHtml`/`safeUrl`)، جست‌وجوی فارسی، تاریخ شمسی، اعتبارسنجی، ناوبری و «برگشت» | هیچ وابستگی به بقیه‌ی برنامه؛ وابستگی با hook (`setErrorContext`، `startRouter`، `setAdminHook`) |
 | `src/data/` | داده‌ی مشترک: منابع، موضوع‌ها، مناطق، کش پست‌ها، تنظیمات سایت، عنوان بخش‌ها | binding زنده‌ی فقط‌خواندنی؛ تغییر فقط با setter (`setChannels`…) |
 | `src/ui/` | اجزای رابط: پنجره، پیام/تأیید، منوها، تب‌بار، نمایشگر سند و عکس، صفحه‌بندی، انتخاب‌گر تاریخ شمسی… | هر جزء با `setupX()` راه می‌افتد |
-| `src/features/<عرصه>/` | هر عرصه‌ی سایت: `news`، `cyberspace`، `people`، `positions`، `hawza`، `laws`، `schools`، `reports`، `announcements`، `home` | دو عرصه هم را دوطرفه import نمی‌کنند؛ برای برگشت از hook (`onX(fn)`) استفاده می‌شود |
+| `src/features/<عرصه>/` | هر عرصه‌ی سایت: `news`، `cyberspace`، `people`، `positions`، `hawza`، `schools`، `reports`، `announcements`، `home` | دو عرصه هم را دوطرفه import نمی‌کنند؛ برای برگشت از hook (`onX(fn)`) استفاده می‌شود |
 | `src/admin/` | همه‌ی بخش‌های مدیریت (`status/`، `settings/`، کاربران، بارگذاری، خروجی، گزارش فعالیت…) | **بسته‌ی جدا**: فقط برای مدیر با `import('./admin/admin.js')` بار می‌شود؛ هیچ ماژول بیننده‌ای از `admin/` import نمی‌کند — کاری که از مدیریت لازم دارد با `adminHook(name)` (`core/admin-hooks.js`) |
 | `src/styles/` | CSS به ترتیب آبشاری (`main.css` همه را به ترتیب import می‌کند) | ترتیب import عوض نشود |
 | `src/app.js` | ورود، ناوبری بین بخش‌ها، بارگذاری داده (`loadAll`)، اتصال اجزا | فقط تابع export‌شده‌ی این فایل را ماژول‌های features/admin می‌توانند import کنند (ارجاع موقت) |

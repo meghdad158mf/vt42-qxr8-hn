@@ -40,12 +40,12 @@ import { fetchPostsMissingKeywords, isAdminRequest } from "../_shared/auth.ts";
 import { AiTimeoutError, liaraChat, mapLimit } from "../_shared/liara.ts";
 
 // ---- فیلتر عرصه‌های تازه (۵.۲۹.۰، migration_048) ----
-// منابع «مواضع مراجع و علماء» و «قوانین و مصوبات» همه‌ی مطالبشان را می‌فرستند
+// منابع «مواضع مراجع و علماء» همه‌ی مطالبشان را می‌فرستند
 // (استفتاء، تسلیت، خبر عادی…)؛ خواست کاربر: فقط مطالب مرتبط نمایش داده شوند و تا بررسی
 // نشده‌اند پنهان بمانند. هر پست یک‌بار بررسی و posts.section_relevant (true/false) پر می‌شود.
 // اندیشکده‌ها عمداً بررسی نمی‌شوند (خواست کاربر: «فعلاً نیاز ندارد») — اگر بعداً خواست، کلید
 // thinktanks را به SECTION_RULES و show_in_thinktanks را به کوئری منابع برگردان.
-// پرامپت هر بخش جداست و هر درخواست فقط پست‌های یک بخش را دارد (درس hawza_relevant: فیلد
+// («قوانین و مصوبات» در ۵.۳۳.۰ به خواست کاربر حذف شد.) پرامپت هر بخش جداست و هر درخواست فقط پست‌های یک بخش را دارد (درس hawza_relevant: فیلد
 // شرطی برای زیرمجموعه‌ای از دسته قابل‌اعتماد نیست). جواب برای همه‌ی پست‌ها اجباری است و
 // پست جاافتاده false می‌گیرد (پنهان ماندنِ نامشخص امن‌تر از نمایش اشتباه است).
 const SECTION_LIMIT = 20;
@@ -61,13 +61,6 @@ const SECTION_RULES: Record<string, string> = {
     "moral teaching, sermons with no political/social angle, condolence or obituary notices, routine " +
     "meetings/visits/ceremonies with no stated position, seminary administrative or educational notices, " +
     "book/class announcements, and anything not clearly a political or social position.",
-  laws:
-    "The posts come from official bodies (government, parliament, Guardian Council, supreme councils, " +
-    "judiciary, provincial and seminary authorities). relevant = true ONLY if the post is about a LAW, BILL, " +
-    "RESOLUTION or APPROVAL (مصوبه), regulation, bylaw, directive, official decision, or an OFFICIAL POSITION " +
-    "of the issuing body on a public matter. relevant = false for: general news reports, interviews and " +
-    "personal opinions of officials, routine meetings/visits/ceremonies, events, sports, culture, " +
-    "congratulations/condolences, and anything that is not a law, approval, official decision or official position.",
 };
 type SecPost = { id: number; channel_id: number; title: string | null; text: string | null };
 async function classifySectionPosts(req: Request, deadline: number): Promise<Record<string, unknown>> {
@@ -77,14 +70,13 @@ async function classifySectionPosts(req: Request, deadline: number): Promise<Rec
   const headers = { apikey: anonKey ?? "", Authorization: auth };
   // ستون‌های migration_047/048 هنوز نیستند → ۴۰۰ → این مرحله بی‌صدا رد می‌شود
   const chRes = await fetch(
-    `${supabaseUrl}/rest/v1/channels?select=id,show_in_positions,show_in_laws` +
-      `&or=(show_in_positions.eq.true,show_in_laws.eq.true)`,
+    `${supabaseUrl}/rest/v1/channels?select=id&show_in_positions=eq.true`,
     { headers },
   );
   if (!chRes.ok) return { section_note: "channels " + chRes.status };
-  const chans: Array<{ id: number; show_in_positions: boolean; show_in_laws: boolean }> = await chRes.json();
+  const chans: Array<{ id: number }> = await chRes.json();
   if (!chans.length) return { section_checked: 0 };
-  const secOf = new Map(chans.map((c) => [c.id, c.show_in_positions ? "positions" : "laws"]));
+  const secOf = new Map(chans.map((c) => [c.id, "positions"]));
   const pRes = await fetch(
     `${supabaseUrl}/rest/v1/posts?select=id,channel_id,title,text&channel_id=in.(${[...secOf.keys()].join(",")})` +
       `&section_relevant=is.null&hidden_at=is.null&order=scraped_at.desc&limit=${SECTION_LIMIT}`,
