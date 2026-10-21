@@ -24,7 +24,6 @@ etme_widget_message_video_player برای تشخیص ویدیو کافیه و ف
 
 import base64
 import datetime
-import os
 import re
 import sys
 import time
@@ -32,10 +31,11 @@ from html import unescape
 
 import requests
 from bs4 import BeautifulSoup
+from jarian_common import (
+    SUPABASE_URL, SUPABASE_ANON_KEY, auth_headers, exit_if_all_failed, login, require_env, upload_object, upsert_posts,
+)
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+require_env()
 
 REQUEST_TIMEOUT = 20
 POLITE_DELAY_SECONDS = 2
@@ -71,25 +71,6 @@ def strip_tags(html: str) -> str:
     return text.strip()
 
 
-def login() -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/rpc/login",
-        headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-        json={"password": ADMIN_PASSWORD},
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()["token"]
-
-
-def auth_headers(token: str) -> dict:
-    return {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    }
-
-
 def fetch_eitaa_channels(token: str) -> list[dict]:
     r = requests.get(
         f"{SUPABASE_URL}/rest/v1/channels",
@@ -99,25 +80,6 @@ def fetch_eitaa_channels(token: str) -> list[dict]:
     )
     r.raise_for_status()
     return r.json()
-
-
-def upload_media(token: str, storage_path: str, content: bytes, content_type: str) -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/storage/v1/object/{MEDIA_BUCKET}/{storage_path}",
-        headers={
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": f"Bearer {token}",
-            "Content-Type": content_type or "application/octet-stream",
-            # چون هر اجرا کل صفحه‌ی کانال رو دوباره اسکن می‌کنه (نه فقط پست‌های
-            # جدید)، ممکنه همون فایل قبلاً آپلود شده باشه — بدون این هدر، آپلود
-            # دوباره‌ی همون مسیر با خطای 400 رد می‌شه.
-            "x-upsert": "true",
-        },
-        data=content,
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return f"{SUPABASE_URL}/storage/v1/object/public/{MEDIA_BUCKET}/{storage_path}"
 
 
 def download_and_store_media(token: str, source_url: str, channel_id: int, post_id: str) -> dict | None:
@@ -139,7 +101,7 @@ def download_and_store_media(token: str, source_url: str, channel_id: int, post_
             return None
         ext = ".mp4" if "video" in content_type else ".jpg"
         storage_path = f"eitaa/{channel_id}/{post_id}{ext}"
-        public_url = upload_media(token, storage_path, content, content_type)
+        public_url = upload_object(token, MEDIA_BUCKET, storage_path, content, content_type, REQUEST_TIMEOUT)
         return {"media_path": public_url, "media_storage_path": storage_path}
     except Exception as e:
         print(f"    [!] media download failed for {source_url[:80]}: {e}", file=sys.stderr)
@@ -241,32 +203,8 @@ def fetch_existing_post_ids(token: str, channel_id: int, post_ids: list[str]) ->
         return set()
 
 
-def upsert_posts(token: str, posts: list[dict]) -> bool:
-    if not posts:
-        return True
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/posts",
-        headers={**auth_headers(token), "Prefer": "resolution=merge-duplicates,return=minimal"},
-        params={"on_conflict": "channel_id,platform_post_id"},
-        json=posts,
-        timeout=REQUEST_TIMEOUT,
-    )
-    if not r.ok:
-        print(f"    [!] upsert failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
-        return False
-    return True
-
-
-def exit_if_all_failed(failed: int, total: int) -> None:
-    # اگه همه‌ی منابع خطا دادن، اجرا «ناموفق» ثبت بشه تا کارت «وضعیت سامانه» قرمز
-    # بشه (قبلاً هر خطایی فقط چاپ می‌شد و اجرا همیشه سبز می‌موند)
-    if total and failed == total:
-        print(f"[!] all {total} source(s) failed", file=sys.stderr)
-        sys.exit(1)
-
-
 def main() -> None:
-    token = login()
+    token = login(REQUEST_TIMEOUT)
     channels = fetch_eitaa_channels(token)
     print(f"[*] {len(channels)} active eitaa channel(s) to scan")
 
@@ -304,8 +242,8 @@ def main() -> None:
                         # تکرار می‌کنه، بدون فایده‌ی «لینک منبع برای دانلود بعدی» که
                         # media_source_url در بقیه‌ی موارد داره.
                         p["media_source_url"] = None
-            ok_new = upsert_posts(token, new_posts)
-            ok_old = upsert_posts(token, old_posts)
+            ok_new = upsert_posts(token, new_posts, REQUEST_TIMEOUT)
+            ok_old = upsert_posts(token, old_posts, REQUEST_TIMEOUT)
             if not (ok_new and ok_old):
                 failed += 1
             total_saved += len(posts)

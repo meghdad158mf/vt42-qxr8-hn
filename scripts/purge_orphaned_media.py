@@ -22,10 +22,9 @@ import os
 import sys
 
 import requests
+from jarian_common import SUPABASE_URL, SUPABASE_ANON_KEY, auth_headers, login, require_env
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+require_env()
 DRY_RUN = os.environ.get("DRY_RUN", "true").strip().lower() != "false"
 
 REQUEST_TIMEOUT = 30
@@ -36,25 +35,6 @@ BUCKETS = [
     ("post-media", "posts"),
     ("newspaper-covers", "newspapers"),
 ]
-
-
-def login() -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/rpc/login",
-        headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-        json={"password": ADMIN_PASSWORD},
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()["token"]
-
-
-def auth_headers(token: str) -> dict:
-    return {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    }
 
 
 def fetch_referenced_paths(token: str, table: str) -> set[str]:
@@ -174,7 +154,7 @@ def purge_bucket(token: str, bucket: str, table: str) -> None:
 
 
 def main() -> None:
-    token = login()
+    token = login(REQUEST_TIMEOUT)
     print(f"[*] DRY_RUN={DRY_RUN}")
     for bucket, table in BUCKETS:
         purge_bucket(token, bucket, table)

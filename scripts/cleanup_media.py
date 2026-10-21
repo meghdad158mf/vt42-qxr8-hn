@@ -27,10 +27,11 @@ import os
 import sys
 
 import requests
+from jarian_common import (
+    SUPABASE_URL, SUPABASE_ANON_KEY, auth_headers, clear_post_media, login, require_env,
+)
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+require_env()
 
 REQUEST_TIMEOUT = 30
 MEDIA_BUCKET = "post-media"
@@ -57,25 +58,6 @@ RETENTION_DAYS = float(os.environ.get("RETENTION_DAYS_OVERRIDE") or 0.5)
 # key=media_retention_hours، migration_043) — اگه RETENTION_DAYS_OVERRIDE ست نشده باشه،
 # اول همون خونده می‌شه؛ اگه نبود/خوانده نشد همون ۰.۵ روز بالا می‌مونه.
 ALLOWED_RETENTION_HOURS = (12, 24, 48, 72)
-
-
-def login() -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/rpc/login",
-        headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-        json={"password": ADMIN_PASSWORD},
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()["token"]
-
-
-def auth_headers(token: str) -> dict:
-    return {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    }
 
 
 def remove_storage_objects(token: str, bucket: str, paths: list[str]) -> set[str] | None:
@@ -161,21 +143,6 @@ def fetch_expired_posts(token: str) -> list[dict]:
     return r.json()
 
 
-def clear_post_media(token: str, post_ids: list[int]) -> None:
-    if not post_ids:
-        return
-    ids_list = ",".join(str(i) for i in post_ids)
-    r = requests.patch(
-        f"{SUPABASE_URL}/rest/v1/posts",
-        headers={**auth_headers(token), "Prefer": "return=minimal"},
-        params={"id": f"in.({ids_list})"},
-        json={"media_path": None, "media_storage_path": None, "media_fetched_at": None},
-        timeout=REQUEST_TIMEOUT,
-    )
-    if not r.ok:
-        print(f"[!] clear post media fields failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
-
-
 def cleanup_post_media(token: str) -> None:
     expired = fetch_expired_posts(token)
     print(f"[*] {len(expired)} post(s) with media older than {RETENTION_DAYS} day(s)")
@@ -188,7 +155,7 @@ def cleanup_post_media(token: str) -> None:
         return
     # فقط ردیف‌هایی که فایلشون واقعاً دیگه نیست — بقیه اجرای بعد دوباره امتحان می‌شن
     ids = [p["id"] for p in expired if p.get("media_storage_path") in gone]
-    clear_post_media(token, ids)
+    clear_post_media(token, ids, REQUEST_TIMEOUT)
     print(f"[done] cleaned up {len(ids)}/{len(expired)} post(s)")
 
 
@@ -281,7 +248,7 @@ def load_retention_setting(token: str) -> None:
 
 
 def main() -> None:
-    token = login()
+    token = login(REQUEST_TIMEOUT)
     load_retention_setting(token)
     cleanup_post_media(token)
     cleanup_newspaper_covers(token)
