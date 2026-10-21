@@ -50,11 +50,16 @@ test.describe('آنچه درباره حوزه گفته می‌شود', () => {
 });
 
 // ۵.۳۳.۰: «درباره مردم»، «قوانین و مصوبات» و «از جریان بپرس» حذف شدند (خواست کاربر)
-test('صفحه‌ی نخست: شش عرصه در یک مدار، و پیوند قدیمی عرصه‌های حذف‌شده به صفحه‌ی نخست می‌رود', async ({ page }) => {
+test('صفحه‌ی نخست: شش عرصه در یک مدار و بدون عرصه‌های حذف‌شده در منو', async ({ page }) => {
   await openAs(page, 'admin');
   await expect(page.locator('.domain-orbits .domain-card')).toHaveCount(6);
   await expect(page.locator('.domain-grid')).toHaveCount(1);
   await expect(page.locator('#nav-menu [data-nav^="laws"], #nav-menu [data-nav^="public"], #nav-menu [data-nav^="ask"]')).toHaveCount(0);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('پیوند قدیمی عرصه‌های حذف‌شده به صفحه‌ی نخست می‌رود', async ({ page }) => {
+  test.slow(); // سه بار باز کردن کامل صفحه
   for (const old of ['laws', 'public/trends', 'ask']) {
     await openAs(page, 'viewer', old);
     await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
