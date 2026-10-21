@@ -8,8 +8,7 @@ import { showToast } from '../../ui/toast.js';
 import { signStoragePaths } from '../../core/signed-urls.js';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../core/config.js';
 import { uiConfirm } from '../../ui/confirm.js';
-// ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
-import { renderUploadLists } from '../../app.js';
+import { adminHook } from '../../core/admin-hooks.js';
 
 export let SCHOOL_REPORTS = []; // {id, title, image_url, media_storage_path, sort_order, uploaded_at, file_type, file_name} — گزارش‌های تحلیل Power BI (تصویر/PDF/اکسل)
 export async function loadSchoolReports(){
@@ -75,7 +74,7 @@ export function openSchoolReportFile(r){
   });
 }
 export function renderSchoolReports(){
-  renderUploadLists();
+  adminHook('renderUploadLists'); // فهرست «بارگذاری محتوا» (admin/uploads.js)
   const list = document.getElementById('school-report-list');
   const empty = document.getElementById('school-reports-empty');
   if(!list) return;

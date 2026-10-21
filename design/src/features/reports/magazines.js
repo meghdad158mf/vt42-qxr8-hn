@@ -9,8 +9,7 @@ import { showToast } from '../../ui/toast.js';
 import { signStoragePaths } from '../../core/signed-urls.js';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../core/config.js';
 import { uiConfirm } from '../../ui/confirm.js';
-// ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
-import { renderUploadLists } from '../../app.js';
+import { adminHook } from '../../core/admin-hooks.js';
 
 export let MAGAZINES = [];   // {id, title, issue_no, publish_date, file_type, files, cover_url, uploaded_at}
 // بعد از هر رندر فهرست شماره‌ها؛ home.js جلدهای «بسته تحلیلی جریان» صفحه‌ی نخست رو ثبت می‌کنه (بدون import دوطرفه)
@@ -23,7 +22,7 @@ export async function loadMagazines(){
 // ---- magazines library (بخش تحلیلی) ----
 export const MAG_TYPE_LABEL = { pdf:'PDF', images:'چند عکس' };
 export function renderMagazines(){
-  renderUploadLists();
+  adminHook('renderUploadLists'); // فهرست «بارگذاری محتوا» (admin/uploads.js)
   const grid = document.getElementById('magazine-grid');
   const empty = document.getElementById('magazines-empty');
   const isAdmin = currentRole === 'app_admin';
