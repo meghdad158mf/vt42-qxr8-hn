@@ -1,13 +1,15 @@
 // بدنه‌ی برنامه — کل اسکریپت قبلی صفحه، حالا یه ES module. جدا شده تا الان: هسته در core/
 // (مرحله‌ی ۳، ۵.۳۲.۲) و اجزای رابط در ui/ (مرحله‌ی ۴، ۵.۳۲.۳: پنجره‌ها، پیام/تأیید، منوها، تب‌بارها،
-// نمایشگر سند/عکس، صفحه‌بندی…). بقیه در مرحله‌های بعد به features/<بخش> و admin/ (CLAUDE.md، «ماژولار کردن»).
+// نمایشگر سند/عکس، صفحه‌بندی…)، داده‌ی مشترک در data/، و عرصه‌ها در features/: اخبار و رویدادها (مرحله‌ی ۵،
+// ۵.۳۲.۴–۵)، کنشگری مجازی، یادداشت‌ها و مواضع مراجع و علماء (مرحله‌ی ۶، ۵.۳۲.۶). بقیه در مرحله‌های بعد به
+// features/<بخش> و admin/ (CLAUDE.md، «ماژولار کردن»).
 import { SUPABASE_URL, SUPABASE_ANON_KEY, APP_VERSION } from './core/config.js';
 import { authToken, currentRole, saveSession, clearSession } from './core/session.js';
 import { api, SESSION_EXPIRED, resetSessionExpired } from './core/api.js';
 import { setErrorContext } from './core/error-reporting.js';
 import { escAttr, escHtml, safeUrl, claimsTextDisplay, toFaDigits, faTitle, faNum, faDigitsToEn, faDigitsToLatin, needsTranslation } from './core/text.js';
 import { searchNorm, searchHay } from './core/search.js';
-import { JALALI_MONTHS, calParts, jalaliMonthStarts, iranTodayStartMs, tehranDayDiff, newsRelTime } from './core/date.js';
+import { JALALI_MONTHS, calParts, jalaliMonthStarts, iranTodayStartMs, tehranDayDiff, newsRelTime, matchesTime } from './core/date.js';
 import { nidValid, normalizeIrMobile } from './core/validate.js';
 import { navMark, navRestoring, startRouter, restoreScrollY } from './core/router.js';
 import { lsGet, lsSet } from './core/local-store.js';
@@ -27,7 +29,7 @@ import { setupJalaliRange } from './ui/jalali-range.js';
 import { renderPagination, NEWS_PAGE_SIZE } from './ui/pagination.js';
 import { setMobileFilterCount, setupMobileFilters } from './ui/mobile-filters.js';
 import { cardAdminControls } from './ui/card-controls.js';
-import { CATEGORIES, CHANNELS, POSTS_CACHE, REGIONS, catNameOf, chById, chInitials, chName, regionNameOf, setCategories, setChannels, setPostsCache, setRegions, HIDDEN_POST_IDS, loadHiddenPostIds } from './data/store.js';
+import { CATEGORIES, CHANNELS, POSTS_CACHE, REGIONS, catNameOf, chById, chInitials, chName, regionNameOf, setCategories, setChannels, setPostsCache, setRegions, HIDDEN_POST_IDS, loadHiddenPostIds, CHANNEL_PROFILE_GROUPS, PROFILE_GROUPS, setChannelProfileGroups, setProfileGroups } from './data/store.js';
 import { setupPostTools } from './features/news/post-tools.js';
 import { NEWS_CURRENT_TAB, NEWS_TABS, activateNewsStudy, goToNewsTab, placeNewsStudyPanel, setNewsPageTab, setupNewsTabs } from './features/news/news-tabs.js';
 import { NEWS_PLATFORM_ICON, NEWS_PLATFORM_LABEL } from './ui/platforms.js';
@@ -38,6 +40,14 @@ import { loadNewsAiInsights } from './features/news/insights.js';
 import { NEWSLETTER_POSTS, loadNewsletterPosts, setNewsletterPosts, setupNewsletter } from './features/news/newsletter.js';
 import { NEWSPAPERS, loadNewspapers, renderNewspaperDateTabs, renderNewspapers, setupNewspapers } from './features/news/newspapers.js';
 import { renderNewsAnalytics, setupNewsAnalytics } from './features/news/analytics.js';
+import { ARCHIVE_REPORTS, deleteArchiveReport, loadArchiveReports, renderArchiveReports } from './features/people/archive.js';
+import { populatePostFilters, postsGroupFilter, postsSelectedChannels, postsTime, renderPosts, setupPostsFeed } from './features/cyberspace/posts-feed.js';
+import { goToPeopleTab, setupPeopleTabs, syncPeopleTab } from './features/people/people-tabs.js';
+import { closePfChannel, openPfChannel, pfSelectedChannel, placePfPanel, populatePoliticalFiguresSourceOptions, renderPoliticalFigures, secPendingNote, secRelevant, setupProfileGallery, resetPfExtraCache } from './features/people/profile-gallery.js';
+import { POS_TAB, POS_TAB_INFO, POS_TAB_LABEL, goToPosTab, setPosTab, setupPositionsTabs } from './features/positions/positions.js';
+import { renderChannelCards, renderCyberPeopleGrid, setupCyberPeople } from './features/cyberspace/cyber-people.js';
+import { setupCardTextTap } from './ui/card-text-tap.js';
+import { setupCyberTabs } from './features/cyberspace/cyber-tabs.js';
 
 // ⚠️ پل موقت: دستگیره‌های درون HTML (onclick="…" در صفحه و در HTMLهایی که همین فایل می‌سازه)
 // فقط تابع سراسری رو می‌بینن، ولی تابع‌های یه module سراسری نیستن. این فهرست تا جایگزینی همه‌ی
@@ -45,17 +55,17 @@ import { renderNewsAnalytics, setupNewsAnalytics } from './features/news/analyti
 // اینجا اضافه نکن — به‌جاش addEventListener. tests/unit/inline-handlers.test.js هم‌خوانیش رو می‌سنجه.
 Object.assign(window, {
   addCrawlSuggestion, addDossierManualPost, autoMatchDossierTopic, bulkChanBack, bulkChanPreview,
-  bulkChanSave, changePassword, clearPostsFocus, closeUserEditor, copyJobLog, deleteCrawlSite,
-  deleteDossierTopic, deleteDossierTopicPost, downloadBackup, editDossierTopicKeywords, exportPosts,
-  exportReport, goToUploadsTab, handleLogin, hideHawzaMention, hidePost, ignoreCrawlSuggestion, introGo,
-  logout, openBulkChan, openIntro, openSiteSettingsPanel, openUserEditor, otpBack, otpChooseSms, otpResend,
-  otpShow, otpSubmit, publishAnnouncement, renderDossierTopicAdminList, renderSystemStatus, retryLoadAll,
-  retryMaintenance, saveAlertSettings, saveCrawlSite, saveDossierTopicKeywords, saveHiddenSections,
-  saveMaintenance, saveMediaRetention, saveSmsConfig, saveUser, saveViewerPasswordLogin, scrollToDomainGrid,
-  scrollToPackageCard, searchDossierManualAdd, sendSmsTest, setHawzaTab, setUploadsTab, submitFeedback,
-  subscribeNotify, switchSection, testAlertEmail, toggleCrawlSite, toggleDossierTopicActive,
-  toggleDossierTopicPostExcluded, toggleMoreText, togglePasswordVisibility, togglePoliticalFigureText,
-  togglePostText, translateMention, unhidePost, unlockLogin, usrDownload
+  bulkChanSave, changePassword, closeUserEditor, copyJobLog, deleteCrawlSite, deleteDossierTopic,
+  deleteDossierTopicPost, downloadBackup, editDossierTopicKeywords, exportPosts, exportReport,
+  goToUploadsTab, handleLogin, hideHawzaMention, hidePost, ignoreCrawlSuggestion, introGo, logout,
+  openBulkChan, openIntro, openSiteSettingsPanel, openUserEditor, otpBack, otpChooseSms, otpResend,
+  otpShow, otpSubmit, publishAnnouncement, renderDossierTopicAdminList, renderSystemStatus,
+  retryLoadAll, retryMaintenance, saveAlertSettings, saveCrawlSite, saveDossierTopicKeywords,
+  saveHiddenSections, saveMaintenance, saveMediaRetention, saveSmsConfig, saveUser,
+  saveViewerPasswordLogin, scrollToDomainGrid, scrollToPackageCard, searchDossierManualAdd, sendSmsTest,
+  setHawzaTab, setUploadsTab, submitFeedback, subscribeNotify, switchSection, testAlertEmail,
+  toggleCrawlSite, toggleDossierTopicActive, toggleDossierTopicPostExcluded, toggleMoreText,
+  togglePasswordVisibility, translateMention, unhidePost, unlockLogin, usrDownload
 });
 
 // خطاهای مرورگر: جای فعلی کاربر و دستگاه برای گزارش (core/error-reporting.js)
@@ -641,26 +651,6 @@ export function goToHawzaTab(tab){
   if(HAWZA_TAB_INFO[tab]){ HAWZA_TAB = tab; lsSet('jarian_last_hawza_tab', tab); }
   switchSection('hawza'); // خودش تب HAWZA_TAB رو باز می‌کنه
 }
-function goToPostsTab(tab){
-  switchSection('posts');
-  const tabBtn = document.querySelector('#posts-page-tabs button[data-posts-tab="'+tab+'"]');
-  if(tabBtn) tabBtn.click();
-}
-function goToPeopleTab(tab){
-  switchSection('people');
-  const tabBtn = document.querySelector('#people-page-tabs button[data-people-tab="'+tab+'"]');
-  if(tabBtn) tabBtn.click();
-}
-const POSTS_TAB_INFO = {
-  feed: 'پست‌های منتشرشده‌ی کانال‌های کنشگر فضای مجازی، قابل‌فیلتر بر اساس کانال، دسته و زمان.',
-  people: 'فهرست کانال‌های کنشگر به‌همراه صاحب کانال، تعداد مخاطب و سطح فعالیت هرکدام.'
-};
-const PEOPLE_TAB_INFO = {
-  orgs: 'مطالب و تحلیل‌های منتشرشده‌ی سازمان‌ها و نهادها؛ برای دیدن مطالب، سازمان موردنظر را انتخاب کنید.',
-  figures: 'یادداشت‌ها و مطالب کانال‌های معرفی‌شده به‌عنوان چهره‌ی سیاسی.',
-  thinktanks: 'گزارش‌ها و یادداشت‌های اندیشکده‌ها و پژوهشگاه‌ها؛ برای دیدن مطالب، اندیشکده‌ی موردنظر را انتخاب کنید.',
-  archive: 'تولیدات تحلیلی سایر نهادها، جدا از بسته‌های تحلیلی خودِ جریان.'
-};
 
 setupTabBars();
 
@@ -693,66 +683,7 @@ function setHawzaTab(tab){
   activateNewsStudy('hawza');
 }
 
-// ---- «مواضع مراجع و علماء» (۵.۲۸.۰، مدار دوم) ----
-// پنج تب؛ هر تب = گالری لوگو + فید منبع با همون ظرف «یادداشت‌ها» (pfMode = 'pos-<تب>')؛
-// عضویت منبع: channels.show_in_positions + positions_tab (migration_047)
-var POS_TAB_INFO = {
-  leader: 'بیانات، پیام‌ها و مواضع رهبر معظم انقلاب.',
-  maraji: 'مواضع و بیانیه‌های مراجع تقلید و علمای طراز اول در برابر مسائل روز.',
-  hawza: 'مواضع رسمی حوزه‌های علمیه در برابر مسائل خاص (بیشتر از سوی مدیر حوزه)؛ این تب خبر نیست، فقط موضع رسمی.',
-  imams: 'خطبه‌ها و مواضع ائمه جمعه.',
-  orgs: 'مواضع و بیانیه‌های تشکل‌ها و نخبگان حوزوی.',
-};
-var POS_TAB_LABEL = { leader:'رهبر انقلاب', maraji:'مراجع و علماء', hawza:'حوزه‌های علمیه', imams:'ائمه جمعه', orgs:'تشکل‌ها و نخبگان' };
-var POS_TAB = (t=>POS_TAB_INFO[t] ? t : 'leader')(lsGet('jarian_last_pos_tab', 'leader'));
-function setPosTab(tab){
-  if(!POS_TAB_INFO[tab]) tab = 'leader';
-  if(viewerHidden('positions/' + tab)) tab = firstVisibleTab('positions') || tab;
-  navMark();
-  POS_TAB = tab;
-  lsSet('jarian_last_pos_tab', tab);
-  document.querySelectorAll('#positions-page-tabs button[data-pos-tab]').forEach(b=>b.classList.toggle('active', b.dataset.posTab === tab));
-  const sub = document.querySelector('#positions-tab-subtitle span');
-  if(sub) sub.textContent = POS_TAB_INFO[tab];
-  placePfPanel('positions');
-  setPfMode('pos-' + tab);
-}
-function goToPosTab(tab){
-  if(POS_TAB_INFO[tab]){ POS_TAB = tab; lsSet('jarian_last_pos_tab', tab); }
-  switchSection('positions'); // خودش تب POS_TAB رو باز می‌کنه
-}
-document.getElementById('positions-page-tabs').addEventListener('click', e=>{
-  const b = e.target.closest('button[data-pos-tab]'); if(!b) return;
-  if(viewerHidden('positions/' + b.dataset.posTab)) return;
-  setPosTab(b.dataset.posTab);
-});
-// ظرف گالری/فید «یادداشت‌ها» (people-tab-figures) بین «یادداشت‌ها» و «مواضع» جابه‌جا می‌شه
-// — خودِ عنصر، مثل placeNewsStudyPanel
-var PF_PANEL_HOME = null;
-function placePfPanel(where){
-  const panel = document.getElementById('people-tab-figures');
-  if(!panel) return;
-  if(!PF_PANEL_HOME){
-    PF_PANEL_HOME = document.createComment('pf-panel-home');
-    panel.parentNode.insertBefore(PF_PANEL_HOME, panel);
-  }
-  if(where === 'positions'){
-    const slot = document.getElementById('positions-pf-slot');
-    if(panel.parentNode !== slot) slot.appendChild(panel);
-    panel.style.display = '';
-  }else if(PF_PANEL_HOME.nextSibling !== panel){
-    PF_PANEL_HOME.parentNode.insertBefore(panel, PF_PANEL_HOME.nextSibling);
-  }
-}
-// برگشت به «یادداشت‌ها»: حالت گالری (pfMode) و نمایش ظرف با تب فعال همون بخش هم‌سو بشه
-function syncPeopleTab(){
-  const b = document.querySelector('#people-page-tabs button.active');
-  const t = b ? b.dataset.peopleTab : 'figures';
-  const pfTab = ['orgs','figures','thinktanks'].includes(t);
-  document.getElementById('people-tab-figures').style.display = pfTab ? '' : 'none';
-  document.getElementById('people-tab-archive').style.display = t === 'archive' ? '' : 'none';
-  if(pfTab && pfMode !== t) setPfMode(t);
-}
+setupPositionsTabs();
 
 // ---- «قوانین و مصوبات» (۵.۲۸.۰، مدار دوم) ----
 // بدون تب: یک فید از منابع show_in_laws با فیلتر «مرجع صادرکننده» (channels.laws_source).
@@ -1105,10 +1036,7 @@ function setupHawzaAbout(){
 }
 setupHawzaAbout();
 
-let PROFILE_GROUPS = []; // {id, name, kind:'figures'|'orgs', sort_order} — گروه‌های گالری «یادداشت‌ها»
-let CHANNEL_PROFILE_GROUPS = []; // {id, channel_id, group_id} — عضویت چندگانه‌ی کانال در گروه‌ها
 let MAGAZINES = [];   // {id, title, issue_no, publish_date, file_type, files, cover_url, uploaded_at}
-let ARCHIVE_REPORTS = [];   // {id, title, source_org, publish_date, file_type, files, cover_url, uploaded_at}
 let FEEDBACK_LIST = [];     // {id, name, message, created_at} — فقط با ورود مدیر به تب «نظرات کاربران» لود می‌شه
 let NOTIFY_SUBSCRIBERS = []; // {id, phone, created_at, notified_at} — فقط با ورود مدیر به تب «خروجی‌گیری» لود می‌شه
 let SCHOOL_REPORTS = []; // {id, title, image_url, media_storage_path, sort_order, uploaded_at, file_type, file_name} — گزارش‌های تحلیل Power BI (تصویر/PDF/اکسل)
@@ -2139,11 +2067,11 @@ async function loadRegions(){
 }
 async function loadProfileGroups(){
   const r = await api('/profile_groups?select=*&order=sort_order.asc,id.asc');
-  PROFILE_GROUPS = r.ok ? await r.json() : [];
+  setProfileGroups(r.ok ? await r.json() : []);
 }
 async function loadChannelProfileGroups(){
   const r = await api('/channel_profile_groups?select=id,channel_id,group_id');
-  CHANNEL_PROFILE_GROUPS = r.ok ? await r.json() : [];
+  setChannelProfileGroups(r.ok ? await r.json() : []);
 }
 // هر سه کوئری (اصلی/حوزه/بله) دقیقاً هم‌زمان، از همون خط اول، ارسال
 // می‌شن — نه اینکه hawza/claims منتظر تموم‌شدن کامل کوئری اصلی (که با
@@ -2199,10 +2127,6 @@ async function loadClaimsPosts(){
 async function loadMagazines(){
   const r = await api('/magazines?select=*&order=sort_order.asc,uploaded_at.desc');
   MAGAZINES = r.ok ? await r.json() : [];
-}
-async function loadArchiveReports(){
-  const r = await api('/archive_reports?select=*&order=sort_order.asc,uploaded_at.desc');
-  ARCHIVE_REPORTS = r.ok ? await r.json() : [];
 }
 async function loadSchoolReports(){
   const r = await api('/school_reports?select=*&order=sort_order.asc,uploaded_at.desc');
@@ -2396,7 +2320,7 @@ export function firstVisibleTab(sec){
   return t ? t[0] : null;
 }
 // کنشگری/یادداشت‌ها تب پیش‌فرض دارن که ممکنه پنهان باشه → اولین تب قابل‌مشاهده
-function ensureVisibleTab(sec){
+export function ensureVisibleTab(sec){
   if(currentRole === 'app_admin') return;
   const bar = sec === 'posts' ? ['#posts-page-tabs', 'posts-tab', 'postsTab'] : sec === 'people' ? ['#people-page-tabs', 'people-tab', 'peopleTab'] : null;
   if(!bar) return;
@@ -2970,7 +2894,7 @@ function updateUploadJDate(el){
   if(!j || !j.classList.contains('upl-jdate')) return;
   j.textContent = el.value ? new Date(el.value + 'T12:00:00Z').toLocaleDateString('fa-IR', { day:'numeric', month:'long', year:'numeric' }) : '';
 }
-function renderUploadLists(){
+export function renderUploadLists(){
   if(UPLOAD_FORMS_READY) setupUploadForms();
   const lists = {
     magazines: { rows: MAGAZINES, del: deleteMagazine, meta: m => [m.issue_no ? 'شماره ' + toFaDigits(m.issue_no) : '', m.publish_date ? new Date(m.publish_date).toLocaleDateString('fa-IR') : '', m.file_type === 'images' ? 'چند عکس' : 'PDF'] },
@@ -3206,820 +3130,18 @@ document.getElementById('school-report-upload-btn').addEventListener('click', as
   }
 });
 
-// ---- channels & people page ----
-function activityOf(channelId){
-  // هفته‌ی اخیر rolling (نه ۲۴ساعته) — طبق درخواست صریح کاربر، آستانه‌ی
-  // قبلی (۲۴ساعته، ≥۸/≥۳) برای کانال‌های کنشگری مجازی زیادی سخت‌گیرانه بود
-  const weekAgo = Date.now() - 7*24*3600*1000;
-  const n = POSTS_CACHE.filter(p=>p.channel_id===channelId && new Date(p.scraped_at).getTime()>=weekAgo).length;
-  if(n === 0) return {level:'inactive', label:'غیرفعال', n};
-  if(n > 20) return {level:'high', label:'زیاد', n};
-  if(n >= 7) return {level:'mid', label:'متوسط', n};
-  return {level:'low', label:'کم', n};
-}
+setupCyberTabs();
 
-function renderChannelCards(){
-  const wrap = document.getElementById('channel-cards');
-  wrap.innerHTML = '';
-  CHANNELS.forEach(ch=>{
-    const act = activityOf(ch.id);
-    const cat = CATEGORIES.find(c=>c.id===ch.category_id);
-    const el=document.createElement('div'); el.className='channel-card';
-    el.innerHTML = `<div class="cc-photo"><div class="cc-portrait">${ICONS.person}</div></div>
-      <div class="cc-body">
-        <div class="cc-name">${escHtml(ch.title || ch.username)}</div>
-        <div class="cc-admin">${ch.platform==='telegram'?'تلگرام':'ایتا'} · <span class="mono">@${escHtml(ch.username)}</span></div>
-        <div class="cc-activity ${act.level}"><span class="dot"></span>فعالیت ${act.label}</div>
-        <div class="cc-cats">${cat?`<span>${escHtml(cat.name)}</span>`:''}<span>${ch.type==='news_agency'?'خبرگزاری':'شخصیت'}</span></div>
-      </div>`;
-    wrap.appendChild(el);
-  });
-}
+setupPeopleTabs();
 
-// ---- «افراد و مجموعه‌ها»: زیرتب دوم «کنشگری مجازی»، گالری معرفی همون
-// کانال‌هایی که پست‌هاشون توی زیرتب «پست‌های منتشر شده» جمع می‌شه ----
-const postsPageTabsEl = document.getElementById('posts-page-tabs');
-if(postsPageTabsEl) postsPageTabsEl.addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || !b.dataset.postsTab) return;
-  if(viewerHidden('posts/' + b.dataset.postsTab)){ ensureVisibleTab('posts'); return; }
-  navMark();
-  lsSet('jarian_last_posts_tab', b.dataset.postsTab);
-  postsPageTabsEl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  const postsSubEl = document.getElementById('posts-tab-subtitle');
-  if(postsSubEl) postsSubEl.querySelector('span').textContent = POSTS_TAB_INFO[b.dataset.postsTab] || '';
-  ['feed','people'].forEach(key=>{
-    const el = document.getElementById('posts-tab-'+key);
-    if(el) el.style.display = key === b.dataset.postsTab ? '' : 'none';
-  });
-  if(b.dataset.postsTab === 'people'){
-    if(POSTS_FOCUS_FROM_TABLE) clearPostsFocus();
-    renderCyberPeopleGrid();
-  }
-});
+setupCyberPeople();
 
-// زیرتب‌های «یادداشت‌ها»: چهره‌های سیاسی (پیش‌فرض) + دو تب منتقل‌شده از
-// بخش قبلاً مستقل «ضمیمه جریان» (سایر بسته‌های تحلیلی/بسته‌های آموزشی)
-const peoplePageTabsEl = document.getElementById('people-page-tabs');
-if(peoplePageTabsEl) peoplePageTabsEl.addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || !b.dataset.peopleTab) return;
-  if(viewerHidden('people/' + b.dataset.peopleTab)){ ensureVisibleTab('people'); return; }
-  navMark();
-  lsSet('jarian_last_people_tab', b.dataset.peopleTab);
-  peoplePageTabsEl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  const peopleSubEl = document.getElementById('people-tab-subtitle');
-  if(peopleSubEl) peopleSubEl.querySelector('span').textContent = PEOPLE_TAB_INFO[b.dataset.peopleTab] || '';
-  const tab = b.dataset.peopleTab;
-  // orgs، figures و thinktanks هر سه ظرف people-tab-figures رو نشون می‌دن
-  const container = (tab === 'orgs' || tab === 'thinktanks') ? 'figures' : tab;
-  ['figures','archive'].forEach(key=>{
-    const el = document.getElementById('people-tab-'+key);
-    if(el) el.style.display = key === container ? '' : 'none';
-  });
-  if(tab === 'orgs' || tab === 'figures' || tab === 'thinktanks') setPfMode(tab);
-});
-
-// فیلتر «طلاب خراسان / سایر» جدول «افراد و مجموعه‌ها» — '' یعنی همه؛
-// نگاه کن به matchesActivistGroup
-let cyberPeopleGroupFilter = '';
-const cyberPeopleGroupSegEl = document.getElementById('cyber-people-group-seg');
-if(cyberPeopleGroupSegEl) cyberPeopleGroupSegEl.addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || b.dataset.g===undefined) return;
-  cyberPeopleGroupSegEl.querySelectorAll(':scope > button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  cyberPeopleGroupFilter = b.dataset.g;
-  renderCyberPeopleGrid();
-});
-
-// مرتب‌سازی جدول «افراد و مجموعه‌ها» با کلیک روی سرستون‌ها — بدون سرور،
-// کاملاً سمت کلاینت روی همون آرایه‌ی فیلترشده‌ی CHANNELS
-let cyberPeopleSort = { field: null, dir: 'asc' };
-// مرتب‌سازی جدول «افراد و مجموعه‌ها» روی گوشی (سربرگ جدول مخفیه)
-document.getElementById('cyber-people-sort-m').addEventListener('change', e=>{
-  const [f, d] = e.target.value.split(':');
-  cyberPeopleSort = { field: f || null, dir: d || 'asc' };
-  renderCyberPeopleGrid();
-});
-const CPT_NUMERIC_SORT = ['subscribers', 'activity'];
-// روی گوشی سربرگ جدول مخفیه — مرتب‌سازی با این فهرست کشویی
-function syncCyberPeopleSortSelect(){
-  const sel = document.getElementById('cyber-people-sort-m');
-  if(sel) sel.value = cyberPeopleSort.field ? cyberPeopleSort.field + ':' + cyberPeopleSort.dir : '';
-}
-function cyberPeopleSortValue(ch, field){
-  switch(field){
-    case 'name': return ch.title || ch.username || '';
-    case 'platform': return ch.platform==='telegram' ? 'تلگرام' : 'ایتا';
-    case 'owner': return ch.owner_name || '';
-    case 'subscribers': return ch.subscriber_count == null ? null : ch.subscriber_count;
-    case 'activity': return activityOf(ch.id).n;
-    case 'category': { const c = CATEGORIES.find(x=>x.id===ch.category_id); return c ? c.name : ''; }
-    case 'group': return ch.is_khorasan_talabeh ? 'طلاب خراسان' : 'سایر کنشگران';
-    default: return '';
-  }
-}
-const cyberPeopleHeadEl = document.getElementById('cyber-people-head');
-if(cyberPeopleHeadEl) cyberPeopleHeadEl.addEventListener('click', e=>{
-  const btn = e.target.closest('.cpt-sort-btn'); if(!btn) return;
-  const field = btn.dataset.sort;
-  if(cyberPeopleSort.field === field){ cyberPeopleSort.dir = cyberPeopleSort.dir==='asc' ? 'desc' : 'asc'; }
-  // ستون‌های عددی (مخاطب، فعالیت) با کلیک اول از بیشترین شروع می‌شن
-  else{ cyberPeopleSort.field = field; cyberPeopleSort.dir = CPT_NUMERIC_SORT.includes(field) ? 'desc' : 'asc'; }
-  syncCyberPeopleSortSelect();
-  renderCyberPeopleGrid();
-});
-
-function renderCyberPeopleGrid(){
-  const wrap = document.getElementById('cyber-people-grid');
-  const table = document.getElementById('cyber-people-table');
-  const empty = document.getElementById('cyber-people-empty');
-  if(!wrap) return;
-  const channels = CHANNELS.filter(c=>c.show_in_cyberspace && matchesActivistGroup(c, cyberPeopleGroupFilter));
-  if(empty) empty.textContent = (CHANNELS.some(c=>c.show_in_cyberspace) && cyberPeopleGroupFilter)
-    ? 'کانالی با این فیلتر پیدا نشد.'
-    : 'هنوز کانالی برای «کنشگری مجازی» تگ نشده.';
-  if(cyberPeopleSort.field){
-    const field = cyberPeopleSort.field;
-    const dir = cyberPeopleSort.dir === 'desc' ? -1 : 1;
-    channels.sort((a,b)=>{
-      const va = cyberPeopleSortValue(a, field), vb = cyberPeopleSortValue(b, field);
-      // بدون مقدار (مثلاً مخاطب ثبت‌نشده) همیشه ته فهرست، در هر دو جهت
-      const ea = va === null || va === '', eb = vb === null || vb === '';
-      if(ea || eb) return ea === eb ? 0 : (ea ? 1 : -1);
-      if(typeof va === 'number' && typeof vb === 'number') return (va-vb)*dir;
-      return String(va).localeCompare(String(vb), 'fa') * dir;
-    });
-  }
-  if(cyberPeopleHeadEl) cyberPeopleHeadEl.querySelectorAll('.cpt-sort-btn').forEach(btn=>{
-    const isActive = btn.dataset.sort === cyberPeopleSort.field;
-    btn.classList.toggle('active', isActive);
-    const ind = btn.querySelector('.cpt-sort-ind');
-    if(ind) ind.textContent = isActive ? (cyberPeopleSort.dir==='asc' ? '▲' : '▼') : '⇅';
-  });
-  empty.style.display = channels.length ? 'none' : 'block';
-  table.style.display = channels.length ? '' : 'none';
-  const countEl = document.getElementById('cyber-people-count');
-  if(countEl){
-    const allCyber = CHANNELS.filter(c=>c.show_in_cyberspace);
-    const khCount = allCyber.filter(c=>c.is_khorasan_talabeh).length;
-    const otherCount = allCyber.length - khCount;
-    countEl.innerHTML = `مجموع: <b>${toFaDigits(channels.length)}</b> کانال` +
-      (cyberPeopleGroupFilter ? '' : ` (طلاب خراسان: <b>${toFaDigits(khCount)}</b> · سایر کنشگران: <b>${toFaDigits(otherCount)}</b>)`);
-  }
-  wrap.innerHTML = '';
-  channels.forEach(ch=>{
-    const act = activityOf(ch.id);
-    const cat = CATEGORIES.find(c=>c.id===ch.category_id);
-    const el=document.createElement('div'); el.className='cpt-row';
-    el.title = 'مشاهده‌ی پست‌های ' + (ch.title || ch.username);
-    const channelUrl = ch.platform==='telegram' ? `https://t.me/${encodeURIComponent(ch.username||'')}` : `https://eitaa.com/${encodeURIComponent(ch.username||'')}`;
-    el.innerHTML = `<div class="cpt-who">
-        <div class="cpt-avatar-wrap">
-          <div class="cpt-avatar">${ch.avatar_url ? `<img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" />` : ICONS.person}</div>
-          <span class="cpt-dot ${act.level}" title="${act.level==='inactive' ? act.label : 'فعالیت ' + act.label}"></span>
-        </div>
-        <div class="cpt-who-txt">
-          <div class="cpt-name">${escHtml(ch.title || ch.username)}</div>
-        </div>
-      </div>
-      <div class="cpt-platform">
-        <span class="cpt-platform-name">${ch.platform==='telegram'?'تلگرام':'ایتا'}</span>
-        <a class="cpt-platform-link mono" href="${escAttr(channelUrl)}" target="_blank" rel="noopener">${escHtml(channelUrl.replace('https://',''))}</a>
-      </div>
-      <div class="cpt-owner">${ch.owner_name ? ICONS.userLine + `<span>${escHtml(ch.owner_name)}</span>` : ''}</div>
-      <div class="cpt-num">${ch.subscriber_count ? `<span class="cpt-num-val">${ICONS.users}${toFaDigits(ch.subscriber_count)}</span>` : ''}</div>
-      <div class="cpt-activity-col"><span class="cpt-activity ${act.level}"><span class="dt"></span>${act.level==='inactive' ? act.label : 'فعالیت ' + act.label}</span></div>
-      <div class="cpt-tagcol">${cat ? `<span class="cpt-tag">${escHtml(cat.name)}</span>` : ''}</div>
-      <div class="cpt-groupcol"><span class="cpt-tag${ch.is_khorasan_talabeh ? ' cpt-tag-khorasan' : ''}">${ch.is_khorasan_talabeh ? 'طلاب خراسان' : 'سایر کنشگران'}</span></div>
-      <span class="cpt-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></span>`;
-    el.querySelector('.cpt-platform-link').addEventListener('click', e => e.stopPropagation());
-    el.addEventListener('click', ()=> openPersonFeed(ch.id));
-    wrap.appendChild(el);
-  });
-}
-
-// کانالی که از جدول «افراد و مجموعه‌ها» باز شده: بالای فید یه نوار «فقط پست‌های X» با
-// «نمایش همه» نشون داده می‌شه، و با برگشتن به جدول انتخاب پاک می‌شه — قبلاً بی‌صدا
-// روی فید می‌موند و کاربر فکر می‌کرد پست‌ها کمه
-var POSTS_FOCUS_FROM_TABLE = false;
-function clearPostsFocus(){
-  POSTS_FOCUS_FROM_TABLE = false;
-  postsSelectedChannels = [];
-  populatePostSourceOptions();
-  renderPosts();
-}
-function renderPostsFocusBar(){
-  const bar = document.getElementById('posts-focus-bar');
-  if(!bar) return;
-  if(!POSTS_FOCUS_FROM_TABLE || postsSelectedChannels.length !== 1){ POSTS_FOCUS_FROM_TABLE = false; bar.style.display = 'none'; return; }
-  const ch = chById(Number(postsSelectedChannels[0])) || {};
-  bar.innerHTML = `<span>فقط پست‌های <b>${escHtml(ch.title || ch.username || '')}</b></span><button type="button" onclick="clearPostsFocus()">نمایش همه‌ی کانال‌ها</button>`;
-  bar.style.display = '';
-}
-function openPersonFeed(channelId){
-  POSTS_FOCUS_FROM_TABLE = true;
-  postsSelectedChannels = [String(channelId)];
-  populatePostSourceOptions();
-  renderPosts();
-  const tabBtn = document.querySelector('#posts-page-tabs button[data-posts-tab="feed"]');
-  if(tabBtn) tabBtn.click();
-}
-
-// ---- posts page ----
-const filterCatEl = document.getElementById('posts-filter-cat');
-// زمان فید کنشگری: '' | today | yesterday | week | custom (بازه‌ی شمسی، postsDateFrom/To میلادی)
-let postsTime = '', postsDateFrom = '', postsDateTo = '';
-const searchEl = document.getElementById('posts-search');
-const postsList = document.getElementById('posts-list');
-const postsEmpty = document.getElementById('posts-empty');
-// به‌جای یه select تک‌انتخابی، مثل «انتخاب رسانه‌ها…» تب شبکه‌های اجتماعی
-// یه چندانتخابی چک‌باکسیه — بشه چندتا کانال رو هم‌زمان انتخاب کرد
-let postsSelectedChannels = [];
-// فیلتر «طلاب خراسان / سایر» — '' یعنی همه؛ نگاه کن به matchesActivistGroup
-let postsGroupFilter = '';
-
-function updatePostSourceSummary(){
-  const summary = document.getElementById('posts-source-summary');
-  if(!summary) return;
-  const n = postsSelectedChannels.length;
-  summary.textContent = n === 0 ? 'انتخاب کانال‌ها…' : toFaDigits(n) + ' کانال انتخاب‌شده';
-}
-
-function populatePostSourceOptions(){
-  const list = document.getElementById('posts-source-list');
-  if(!list) return;
-  const cyberChannels = CHANNELS.filter(c=>c.show_in_cyberspace);
-  const validIds = new Set(cyberChannels.map(c=>String(c.id)));
-  postsSelectedChannels = postsSelectedChannels.filter(id=>validIds.has(id));
-  list.innerHTML = cyberChannels.map(c=>{
-    const id = String(c.id);
-    const checked = postsSelectedChannels.includes(id) ? 'checked' : '';
-    return `<label><input type="checkbox" value="${id}" ${checked}> ${escAttr(c.title||c.username)}</label>`;
-  }).join('');
-  list.querySelectorAll('input[type=checkbox]').forEach(chk=>{
-    chk.addEventListener('change', ()=>{
-      const id = chk.value;
-      POSTS_FOCUS_FROM_TABLE = false;
-      if(chk.checked){ if(!postsSelectedChannels.includes(id)) postsSelectedChannels.push(id); }
-      else{ postsSelectedChannels = postsSelectedChannels.filter(x=>x!==id); }
-      updatePostSourceSummary();
-      renderPosts();
-    });
-  });
-  updatePostSourceSummary();
-}
-
-function populatePostFilters(){
-  populatePostSourceOptions();
-  filterCatEl.innerHTML = '<option value="">همه‌ی دسته‌بندی‌ها</option>' +
-    CATEGORIES.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
-}
-
-function matchesTime(dateStr, val){
-  if(!val) return true;
-  if(!dateStr) return false;
-  const diffDays = tehranDayDiff(dateStr);
-  if(val==='today') return diffDays===0;
-  if(val==='yesterday') return diffDays===1;
-  if(val==='week') return diffDays>=0 && diffDays<=6;
-  return true;
-}
-
-// فیلتر مشترک «طلاب خراسان / سایر» بخش «کنشگری مجازی» — هم توی فید
-// «پست‌های منتشر شده» هم توی جدول «افراد و مجموعه‌ها» استفاده می‌شه
-// (نگاه کن به postsGroupFilter/cyberPeopleGroupFilter)
-function matchesActivistGroup(ch, group){
-  if(!group) return true;
-  if(group === 'khorasan') return !!(ch && ch.is_khorasan_talabeh);
-  if(group === 'other') return !(ch && ch.is_khorasan_talabeh);
-  return true;
-}
-
-function filteredPosts(){
-  const catFilter = filterCatEl.value;
-  const q = searchEl.value.trim();
-  const fromMs = postsDateFrom ? new Date(postsDateFrom + 'T00:00:00').getTime() : null;
-  const toMs = postsDateTo ? new Date(postsDateTo + 'T23:59:59').getTime() : null;
-  return POSTS_CACHE.filter(p=>{
-    const ownerCh = chById(p.channel_id);
-    if(!ownerCh || !ownerCh.show_in_cyberspace) return false;
-    if(!matchesActivistGroup(ownerCh, postsGroupFilter)) return false;
-    if(postsSelectedChannels.length && !postsSelectedChannels.includes(String(p.channel_id))) return false;
-    if(catFilter){
-      const ch = chById(p.channel_id);
-      if(!ch || String(ch.category_id) !== catFilter) return false;
-    }
-    if(postsTime === 'custom'){
-      const ms = new Date(p.scraped_at).getTime();
-      if(fromMs !== null && ms < fromMs) return false;
-      if(toMs !== null && ms > toMs) return false;
-    }else if(!matchesTime(p.scraped_at, postsTime)) return false;
-    if(q && !searchHay(p).includes(searchNorm(q)) && !searchNorm(chName(p.channel_id)).includes(searchNorm(q))) return false;
-    return true;
-  });
-}
-
-// لمس خودِ متن پست = «نمایش بیشتر» (دکمه‌ی کوچیکش روی گوشی سخت زده می‌شد)؛ اگه کاربر
-// داره متن رو انتخاب می‌کنه یا متن کوتاهه (دکمه مخفیه)، کاری نمی‌کنه
-document.addEventListener('click', e=>{
-  const t = e.target.closest('.news-card .news-text');
-  if(!t || e.target.closest('a')) return;
-  const sel = window.getSelection && window.getSelection();
-  if(sel && String(sel).trim()) return;
-  const more = t.parentElement && t.parentElement.querySelector(':scope > .news-more');
-  if(more && more.style.display !== 'none' && more.offsetParent) more.click();
-});
+setupCardTextTap();
 
 
-function postMediaBlock(p){
-  const isMedia = p.media_type && p.media_type!=='none';
-  if(!isMedia) return '';
-  const mediaIcon = p.media_type==='video' ? ICONS.video : ICONS.photo;
-  if(!p.media_path){
-    return `<div class="pt-media">${mediaIcon}<b>${p.media_type==='video'?'فیلم':'عکس'}</b><span>پیش‌نمایش موجود نیست</span></div>`;
-  }
-  const path = p.media_path;
-  if(p.media_type==='photo'){
-    return `<div class="pt-media has-img"><img src="${escAttr(path)}" loading="lazy" alt="" data-viewer-kind="image" data-viewer-src="${escAttr(path)}"><span class="pt-media-badge">${ICONS.photo}</span></div>`;
-  }
-  if(p.media_type==='video'){
-    const isRealVideo = /\.mp4($|\?)/i.test(path);
-    if(isRealVideo){
-      return `<div class="pt-media has-img"><video src="${escAttr(path)}" muted preload="metadata" data-viewer-kind="video" data-viewer-src="${escAttr(path)}"></video><span class="pt-media-badge">${ICONS.video}</span><a class="pt-media-link" href="${escAttr(path)}" target="_blank" rel="noopener" download onclick="event.stopPropagation()">${ICONS.download}دانلود فیلم</a></div>`;
-    }
-    // ایتا: فقط تصویر بندانگشتی دانلود شده، نه فایل کامل — کلیک روی تصویر
-    // بزرگش می‌کنه، لینک جدا به منبع اصلی می‌ره
-    const srcLink = p.link || path;
-    return `<div class="pt-media has-img"><img src="${escAttr(path)}" loading="lazy" alt="" data-viewer-kind="image" data-viewer-src="${escAttr(path)}" data-viewer-link="${escAttr(srcLink)}"><span class="pt-media-badge">${ICONS.video}</span><a class="pt-media-link" href="${escAttr(srcLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${ICONS.external}مشاهده در مبدأ</a></div>`;
-  }
-  return `<div class="pt-media">${mediaIcon}<b>رسانه</b><span>پیش‌نمایش موجود نیست</span></div>`;
-}
+setupPostsFeed();
 
-// ظاهر کارت‌های این صفحه دقیقاً همون کارت‌های تب «شبکه‌های اجتماعی» توی
-// اخبار رسمی‌ه (همون کلاس‌های news-card/news-thumb/news-text و...) —
-// فقط منبع داده و فیلترها فرق داره (filteredPosts به‌جای filteredNewsPosts)
-// صفحه‌بندی فید پست‌ها (همون اندازه‌ی صفحه‌ی اخبار). با عوض شدن هر فیلتر
-// (امضای postsFilterKey) به صفحه‌ی ۱ برمی‌گرده؛ رفرش داده صفحه رو نگه می‌داره
-let postsPage = 1, postsFilterSig = '';
-function postsFilterKey(){
-  return JSON.stringify([filterCatEl.value, postsTime, postsDateFrom, postsDateTo, searchEl.value.trim(), postsGroupFilter, postsSelectedChannels]);
-}
-function goPostsPage(p){
-  postsPage = p;
-  renderPosts();
-  scrollToListTop(document.getElementById('posts-tab-feed'));
-}
-function renderPosts(){
-  updateMobileFilterBadges();
-  renderPostsFocusBar();
-  const filtered = filteredPosts();
-  postsEmpty.style.display = filtered.length ? 'none' : 'block';
-  const sig = postsFilterKey();
-  if(sig !== postsFilterSig){ postsFilterSig = sig; postsPage = 1; }
-  const totalPages = Math.max(1, Math.ceil(filtered.length / NEWS_PAGE_SIZE));
-  postsPage = Math.min(Math.max(1, postsPage), totalPages);
-  const list = filtered.slice((postsPage - 1) * NEWS_PAGE_SIZE, postsPage * NEWS_PAGE_SIZE);
-  renderPagination('posts-pagination', postsPage, totalPages, goPostsPage);
-  postsList.innerHTML = list.map(p=>{
-    const ch = chById(p.channel_id) || {};
-    const topic = catNameOf(p.channel_id);
-    const isRealVideo = p.media_type === 'video' && p.media_path && /\.mp4($|\?)/i.test(p.media_path);
-    const hasThumb = !!p.media_path && (p.media_type === 'photo' || (p.media_type === 'video' && !isRealVideo));
-    const thumbBadge = p.media_type === 'video' ? `<span class="pt-media-badge">${ICONS.video}</span>` : '';
-    const thumbHtml = hasThumb
-      ? `<div class="news-thumb" style="position:relative">${thumbBadge}<img src="${escAttr(p.media_path)}" alt="" loading="lazy" data-viewer-kind="image" data-viewer-src="${escAttr(p.media_path)}"${p.media_type==='video' && p.link ? ` data-viewer-link="${escAttr(p.link)}"` : ''} /></div>`
-      : ch.avatar_url
-        ? `<div class="news-thumb"><img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" /></div>`
-        : `<div class="news-thumb placeholder">${ICONS.doc}</div>`;
-    return `
-    <div class="news-card">
-      ${thumbHtml}
-      <div class="news-body">
-        <div class="news-head">
-          <span class="news-source">${escHtml(ch.title||ch.username||'؟')}</span>
-          <span class="news-platform">${NEWS_PLATFORM_ICON[ch.platform]||''}${NEWS_PLATFORM_LABEL[ch.platform]||ch.platform}</span>
-          ${ch.region_id ? `<span class="news-region">${escHtml(regionNameOf(ch.region_id))}</span>` : ''}
-          <span class="news-time">${newsRelTime(p.posted_at||p.scraped_at)}</span>
-        </div>
-        <p class="news-text" id="post-text-${p.id}">${claimsTextDisplay(p.text)}</p>
-        <button class="news-more" onclick="togglePostText(${p.id})" id="post-more-${p.id}">
-          نمایش بیشتر
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="news-foot">
-          <div>${topic ? `<span class="news-topic">${escHtml(topic)}</span>` : ''}</div>
-          <div style="display:flex; gap:10px; align-items:center;">
-            ${isRealVideo ? `<a class="news-link" href="${safeUrl(p.media_path)}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}
-            ${p.link ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
-          </div>
-        </div>
-        ${currentRole === 'app_admin' ? `<div class="post-admin-row">${postHideBtnHtml(p)}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-  wireMediaViewerClicks(postsList);
-  updatePostMoreButtons(list);
-  if(document.fonts && document.fonts.status !== 'loaded'){
-    document.fonts.ready.then(()=> updatePostMoreButtons(list));
-  }
-}
-
-function updatePostMoreButtons(list){
-  list.forEach(p=>{
-    const textEl = document.getElementById('post-text-'+p.id);
-    const moreBtn = document.getElementById('post-more-'+p.id);
-    if(!textEl || !moreBtn) return;
-    const overflowing = textEl.scrollHeight > textEl.clientHeight + 1;
-    moreBtn.style.display = overflowing ? '' : 'none';
-  });
-}
-
-function togglePostText(postId){
-  const t = document.getElementById('post-text-'+postId);
-  const b = document.getElementById('post-more-'+postId);
-  if(!t || !b) return;
-  const isOpen = t.classList.toggle('expanded');
-  b.classList.toggle('open', isOpen);
-  b.firstChild.textContent = isOpen ? 'بستن ' : 'نمایش بیشتر ';
-}
-
-filterCatEl.addEventListener('change', renderPosts);
-function updatePostsRangeSummary(){
-  const has = !!(postsDateFrom || postsDateTo);
-  const f = postsDateFrom ? new Date(postsDateFrom).toLocaleDateString('fa-IR') : '…';
-  const t = postsDateTo ? new Date(postsDateTo).toLocaleDateString('fa-IR') : '…';
-  document.getElementById('posts-daterange-summary').textContent = has ? f + ' تا ' + t : 'بازه زمانی';
-  document.getElementById('posts-daterange-details').classList.toggle('has-value', has);
-}
-function clearPostsRange(){
-  postsDateFrom = ''; postsDateTo = '';
-  document.querySelectorAll('#posts-daterange-details .jdate select').forEach(sel=>{ sel.value = ''; });
-  updatePostsRangeSummary();
-}
-document.getElementById('posts-time-seg').addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || b.dataset.t === undefined) return;
-  document.querySelectorAll('#posts-time-seg > button').forEach(x=>x.classList.toggle('active', x === b));
-  postsTime = b.dataset.t;
-  clearPostsRange();
-  document.getElementById('posts-daterange-details').removeAttribute('open');
-  renderPosts();
-});
-setupJalaliRange(document.getElementById('posts-daterange-details'), (which, iso)=>{
-  if(which === 'from') postsDateFrom = iso; else postsDateTo = iso;
-  postsTime = 'custom';
-  document.querySelectorAll('#posts-time-seg > button').forEach(x=>x.classList.remove('active'));
-  updatePostsRangeSummary();
-  renderPosts();
-});
-document.getElementById('posts-daterange-clear').addEventListener('click', e=>{
-  e.stopPropagation();
-  clearPostsRange();
-  postsTime = '';
-  document.querySelectorAll('#posts-time-seg > button').forEach(x=>x.classList.toggle('active', x.dataset.t === ''));
-  document.getElementById('posts-daterange-details').removeAttribute('open');
-  renderPosts();
-});
-searchEl.addEventListener('input', renderPosts);
-const postsGroupSegEl = document.getElementById('posts-group-seg');
-if(postsGroupSegEl) postsGroupSegEl.addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || b.dataset.g===undefined) return;
-  postsGroupSegEl.querySelectorAll(':scope > button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  postsGroupFilter = b.dataset.g;
-  renderPosts();
-});
-
-// ---- چهره‌های سیاسی (تنها محتوای بخش «یادداشت‌ها») ----
-// عیناً هم‌الگو با فید «کنشگری مجازی» بالا (همون POSTS_CACHE، فقط فیلتر
-// عضویت show_in_people به‌جای show_in_cyberspace)؛ چون یه
-// پست ممکنه هم‌زمان توی هر دو فید ظاهر بشه (کانالش هر دو عضویت رو
-// داشته باشه)، آی‌دی‌های DOM این فید با پیشوند pf- جدا شدن تا با
-// آی‌دی‌های post-text-{id}/post-more-{id} فید کنشگری مجازی تصادم نکنن.
-// دکمه‌های زمان؛ value مثل همون select قبلی خونده/نوشته می‌شه
-const pfTimeSegEl = document.getElementById('political-figures-filter-time');
-const pfFilterTimeEl = pfTimeSegEl ? {
-  get value(){ const b = pfTimeSegEl.querySelector('button.active'); return b ? b.dataset.t : ''; },
-  set value(v){ pfTimeSegEl.querySelectorAll('button').forEach(x=>x.classList.toggle('active', x.dataset.t === v)); }
-} : null;
-const pfSearchEl = document.getElementById('political-figures-search');
-const pfList = document.getElementById('political-figures-list');
-const pfEmpty = document.getElementById('political-figures-empty');
-const pfGallerySearchEl = document.getElementById('pf-gallery-search');
-// pfMode: 'figures' (ستون show_in_people) یا 'orgs' (ستون show_in_orgs)؛
-// pfSelectedChannel: کانالی که از گالری انتخاب شده (null = نمایش گالری)
-let pfMode = 'figures';
-let pfSelectedChannel = null;
-
-// حالت‌ها: figures/orgs/thinktanks («یادداشت‌ها») و pos-<تب> («مواضع مراجع و علماء»، ۵.۲۸.۰)
-function pfDomainField(mode){
-  mode = mode || pfMode;
-  return mode === 'orgs' ? 'show_in_orgs' : mode === 'thinktanks' ? 'show_in_thinktanks'
-    : mode.startsWith('pos-') ? 'show_in_positions' : 'show_in_people';
-}
-function pfModeMatch(ch, mode){
-  if(!ch || !ch[pfDomainField(mode)]) return false;
-  return !mode.startsWith('pos-') || ch.positions_tab === mode.slice(4);
-}
-function pfChannelMatch(ch){ return pfModeMatch(ch, pfMode); }
-
-function politicalFigureChannels(){
-  return CHANNELS.filter(pfChannelMatch);
-}
-// حالت‌های تازه منابع کم‌تکرار دارن (بیانیه‌ی مرجع، گزارش اندیشکده) — از سقف ۱۰۰۰تایی POSTS_CACHE
-// زود بیرون می‌افتن؛ پس با باز شدن هر حالت، پست‌های همون منابع جدا گرفته و کنار کش نگه داشته می‌شن
-var PF_EXTRA_POSTS = [], PF_EXTRA_AT = {}, PF_EXTRA_LOADING = {};
-async function ensurePfExtra(mode){
-  if(mode === 'figures' || mode === 'orgs') return;
-  if(PF_EXTRA_AT[mode] && Date.now() - PF_EXTRA_AT[mode] < 600000) return;
-  if(PF_EXTRA_LOADING[mode]) return;
-  const ids = CHANNELS.filter(c=>pfModeMatch(c, mode)).map(c=>c.id);
-  if(!ids.length){ PF_EXTRA_AT[mode] = Date.now(); return; }
-  PF_EXTRA_LOADING[mode] = true;
-  try{
-    const r = await api('/posts?select=*&channel_id=in.(' + ids.join(',') + ')&order=scraped_at.desc&limit=600');
-    if(r.ok){
-      const have = new Set(PF_EXTRA_POSTS.map(p=>p.id));
-      (await r.json()).forEach(p=>{ if(!p.hidden_at && !have.has(p.id)) PF_EXTRA_POSTS.push(p); });
-      PF_EXTRA_AT[mode] = Date.now();
-    }
-  }catch(e){}
-  finally{ PF_EXTRA_LOADING[mode] = false; }
-  if(pfMode === mode) renderPoliticalFigures();
-}
-// ۵.۲۹.۰ (migration_048): در تب‌های «مواضع» فقط مطلبی نمایش داده می‌شود که
-// هوش مصنوعی مرتبط تشخیص داده (section_relevant=true؛ NULL = هنوز بررسی نشده — خواست کاربر: پنهان)
-// اندیشکده‌ها عمداً بدون فیلتر (خواست کاربر: «فعلاً نیاز به بررسی هوش مصنوعی ندارد»)
-function pfModeFiltered(mode){ mode = mode || pfMode; return mode.startsWith('pos-'); }
-function secRelevant(p){ return p.section_relevant === true; }
-// متن «در انتظار بررسی» فقط برای مدیر
-function secPendingNote(list){
-  if(currentRole !== 'app_admin' || !list.length) return '';
-  if(!('section_relevant' in list[0])) return 'برای فعال شدن فیلتر هوش مصنوعی، migration_048 باید در سوپابیس اجرا شود؛ تا آن موقع مطلبی نمایش داده نمی‌شود.';
-  const n = list.filter(p=>p.section_relevant == null).length;
-  return n ? faNum(n) + ' مطلب در انتظار بررسی هوش مصنوعی است (برای بیننده‌ها نمایش داده نمی‌شود).' : '';
-}
-function pfPostsAll(){
-  if(!PF_EXTRA_POSTS.length) return POSTS_CACHE;
-  const ids = new Set(POSTS_CACHE.map(p=>p.id));
-  return POSTS_CACHE.concat(PF_EXTRA_POSTS.filter(p=>!ids.has(p.id) && !HIDDEN_POST_IDS.has(p.id)));
-}
-
-let pfGroupFilter = null; // id گروه انتخاب‌شده در ردیف چیپ‌ها (null = همه)
-
-function pfGroupsOfKind(){ return PROFILE_GROUPS.filter(g=>g.kind === pfMode); }
-function pfGroupIdsOf(channelId){
-  return CHANNEL_PROFILE_GROUPS.filter(x=>x.channel_id === channelId).map(x=>x.group_id);
-}
-
-function setPfMode(mode){
-  navMark();
-  if(pfMode !== mode){ pfMode = mode; pfSelectedChannel = null; pfGroupFilter = null; }
-  if(pfGallerySearchEl) pfGallerySearchEl.value = '';
-  renderPoliticalFigures();
-  ensurePfExtra(mode);
-}
-
-function pfLogoHtml(ch){
-  if(ch.avatar_url) return `<span class="pf-logo"><img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" /></span>`;
-  const initial = (ch.title || ch.username || '؟').trim().charAt(0);
-  return `<span class="pf-logo">${escAttr(initial)}</span>`;
-}
-
-function pfChannelUrl(ch){
-  if(ch.platform === 'telegram') return 'https://t.me/' + ch.username;
-  if(ch.platform === 'eitaa') return 'https://eitaa.com/' + ch.username;
-  return '';
-}
-
-// قبلاً دراپ‌داون چندانتخابی کانال‌ها رو پر می‌کرد؛ الان انتخاب کانال از
-// گالری لوگوهاست — اسم تابع برای سازگاری با loadAll() حفظ شده
-function populatePoliticalFiguresSourceOptions(){
-  if(pfSelectedChannel && !politicalFigureChannels().some(c=>c.id===pfSelectedChannel)) pfSelectedChannel = null;
-}
-
-function renderPfGallery(){
-  const grid = document.getElementById('pf-logo-grid');
-  const empty = document.getElementById('pf-gallery-empty');
-  if(!grid) return;
-  const q = searchNorm(pfGallerySearchEl ? pfGallerySearchEl.value : '');
-  const all = politicalFigureChannels();
-  const stats = {};
-  const filt = pfModeFiltered();
-  pfPostsAll().forEach(p=>{
-    if(filt && !secRelevant(p)) return;
-    const st = stats[p.channel_id] || (stats[p.channel_id] = {n:0, last:''});
-    st.n++;
-    const t = p.posted_at || p.scraped_at || '';
-    if(t > st.last) st.last = t;
-  });
-  const channels = all
-    .filter(c=> !q || searchNorm(c.title).includes(q) || searchNorm(c.username).includes(q))
-    .sort((a,b)=> ((stats[b.id]||{}).last||'').localeCompare((stats[a.id]||{}).last||''));
-  if(!all.length){
-    empty.textContent = pfMode === 'orgs' ? 'هنوز سازمانی به این بخش اضافه نشده است.'
-      : pfMode === 'figures' ? 'هنوز چهره‌ای به این بخش اضافه نشده است.'
-      : pfMode === 'thinktanks' ? 'هنوز اندیشکده‌ای به این بخش اضافه نشده است.'
-      : 'هنوز منبعی به این تب اضافه نشده است.' + (currentRole === 'app_admin' ? ' منابع از «تنظیمات بخش‌ها ← مدیریت منابع»، بخش «مواضع مراجع و علماء» اضافه می‌شوند.' : '');
-  }else{
-    empty.textContent = 'موردی با این نام پیدا نشد.';
-  }
-  empty.style.display = channels.length ? 'none' : 'block';
-  const unit = pfMode === 'figures' ? 'یادداشت' : 'مطلب';
-  const cardHtml = (ch,i)=>{
-    const st = stats[ch.id];
-    const meta = st ? `${toFaDigits(st.n)} ${unit}<br>${newsRelTime(st.last)}` : `بدون ${unit} اخیر`;
-    return `<button type="button" class="pf-logo-card" data-ch="${ch.id}" style="animation-delay:${Math.min(i,12)*30}ms" title="مشاهده‌ی مطالب ${escAttr(ch.title||ch.username)}">
-        ${pfLogoHtml(ch)}
-        <span class="pf-logo-name">${escAttr(ch.title||ch.username)}</span>
-        <span class="pf-logo-meta">${meta}</span>
-      </button>`;
-  };
-  // گروه‌ها: ردیف چیپ («همه» + گروه‌های همین تب)؛ در حالت «همه» لوگوها
-  // زیر تیتر هر گروه بخش‌بخش می‌شن (کانال چندگروهه توی هر گروهش تکرار
-  // می‌شه) + بخش «سایر» برای بدون‌گروه‌ها؛ با انتخاب یه گروه فقط همون
-  const groups = pfGroupsOfKind();
-  if(pfGroupFilter && !groups.some(g=>g.id===pfGroupFilter)) pfGroupFilter = null;
-  const chipRow = document.getElementById('pf-group-row');
-  chipRow.style.display = groups.length ? '' : 'none';
-  chipRow.innerHTML = [`<button type="button" class="news-topic-chip${pfGroupFilter ? '' : ' active'}" data-group="">همه</button>`]
-    .concat(groups.map(g=>`<button type="button" class="news-topic-chip${pfGroupFilter===g.id ? ' active' : ''}" data-group="${g.id}">${escAttr(g.name)}</button>`)).join('');
-  const inGroup = (ch, gid)=> pfGroupIdsOf(ch.id).includes(gid);
-  let visible = channels;
-  if(pfGroupFilter) visible = channels.filter(ch=>inGroup(ch, pfGroupFilter));
-  empty.style.display = visible.length ? 'none' : 'block';
-  if(pfGroupFilter && channels.length && !visible.length) empty.textContent = 'موردی در این گروه نیست.';
-  if(pfGroupFilter || !groups.length){
-    grid.className = 'pf-logo-grid';
-    grid.innerHTML = visible.map(cardHtml).join('');
-    return;
-  }
-  grid.className = '';
-  const sections = groups.map(g=>({title:g.name, items:channels.filter(ch=>inGroup(ch, g.id))}));
-  const groupIds = new Set(groups.map(g=>g.id));
-  sections.push({title:'سایر', items:channels.filter(ch=>!pfGroupIdsOf(ch.id).some(id=>groupIds.has(id)))});
-  grid.innerHTML = sections.filter(sec=>sec.items.length).map(sec=>`
-    <div class="pf-group-section">
-      <h4 class="pf-group-title">${escAttr(sec.title)} <small>${toFaDigits(sec.items.length)}</small></h4>
-      <div class="pf-logo-grid">${sec.items.map(cardHtml).join('')}</div>
-    </div>`).join('');
-}
-
-function openPfChannel(id){
-  navMark();
-  pfSelectedChannel = id;
-  if(pfSearchEl) pfSearchEl.value = '';
-  if(pfFilterTimeEl) pfFilterTimeEl.value = '';
-  renderPoliticalFigures();
-  window.scrollTo(0,0);
-}
-
-function closePfChannel(){
-  navMark();
-  pfSelectedChannel = null;
-  renderPoliticalFigures();
-  window.scrollTo(0,0);
-}
-
-const pfLogoGridEl = document.getElementById('pf-logo-grid');
-if(pfLogoGridEl) pfLogoGridEl.addEventListener('click', e=>{
-  const card = e.target.closest('.pf-logo-card'); if(!card) return;
-  openPfChannel(Number(card.dataset.ch));
-});
-const pfBackBtnEl = document.getElementById('pf-back-btn');
-if(pfBackBtnEl) pfBackBtnEl.addEventListener('click', closePfChannel);
-if(pfGallerySearchEl) pfGallerySearchEl.addEventListener('input', renderPfGallery);
-const pfGroupRowEl = document.getElementById('pf-group-row');
-if(pfGroupRowEl) pfGroupRowEl.addEventListener('click', e=>{
-  const chip = e.target.closest('.news-topic-chip'); if(!chip) return;
-  pfGroupFilter = chip.dataset.group ? Number(chip.dataset.group) : null;
-  renderPfGallery();
-});
-
-var PF_PAGE = 1, PF_PAGE_KEY = ''; // var: renderPoliticalFigures ممکنه پیش از این خط صدا زده بشه
-function goPfPage(p){
-  PF_PAGE = p;
-  renderPoliticalFigures();
-  scrollToListTop(document.getElementById('pf-feed-view'));
-}
-function filteredPoliticalFigurePosts(){
-  const timeFilter = pfFilterTimeEl ? pfFilterTimeEl.value : '';
-  const q = searchNorm(pfSearchEl ? pfSearchEl.value : '');
-  const filt = pfModeFiltered();
-  return pfPostsAll().filter(p=>{
-    if(p.channel_id !== pfSelectedChannel) return false;
-    if(filt && !secRelevant(p)) return false;
-    if(!matchesTime(p.scraped_at, timeFilter)) return false;
-    if(q && !searchHay(p).includes(q)) return false;
-    return true;
-  }).sort((a,b)=>String(b.scraped_at || '').localeCompare(String(a.scraped_at || '')));
-}
-
-function renderPoliticalFigures(){
-  if(!pfList) return;
-  const galleryView = document.getElementById('pf-gallery-view');
-  const feedView = document.getElementById('pf-feed-view');
-  const selCh = pfSelectedChannel ? chById(pfSelectedChannel) : null;
-  if(!selCh || !pfChannelMatch(selCh)){
-    pfSelectedChannel = null;
-    galleryView.style.display = '';
-    feedView.style.display = 'none';
-    renderPfGallery();
-    return;
-  }
-  galleryView.style.display = 'none';
-  feedView.style.display = '';
-  const url = pfChannelUrl(selCh);
-  document.getElementById('pf-feed-identity').innerHTML = `${pfLogoHtml(selCh)}
-    <div><h3>${escAttr(selCh.title||selCh.username)}</h3>
-    ${url ? `<a href="${escAttr(url)}" target="_blank" rel="noopener">${NEWS_PLATFORM_LABEL[selCh.platform]||selCh.platform} ↗</a>` : ''}
-    ${(()=>{ const names = pfGroupsOfKind().filter(g=>pfGroupIdsOf(selCh.id).includes(g.id)).map(g=>`<span>${escAttr(g.name)}</span>`);
-      return names.length ? `<div class="pf-feed-groups">${names.join('')}</div>` : ''; })()}</div>`;
-  const filtered = filteredPoliticalFigurePosts();
-  pfEmpty.style.display = filtered.length ? 'none' : 'block';
-  if(pfModeFiltered()){
-    const chPosts = pfPostsAll().filter(p=>p.channel_id === pfSelectedChannel);
-    const note = secPendingNote(chPosts);
-    pfEmpty.textContent = (chPosts.some(secRelevant) ? 'مطلبی با این فیلتر پیدا نشد.' : 'هنوز مطلب مرتبطی از این منبع ثبت نشده است.') + (note ? ' ' + note : '');
-    const head = document.getElementById('pf-feed-identity');
-    if(note && filtered.length) head.insertAdjacentHTML('beforeend', `<div class="sec-pending-note">${escHtml(note)}</div>`);
-  }else pfEmpty.textContent = 'مطلبی با این فیلتر پیدا نشد.';
-  // صفحه‌بندی ۱۲تایی مثل اخبار و کنشگری (۵.۲۱.۰؛ قبلاً تا ۱۵۰ مطلب یک‌جا)؛ با عوض شدن
-  // کانال/فیلتر به صفحه‌ی ۱ برمی‌گرده
-  const pfKey = [pfSelectedChannel, pfFilterTimeEl ? pfFilterTimeEl.value : '', pfSearchEl ? pfSearchEl.value : ''].join('|');
-  if(pfKey !== PF_PAGE_KEY){ PF_PAGE_KEY = pfKey; PF_PAGE = 1; }
-  const pfPages = Math.max(1, Math.ceil(filtered.length / NEWS_PAGE_SIZE));
-  if(PF_PAGE > pfPages) PF_PAGE = pfPages;
-  const list = filtered.slice((PF_PAGE - 1) * NEWS_PAGE_SIZE, PF_PAGE * NEWS_PAGE_SIZE);
-  renderPagination('pf-pagination', PF_PAGE, pfPages, goPfPage);
-  pfList.innerHTML = list.map(p=>{
-    const ch = chById(p.channel_id) || {};
-    const topic = catNameOf(p.channel_id);
-    const isRealVideo = p.media_type === 'video' && p.media_path && /\.mp4($|\?)/i.test(p.media_path);
-    const hasThumb = !!p.media_path && (p.media_type === 'photo' || (p.media_type === 'video' && !isRealVideo));
-    const thumbBadge = p.media_type === 'video' ? `<span class="pt-media-badge">${ICONS.video}</span>` : '';
-    const thumbHtml = hasThumb
-      ? `<div class="news-thumb" style="position:relative">${thumbBadge}<img src="${escAttr(p.media_path)}" alt="" loading="lazy" data-viewer-kind="image" data-viewer-src="${escAttr(p.media_path)}"${p.media_type==='video' && p.link ? ` data-viewer-link="${escAttr(p.link)}"` : ''} /></div>`
-      : '';
-    return `
-    <div class="news-card">
-      ${thumbHtml}
-      <div class="news-body">
-        <div class="news-head">
-          <span class="news-source">${escHtml(ch.title||ch.username||'؟')}</span>
-          <span class="news-platform">${NEWS_PLATFORM_ICON[ch.platform]||''}${NEWS_PLATFORM_LABEL[ch.platform]||ch.platform}</span>
-          ${ch.region_id ? `<span class="news-region">${escHtml(regionNameOf(ch.region_id))}</span>` : ''}
-          <span class="news-time">${newsRelTime(p.posted_at||p.scraped_at)}</span>
-        </div>
-        ${p.title ? `<h4 class="news-title" dir="auto">${escHtml(p.title)}</h4>` : ''}
-        <p class="news-text" id="pf-post-text-${p.id}">${claimsTextDisplay(p.text)}</p>
-        <button class="news-more" onclick="togglePoliticalFigureText(${p.id})" id="pf-post-more-${p.id}">
-          نمایش بیشتر
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="news-foot">
-          <div>${topic ? `<span class="news-topic">${escHtml(topic)}</span>` : ''}</div>
-          <div style="display:flex; gap:10px; align-items:center;">
-            ${isRealVideo ? `<a class="news-link" href="${safeUrl(p.media_path)}" target="_blank" rel="noopener" download>دانلود فیلم ↓</a>` : ''}
-            ${p.link ? `<a class="news-link" href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
-          </div>
-        </div>
-        ${currentRole === 'app_admin' ? `<div class="post-admin-row">${postHideBtnHtml(p)}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-  wireMediaViewerClicks(pfList);
-  updatePoliticalFigureMoreButtons(list);
-  if(document.fonts && document.fonts.status !== 'loaded'){
-    document.fonts.ready.then(()=> updatePoliticalFigureMoreButtons(list));
-  }
-}
-
-function updatePoliticalFigureMoreButtons(list){
-  list.forEach(p=>{
-    const textEl = document.getElementById('pf-post-text-'+p.id);
-    const moreBtn = document.getElementById('pf-post-more-'+p.id);
-    if(!textEl || !moreBtn) return;
-    const overflowing = textEl.scrollHeight > textEl.clientHeight + 1;
-    moreBtn.style.display = overflowing ? '' : 'none';
-  });
-}
-
-function togglePoliticalFigureText(postId){
-  const t = document.getElementById('pf-post-text-'+postId);
-  const b = document.getElementById('pf-post-more-'+postId);
-  if(!t || !b) return;
-  const isOpen = t.classList.toggle('expanded');
-  b.classList.toggle('open', isOpen);
-  b.firstChild.textContent = isOpen ? 'بستن ' : 'نمایش بیشتر ';
-}
-
-if(pfTimeSegEl) pfTimeSegEl.addEventListener('click', e=>{
-  const b = e.target.closest('button'); if(!b || !pfTimeSegEl.contains(b)) return;
-  pfFilterTimeEl.value = b.dataset.t || '';
-  renderPoliticalFigures();
-});
-if(pfSearchEl) pfSearchEl.addEventListener('input', renderPoliticalFigures);
+setupProfileGallery();
 
 // ---- analytics ----
 const STOPWORDS = new Set(['و','در','به','از','که','این','را','با','است','می','یک','آن','هم','ها','های','برای','تا','هر','خود','ما','یا','او','وی','شد','شده','شود','کرد','کرده','کند','باید','اما','اگر','هست','نیست','بود','بودن','بوده','بودند','بر','مورد','چه','همه','همین','همان','چند','بین','پس','هنوز','حتی','نه','نیز','دیگر','بعد','قبل','دارد','دارند','داشت','روی','زیر','آنها','ولی','پیش','چون','چرا','کجا','کدام','مثل','مانند','شما','تو','من']);
@@ -4460,7 +3582,7 @@ async function bulkChanSave(){
     const added = (await r.json()).length;
     closeBulkChan();
     await loadChannels();
-    PF_EXTRA_AT = {}; LAWS_AT = 0;
+    resetPfExtraCache(); LAWS_AT = 0;
     renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
     renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures();
     loadCrawlSites();
@@ -4537,7 +3659,7 @@ ceEl('ce-save-btn').addEventListener('click', async ()=>{
     current.forEach(gid=>{ if(!wanted.has(gid)) ops.push(api('/channel_profile_groups?channel_id=eq.'+id+'&group_id=eq.'+gid, {method:'DELETE'})); });
     await Promise.all(ops);
     await Promise.all([loadChannels(), loadChannelProfileGroups()]);
-    PF_EXTRA_AT = {}; LAWS_AT = 0; // عضویت بخش‌های تازه عوض شده باشه، داده‌ی جدا دوباره گرفته بشه
+    resetPfExtraCache(); LAWS_AT = 0; // عضویت بخش‌های تازه عوض شده باشه، داده‌ی جدا دوباره گرفته بشه
     closeChanEditor();
     renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
     renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures(); renderProfileGroupAdmin();
@@ -5298,101 +4420,6 @@ document.getElementById('mag-upload-btn').addEventListener('click', async () => 
     btn.disabled = false; btn.textContent = 'بارگذاری مجله';
   }
 });
-
-// ---- زیرتب‌های «ضمیمه جریان» (بخش مستقل، نه زیرمجموعه‌ی بخش تحلیلی) ----
-// «سایر بسته‌های تحلیلی»: برخلاف مجلات جریان، این‌ها تولیدات نهادهای دیگه‌ست
-// که فقط بایگانی می‌کنیم — همون الگوی داده/Storage مجلات (bucket خصوصی برای
-// فایل + bucket عمومی برای جلد)، فقط با یه ستون اضافه‌ی source_org.
-function renderArchiveReports(){
-  renderUploadLists();
-  const grid = document.getElementById('archive-report-grid');
-  const empty = document.getElementById('archive-reports-empty');
-  if(!grid) return;
-  const isAdmin = currentRole === 'app_admin';
-  grid.innerHTML = '';
-  empty.style.display = ARCHIVE_REPORTS.length ? 'none' : 'block';
-  ARCHIVE_REPORTS.forEach((m, i)=>{
-    const files = Array.isArray(m.files) ? m.files : [];
-    // ۵.۲۲.۰: هم‌شکل کارت‌های «بسته تحلیلی جریان» — جلد + عنوان + متا با ارقام فارسی + «مطالعه»
-    // (قبلاً فقط کلیک روی جلد، و فقط فایل اول در زبانه‌ی جدید باز می‌شد)
-    const meta = [
-      m.source_org || '',
-      m.publish_date ? new Date(m.publish_date).toLocaleDateString('fa-IR') : '',
-      m.file_type === 'images' ? (toFaDigits(files.length) + ' صفحه') : (files.length > 1 ? toFaDigits(files.length) + ' فایل PDF' : 'PDF'),
-    ].filter(Boolean).map(escHtml).join('، ');
-    const el = document.createElement('div'); el.className = 'magazine-card archive-report-card mag-issue-card';
-    el.innerHTML = `<div class="archive-report-poster">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
-      <div class="mag-title">${escHtml(faTitle(m.title))}</div>
-      <div class="mag-meta">${meta}</div>
-      <div class="mag-actions"></div>`;
-    const poster = el.querySelector('.archive-report-poster');
-    const actions = el.querySelector('.mag-actions');
-    if(files.length){
-      poster.style.cursor = 'pointer';
-      poster.addEventListener('click', () => openArchiveViewer(m));
-      const btn = document.createElement('button');
-      btn.className = 'btn primary mag-read-btn'; btn.textContent = 'مطالعه';
-      btn.addEventListener('click', () => openArchiveViewer(m));
-      actions.appendChild(btn);
-    }
-    if(isAdmin) actions.appendChild(cardAdminControls(i, ARCHIVE_REPORTS.length, d => moveArchiveReport(m, d), () => deleteArchiveReport(m), m.title));
-    grid.appendChild(el);
-  });
-}
-
-// نمایشگر سند (همون «بسته تحلیلی جریان»): همه‌ی فایل‌ها، ورق‌زدن، بدون window.open بعد از await
-function openArchiveViewer(m){
-  const files = Array.isArray(m.files) ? m.files : [];
-  const title = faTitle(m.title || 'بسته‌ی تحلیلی');
-  openDocViewer(title, async ()=>{
-    if(!files.length) return [];
-    const urls = await signStoragePaths('archive-reports', files);
-    return files.map((f, k)=>{
-      const isPdf = /\.pdf$/i.test(f) || (m.file_type === 'pdf' && !/\.(jpe?g|png|webp|gif)$/i.test(f));
-      return { kind: isPdf ? 'pdf' : 'image', url: urls[k], label: title + (files.length > 1 ? ' — ' + (isPdf ? 'فایل ' : 'صفحه‌ی ') + toFaDigits(k + 1) : '') };
-    });
-  });
-}
-
-async function moveArchiveReport(m, direction){
-  const idx = ARCHIVE_REPORTS.findIndex(x=>x.id===m.id);
-  const swapIdx = idx + direction;
-  if(swapIdx < 0 || swapIdx >= ARCHIVE_REPORTS.length) return;
-  const other = ARCHIVE_REPORTS[swapIdx];
-  const aOrder = m.sort_order || 0, bOrder = other.sort_order || 0;
-  await Promise.all([
-    api('/archive_reports?id=eq.'+m.id, {method:'PATCH', body: JSON.stringify({sort_order: bOrder})}),
-    api('/archive_reports?id=eq.'+other.id, {method:'PATCH', body: JSON.stringify({sort_order: aOrder})}),
-  ]);
-  await loadArchiveReports(); renderArchiveReports();
-}
-
-async function deleteArchiveReport(m){
-  if(!await uiConfirm('«' + m.title + '» از آرشیو حذف شود؟ فایل‌های آن هم برای همیشه پاک می‌شوند.')) return;
-  try{
-    const files = Array.isArray(m.files) ? m.files : [];
-    if(files.length){
-      await fetch(SUPABASE_URL + '/storage/v1/object/remove/archive-reports', {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prefixes: files }),
-      });
-    }
-    if(m.cover_url && m.cover_url.includes('/archive-report-covers/')){
-      const coverPath = m.cover_url.split('/archive-report-covers/')[1];
-      await fetch(SUPABASE_URL + '/storage/v1/object/remove/archive-report-covers', {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + authToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prefixes: [coverPath] }),
-      });
-    }
-    await api('/archive_reports?id=eq.'+m.id, {method:'DELETE'});
-    await loadArchiveReports(); renderArchiveReports();
-    showToast('از آرشیو حذف شد');
-  }catch(e){
-    showToast('حذف ناموفق بود');
-  }
-}
 
 async function uploadArchiveReportFile(file){
   const safeName = file.name.replace(/[^\w.\-]+/g, '_');

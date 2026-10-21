@@ -83,3 +83,13 @@ export function newsRelTime(dateStr){
   return d.toLocaleDateString('fa-IR');
 }
 
+// فیلتر زمان «امروز/دیروز/هفته گذشته» روی نیمه‌شب تهران (val خالی = همه)
+export function matchesTime(dateStr, val){
+  if(!val) return true;
+  if(!dateStr) return false;
+  const diffDays = tehranDayDiff(dateStr);
+  if(val==='today') return diffDays===0;
+  if(val==='yesterday') return diffDays===1;
+  if(val==='week') return diffDays>=0 && diffDays<=6;
+  return true;
+}
