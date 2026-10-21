@@ -17,32 +17,19 @@
   SUPABASE_URL, SUPABASE_ANON_KEY, ADMIN_PASSWORD
 """
 
-import os
 import sys
 
 import requests
+from jarian_common import SUPABASE_URL, SUPABASE_ANON_KEY, login, require_env
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+require_env()
 
 REQUEST_TIMEOUT = 120  # پاسخ هوش مصنوعی روی دسته‌ای از پست‌ها ممکنه چند ثانیه طول بکشه
 WINDOW_HOURS = 6
 
 
-def login() -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/rpc/login",
-        headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-        json={"password": ADMIN_PASSWORD},
-        timeout=30,
-    )
-    r.raise_for_status()
-    return r.json()["token"]
-
-
 def main() -> None:
-    token = login()
+    token = login(30)
     r = requests.post(
         f"{SUPABASE_URL}/functions/v1/news-insights",
         headers={

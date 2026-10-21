@@ -36,15 +36,15 @@
 import datetime
 import html as html_lib
 import json
-import os
 import re
 import sys
 
 import requests
+from jarian_common import (
+    SUPABASE_URL, SUPABASE_ANON_KEY, auth_headers, exit_if_all_failed, login, require_env, upsert_posts,
+)
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+require_env()
 
 REQUEST_TIMEOUT = 20
 
@@ -87,25 +87,6 @@ HASHTAG_RE = re.compile(r"^\s*#\S+\s*")
 # واقعیِ خودِ همون بخش باشه (نه نشتی از بخش بعدی که وجود نداره)، پس اونجا
 # دست‌نخورده می‌مونه و fix_orphan_asterisk تشخیص درست‌ترش می‌ده.
 TRAILING_ARTIFACT_RE = re.compile(r"\*\s*$")
-
-
-def login() -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/rpc/login",
-        headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-        json={"password": ADMIN_PASSWORD},
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()["token"]
-
-
-def auth_headers(token: str) -> dict:
-    return {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    }
 
 
 def fetch_bale_channels(token: str) -> list[dict]:
@@ -298,32 +279,8 @@ def extract_bale_messages(html: str, channel_username: str) -> list[dict]:
     return results
 
 
-def upsert_posts(token: str, posts: list[dict]) -> bool:
-    if not posts:
-        return True
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/posts",
-        headers={**auth_headers(token), "Prefer": "resolution=merge-duplicates,return=minimal"},
-        params={"on_conflict": "channel_id,platform_post_id"},
-        json=posts,
-        timeout=REQUEST_TIMEOUT,
-    )
-    if not r.ok:
-        print(f"    [!] upsert failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
-        return False
-    return True
-
-
-def exit_if_all_failed(failed: int, total: int) -> None:
-    # اگه همه‌ی منابع خطا دادن، اجرا «ناموفق» ثبت بشه تا کارت «وضعیت سامانه» قرمز
-    # بشه (قبلاً هر خطایی فقط چاپ می‌شد و اجرا همیشه سبز می‌موند)
-    if total and failed == total:
-        print(f"[!] all {total} source(s) failed", file=sys.stderr)
-        sys.exit(1)
-
-
 def main() -> None:
-    token = login()
+    token = login(REQUEST_TIMEOUT)
     channels = fetch_bale_channels(token)
     print(f"[*] {len(channels)} active bale channel(s) to scan")
 
@@ -370,7 +327,7 @@ def main() -> None:
                 }
                 for m in messages
             ]
-            if not upsert_posts(token, rows):
+            if not upsert_posts(token, rows, REQUEST_TIMEOUT):
                 failed += 1
             total_saved += len(rows)
             print(f"[+] @{username}: {len(rows)} post(s)")

@@ -21,40 +21,21 @@ data-full-image روی <img> داخلش. کارت‌های دسته‌ی «مج�
 دانلود عکس/فیلم پست‌های تلگرام و ایتا در collect_telegram.py/collect_eitaa.py).
 """
 
-import os
 import sys
 
 import requests
 from bs4 import BeautifulSoup
+from jarian_common import (
+    SUPABASE_URL, SUPABASE_ANON_KEY, auth_headers, login, require_env, upload_object,
+)
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+require_env()
 
 REQUEST_TIMEOUT = 20
 KIOSK_URL = "https://www.jaaar.com/kiosk"
 MAGAZINE_CATEGORY_CLASS = "category-6"
 MEDIA_BUCKET = "newspaper-covers"
 MAX_MEDIA_BYTES = 15 * 1024 * 1024  # ۱۵ مگابایت — برای اینکه فضای Storage/زمان اجرا با فایل‌های خیلی بزرگ پر نشه
-
-
-def login() -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/rpc/login",
-        headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-        json={"password": ADMIN_PASSWORD},
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()["token"]
-
-
-def auth_headers(token: str) -> dict:
-    return {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    }
 
 
 def fetch_kiosk_html() -> bytes:
@@ -104,22 +85,6 @@ def extract_newspapers(html: bytes) -> list[dict]:
     return papers
 
 
-def upload_media(token: str, storage_path: str, content: bytes, content_type: str) -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/storage/v1/object/{MEDIA_BUCKET}/{storage_path}",
-        headers={
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": f"Bearer {token}",
-            "Content-Type": content_type or "image/jpeg",
-            "x-upsert": "true",  # هر اجرا ممکنه همون شماره رو دوباره ببینه — بدون این هدر آپلود دوباره خطای 400 می‌ده
-        },
-        data=content,
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return f"{SUPABASE_URL}/storage/v1/object/public/{MEDIA_BUCKET}/{storage_path}"
-
-
 def download_and_store_cover(token: str, paper: dict) -> dict | None:
     try:
         resp = requests.get(paper["source_image_url"], timeout=REQUEST_TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
@@ -130,7 +95,7 @@ def download_and_store_cover(token: str, paper: dict) -> dict | None:
             return None
         content_type = resp.headers.get("Content-Type", "image/jpeg")
         storage_path = f"{paper['slug']}/{paper['edition_date']}.jpg"
-        public_url = upload_media(token, storage_path, content, content_type)
+        public_url = upload_object(token, MEDIA_BUCKET, storage_path, content, content_type, REQUEST_TIMEOUT, "image/jpeg")
         return {"image_url": public_url, "media_storage_path": storage_path}
     except Exception as e:
         print(f"    [!] cover download failed for {paper['slug']}: {e}", file=sys.stderr)
@@ -153,7 +118,7 @@ def upsert_newspapers(token: str, rows: list[dict]) -> None:
 
 
 def main() -> None:
-    token = login()
+    token = login(REQUEST_TIMEOUT)
     html = fetch_kiosk_html()
     papers = extract_newspapers(html)
     print(f"[*] {len(papers)} newspaper front page(s) found")

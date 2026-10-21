@@ -25,35 +25,17 @@ import os
 import sys
 
 import requests
+from jarian_common import (
+    SUPABASE_URL, SUPABASE_ANON_KEY, auth_headers, clear_post_media, login, require_env,
+)
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+require_env()
 
 CHANNEL_USERNAME = os.environ["CHANNEL_USERNAME"].lstrip("@")
 DELETE_COUNT = int(os.environ.get("DELETE_COUNT") or 100)
 
 REQUEST_TIMEOUT = 30
 MEDIA_BUCKET = "post-media"
-
-
-def login() -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/rpc/login",
-        headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-        json={"password": ADMIN_PASSWORD},
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()["token"]
-
-
-def auth_headers(token: str) -> dict:
-    return {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    }
 
 
 def remove_storage_objects(token: str, bucket: str, paths: list[str]) -> bool:
@@ -125,23 +107,8 @@ def fetch_oldest_media_posts(token: str, channel_id: int, limit: int) -> list[di
     return r.json()
 
 
-def clear_post_media(token: str, post_ids: list[int]) -> None:
-    if not post_ids:
-        return
-    ids_list = ",".join(str(i) for i in post_ids)
-    r = requests.patch(
-        f"{SUPABASE_URL}/rest/v1/posts",
-        headers={**auth_headers(token), "Prefer": "return=minimal"},
-        params={"id": f"in.({ids_list})"},
-        json={"media_path": None, "media_storage_path": None, "media_fetched_at": None},
-        timeout=REQUEST_TIMEOUT,
-    )
-    if not r.ok:
-        print(f"[!] clear post media fields failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
-
-
 def main() -> None:
-    token = login()
+    token = login(REQUEST_TIMEOUT)
     channel_id = find_channel_id(token)
     posts = fetch_oldest_media_posts(token, channel_id, DELETE_COUNT)
     print(f"[*] {len(posts)} post(s) with media found (oldest {DELETE_COUNT} requested)")
@@ -152,7 +119,7 @@ def main() -> None:
     if not remove_storage_objects(token, MEDIA_BUCKET, paths):
         print("[!] aborting — storage delete failed, DB left untouched, retry later", file=sys.stderr)
         sys.exit(1)
-    clear_post_media(token, ids)
+    clear_post_media(token, ids, REQUEST_TIMEOUT)
     print(f"[done] cleared media for {len(ids)} post(s) of @{CHANNEL_USERNAME}")
 
 

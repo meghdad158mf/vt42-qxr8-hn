@@ -21,10 +21,11 @@ import requests
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
+from jarian_common import (
+    SUPABASE_URL, SUPABASE_ANON_KEY, auth_headers, exit_if_all_failed, login, require_env, upload_object, upsert_posts,
+)
 
-SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
+require_env()
 TG_API_ID = int(os.environ["TG_API_ID"])
 TG_API_HASH = os.environ["TG_API_HASH"]
 TG_SESSION = os.environ["TG_SESSION"]
@@ -33,25 +34,6 @@ REQUEST_TIMEOUT = 20
 MESSAGES_PER_CHANNEL_LIMIT = 100  # سقف ایمنی برای هر اجرا (بک‌فیل کانال تازه هم همینه)، در حالت عادی خیلی کمتره
 MEDIA_BUCKET = "post-media"
 MAX_MEDIA_BYTES = 15 * 1024 * 1024  # ۱۵ مگابایت — فایل بزرگ‌تر دانلود نمی‌شه (فضای Storage + زمان اجرا)
-
-
-def login() -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/rpc/login",
-        headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
-        json={"password": ADMIN_PASSWORD},
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return r.json()["token"]
-
-
-def auth_headers(token: str) -> dict:
-    return {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    }
 
 
 def fetch_telegram_channels(token: str) -> list[dict]:
@@ -86,22 +68,6 @@ def fetch_last_post_id(token: str, channel_id: int) -> int:
     return int(rows[0]["platform_post_id"]) if rows else 0
 
 
-def upsert_posts(token: str, posts: list[dict]) -> bool:
-    if not posts:
-        return True
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/posts",
-        headers={**auth_headers(token), "Prefer": "resolution=merge-duplicates,return=minimal"},
-        params={"on_conflict": "channel_id,platform_post_id"},
-        json=posts,
-        timeout=REQUEST_TIMEOUT,
-    )
-    if not r.ok:
-        print(f"    [!] upsert failed: {r.status_code} {r.text[:300]}", file=sys.stderr)
-        return False
-    return True
-
-
 def media_type_of(msg) -> str | None:
     if not msg.media:
         return None
@@ -112,25 +78,6 @@ def media_type_of(msg) -> str | None:
     if isinstance(msg.media, (MessageMediaPhoto, MessageMediaDocument)):
         return "document"
     return "other"
-
-
-def upload_media(token: str, storage_path: str, content: bytes, content_type: str) -> str:
-    r = requests.post(
-        f"{SUPABASE_URL}/storage/v1/object/{MEDIA_BUCKET}/{storage_path}",
-        headers={
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": f"Bearer {token}",
-            "Content-Type": content_type or "application/octet-stream",
-            # اگه به هر دلیلی همون پیام قبلاً یه‌بار دانلود شده باشه ولی ذخیره‌ی
-            # دیتابیسش ناموفق بوده، بدون این هدر آپلود دوباره‌ی همون مسیر خطای
-            # 400 می‌ده.
-            "x-upsert": "true",
-        },
-        data=content,
-        timeout=REQUEST_TIMEOUT,
-    )
-    r.raise_for_status()
-    return f"{SUPABASE_URL}/storage/v1/object/public/{MEDIA_BUCKET}/{storage_path}"
 
 
 async def download_and_store_media(client: TelegramClient, token: str, msg, channel_id: int) -> dict | None:
@@ -151,7 +98,7 @@ async def download_and_store_media(client: TelegramClient, token: str, msg, chan
         content_type = (msg.file.mime_type if msg.file else None) or ("image/jpeg" if msg.photo else "video/mp4")
         ext = ".jpg" if msg.photo else ".mp4"
         storage_path = f"telegram/{channel_id}/{msg.id}{ext}"
-        public_url = upload_media(token, storage_path, content, content_type)
+        public_url = upload_object(token, MEDIA_BUCKET, storage_path, content, content_type, REQUEST_TIMEOUT)
         return {"media_path": public_url, "media_storage_path": storage_path}
     except Exception as e:
         print(f"    [!] media download failed for msg {msg.id}: {e}", file=sys.stderr)
@@ -195,21 +142,13 @@ async def collect_channel(client: TelegramClient, token: str, channel: dict) -> 
             media_count += 1
         posts.append(post)
 
-    if not upsert_posts(token, posts):
+    if not upsert_posts(token, posts, REQUEST_TIMEOUT):
         raise RuntimeError("upsert failed")
     return len(posts), media_count
 
 
-def exit_if_all_failed(failed: int, total: int) -> None:
-    # اگه همه‌ی منابع خطا دادن، اجرا «ناموفق» ثبت بشه تا کارت «وضعیت سامانه» قرمز
-    # بشه (قبلاً هر خطایی فقط چاپ می‌شد و اجرا همیشه سبز می‌موند)
-    if total and failed == total:
-        print(f"[!] all {total} source(s) failed", file=sys.stderr)
-        sys.exit(1)
-
-
 async def main() -> None:
-    token = login()
+    token = login(REQUEST_TIMEOUT)
     channels = fetch_telegram_channels(token)
     print(f"[*] {len(channels)} active telegram channel(s) to scan")
 
