@@ -9,8 +9,7 @@ import { showToast } from '../../ui/toast.js';
 import { signStoragePaths } from '../../core/signed-urls.js';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../core/config.js';
 import { uiConfirm } from '../../ui/confirm.js';
-// ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
-import { renderUploadLists } from '../../app.js';
+import { adminHook } from '../../core/admin-hooks.js';
 
 export let ARCHIVE_REPORTS = [];   // {id, title, source_org, publish_date, file_type, files, cover_url, uploaded_at}
 export async function loadArchiveReports(){
@@ -22,7 +21,7 @@ export async function loadArchiveReports(){
 // که فقط بایگانی می‌کنیم — همون الگوی داده/Storage مجلات (bucket خصوصی برای
 // فایل + bucket عمومی برای جلد)، فقط با یه ستون اضافه‌ی source_org.
 export function renderArchiveReports(){
-  renderUploadLists();
+  adminHook('renderUploadLists'); // فهرست «بارگذاری محتوا» (admin/uploads.js)
   const grid = document.getElementById('archive-report-grid');
   const empty = document.getElementById('archive-reports-empty');
   if(!grid) return;

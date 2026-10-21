@@ -2,8 +2,7 @@
 import { api } from '../../core/api.js';
 import { escAttr, toFaDigits } from '../../core/text.js';
 import { wireMediaViewerClicks } from '../../ui/media-viewer.js';
-// ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
-import { mediaRetentionHours } from '../../app.js';
+import { mediaRetentionHours } from '../../data/site-settings.js';
 
 export let NEWSPAPERS = [];  // {id, slug, title, edition_date, image_url, media_storage_path, reader_url}
 export let NEWSPAPER_TODAYS = [];  // زیرمجموعه‌ی NEWSPAPERS مربوط به تاریخ انتخاب‌شده — برای فیلتر بدون rebuild چک‌باکس‌ها
