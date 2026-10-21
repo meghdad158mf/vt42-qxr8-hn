@@ -25,7 +25,6 @@ function updateNavMenuCurrent(){
     const isExact = b.dataset.nav === exact;
     if(isExact) hasExact = true;
     b.classList.toggle('is-current', isExact);
-    b.classList.toggle('is-current-group', b.dataset.nav === st.s);
     b.removeAttribute('aria-current');
   });
   // بخشی که زیرشاخه‌ی منو نداره (صفحه نخست، برنامه مدارس، بسته تحلیلی...) خودش پررنگ می‌شه

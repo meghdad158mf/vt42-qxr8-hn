@@ -114,7 +114,12 @@
   .nav-menu-col-domains > .nav-menu-toplevel-title{ display:none; }
   .nav-menu-col-domains button:hover{ background: rgba(255,255,255,0.6); }
 }
-@media (max-width:640px){ .nav-menu-domains-tab{ display:none; } }
+@media (max-width:640px){
+  .nav-menu-domains-tab{ display:none; }
+  /* گوشی: «عرصه‌های رصد» هم‌شکل «صفحه نخست» و «بسته تحلیلی جریان» (سطح اول)، بدون خط‌های اضافه —
+     جداکننده‌ی دو بلوک همان خط زیر ستون بالایی است */
+  .nav-menu-col-domains > .nav-menu-toplevel-title{ font-size:12px; padding:9px 10px; margin:0; border-bottom:none; }
+}
 .nav-menu-issues{ display:flex; flex-direction:column; gap:2px; }
 .admin-menu-list button.nav-menu-issue{ min-width:0; }
 .admin-menu-list button.nav-menu-issue > span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -146,7 +151,7 @@
 }
 .admin-menu-list button:hover{ background: var(--surface-2); color: var(--text); }
 /* جای فعلی کاربر در منوی «بخش‌ها» (updateNavMenuCurrent، ۵.۲۰.۰) */
-.admin-menu-list button.is-current-group{ color: var(--accent-strong); }
+/* ۵.۳۳.۰ (خواست کاربر: هر سطح یک‌شکل): تیترِ بخشِ فعلی رنگ جدا نمی‌گیرد — فقط خودِ گزینه‌ی فعلی پررنگ می‌شود */
 .admin-menu-list button.is-current,
 .admin-menu-list button.is-current:hover{ background: rgba(234,179,147,0.3); color: var(--accent-strong); font-weight:800; }
 .admin-menu-list svg{ width:14px; height:14px; flex-shrink:0; }
