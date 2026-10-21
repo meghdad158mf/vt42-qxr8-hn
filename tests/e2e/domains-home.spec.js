@@ -58,6 +58,18 @@ test('صفحه‌ی نخست: شش عرصه در یک مدار و بدون عر�
   expect(page.appErrors).toEqual([]);
 });
 
+test('منوی بخش‌ها: شماره‌های بسته تحلیلی زیر «بسته تحلیلی جریان» و باز شدن در نمایشگر سند', async ({ page }) => {
+  await openAs(page, 'viewer');
+  await page.click('#nav-menu-btn');
+  const items = page.locator('#nav-menu-issues .nav-menu-issue');
+  await expect(items).toHaveCount(4); // فقط شماره‌های دارای فایل
+  await expect(items.first()).toHaveText('شماره ۱');
+  await items.first().click();
+  await expect(page.locator('#doc-viewer')).toHaveClass(/active/);
+  await expect(page.locator('#nav-menu')).not.toHaveClass(/open/);
+  expect(page.appErrors).toEqual([]);
+});
+
 test('پیوند قدیمی عرصه‌های حذف‌شده به صفحه‌ی نخست می‌رود', async ({ page }) => {
   test.slow(); // سه بار باز کردن کامل صفحه
   for (const old of ['laws', 'public/trends', 'ask']) {

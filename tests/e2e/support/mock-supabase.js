@@ -47,7 +47,7 @@ function buildData(now = Date.now()) {
     categories: [{ id: 1, name: 'خبرگزاری' }, { id: 2, name: 'سیاسی' }, { id: 3, name: 'فرهنگی' }],
     regions: [{ id: 1, name: 'ملی' }, { id: 2, name: 'خراسان رضوی' }],
     news_topics: [{ id: 1, label: 'اقتصاد', keywords: ['تورم'] }, { id: 2, label: 'غزه', keywords: ['غزه'] }],
-    magazines: Array.from({ length: 6 }, (_, i) => ({ id: i + 1, title: 'بسته تحلیلی جریان', issue_no: String(i + 1), sort_order: i, cover_path: null, cover_url: null, file_paths: [], published_at: iso(168 * i), created_at: iso(168 * i) })),
+    magazines: Array.from({ length: 6 }, (_, i) => ({ id: i + 1, title: 'بسته تحلیلی جریان', issue_no: String(i + 1), sort_order: i, file_type: 'pdf', files: i < 4 ? ['m' + (i + 1) + '.pdf'] : [], cover_path: null, cover_url: null, file_paths: [], published_at: iso(168 * i), created_at: iso(168 * i) })),
     news_ai_insights: [{
       id: 1, computed_at: iso(2), window_hours: 6,
       picks: posts.slice(0, 6).map((p, k) => ({ id: p.id, headline: 'خبر منتخب ' + (k + 1), score: 9 - k, tags: ['تنش سیاسی'], sources: 6 - k, posts: 8, channel_id: p.channel_id, time: p.posted_at, link: p.link })),

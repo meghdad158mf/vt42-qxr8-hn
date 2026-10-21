@@ -115,6 +115,10 @@
   .nav-menu-col-domains button:hover{ background: rgba(255,255,255,0.6); }
 }
 @media (max-width:640px){ .nav-menu-domains-tab{ display:none; } }
+.nav-menu-issues{ display:flex; flex-direction:column; gap:2px; }
+.admin-menu-list button.nav-menu-issue{ min-width:0; }
+.admin-menu-list button.nav-menu-issue > span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@media (min-width:641px){ .nav-menu-issues{ max-width:210px; } }
 @media (max-width:640px){
   #nav-menu-list.nav-menu-grid{ grid-template-columns:1fr; min-width:220px; gap:2px; padding:6px; }
   /* گوشی: «صفحه نخست» و «بسته تحلیلی جریان» بالای فهرست بلند عرصه‌ها */
