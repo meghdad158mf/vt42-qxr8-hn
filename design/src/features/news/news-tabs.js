@@ -7,11 +7,14 @@ import { renderNewsAnalytics } from './analytics.js';
 import { renderNewsletterTab } from './newsletter.js';
 import { renderNewspapers } from './newspapers.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
-import { firstVisibleTab, goToHawzaTab, switchSection, viewerHidden } from '../../app.js';
+import { firstVisibleTab, switchSection, viewerHidden } from '../../app.js';
 
+// تب قدیمی «اخبار حوزه» حالا بخش «درباره حوزه»ه؛ hawza-tabs.js مقصد رو ثبت می‌کنه (بدون import دوطرفه)
+let LEGACY_HAWZA_GO = null;
+export function onLegacyHawzaTab(fn){ LEGACY_HAWZA_GO = fn; }
 // میان‌برهای کارت‌های صفحه‌ی نخست به زیربخش‌های خودِ همون صفحه
 export function goToNewsTab(tab){
-  if(tab === 'hawza'){ goToHawzaTab('news'); return; } // تب قدیمی، حالا بخش «درباره حوزه»
+  if(tab === 'hawza'){ if(LEGACY_HAWZA_GO) LEGACY_HAWZA_GO(); return; }
   switchSection('overview');
   setNewsPageTab(tab);
 }
