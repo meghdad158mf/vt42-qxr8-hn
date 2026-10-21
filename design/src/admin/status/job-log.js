@@ -62,6 +62,7 @@ export async function copyJobLog(){
   catch(e){ showToast('کپی ممکن نشد؛ متن را دستی انتخاب و کپی کنید.'); }
 }
 export function setupJobLog(){
+  document.getElementById('job-log-copy').addEventListener('click', ()=>copyJobLog());
   bindModal('job-log-modal', closeJobLog);
   document.addEventListener('click', e=>{
     const b = e.target.closest('.sys-log-btn');

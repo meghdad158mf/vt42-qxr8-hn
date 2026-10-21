@@ -51,7 +51,7 @@ export function renderSysRetention(){
         const est = pct === null ? '' : ' — حدود ' + toFaDigits(Math.round(pct)) + '٪ فضا' + (pct > RETENTION_MAX_PCT ? ' (بیش از حد مجاز)' : '');
         return `<option value="${h}" ${h === cur ? 'selected' : ''}>${l}${h === cur ? ' (فعلی)' : est}</option>`;
       }).join('')}</select>
-      <button type="button" class="btn btn-sm" id="sys-ret-save" onclick="saveMediaRetention()">ذخیره</button>
+      <button type="button" class="btn btn-sm" id="sys-ret-save">ذخیره</button>
     </div>
   </div>`;
 }
@@ -178,6 +178,7 @@ export function drawSysCapacity(){
     <p class="sys-cap-proj ${projCls}">${proj}</p>`;
 }
 export function setupSysStorage(){
+  document.getElementById('sys-retention').addEventListener('click', e=>{ if(e.target.closest('#sys-ret-save')) saveMediaRetention(); });
   document.getElementById('sys-capacity').addEventListener('click', e=>{
     const k = e.target.closest('[data-cap-kind]'), r = e.target.closest('[data-cap-range]');
     if(k){ CAP_KIND = k.dataset.capKind; drawSysCapacity(); }

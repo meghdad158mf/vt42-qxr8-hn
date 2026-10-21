@@ -26,6 +26,11 @@ describe('ارجاع موقت به app.js', () => {
       .filter((f) => /^import [^;]*from '(?:\.\.?\/)+admin\//m.test(read(f)) || /^import [^;]*from '\.\/admin\//m.test(read(f)));
     expect(bad).toEqual([]);
   });
+  // بسته‌ی جدای مدیر (مرحله‌ی ۸ب): app.js هم admin/ رو فقط با import() پویای admin/admin.js بار می‌کنه
+  it('app.js کد مدیریت رو فقط با import پویا بار می‌کنه', () => {
+    expect(/^import [^;]*from '\.\/admin\//m.test(app)).toBe(false);
+    expect(app).toContain("import('./admin/admin.js')");
+  });
   it('فقط تابع‌های export‌شده‌ی app.js', () => {
     const bad = backRefs.flatMap((r) => r.names.filter((n) => !appFns.has(n)).map((n) => `${r.file}: ${n}`));
     expect(bad).toEqual([]);

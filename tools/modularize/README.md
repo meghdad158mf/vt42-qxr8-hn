@@ -12,8 +12,7 @@
 | `retarget.cjs` | نام‌هایی که از app.js import شده‌اند ولی دیگر آنجا نیستند (جابه‌جا شده‌اند) را از ماژول تازه‌شان import می‌کند |
 | `merge-imports.cjs` | چند خط import از یک ماژول را یکی می‌کند |
 | `prune.cjs` | نام‌های import‌شده‌ی بی‌استفاده را حذف می‌کند |
-| `handlers.cjs` | فهرست تابع‌هایی که `onclick`های HTML و رشته‌های app.js صدا می‌زنند (برای پل موقت `Object.assign(window, …)`) |
 
-ترتیب معمول: `deps`/`stmts` برای تعیین گروه ← spec ← `move` ← ویرایش دستی (setter، hook، listener به‌جای onclick) ← `fiximports` ← `retarget` ← `merge-imports` ← `prune` ← به‌روزکردن پل `Object.assign(window, …)` با خروجی `handlers`.
+ترتیب معمول: `deps`/`stmts` برای تعیین گروه ← spec ← `move` ← ویرایش دستی (setter، hook، listener به‌جای onclick) ← `fiximports` ← `retarget` ← `merge-imports` ← `prune`. (پل موقت `Object.assign(window, …)` و ابزار `handlers.cjs` در مرحله‌ی ۸ج با حذف همه‌ی دستگیره‌های درون HTML برداشته شدند.)
 
 بعد از هر جابه‌جایی: `npm run lint`، `npm run test:unit`، `npm test` و `npm run build && npm run test:dist`، و مقایسه‌ی پیکسلی با نسخه‌ی زنده.

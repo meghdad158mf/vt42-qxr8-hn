@@ -155,6 +155,8 @@ export async function uploadArchiveCoverFile(file){
   return SUPABASE_URL + '/storage/v1/object/public/archive-report-covers/' + path;
 }
 export function setupUploads(){
+  document.querySelectorAll('.upl-goto[data-upl]').forEach(b=>b.addEventListener('click', ()=>goToUploadsTab(b.dataset.upl)));
+  document.querySelectorAll('.upl-choice[data-upl-tab]').forEach(b=>b.addEventListener('click', ()=>setUploadsTab(b.dataset.uplTab)));
   setAdminHook('renderUploadLists', renderUploadLists);
   document.getElementById('school-report-upload-btn').addEventListener('click', async () => {
     const btn = document.getElementById('school-report-upload-btn');

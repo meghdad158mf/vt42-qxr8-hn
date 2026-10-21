@@ -59,7 +59,7 @@ export async function renderSysLogins(){
     const lockHtml = locks === null
       ? '<div class="sys-note sys-lock-note">قفل خودکار ورود هنوز فعال نیست؛ برای فعال شدن، فایل <b>db/migration_042_login_lock_site_settings.sql</b> را یک‌بار در SQL Editor سوپابیس اجرا کنید.</div>'
       : locks.length
-        ? `<div class="sys-lock-box warn"><div class="sys-lock-head"><b>ورود از ${faNum(locks.length)} اتصال موقتاً بسته است</b>${locks.length > 1 ? '<button type="button" class="btn btn-sm" onclick="unlockLogin(null)">باز کردن همه</button>' : ''}</div>${locks.map(x=>{
+        ? `<div class="sys-lock-box warn"><div class="sys-lock-head"><b>ورود از ${faNum(locks.length)} اتصال موقتاً بسته است</b>${locks.length > 1 ? '<button type="button" class="btn btn-sm" data-unlock-all>باز کردن همه</button>' : ''}</div>${locks.map(x=>{
             const until = new Date(x.locked_until);
             const mins = Math.max(1, Math.ceil((until.getTime() - Date.now()) / 60000));
             return `<div class="sys-lock-row"><span dir="ltr" class="sys-lock-ip">${escHtml(x.ip || 'نامشخص')}</span><span class="sys-lock-meta">${faNum(x.attempts)} تلاش ناموفق، باز شدن خودکار تا ${faNum(mins)} دقیقه‌ی دیگر</span><button type="button" class="btn btn-sm" data-unlock="${escAttr(x.ip || '')}">باز کردن قفل</button></div>`;
@@ -113,6 +113,7 @@ export function setupSysLogins(){
     if(e.target.closest('[data-act="logins-toggle"]')){ SYS_LOGINS_SHOW_ALL = !SYS_LOGINS_SHOW_ALL; renderSysLogins(); }
   });
   document.getElementById('sys-logins').addEventListener('click', e=>{
+    if(e.target.closest('[data-unlock-all]')){ unlockLogin(null); return; }
     const b = e.target.closest('[data-unlock]'); if(b) unlockLogin(b.dataset.unlock);
   });
   document.getElementById('sys-stale').addEventListener('click', openStaleChannel);

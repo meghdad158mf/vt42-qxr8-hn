@@ -83,7 +83,7 @@ export function renderNewspaperGrid(){
   grid.innerHTML = list.map(n => `
     <div class="newspaper-card">
       <div class="newspaper-cover">
-        <img src="${escAttr(n.image_url)}" alt="${escAttr(n.title)}" loading="lazy" draggable="false" oncontextmenu="return false"
+        <img src="${escAttr(n.image_url)}" alt="${escAttr(n.title)}" loading="lazy" draggable="false" data-no-menu
              data-viewer-kind="image" data-viewer-src="${escAttr(n.image_url)}"${n.reader_url ? ` data-viewer-link="${escAttr(n.reader_url)}"` : ''} />
       </div>
       <div class="newspaper-title">${escAttr(n.title)}</div>

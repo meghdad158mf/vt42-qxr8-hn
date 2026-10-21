@@ -6,3 +6,8 @@ export function adminHook(name, ...args){
   const fn = HOOKS[name];
   return fn ? fn(...args) : undefined;
 }
+
+// خودِ بسته‌ی مدیریت (admin/admin.js) بعد از بار شدن پویا؛ برای بیننده null می‌مونه
+let ADMIN = null;
+export function setAdmin(mod){ ADMIN = mod; }
+export function admin(){ return ADMIN; }

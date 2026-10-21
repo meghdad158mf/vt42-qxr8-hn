@@ -35,7 +35,7 @@ export async function renderSysAlerts(){
           <div class="field"><label for="sys-alert-email">نشانی ایمیل گیرنده</label><input type="email" id="sys-alert-email" dir="ltr" value="${escAttr(a.email || '')}" placeholder="name@example.com" autocomplete="email"></div>
           <label class="ce-check"><input type="checkbox" id="sys-alert-on" ${a.alerts_on ? 'checked' : ''}>ایمیل فوری هنگام خرابی <small>(بررسی هر ۳۰ دقیقه؛ یادآوری هر ۱۲ ساعت تا برطرف شود)</small></label>
           <label class="ce-check"><input type="checkbox" id="sys-alert-daily" ${a.daily_on ? 'checked' : ''}>گزارش روزانه <small>(هر روز ساعت ۷:۲۲ صبح، حتی اگر همه‌چیز سالم باشد)</small></label>
-          <div class="sys-btn-row"><button type="button" class="btn btn-sm primary" id="sys-alert-save" onclick="saveAlertSettings()">ذخیره</button><button type="button" class="btn btn-sm" id="sys-alert-test" onclick="testAlertEmail()">ارسال ایمیل آزمایشی</button></div>
+          <div class="sys-btn-row"><button type="button" class="btn btn-sm primary" id="sys-alert-save">ذخیره</button><button type="button" class="btn btn-sm" id="sys-alert-test">ارسال ایمیل آزمایشی</button></div>
         </div>
         <div class="sys-alerts-stat">
           <div><span>آخرین بررسی</span><b>${when(a.last_check_at)}</b></div>
@@ -118,6 +118,10 @@ export async function renderSysClientErrors(){
   }
 }
 export function setupSysAlerts(){
+  document.getElementById('sys-alerts').addEventListener('click', e=>{
+    if(e.target.closest('#sys-alert-save')) saveAlertSettings();
+    else if(e.target.closest('#sys-alert-test')) testAlertEmail();
+  });
   document.getElementById('sys-client-errors').addEventListener('click', async e=>{
     const b = e.target.closest('[data-cerr]'); if(!b) return;
     if(!await uiConfirm('حذف این خطا از فهرست\nاگر دوباره رخ دهد، باز در فهرست ظاهر می‌شود.')) return;

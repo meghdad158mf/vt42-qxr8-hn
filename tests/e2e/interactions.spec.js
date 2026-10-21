@@ -54,7 +54,7 @@ test('گالری یادداشت‌ها: باز کردن فید یک چهره', a
 
 test('خروج از حساب به صفحه‌ی ورود برمی‌گرداند', async ({ page }) => {
   await openAs(page, 'viewer');
-  await page.evaluate(() => window.logout());
+  await page.locator('[data-logout]:visible').first().click();
   await expect(page.locator('#view-login')).toHaveClass(/active/);
   expect(await page.evaluate(() => sessionStorage.getItem('jarian_token'))).toBeNull();
 });

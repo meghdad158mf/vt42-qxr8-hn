@@ -120,6 +120,10 @@ export async function saveViewerPasswordLogin(on){
   catch(e){ console.error(e); showToast('ذخیره ناموفق بود'); document.getElementById('sms-viewer-pw').checked = !on; }
 }
 export function setupSecurityAdmin(){
+  document.querySelectorAll('[data-pw-role]').forEach(b=>b.addEventListener('click', ()=>changePassword(b.dataset.pwRole)));
+  document.getElementById('sms-save').addEventListener('click', ()=>saveSmsConfig());
+  document.getElementById('sms-test-btn').addEventListener('click', ()=>sendSmsTest());
+  document.getElementById('sms-viewer-pw').addEventListener('change', e=>saveViewerPasswordLogin(e.target.checked));
   bindModal('pw-modal', closePwModal);
   document.getElementById('pw-show').addEventListener('change', e=>{
     ['pw-new','pw-new2'].forEach(id=> document.getElementById(id).type = e.target.checked ? 'text' : 'password');

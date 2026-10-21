@@ -232,6 +232,10 @@ export async function markNotifySubscribersNotified(){
   }
 }
 export function setupUsersAdmin(){
+  document.querySelector('.usr-dl').addEventListener('click', ()=>usrDownload());
+  document.querySelector('.usr-add').addEventListener('click', ()=>openUserEditor(null));
+  document.getElementById('usr-editor').addEventListener('submit', e=>{ e.preventDefault(); saveUser(); });
+  document.getElementById('usr-cancel').addEventListener('click', ()=>closeUserEditor());
   document.getElementById('sec-users').addEventListener('click', e=>{
     const t = e.target.closest('button, input[type=checkbox]');
     if(!t) return;

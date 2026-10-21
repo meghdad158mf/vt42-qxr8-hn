@@ -93,6 +93,9 @@ export async function saveHiddenSections(){
   applySiteVisibility();
 }
 export function setupSiteSettingsAdmin(){
+  document.getElementById('maint-admin-open').addEventListener('click', ()=>openSiteSettingsPanel('maint'));
+  document.getElementById('ss-maint-save').addEventListener('click', ()=>saveMaintenance());
+  document.getElementById('ss-vis-save').addEventListener('click', ()=>saveHiddenSections());
   document.getElementById('ss-maint-msg').addEventListener('input', updateMaintCounter);
   document.getElementById('ss-maint-on').addEventListener('change', e=>document.getElementById('ss-maint-box').classList.toggle('on', e.target.checked));
   document.getElementById('ss-vis-list').addEventListener('change', e=>{
