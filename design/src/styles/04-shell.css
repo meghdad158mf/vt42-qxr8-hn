@@ -94,6 +94,8 @@
     inset 0 0 0 1px rgba(0,0,0,0.06), inset 0 2px 10px rgba(0,0,0,0.08);
 }
 .nav-menu-col{ display:flex; flex-direction:column; gap:2px; }
+/* «صفحه نخست» و «بسته تحلیلی جریان» ستون اول (راست) — خواست کاربر، ۵.۳۳.۰ */
+.nav-menu-col-top{ order:-1; }
 @media (max-width:640px){
   #nav-menu-list.nav-menu-grid{ grid-template-columns:1fr; min-width:220px; gap:2px; padding:6px; }
   /* گوشی: «صفحه نخست» و «بسته تحلیلی جریان» بالای فهرست بلند عرصه‌ها */
