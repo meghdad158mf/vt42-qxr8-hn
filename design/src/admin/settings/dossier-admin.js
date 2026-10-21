@@ -53,8 +53,8 @@ export function editDossierTopicKeywords(id){
   kwEl.innerHTML = `
     <input type="text" id="dossier-topic-kw-input-${id}" value="${escAttr(t.keywords)}" placeholder="کلیدواژه‌ها، جدا با ویرگول" style="width:100%;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);font-family:inherit;box-sizing:border-box;" />
     <div style="display:flex;gap:6px;margin-top:6px;">
-      <button type="button" class="btn btn-sm" onclick="saveDossierTopicKeywords(${id})">ذخیره</button>
-      <button type="button" class="btn btn-sm" onclick="renderDossierTopicAdminList()">انصراف</button>
+      <button type="button" class="btn btn-sm" data-dt-act="save-kw" data-id="${id}">ذخیره</button>
+      <button type="button" class="btn btn-sm" data-dt-act="cancel-kw">انصراف</button>
     </div>`;
   document.getElementById('dossier-topic-kw-input-'+id).focus();
 }
@@ -89,8 +89,8 @@ export function dossierTopicAdminCardHtml(t){
     <div class="dossier-topic-post-row${dp.excluded?' excluded':''}">
       <span class="txt">${escAttr(label)}</span>
       <span style="display:flex;gap:8px;flex-shrink:0;">
-        <button class="btn btn-sm" onclick="toggleDossierTopicPostExcluded(${dp.id})">${dp.excluded?'نمایش':'پنهان'}</button>
-        <button class="del-btn" style="min-width:24px;min-height:24px;font-size:11px;" title="حذف کامل" onclick="deleteDossierTopicPost(${dp.id})">✕</button>
+        <button class="btn btn-sm" data-dt-act="exclude" data-id="${dp.id}">${dp.excluded?'نمایش':'پنهان'}</button>
+        <button class="del-btn" style="min-width:24px;min-height:24px;font-size:11px;" title="حذف کامل" data-dt-act="del-post" data-id="${dp.id}">✕</button>
       </span>
     </div>`;
   }).join('') : '<p class="dossier-topic-empty">هنوز خبری برای این موضوع ثبت نشده.</p>';
@@ -100,18 +100,18 @@ export function dossierTopicAdminCardHtml(t){
     <div class="dossier-topic-card-head">
       <span class="name"><b>${escAttr(t.name)}</b><div class="kw" id="dossier-topic-kw-${t.id}">${escAttr(t.keywords)}</div></span>
       <span class="dossier-topic-card-actions">
-        <button class="btn btn-sm" onclick="editDossierTopicKeywords(${t.id})">ویرایش کلیدواژه</button>
-        <button class="btn btn-sm" title="پست‌های موجود دوباره با کلیدواژه‌های این موضوع تطبیق داده شوند" onclick="autoMatchDossierTopic(${t.id})">جست‌وجوی خودکار</button>
+        <button class="btn btn-sm" data-dt-act="edit-kw" data-id="${t.id}">ویرایش کلیدواژه</button>
+        <button class="btn btn-sm" title="پست‌های موجود دوباره با کلیدواژه‌های این موضوع تطبیق داده شوند" data-dt-act="auto" data-id="${t.id}">جست‌وجوی خودکار</button>
         <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;">
-          <input type="checkbox" ${t.active?'checked':''} onchange="toggleDossierTopicActive(${t.id}, this.checked)" />
+          <input type="checkbox" ${t.active?'checked':''} data-dt-active="${t.id}" />
           فعال
         </label>
-        <button class="del-btn" title="حذف موضوع" onclick="deleteDossierTopic(${t.id})">✕</button>
+        <button class="del-btn" title="حذف موضوع" data-dt-act="del-topic" data-id="${t.id}">✕</button>
       </span>
     </div>
     <div class="dossier-topic-posts">${postsHtml}</div>
     <div class="dossier-manual-add">
-      <input type="text" placeholder="جست‌وجوی دستی پست برای افزودن به این موضوع…" oninput="searchDossierManualAdd(${t.id}, this.value)" />
+      <input type="text" placeholder="جست‌وجوی دستی پست برای افزودن به این موضوع…" data-dt-search="${t.id}" />
       <div class="dossier-manual-results" id="dossier-manual-results-${t.id}"></div>
     </div>
   </div>`;
@@ -150,7 +150,7 @@ export function searchDossierManualAdd(topicId, query){
   const matches = POSTS_CACHE.filter(p=> !already.has(p.id) && ((p.title||'').includes(query) || (p.text||'').includes(query))).slice(0,8);
   resultsEl.innerHTML = matches.length ? matches.map(p=>{
     const label = p.title || (p.text||'').slice(0,60) || ('پست #'+p.id);
-    return `<div class="dossier-manual-result-row"><span class="txt">${escAttr(label)}</span><button class="btn btn-sm" onclick="addDossierManualPost(${topicId}, ${p.id})">افزودن</button></div>`;
+    return `<div class="dossier-manual-result-row"><span class="txt">${escAttr(label)}</span><button class="btn btn-sm" data-dt-act="add-post" data-id="${topicId}" data-post="${p.id}">افزودن</button></div>`;
   }).join('') : '<p class="dossier-topic-empty">موردی پیدا نشد.</p>';
 }
 export async function addDossierManualPost(topicId, postId){
@@ -160,6 +160,27 @@ export async function addDossierManualPost(topicId, postId){
   renderDossierTopicAdminList();
 }
 export function setupDossierAdmin(){
+  const list = document.getElementById('dossier-topic-admin-list');
+  list.addEventListener('click', e=>{
+    const b = e.target.closest('[data-dt-act]'); if(!b) return;
+    const id = Number(b.dataset.id);
+    switch(b.dataset.dtAct){
+      case 'save-kw': saveDossierTopicKeywords(id); break;
+      case 'cancel-kw': renderDossierTopicAdminList(); break;
+      case 'exclude': toggleDossierTopicPostExcluded(id); break;
+      case 'del-post': deleteDossierTopicPost(id); break;
+      case 'edit-kw': editDossierTopicKeywords(id); break;
+      case 'auto': autoMatchDossierTopic(id); break;
+      case 'del-topic': deleteDossierTopic(id); break;
+      case 'add-post': addDossierManualPost(id, Number(b.dataset.post)); break;
+    }
+  });
+  list.addEventListener('change', e=>{
+    const c = e.target.closest('[data-dt-active]'); if(c) toggleDossierTopicActive(Number(c.dataset.dtActive), c.checked);
+  });
+  list.addEventListener('input', e=>{
+    const i = e.target.closest('[data-dt-search]'); if(i) searchDossierManualAdd(Number(i.dataset.dtSearch), i.value);
+  });
   // ---- پنل مدیریت موضوعات «پرونده‌های موضوعی» ----
   document.getElementById('add-dossier-topic-btn').addEventListener('click', async ()=>{
     const nameEl = document.getElementById('new-dossier-topic-name');

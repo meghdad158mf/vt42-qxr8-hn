@@ -53,6 +53,7 @@ export async function publishAnnouncement(){
   finally{ btn.disabled = false; btn.textContent = 'انتشار اطلاعیه'; }
 }
 export function setupAnnounceAdmin(){
+  document.getElementById('ann-publish').addEventListener('click', ()=>publishAnnouncement());
   document.getElementById('ann-msg').addEventListener('input', updateAnnPreview);
   document.getElementById('ann-level').addEventListener('change', updateAnnPreview);
 }

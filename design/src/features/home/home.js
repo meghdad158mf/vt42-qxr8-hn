@@ -76,7 +76,7 @@ export function pkgTile(m){
   const files = Array.isArray(m.files) ? m.files : [];
   const tile = document.createElement('div'); tile.className = 'pkg-tile';
   tile.setAttribute('role', 'button'); tile.tabIndex = 0;
-  tile.innerHTML = `<div class="pkg-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
+  tile.innerHTML = `<div class="pkg-cover">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" data-no-menu />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
     <div class="pkg-title">${escHtml(m.issue_no ? 'شماره ' + toFaDigits(String(m.issue_no)) : faTitle(m.title))}</div>`;
   tile.addEventListener('click', () => { if(files.length) openMagazineViewer(m); });
   return tile;

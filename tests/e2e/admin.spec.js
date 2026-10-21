@@ -105,3 +105,25 @@ test('بارگذاری محتوا: کارت‌های انتخاب نوع محت�
   await expect(page.locator('#upl-pane-magazines')).toBeHidden();
   expect(page.appErrors).toEqual([]);
 });
+
+// بسته‌ی جدای مدیر (مرحله‌ی ۸ب): خام = design/src/admin/…، ساخته‌شده = assets/admin-<hash>.js
+const ADMIN_BUNDLE = /\/(src\/admin\/|assets\/admin-)[^?]*\.js/;
+test('بسته‌ی مدیریت فقط برای مدیر دانلود می‌شود', async ({ page }) => {
+  const urls = [];
+  page.on('request', (r) => urls.push(r.url()));
+  await openAs(page, 'viewer', 'overview/analytics');
+  expect(urls.filter((u) => ADMIN_BUNDLE.test(u))).toEqual([]);
+  await openAs(page, 'admin', 'overview/analytics');
+  expect(urls.some((u) => ADMIN_BUNDLE.test(u))).toBe(true);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('رفرش روی بخش مدیریتیِ تب‌دار همان تب را باز می‌کند', async ({ page }) => {
+  await openAs(page, 'admin', 'uploads/archive');
+  await expect(page.locator('#upl-pane-archive')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#uploads/archive');
+  await openAs(page, 'admin', 'activity/audit');
+  await expect(page.locator('#act-page-tabs [data-act-tab="audit"]')).toHaveClass(/active/);
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#activity/audit');
+  expect(page.appErrors).toEqual([]);
+});

@@ -102,7 +102,7 @@ export function renderCrawlSites(){
         <div class="add-row">
           <input type="text" id="crawl-edit-name" aria-label="نام سایت" value="${escAttr(c.name)}" />
           <input type="url" id="crawl-edit-sitemap" aria-label="نشانی فهرست خبری (اختیاری)" placeholder="sitemap (اختیاری؛ خالی = پیدا کردن خودکار)" dir="ltr" value="${escAttr(c.sitemap_url || '')}" />
-          <button type="button" class="btn primary btn-sm" onclick="saveCrawlSite(${Number(c.id)})">ذخیره</button>
+          <button type="button" class="btn primary btn-sm" data-crawl-act="save" data-id="${Number(c.id)}">ذخیره</button>
           <button type="button" class="btn btn-sm" data-crawl-edit="">انصراف</button>
         </div>
       </div>`;
@@ -113,9 +113,9 @@ export function renderCrawlSites(){
         <div class="crawl-site-status">${escHtml(st.text)}</div>
       </div>
       <div class="crawl-site-acts">
-        <button type="button" class="usr-act" onclick="toggleCrawlSite(${Number(c.id)})">${c.active ? 'توقف' : 'فعال‌سازی'}</button>
+        <button type="button" class="usr-act" data-crawl-act="toggle" data-id="${Number(c.id)}">${c.active ? 'توقف' : 'فعال‌سازی'}</button>
         <button type="button" class="usr-act" data-crawl-edit="${Number(c.id)}">ویرایش</button>
-        ${linked ? '' : `<button type="button" class="usr-act is-del" onclick="deleteCrawlSite(${Number(c.id)})">حذف</button>`}
+        ${linked ? '' : `<button type="button" class="usr-act is-del" data-crawl-act="delete" data-id="${Number(c.id)}">حذف</button>`}
       </div>
     </div>`;
   }).join('') || '<p class="settings-help">هنوز سایتی اضافه نشده است.</p>';
@@ -179,8 +179,8 @@ export function renderCrawlSuggestions(){
         <div class="crawl-site-status">${escHtml(stat)}${s.sample_url ? ` — <a href="${safeUrl(s.sample_url)}" target="_blank" rel="noopener">نمونه</a>` : ''}</div>
       </div>
       <div class="crawl-site-acts">
-        <button type="button" class="usr-act" onclick="addCrawlSuggestion(${Number(s.id)})">افزودن</button>
-        <button type="button" class="usr-act" onclick="ignoreCrawlSuggestion(${Number(s.id)})">نادیده گرفتن</button>
+        <button type="button" class="usr-act" data-sug-act="add" data-id="${Number(s.id)}">افزودن</button>
+        <button type="button" class="usr-act" data-sug-act="ignore" data-id="${Number(s.id)}">نادیده گرفتن</button>
       </div>
     </div>`;
   }).join('');
@@ -213,6 +213,17 @@ export async function addCrawlSuggestion(id){
   }
 }
 export function setupCrawlAdmin(){
+  document.getElementById('crawl-site-list').addEventListener('click', e=>{
+    const b = e.target.closest('[data-crawl-act]'); if(!b) return;
+    const id = Number(b.dataset.id);
+    if(b.dataset.crawlAct === 'save') saveCrawlSite(id);
+    else if(b.dataset.crawlAct === 'toggle') toggleCrawlSite(id);
+    else if(b.dataset.crawlAct === 'delete') deleteCrawlSite(id);
+  });
+  document.getElementById('crawl-sug-list').addEventListener('click', e=>{
+    const b = e.target.closest('[data-sug-act]'); if(!b) return;
+    if(b.dataset.sugAct === 'add') addCrawlSuggestion(Number(b.dataset.id)); else ignoreCrawlSuggestion(Number(b.dataset.id));
+  });
   document.getElementById('crawl-site-list').addEventListener('click', e=>{
     const b = e.target.closest('[data-crawl-edit]');
     if(b){ CRAWL_EDIT_ID = b.dataset.crawlEdit ? Number(b.dataset.crawlEdit) : null; renderCrawlSites(); }

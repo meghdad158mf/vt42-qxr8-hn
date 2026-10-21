@@ -117,4 +117,6 @@ export async function downloadBackup(){
     btn.disabled = false; btn.textContent = 'دانلود فایل پشتیبان';
   }
 }
-
+export function setupBackup(){
+  document.getElementById('backup-btn').addEventListener('click', ()=>downloadBackup());
+}

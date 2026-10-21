@@ -119,6 +119,8 @@ export function exportReport(){
   });
 }
 export function setupExport(){
+  document.getElementById('export-posts-btn').addEventListener('click', ()=>exportPosts());
+  document.getElementById('export-report-btn').addEventListener('click', ()=>exportReport());
   document.querySelectorAll('.fmt-row').forEach(row=>{
     row.addEventListener('click', e=>{
       const b = e.target.closest('.fmt'); if(!b) return;

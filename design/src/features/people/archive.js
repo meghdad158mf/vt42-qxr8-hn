@@ -38,7 +38,7 @@ export function renderArchiveReports(){
       m.file_type === 'images' ? (toFaDigits(files.length) + ' صفحه') : (files.length > 1 ? toFaDigits(files.length) + ' فایل PDF' : 'PDF'),
     ].filter(Boolean).map(escHtml).join('، ');
     const el = document.createElement('div'); el.className = 'magazine-card archive-report-card mag-issue-card';
-    el.innerHTML = `<div class="archive-report-poster">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" oncontextmenu="return false" />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
+    el.innerHTML = `<div class="archive-report-poster">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="${escAttr(m.title)}" draggable="false" data-no-menu />` : (m.file_type==='images' ? ICONS.photo : ICONS.doc)}</div>
       <div class="mag-title">${escHtml(faTitle(m.title))}</div>
       <div class="mag-meta">${meta}</div>
       <div class="mag-actions"></div>`;

@@ -336,6 +336,10 @@ export async function bulkChanSave(){
   }
 }
 export function setupChannelsAdmin(){
+  document.getElementById('bulk-chan-btn').addEventListener('click', ()=>openBulkChan());
+  document.getElementById('bulk-chan-preview').addEventListener('click', ()=>bulkChanPreview());
+  document.getElementById('bulk-chan-back').addEventListener('click', ()=>bulkChanBack());
+  document.getElementById('bulk-chan-save').addEventListener('click', ()=>bulkChanSave());
   onChanListRender(renderChanList);
   chanSearchEl.addEventListener('input', renderChanList);
   chanFilterPlatformEl.addEventListener('change', renderChanList);

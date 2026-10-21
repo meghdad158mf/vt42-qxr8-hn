@@ -241,12 +241,19 @@ export async function renderActHidden(){
         <div class="act-hid-meta"><b>${escHtml(ch.title || ch.username || '؟')}</b>، ${escHtml(NEWS_PLATFORM_LABEL[p.platform] || p.platform || '')}، انتشار ${escHtml(newsRelTime(p.posted_at || p.scraped_at))}، پنهان‌شده ${escHtml(newsRelTime(p.hidden_at))}</div>
         <div class="act-hid-text">${escHtml(text.slice(0, 400))}</div>
       </div><div class="act-hid-acts">
-        <button type="button" class="btn" onclick="unhidePost(${Number(p.id)})">بازگرداندن</button>
+        <button type="button" class="btn" data-unhide-post="${Number(p.id)}">بازگرداندن</button>
         ${p.link ? `<a href="${safeUrl(p.link)}" target="_blank" rel="noopener">مشاهده‌ی منبع ↗</a>` : ''}
       </div></div>`;
   }).join('');
 }
 export function setupActivity(){
+  document.getElementById('act-hidden').addEventListener('click', e=>{
+    const b = e.target.closest('[data-unhide-post]'); if(b) unhidePost(Number(b.dataset.unhidePost));
+  });
+  // دکمه‌ی «پنهان کردن» زیر پست‌ها (postHideBtnHtml در app.js، فقط برای مدیر ساخته می‌شه) در همه‌ی فیدها
+  document.addEventListener('click', e=>{
+    const b = e.target.closest('[data-hide-post]'); if(b) hidePost(Number(b.dataset.hidePost));
+  });
   document.getElementById('act-page-tabs').addEventListener('click', e=>{
     const b = e.target.closest('button');
     if(b && b.dataset.actTab && b.dataset.actTab !== ACT_TAB) setActTab(b.dataset.actTab);

@@ -96,6 +96,7 @@ export async function runJobManually(job, btn){
   }
 }
 export function setupSystemStatus(){
+  document.getElementById('sys-status-refresh').addEventListener('click', ()=>renderSystemStatus());
   document.addEventListener('click', e=>{
     const b = e.target.closest('.sys-run-btn:not(.sys-log-btn)');
     if(b && !b.disabled) runJobManually(b.dataset.job, b);

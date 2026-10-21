@@ -3,8 +3,8 @@
 // نمایشگر سند/عکس، صفحه‌بندی…)، داده‌ی مشترک در data/، و عرصه‌ها در features/: اخبار و رویدادها (مرحله‌ی ۵،
 // ۵.۳۲.۴–۵)، کنشگری مجازی، یادداشت‌ها و مواضع مراجع و علماء (مرحله‌ی ۶، ۵.۳۲.۶)، درباره حوزه، قوانین،
 // برنامه مدارس، بسته تحلیلی، اطلاعیه‌ها و صفحه‌ی نخست (مرحله‌ی ۷، ۵.۳۲.۷)، و بخش‌های مدیریت در admin/
-// (مرحله‌ی ۸الف، ۵.۳۲.۸). اینجا مونده: ورود، ناوبری و بارگذاری داده. مرحله‌ی ۸ب admin/ رو بسته‌ی جدایی
-// می‌کنه که فقط برای مدیر بار می‌شه — CLAUDE.md، «ماژولار کردن».
+// (مرحله‌ی ۸، ۵.۳۲.۸–۹) که بسته‌ی جدایی‌ه و فقط برای مدیر با loadAdmin() بار می‌شه. اینجا مونده: ورود،
+// ناوبری و بارگذاری داده — CLAUDE.md، «ماژولار کردن».
 import { SUPABASE_URL, SUPABASE_ANON_KEY, APP_VERSION } from './core/config.js';
 import { authToken, currentRole, saveSession, clearSession } from './core/session.js';
 import { api, SESSION_EXPIRED, resetSessionExpired } from './core/api.js';
@@ -51,48 +51,12 @@ import { renderDashHeroStats } from './features/home/hero-stats.js';
 import { loadSchoolReports, renderSchoolReports, setupSchoolReports } from './features/schools/school-reports.js';
 import { setupDatebar } from './features/home/datebar.js';
 import { SITE_VIS_ITEMS } from './data/site-sections.js';
-import { ACT_TAB, ACT_TAB_INFO, hidePost, setActTab, setupActivity, unhidePost } from './admin/activity.js';
-import { addCrawlSuggestion, deleteCrawlSite, ignoreCrawlSuggestion, loadCrawlSites, loadCrawlSuggestions, saveCrawlSite, setupCrawlAdmin, toggleCrawlSite } from './admin/settings/crawl.js';
-import { addDossierManualPost, autoMatchDossierTopic, deleteDossierTopic, deleteDossierTopicPost, editDossierTopicKeywords, renderDossierTopicAdminList, saveDossierTopicKeywords, searchDossierManualAdd, setupDossierAdmin, toggleDossierTopicActive, toggleDossierTopicPostExcluded } from './admin/settings/dossier-admin.js';
-import { ADMIN_ALERT_TIMER, ackAdminAlerts, refreshAdminAlerts } from './admin/alerts-badge.js';
-import { bulkChanBack, bulkChanPreview, bulkChanSave, openBulkChan, renderChanList, setupChannelsAdmin } from './admin/settings/channels.js';
-import { changePassword, renderSmsPanel, saveSmsConfig, saveViewerPasswordLogin, sendSmsTest, setupSecurityAdmin } from './admin/settings/security.js';
-import { closeUserEditor, openUserEditor, openUsersSection, renderUsersSection, saveUser, setupUsersAdmin, usrDownload } from './admin/users.js';
-import { copyJobLog, setupJobLog } from './admin/status/job-log.js';
-import { downloadBackup, renderBackupPanel } from './admin/settings/backup.js';
-import { exportPosts, exportReport, populateExportFilters, setupExport } from './admin/export.js';
 import { MAINT_DEFAULT_MSG, SITE_SETTINGS, loadSiteSettings, maintOn, siteHiddenSet } from './data/site-settings.js';
-import { openSiteSettingsPanel, renderSiteSettingsAdmin, saveHiddenSections, saveMaintenance, setupSiteSettingsAdmin } from './admin/site-settings.js';
-import { publishAnnouncement, renderAnnAdmin, setupAnnounceAdmin } from './admin/announce.js';
-import { refreshCatOptions, refreshRegionOptions, renderCatGrid, renderRegionGrid, renderTopicGrid, setupTaxonomyAdmin } from './admin/settings/taxonomy.js';
-import { renderProfileGroupAdmin, setupProfileGroupsAdmin } from './admin/settings/profile-groups.js';
-import { renderSystemStatus, setupSystemStatus } from './admin/status/status.js';
-import { saveAlertSettings, setupSysAlerts, testAlertEmail } from './admin/status/alerts.js';
-import { saveMediaRetention, setupSysStorage } from './admin/status/storage.js';
-import { setupDeleteChannel } from './admin/settings/delete-channel.js';
-import { setupSysLogins, unlockLogin } from './admin/status/logins.js';
-import { setupSysSummary } from './admin/status/summary.js';
 import { sysDeviceLabel } from './core/device.js';
 import { TITLES } from './data/section-titles.js';
-import { UPLOADS_TAB, goToUploadsTab, setUploadsTab, setupUploads } from './admin/uploads.js';
+import { admin, setAdmin } from './core/admin-hooks.js';
+import { setupNoContextMenu } from './ui/no-context-menu.js';
 
-// ⚠️ پل موقت: دستگیره‌های درون HTML (onclick="…" در صفحه و در HTMLهایی که همین فایل می‌سازه)
-// فقط تابع سراسری رو می‌بینن، ولی تابع‌های یه module سراسری نیستن. این فهرست تا جایگزینی همه‌ی
-// onclickها با event delegation (مرحله‌های ۴ تا ۷) می‌مونه و هر بار کوچیک‌تر می‌شه؛ تابع تازه
-// اینجا اضافه نکن — به‌جاش addEventListener. tests/unit/inline-handlers.test.js هم‌خوانیش رو می‌سنجه.
-Object.assign(window, {
-  addCrawlSuggestion, addDossierManualPost, autoMatchDossierTopic, bulkChanBack, bulkChanPreview,
-  bulkChanSave, changePassword, closeUserEditor, copyJobLog, deleteCrawlSite, deleteDossierTopic,
-  deleteDossierTopicPost, downloadBackup, editDossierTopicKeywords, exportPosts, exportReport,
-  goToUploadsTab, handleLogin, hidePost, ignoreCrawlSuggestion, logout, openBulkChan,
-  openSiteSettingsPanel, openUserEditor, otpBack, otpChooseSms, otpResend, otpShow, otpSubmit,
-  publishAnnouncement, renderDossierTopicAdminList, renderSystemStatus, retryLoadAll, retryMaintenance,
-  saveAlertSettings, saveCrawlSite, saveDossierTopicKeywords, saveHiddenSections, saveMaintenance,
-  saveMediaRetention, saveSmsConfig, saveUser, saveViewerPasswordLogin, searchDossierManualAdd,
-  sendSmsTest, setUploadsTab, submitFeedback, switchSection, testAlertEmail, toggleCrawlSite,
-  toggleDossierTopicActive, toggleDossierTopicPostExcluded, togglePasswordVisibility, unhidePost,
-  unlockLogin, usrDownload
-});
 
 // خطاهای مرورگر: جای فعلی کاربر و دستگاه برای گزارش (core/error-reporting.js)
 setErrorContext({ place: ()=>navCurrentState().key, device: ()=>sysDeviceLabel(navigator.userAgent) });
@@ -110,11 +74,24 @@ function showLoginError(msg, withRetry){
   errEl.style.display = 'block';
   document.getElementById('login-retry-btn').style.display = withRetry ? '' : 'none';
 }
+// بسته‌ی جدای مدیریت (admin/admin.js، مرحله‌ی ۸ب): فقط برای مدیر و فقط یک‌بار در هر زبانه بار می‌شه
+let ADMIN_LOADING = null;
+function loadAdmin(){
+  if(!ADMIN_LOADING){
+    ADMIN_LOADING = import('./admin/admin.js').then(m=>{ setAdmin(m); return m; }, e=>{
+      ADMIN_LOADING = null;
+      console.error('admin bundle failed', e);
+      showToast('بخش مدیریت بارگذاری نشد؛ اتصال را بررسی و صفحه را دوباره باز کنید.');
+    });
+  }
+  return ADMIN_LOADING;
+}
 // بارگذاری اطلاعات بعد از ورود؛ اگه شکست خورد، به‌جای ماندن بی‌صدا روی صفحه‌ی
 // ورود، علتش (نشست منقضی / قطع اتصال) رو می‌گه
 async function loadAllAndEnter(){
   resetSessionExpired();
   try{
+    if(currentRole === 'app_admin') await loadAdmin();
     await loadAll();
     if(SESSION_EXPIRED) throw new Error('session expired');
     startSitePoll();
@@ -125,7 +102,7 @@ async function loadAllAndEnter(){
     const hashSt = navParse(location.hash);
     if(hashSt) navApply(hashSt);
     navMark();
-    setTimeout(refreshAdminAlerts, 2000);
+    admin()?.startAlerts();
     maybeShowIntro();
     if(document.body.classList.contains('app-loading')){
       // رفرش: اسکرول همون جایی که کاربر بود (بعد از رسیدن محتوا، تا ارتفاع صفحه درست باشه)
@@ -155,6 +132,7 @@ async function retryLoadAll(){
   await loadAllAndEnter();
   btn.disabled = false; btn.textContent = 'تلاش دوباره';
 }
+document.getElementById('login-retry-btn').addEventListener('click', ()=>retryLoadAll());
 
 
 async function doLogin(password){
@@ -194,15 +172,22 @@ function logout(){
   // بستن زبانه پاکش می‌کرد و بعد از خروج/ورود در همون زبانه اطلاعیه‌ی مهم برنمی‌گشت)
   try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); sessionStorage.removeItem('jarian_ann_dismissed_s'); sessionStorage.removeItem('jarian_pv_session'); sessionStorage.removeItem('jarian_user_name'); }catch(e){}
   PV_LAST = '';
-  clearTimeout(ADMIN_ALERT_TIMER);
+  admin()?.stopAlerts();
   clearInterval(SITE_POLL_TIMER);
   try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
   goLogin();
   loadLoginMaintNotice();
 }
+document.querySelectorAll('[data-logout]').forEach(b=>b.addEventListener('click', ()=>logout()));
 
 
 setupHome();
+// کارت‌های عرصه‌ی صفحه‌ی نخست و «مشاهده‌ی همه‌ی شماره‌ها»: data-go = بخش مقصد
+document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click', ()=>switchSection(el.dataset.go)));
+// نام سامانه در نوار بالا = صفحه‌ی نخست
+const topbarBrand = document.querySelector('.topbar-brand-text');
+topbarBrand.addEventListener('click', ()=>switchSection('dashboard'));
+topbarBrand.addEventListener('keydown', e=>{ if(e.key === 'Enter') switchSection('dashboard'); });
 
 // منوها: رفتن از دکمه‌های data-nav (منوی بخش‌ها) و data-admin-go (منوی مدیریت)
 function navMenuGo(key){
@@ -214,7 +199,8 @@ function navMenuGo(key){
   switchSection(s);   // posts/feed و public/trends هم: خودِ بخش (با تب آخر/پیش‌فرض)
 }
 function adminMenuGo(key){
-  if(key === 'users') openUsersSection();
+  const a = admin();
+  if(key === 'users' && a) a.openUsersSection();
   else switchSection(key);
 }
 setupMenus({ current: navCurrentState, navigate: navMenuGo, adminGo: adminMenuGo });
@@ -447,6 +433,12 @@ function otpSubmit(){
   const st = otpStep();
   return st === 'code' ? otpVerify() : st === 'pass' ? otpPassLogin() : st === 'nid' ? otpRequestCode() : null;
 }
+document.getElementById('otp-form').addEventListener('submit', e=>{ e.preventDefault(); otpSubmit(); });
+document.getElementById('otp-choose-sms').addEventListener('click', ()=>otpChooseSms());
+document.getElementById('otp-to-pass').addEventListener('click', ()=>otpShow('pass'));
+document.querySelectorAll('[data-otp-back]').forEach(b=>b.addEventListener('click', ()=>otpBack()));
+document.getElementById('otp-resend').addEventListener('click', ()=>otpResend());
+document.getElementById('login-form').addEventListener('submit', e=>{ e.preventDefault(); handleLogin(); });
 
 function togglePasswordVisibility(){
   const pwEl = document.getElementById('login-password');
@@ -455,6 +447,7 @@ function togglePasswordVisibility(){
   pwEl.type = show ? 'text' : 'password';
   btn.setAttribute('aria-label', show ? 'پنهان‌کردن رمز عبور' : 'نمایش رمز عبور');
 }
+document.getElementById('login-pw-toggle').addEventListener('click', ()=>togglePasswordVisibility());
 
 // هشدار صفحه‌کلید (۵.۲۰.۰): رایج‌ترین علت «رمز اشتباه» صفحه‌کلید فارسی یا Caps Lock روشنه
 function updateLoginKbHint(e){
@@ -484,7 +477,6 @@ function focusLoginPassword(){
 
 setupIntro();
 
-setupDeleteChannel();
 
 function show(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 function goLogin(){ document.documentElement.classList.remove('has-session'); show('view-login'); focusLoginPassword(); }
@@ -515,12 +507,7 @@ export function switchSection(key){
   if(key === 'overview'){ setNewsPageTab(NEWS_CURRENT_TAB); renderNewsFeed(); renderNewsAnalytics(); }
   if(key === 'hawza') setHawzaTab(HAWZA_TAB);
   if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
-  if(key === 'users') renderUsersSection();
-  if(key === 'status'){ renderSystemStatus(); ackAdminAlerts(); }
-  if(key === 'uploads') setUploadsTab(UPLOADS_TAB);
-  if(key === 'announce') renderAnnAdmin();
-  if(key === 'activity') setActTab(ACT_TAB);
-  if(key === 'settings'){ renderBackupPanel(); renderSiteSettingsAdmin(); renderSmsPanel(); loadCrawlSites(); if(currentRole === 'app_admin') loadCrawlSuggestions(); }
+  admin()?.enterSection(key); // بخش‌های مدیریت (admin/admin.js — فقط وقتی بسته‌ی مدیر بار شده)
   if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
   if(key === 'people') placePfPanel('people'); // ظرف گالری ممکنه الان توی «مواضع مراجع و علماء» باشه
   if(key === 'people') restoreLastTab('people-page-tabs', 'people-tab', 'jarian_last_people_tab');
@@ -545,18 +532,12 @@ setupHawzaAbout();
 
 function chAvatar(id){ return `<span class="avatar">${escHtml(chInitials(id))}</span>`; }
 
-setupSysStorage();
 
 
-setupSysAlerts();
 
-setupJobLog();
 
-setupSysLogins();
 
-setupSysSummary();
 
-setupSystemStatus();
 
 
 export function updateMobileFilterBadges(){
@@ -668,17 +649,9 @@ async function loadAll(){
   renderCyberPeopleGrid();
   populatePoliticalFiguresSourceOptions();
   renderPoliticalFigures();
-  populateExportFilters();
-  refreshCatOptions();
-  renderCatGrid();
-  refreshRegionOptions();
-  renderRegionGrid();
+  admin()?.renderAfterLoad();
   renderNewsRegionChips();
   renderNewsTopicRow();
-  renderTopicGrid();
-  renderProfileGroupAdmin();
-  renderDossierTopicAdminList();
-  renderChanList();
   renderMagazines();
   renderArchiveReports();
   renderNewspapers();
@@ -761,6 +734,7 @@ async function retryMaintenance(){
     else await loadAllAndEnter();
   }finally{ btn.disabled = false; btn.textContent = 'بررسی دوباره'; }
 }
+document.getElementById('maint-retry-btn').addEventListener('click', ()=>retryMaintenance());
 // هر ۵ دقیقه (فقط با نشست باز): روشن شدن حالت تعمیر یا پنهان شدن بخشی که کاربر داخلشه
 function startSitePoll(){
   clearInterval(SITE_POLL_TIMER);
@@ -799,16 +773,12 @@ async function loadLoginMaintNotice(){
   }catch(e){ el.hidden = true; }
 }
 
-setupSiteSettingsAdmin();
 
 setupInstallPrompt();
-setupAnnounceAdmin();
 
-setupUsersAdmin();
 
 setupSchoolReports();
 
-setupUploads();
 
 setupCyberTabs();
 
@@ -848,23 +818,19 @@ setupNewsPicks();
 setupNewsAnalytics();
 setupNewsletter();
 
-setupChannelsAdmin();
 
 
 
-setupTaxonomyAdmin();
 
-setupCrawlAdmin();
 
-setupProfileGroupsAdmin();
 
-setupDossierAdmin();
 
 setupToTop();
 setupKeyboardButtons();
 
 setupDocViewer();
 setupMediaViewer();
+setupNoContextMenu();
 setupMobileFilters();
 
 // کارت «ثبت نظر و پیشنهاد» ته صفحه‌ی نخست — هم مدیر هم بیننده اجازه‌ی
@@ -889,10 +855,9 @@ async function submitFeedback(event){
     btn.disabled = false; btn.textContent = 'ارسال';
   }
 }
+document.querySelector('.feedback-form').addEventListener('submit', e=>submitFeedback(e));
 
-setupSecurityAdmin();
 
-setupExport();
 
 setupConfirm();
 
@@ -904,14 +869,13 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
 setupDatebar();
 
 export function postHideBtnHtml(p){
-  return currentRole === 'app_admin' ? `<button type="button" class="post-hide-btn" onclick="hidePost(${Number(p.id)})" title="این پست برای همه‌ی بیننده‌ها پنهان می‌شود"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button>` : '';
+  return currentRole === 'app_admin' ? `<button type="button" class="post-hide-btn" data-hide-post="${Number(p.id)}" title="این پست برای همه‌ی بیننده‌ها پنهان می‌شود"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button>` : '';
 }
 export function rerenderPostViews(){
   [renderNewsFeed, renderPosts, renderPoliticalFigures, renderDossierTab, renderLaws].forEach(fn=>{ try{ fn(); }catch(e){ console.error(e); } });
   if(document.getElementById('sec-overview').classList.contains('active') && NEWS_CURRENT_TAB === 'analytics'){ try{ renderNewsAnalytics(); }catch(e){ console.error(e); } }
 }
 
-setupActivity();
 
 // ---- آمار بازدید ----
 // هر جابه‌جایی بخش/تب (از navFlush) یه شماره؛ باز کردن دوباره‌ی همون جا پشت‌سرهم
@@ -944,8 +908,7 @@ function navCurrentState(){
   }
   else if(s === 'positions'){ t = POS_TAB; if(pfSelectedChannel) ch = pfSelectedChannel; }
   else if(s === 'public') t = 'trends';
-  else if(s === 'uploads') t = UPLOADS_TAB;
-  else if(s === 'activity') t = ACT_TAB;
+  else if(s === 'uploads' || s === 'activity') t = admin()?.navTab(s) ?? null;
   else if(s === 'hawza') t = HAWZA_TAB;
   const key = [s, t, ch].filter(x=>x !== null && x !== undefined && x !== '').join('/');
   return { jarian:1, key, s, t, ch };
@@ -973,8 +936,7 @@ function navApply(st){
     if(st.ch && st.ch !== pfSelectedChannel) openPfChannel(st.ch);
     else if(!st.ch && pfSelectedChannel) closePfChannel();
   }
-  if(st.s === 'uploads' && st.t && ['magazines','archive','schools'].includes(st.t) && st.t !== UPLOADS_TAB) setUploadsTab(st.t);
-  if(st.s === 'activity' && st.t && ACT_TAB_INFO[st.t] && st.t !== ACT_TAB) setActTab(st.t);
+  if(st.s === 'uploads' || st.s === 'activity') admin()?.applyNav(st);
   if(st.s === 'hawza' && st.t && HAWZA_TAB_INFO[st.t] && st.t !== HAWZA_TAB) setHawzaTab(st.t);
   if(st.s === 'positions'){
     if(st.t && POS_TAB_INFO[st.t] && st.t !== POS_TAB) setPosTab(st.t);
@@ -1013,13 +975,18 @@ if(authToken){
   // می‌شه و داده‌ها پشت‌صحنه می‌رسن (loadAllAndEnter دوباره رندرش می‌کنه)
   document.body.classList.add('app-loading');
   applyRoleUI();
-  navRestoring();
-  // تب لینک مستقیم (مثلاً #people/orgs) همین‌جا اعمال می‌شه — وگرنه navFlush بعد از
-  // switchSection آدرس رو با تب پیش‌فرض جایگزین می‌کرد و loadAllAndEnter دیگه تب لینک رو نمی‌دید
-  const bootSt = navParse(location.hash);
-  try{ show('view-dash'); switchSection(lastSectionKey()); if(bootSt) navApply(bootSt); }catch(e){ console.error(e); }
-  document.documentElement.classList.remove('has-session');
-  loadAllAndEnter();
+  const enterNow = ()=>{
+    navRestoring();
+    // تب لینک مستقیم (مثلاً #people/orgs) همین‌جا اعمال می‌شه — وگرنه navFlush بعد از
+    // switchSection آدرس رو با تب پیش‌فرض جایگزین می‌کرد و loadAllAndEnter دیگه تب لینک رو نمی‌دید
+    const bootSt = navParse(location.hash);
+    try{ show('view-dash'); switchSection(lastSectionKey()); if(bootSt) navApply(bootSt); }catch(e){ console.error(e); }
+    document.documentElement.classList.remove('has-session');
+    loadAllAndEnter();
+  };
+  // مدیر: اول بسته‌ی مدیریت (تا بخش مدیریتیِ لینک/رفرش، مثل #uploads/archive، با تب خودش باز بشه)
+  if(currentRole === 'app_admin') loadAdmin().then(enterNow, enterNow);
+  else enterNow();
 }else{
   focusLoginPassword();
   loadLoginMaintNotice();
