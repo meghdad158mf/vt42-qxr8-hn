@@ -10,6 +10,10 @@ export function wireMediaViewerClicks(root){
       openMediaViewer(node.dataset.viewerKind, node.dataset.viewerSrc, node.dataset.viewerLink || null);
     });
   });
+  // لینک «دانلود فیلم»/«مشاهده در مبدأ» روی عکس پست: کلیک به کارت نرسه (قبلاً onclick="event.stopPropagation()")
+  root.querySelectorAll('[data-stop-click]').forEach(node=>{
+    node.addEventListener('click', e=>e.stopPropagation());
+  });
 }
 export function openMediaViewer(kind, url, linkUrl){
   const body = document.getElementById('media-viewer-body');

@@ -40,3 +40,9 @@ export async function loadHiddenPostIds(){
     HIDDEN_POST_IDS = new Set((Array.isArray(rows) ? rows : []).map(x=>Number(x && typeof x === 'object' ? Object.values(x)[0] : x)));
   }catch(e){ HIDDEN_POST_IDS = new Set(); }
 }
+
+// گروه‌های گالری «یادداشت‌ها» (profile_groups، مثل حزب ۱/۲) و عضویت چندگانه‌ی کانال‌ها در اون‌ها
+export let PROFILE_GROUPS = []; // {id, name, kind:'figures'|'orgs', sort_order} — گروه‌های گالری «یادداشت‌ها»
+export let CHANNEL_PROFILE_GROUPS = []; // {id, channel_id, group_id} — عضویت چندگانه‌ی کانال در گروه‌ها
+export function setProfileGroups(v){ PROFILE_GROUPS = v; }
+export function setChannelProfileGroups(v){ CHANNEL_PROFILE_GROUPS = v; }

@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { jalaliToGregorian, jalaliMonthLength, calParts, iranTodayStartMs, tehranDayDiff } from '../../design/src/core/date.js';
+import { jalaliToGregorian, jalaliMonthLength, calParts, iranTodayStartMs, tehranDayDiff, matchesTime } from '../../design/src/core/date.js';
 
 const iso = ([y, m, d]) => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
@@ -48,5 +48,16 @@ describe('مرز «امروز/دیروز» = نیمه‌شب تهران', () => 
     expect(tehranDayDiff('2026-10-19T00:00:00+03:30')).toBe(1);
     expect(tehranDayDiff('2026-10-13T12:00:00Z')).toBe(7);
     expect(tehranDayDiff(null)).toBe(Infinity);
+  });
+  it('matchesTime (فیلتر زمان فیدها)', () => {
+    at('2026-10-20T00:30:00+03:30');
+    expect(matchesTime(null, '')).toBe(true);           // «همه»
+    expect(matchesTime(null, 'today')).toBe(false);     // بدون تاریخ فقط در «همه»
+    expect(matchesTime('2026-10-20T00:05:00+03:30', 'today')).toBe(true);
+    expect(matchesTime('2026-10-19T23:55:00+03:30', 'today')).toBe(false);
+    expect(matchesTime('2026-10-19T23:55:00+03:30', 'yesterday')).toBe(true);
+    expect(matchesTime('2026-10-14T12:00:00+03:30', 'week')).toBe(true);  // ۶ روز پیش
+    expect(matchesTime('2026-10-13T12:00:00+03:30', 'week')).toBe(false); // ۷ روز پیش
+    expect(matchesTime('2026-10-13T12:00:00+03:30', 'range')).toBe(true); // بازه جدا بررسی می‌شه
   });
 });
