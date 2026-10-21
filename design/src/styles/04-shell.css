@@ -94,8 +94,27 @@
     inset 0 0 0 1px rgba(0,0,0,0.06), inset 0 2px 10px rgba(0,0,0,0.08);
 }
 .nav-menu-col{ display:flex; flex-direction:column; gap:2px; }
-/* «صفحه نخست» و «بسته تحلیلی جریان» ستون اول (راست) — خواست کاربر، ۵.۳۳.۰ */
+/* ۵.۳۳.۰ (خواست کاربر): ستون راست = «صفحه نخست»، زبانه‌ی «عرصه‌های رصد»، «بسته تحلیلی جریان»؛
+   ستون چپ = کادر هلویی زیرمجموعه‌های «عرصه‌های رصد» که زبانه به آن چسبیده (مثل پوشه‌ی باز) */
 .nav-menu-col-top{ order:-1; }
+@media (min-width:641px){
+  #nav-menu-list.nav-menu-grid{ grid-template-columns: minmax(150px, auto) 1fr; column-gap:0; min-width:470px; }
+  .nav-menu-col-top{ padding-left:0; }
+  /* لبه‌ی چپ زبانه صاف است تا بی‌درز به کادر بچسبد */
+  .nav-menu-domains-tab{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-size:12px; font-weight:800; color: var(--accent-strong);
+    padding:9px 12px 9px 8px; margin:4px 0; border-radius:0 8px 8px 0;
+    background: rgba(234,179,147,0.28);
+  }
+  .nav-menu-domains-tab svg{ width:14px; height:14px; flex-shrink:0; }
+  .nav-menu-col-domains{
+    background: rgba(234,179,147,0.28); border-radius:10px; padding:8px 6px;
+  }
+  .nav-menu-col-domains > .nav-menu-toplevel-title{ display:none; }
+  .nav-menu-col-domains button:hover{ background: rgba(255,255,255,0.6); }
+}
+@media (max-width:640px){ .nav-menu-domains-tab{ display:none; } }
 @media (max-width:640px){
   #nav-menu-list.nav-menu-grid{ grid-template-columns:1fr; min-width:220px; gap:2px; padding:6px; }
   /* گوشی: «صفحه نخست» و «بسته تحلیلی جریان» بالای فهرست بلند عرصه‌ها */
