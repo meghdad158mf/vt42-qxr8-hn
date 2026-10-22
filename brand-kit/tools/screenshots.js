@@ -2,7 +2,7 @@ const { chromium } = require('playwright');
 const fs = require('fs'); const path = require('path');
 const OUT = process.env.SP + '/kit3/Jarian-Motion-Kit';
 const mk = d=>fs.mkdirSync(path.join(OUT,d),{recursive:true});
-['01-logo','02-illustrations/png','02-illustrations/webp-original','03-icons/svg-peach','03-icons/svg-white','03-icons/png-peach','04-shapes/svg','04-shapes/png','07-screenshots/desktop-1920x1080','07-screenshots/mobile','08-text'].forEach(mk);
+['01-logo','02-illustrations/png','02-illustrations/webp-original','03-icons/svg-peach','03-icons/svg-white','03-icons/png-peach','04-shapes/svg','04-shapes/png','07-screenshots/desktop-1920x1080','07-screenshots/mobile','07-screenshots/light-desktop-1920x1080','07-screenshots/light-mobile','08-text'].forEach(mk);
 (async()=>{
   const browser = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium' });
   // ---------- mock data for realistic pages ----------
@@ -39,17 +39,19 @@ const mk = d=>fs.mkdirSync(path.join(OUT,d),{recursive:true});
     });
     await ctx.route('**/functions/v1/**', r=>r.fulfill({status:200,contentType:'application/json',body:'{}'}));
   };
-  const openApp = async (W,Hh,dpr)=>{
+  const openApp = async (W,Hh,dpr,theme)=>{
     const ctx = await browser.newContext({ serviceWorkers:'block', viewport:{width:W,height:Hh}, deviceScaleFactor:dpr||1 });
     await setup(ctx); const page = await ctx.newPage();
     await page.goto('http://localhost:8765/ita-monitoring-prototype.html');
     await page.evaluate(()=>{ sessionStorage.setItem('jarian_token','x'); sessionStorage.setItem('jarian_role','app_viewer'); localStorage.setItem('jarian_intro_seen','1'); });
+    // ۵.۳۴.۰: نمای روشن/تیره (ui/theme.js)
+    await page.evaluate(t=>{ if(t) localStorage.setItem('jarian_theme',t); else localStorage.removeItem('jarian_theme'); }, theme||'');
     await page.reload(); await page.waitForTimeout(2500);
     await page.addStyleTag({content:'#ann-bar,#to-top{display:none!important}'});
     return {ctx,page};
   };
-  const shot = async (W,Hh,dpr,dir,list)=>{
-    const {ctx, page} = await openApp(W,Hh,dpr);
+  const shot = async (W,Hh,dpr,dir,list,theme)=>{
+    const {ctx, page} = await openApp(W,Hh,dpr,theme);
     await page.addStyleTag({content:'*{transition:none!important}'});
     for(const [name, fn] of list){
       await page.evaluate(fn); await page.waitForTimeout(1800);
@@ -81,6 +83,9 @@ const mk = d=>fs.mkdirSync(path.join(OUT,d),{recursive:true});
     ['03-news-at-a-glance', `location.hash='#overview/analytics'; window.scrollTo(0,0)`],
   ];
   const c2 = await shot(390,844,3,'mobile',mobile); await c2.close();
+  // نمای روشن (۵.۳۴.۰): همان صفحه‌های اصلی
+  const c3 = await shot(1920,1080,1,'light-desktop-1920x1080',desktop.slice(0,8),'light'); await c3.close();
+  const c4 = await shot(390,844,3,'light-mobile',mobile,'light'); await c4.close();
   console.log('screens done');
   await browser.close();
 })();
