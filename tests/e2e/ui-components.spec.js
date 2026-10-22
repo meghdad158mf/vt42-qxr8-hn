@@ -34,6 +34,7 @@ test('منو با کلیک بیرون و Esc بسته می‌شود', async ({ p
 });
 
 test('منوی مدیریت: هر گزینه بخش خودش را باز می‌کند', async ({ page }) => {
+  test.setTimeout(60_000); // ۷ بخش مدیریت، «وضعیت سامانه» سنگین‌ترینشان — زیر بار موازی از ۳۰ ثانیه می‌گذشت
   await openAs(page, 'admin');
   const keys = await page.$$eval('#admin-menu button[data-admin-go]', (bs) => bs.map((b) => b.dataset.adminGo));
   expect(keys).toEqual(['status', 'activity', 'settings', 'announce', 'users', 'uploads', 'export']);
