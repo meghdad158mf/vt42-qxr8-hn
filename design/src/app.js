@@ -16,6 +16,7 @@ import { setupAmbient } from './ui/ambient.js';
 import { showToast } from './ui/toast.js';
 import { setupConfirm } from './ui/confirm.js';
 import { setupMenus, closeNavMenu, closeAdminMenu } from './ui/menus.js';
+import { setupThemeToggle } from './ui/theme.js';
 import { setupTabBars, updateTabInk, restoreLastTab, peekTabBar } from './ui/tabs.js';
 import { setupToTop } from './ui/scroll.js';
 import { setupKeyboardButtons } from './ui/keyboard.js';
@@ -203,6 +204,7 @@ function adminMenuGo(key){
   else switchSection(key);
 }
 setupMenus({ current: navCurrentState, navigate: navMenuGo, adminGo: adminMenuGo });
+setupThemeToggle();
 
 // آکاردئون بخش‌های صفحه‌ی «تنظیمات» — هر بار یه details.settings-accordion
 // باز می‌شه، بقیه‌شون بسته می‌شن (تک‌بخش باز، بقیه جمع)

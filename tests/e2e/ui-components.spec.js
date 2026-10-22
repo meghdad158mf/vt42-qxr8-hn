@@ -34,6 +34,7 @@ test('منو با کلیک بیرون و Esc بسته می‌شود', async ({ p
 });
 
 test('منوی مدیریت: هر گزینه بخش خودش را باز می‌کند', async ({ page }) => {
+  test.setTimeout(60_000); // ۷ بخش مدیریت، «وضعیت سامانه» سنگین‌ترینشان — زیر بار موازی از ۳۰ ثانیه می‌گذشت
   await openAs(page, 'admin');
   const keys = await page.$$eval('#admin-menu button[data-admin-go]', (bs) => bs.map((b) => b.dataset.adminGo));
   expect(keys).toEqual(['status', 'activity', 'settings', 'announce', 'users', 'uploads', 'export']);
@@ -122,5 +123,24 @@ test('دکمه‌ی «بالای صفحه»', async ({ page }) => {
   await expect(page.locator('#to-top')).toHaveClass(/show/);
   await page.click('#to-top');
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('نمای روشن/تیره: دکمه‌ی نوار بالا عوض می‌کند و بعد از رفرش می‌ماند', async ({ page }) => {
+  await openAs(page, 'viewer');
+  const theme = () => page.evaluate(() => document.documentElement.dataset.theme || 'dark');
+  const canvas = () => page.evaluate(() => getComputedStyle(document.getElementById('sec-title')).color);
+  expect(await theme()).toBe('dark');
+  const darkTitle = await canvas();
+  await page.click('#theme-btn');
+  expect(await theme()).toBe('light');
+  await expect(page.locator('#theme-btn')).toHaveAttribute('aria-pressed', 'true');
+  expect(await canvas()).not.toBe(darkTitle);
+  await page.reload();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  expect(await theme()).toBe('light');
+  await page.click('#theme-btn');
+  expect(await theme()).toBe('dark');
+  expect(await canvas()).toBe(darkTitle);
   expect(page.appErrors).toEqual([]);
 });

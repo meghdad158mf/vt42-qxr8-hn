@@ -1,0 +1,127 @@
+/* نمای روشن «خاکستری مه‌آلود» (۵.۳۴.۰، خواست کاربر: گزینه‌ی روشن/تیره؛ تیره = همان ظاهر قبلی).
+   فقط وقتی html[data-theme="light"] است (دکمه‌ی خورشید/ماه نوار بالا، ui/theme.js). نمای تیره هیچ تغییری نکرده:
+   این فایل فقط متن‌ها و کادرهای «روی بوم تیره» را بازنویسی می‌کند؛ کارت‌های سفید از قبل روشن‌اند.
+   کادر بالای صفحه‌ی نخست عمداً سرمه‌ای می‌ماند (تصویرش خط سفید دارد). صفحه‌ی ورود دست نمی‌خورد.
+   ⚠️ متن یا کادر تازه‌ای که روی بوم (نه داخل کارت سفید) سفید/نیمه‌شفاف است، اینجا هم نسخه‌ی روشن بگیرد. */
+
+:root[data-theme="light"]{
+  --cv-ink: #16202a;
+  --cv-dim: rgba(22,32,42,0.66);
+  --cv-faint: rgba(22,32,42,0.5);
+  --cv-line: rgba(22,32,42,0.12);
+  --cv-ctl: #ffffff;
+  --cv-ctl-line: rgba(22,32,42,0.14);
+}
+:root[data-theme="light"] #view-dash{
+  background:
+    radial-gradient(120% 60% at 25% 0%, rgba(234,179,147,0.12), transparent 55%),
+    radial-gradient(90% 50% at 100% 0%, rgba(142,163,184,0.18), transparent 55%),
+    linear-gradient(160deg, #f5f7fa, #e2e8f0);
+  color: var(--cv-ink);
+}
+
+/* نوار بالا و فوتر */
+:root[data-theme="light"] #view-dash .topbar{ border-bottom-color: var(--cv-line); }
+:root[data-theme="light"] #view-dash .topbar-brand-text b{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .topbar-brand-text .sep{ color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .topbar-brand-text #sec-title{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .topbar-status{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .topbar .chip-btn.ghost{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .topbar .chip-btn.ghost:hover{ color: var(--cv-ink); background: rgba(22,32,42,0.06); }
+:root[data-theme="light"] #view-dash .topbar-divider{ background: rgba(22,32,42,0.2); }
+:root[data-theme="light"] #view-dash #nav-menu-btn{ background: rgba(181,101,29,0.1); }
+:root[data-theme="light"] #view-dash #nav-menu-btn svg{ color: var(--accent-strong); }
+:root[data-theme="light"] #view-dash .app-footer{ border-top-color: var(--cv-line); }
+:root[data-theme="light"] #view-dash .app-footer-title{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .app-footer-tagline, :root[data-theme="light"] #view-dash .afo-item span{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .app-footer-brand small, :root[data-theme="light"] #view-dash .app-footer-brand small .app-version{ color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .afo-item b{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .app-footer-intro{ color: var(--accent-strong); }
+:root[data-theme="light"] #view-dash .app-footer-intro:hover{ color: var(--cv-ink); }
+
+/* صفحه‌ی نخست */
+:root[data-theme="light"] #view-dash .dash-hero-grid{ background: linear-gradient(160deg, #16202a, #24323f); border-color: transparent; box-shadow: 0 24px 44px -26px rgba(22,32,42,0.55); }
+:root[data-theme="light"] #view-dash .datebar .db-top{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .datebar .db-top b, :root[data-theme="light"] #view-dash .datebar .db-clock{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .section-label, :root[data-theme="light"] #view-dash #pkg-flow, :root[data-theme="light"] #view-dash .domain-card h3, :root[data-theme="light"] #view-dash .feedback-card h3, :root[data-theme="light"] #view-dash .notify-card-text h3, :root[data-theme="light"] #view-dash .pkg-title{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .domain-caption, :root[data-theme="light"] #view-dash .notify-card-text p{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .pkg-part{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .pkg-part svg, :root[data-theme="light"] #view-dash .pkg-more-btn svg{ color: var(--accent-strong); }
+:root[data-theme="light"] #view-dash .pkg-more-btn{ color: var(--accent-strong); border-color: rgba(181,101,29,0.4); }
+:root[data-theme="light"] #view-dash .pkg-cover{ border-color: var(--cv-line); box-shadow: 0 18px 30px -16px rgba(22,32,42,0.45); }
+:root[data-theme="light"] #view-dash .pkg-empty{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .home-bottom-divider{ background: rgba(181,101,29,0.3); }
+
+/* تب‌بار و زیرنویس */
+:root[data-theme="light"] #view-dash .news-page-tabs button{ color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .news-page-tabs button:hover:not(:disabled):not(.active){ color: var(--cv-ink); background: rgba(22,32,42,0.04); }
+:root[data-theme="light"] #view-dash .news-page-tabs button.active{ color: var(--cv-ink); background: linear-gradient(180deg, rgba(234,179,147,0.05), rgba(234,179,147,0.28)); }
+:root[data-theme="light"] #view-dash .news-page-tabs.is-stuck, :root[data-theme="light"] #view-dash .tab-bar-wrap.is-stuck{ background: rgba(245,247,250,0.94); box-shadow: 0 10px 24px -16px rgba(22,32,42,0.35); }
+:root[data-theme="light"] #view-dash .news-tab-subtitle{ color: var(--cv-dim); }
+
+/* فیلترها، جست‌وجو، صفحه‌بندی (روی بوم) */
+:root[data-theme="light"] #view-dash .news-seg, :root[data-theme="light"] #view-dash .news-view-toggle{ background: var(--cv-ctl); border-color: var(--cv-ctl-line); }
+:root[data-theme="light"] #view-dash .news-seg button, :root[data-theme="light"] #view-dash .news-view-toggle button{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .news-filter-divider{ background: var(--cv-line); }
+:root[data-theme="light"] #view-dash .news-search-box input, :root[data-theme="light"] #view-dash .news-smart-toggle,
+:root[data-theme="light"] #view-dash .news-source-details > summary, :root[data-theme="light"] #view-dash #posts-tab-feed .toolbar select, :root[data-theme="light"] #view-dash #hab-site,
+:root[data-theme="light"] #view-dash .m-filter-btn{ background-color: var(--cv-ctl); border-color: var(--cv-ctl-line); color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .news-search-box input::placeholder{ color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .news-search-box svg, :root[data-theme="light"] #view-dash .m-filter-btn svg{ color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .news-daterange-details > summary{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash #posts-tab-feed .toolbar select, :root[data-theme="light"] #view-dash #hab-site{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2316202a' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important; }
+:root[data-theme="light"] #view-dash .news-region-chip, :root[data-theme="light"] #view-dash .news-topic-chip{ background: var(--cv-ctl); border-color: var(--cv-ctl-line); color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .news-region-chip.active{ background: rgba(58,80,104,0.14); border-color: rgba(58,80,104,0.4); color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .news-topic-chip.active{ background: rgba(234,179,147,0.35); border-color: rgba(181,101,29,0.4); color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .news-topic-label{ color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .news-pagination button{ background: var(--cv-ctl); border-color: var(--cv-ctl-line); color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .news-pagination .dots{ color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .news-empty, :root[data-theme="light"] #view-dash .posts-empty, :root[data-theme="light"] #view-dash .upl-empty, :root[data-theme="light"] #view-dash .pkg-empty{ color: var(--cv-dim); }
+
+/* متن «خالی» با رنگ inline در HTML */
+:root[data-theme="light"] #view-dash #school-reports-empty, :root[data-theme="light"] #view-dash #archive-reports-empty{ color: var(--cv-dim) !important; }
+
+/* گالری یادداشت‌ها و مواضع */
+:root[data-theme="light"] #view-dash .pf-logo-card:hover{ background: rgba(22,32,42,0.04); }
+:root[data-theme="light"] #view-dash .pf-logo-name, :root[data-theme="light"] #view-dash .pf-group-title, :root[data-theme="light"] #view-dash .pf-feed-identity h3{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .pf-logo-meta, :root[data-theme="light"] #view-dash .pf-group-title small{ color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .pf-back-btn{ color: var(--cv-ink); border-color: rgba(22,32,42,0.25); }
+
+/* بسته‌ها، مدارس، روزنامه‌ها */
+:root[data-theme="light"] #view-dash .archive-report-card .mag-title, :root[data-theme="light"] #view-dash .mag-issue-card .mag-title{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .archive-report-card .mag-meta, :root[data-theme="light"] #view-dash .mag-issue-card .mag-meta{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .card-admin button{ border-color: rgba(22,32,42,0.2); background: var(--cv-ctl); color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .card-admin button:hover:not(:disabled){ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .school-report-title{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .school-report-date{ color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .newspaper-title{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .np-compare-soon{ border-color: var(--cv-line); }
+:root[data-theme="light"] #view-dash .np-compare-soon svg{ color: var(--accent-strong); }
+:root[data-theme="light"] #view-dash .news-soon{ background: rgba(181,101,29,0.12); color: var(--accent-strong); }
+:root[data-theme="light"] #view-dash .upl-goto{ color: var(--accent-strong); border-color: rgba(181,101,29,0.45); background: rgba(234,179,147,0.12); }
+
+/* مدیریت: بارگذاری، اطلاعیه، تنظیمات، وضعیت */
+:root[data-theme="light"] #view-dash .upl-intro, :root[data-theme="light"] #view-dash .upl-list-head, :root[data-theme="light"] #view-dash .settings-group-title{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .upl-item{ background: var(--cv-ctl); border-color: var(--cv-ctl-line); }
+:root[data-theme="light"] #view-dash .upl-thumb{ background: rgba(22,32,42,0.05); color: var(--cv-faint); }
+:root[data-theme="light"] #view-dash .upl-meta b{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .upl-meta span{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .upl-del{ color: var(--danger); }
+:root[data-theme="light"] #view-dash .ann-missing{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash #sys-summary{ background: var(--cv-ctl); color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash #sys-summary b{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .sys-sum-chip.bad{ background: var(--danger-soft); color: #b3261e; }
+:root[data-theme="light"] #view-dash .sys-sum-chip.warn{ background: rgba(224,176,74,0.18); color: #8a5a00; }
+
+/* دکمه‌ی خورشید/ماه */
+.topbar-theme-btn{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:none; border-radius:50%;
+  background:none; color: rgba(255,255,255,0.6); cursor:pointer; position:relative; transition: color .15s ease, background .15s ease; }
+.topbar-theme-btn::before{ content:''; position:absolute; inset:-4px; }
+.topbar-theme-btn:hover{ color:#fff; background: rgba(255,255,255,0.1); }
+.topbar-theme-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.topbar-theme-btn svg{ width:18px; height:18px; }
+.topbar-theme-btn .ic-moon{ display:none; }
+:root[data-theme="light"] #view-dash .topbar-theme-btn{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .topbar-theme-btn:hover{ color: var(--cv-ink); background: rgba(22,32,42,0.06); }
+:root[data-theme="light"] #view-dash .topbar-theme-btn .ic-sun{ display:none; }
+:root[data-theme="light"] #view-dash .topbar-theme-btn .ic-moon{ display:block; }

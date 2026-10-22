@@ -19,9 +19,9 @@ https://meghdad158mf.github.io/vt42-qxr8-hn/brand-kit/%D9%81%D9%87%D8%B1%D8%B3%D
 | `02-illustrations` | تصویرهای `design/images` (PNG شفاف + WebP اصلی) |
 | `03-icons` | ۴۰ آیکون خطی سایت (هلویی/سفید SVG + PNG هلویی ۵۱۲) — `stat-*` آمار هرو، `pkg-*` بخش‌های بسته، `tab-*` تب‌ها (`TAB_ICONS`)، `quicknav-*`، `ui-*` |
 | `04-shapes` | قوس‌های مدار صفحه‌ی نخست، شهاب، خط تزئینی |
-| `05-colors` | پالت ۱۵ رنگ واقعی سایت (png/txt/ase) |
+| `05-colors` | پالت ۱۷ رنگ واقعی سایت (png/txt/ase) + `palette-light.png` نمای روشن |
 | `06-fonts` | IRANSansX به TTF |
-| `07-screenshots` | اسکرین‌شات صفحه‌ها (۱۱ رایانه + ۳ گوشی) |
+| `07-screenshots` | اسکرین‌شات صفحه‌ها (۱۱ رایانه + ۳ گوشی؛ `light-*` همان صفحه‌ها در نمای روشن: ۸ + ۳) |
 | `08-text` | متن‌های سایت |
 | `README-FA.txt` | راهنمای فارسی کامل |
 
