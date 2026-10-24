@@ -12,6 +12,11 @@
 
 متغیرهای محیطی (GitHub Secrets): SUPABASE_URL، SUPABASE_ANON_KEY، ADMIN_PASSWORD — هر اسکریپت اول
 `require_env()` رو صدا می‌زنه تا نبودنشون مثل قبل همون اول اجرا خطا بده.
+
+روی سرور خودمان (server/، زمان‌بند jaryan-jobs) به‌جای رمز مدیر، توکن کوتاه‌عمر آماده در
+JARYAN_SERVICE_TOKEN می‌آید (رمز مدیر هیچ‌جا ذخیره نمی‌شود)، و SUPABASE_PUBLIC_URL نشانی عمومی
+سرور است تا آدرس فایل‌های بارگذاری‌شده برای کاربر درست باشد (SUPABASE_URL آنجا http://127.0.0.1 است).
+روی گیت‌هاب این دو خالی‌اند و رفتار عیناً همان قبلی است.
 """
 
 import os
@@ -22,17 +27,22 @@ import requests
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+SERVICE_TOKEN = os.environ.get("JARYAN_SERVICE_TOKEN", "")
+PUBLIC_URL = (os.environ.get("SUPABASE_PUBLIC_URL", "") or SUPABASE_URL).rstrip("/")
 
 
 def require_env(*extra: str) -> None:
     """نبودن هر متغیر محیطی لازم = KeyError (مثل os.environ[...] قبلی هر اسکریپت)."""
-    for name in ("SUPABASE_URL", "SUPABASE_ANON_KEY", "ADMIN_PASSWORD", *extra):
+    names = ("SUPABASE_URL", "SUPABASE_ANON_KEY") + (() if SERVICE_TOKEN else ("ADMIN_PASSWORD",))
+    for name in (*names, *extra):
         if not os.environ.get(name):
             raise KeyError(name)
 
 
 def login(timeout: float) -> str:
-    """ورود با رمز مدیر (RPC login) → توکن ۲۴ ساعته."""
+    """ورود با رمز مدیر (RPC login) → توکن ۲۴ ساعته (روی سرور خودمان: همان توکن آماده‌ی زمان‌بند)."""
+    if SERVICE_TOKEN:
+        return SERVICE_TOKEN
     r = requests.post(
         f"{SUPABASE_URL}/rest/v1/rpc/login",
         headers={"apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json"},
@@ -88,7 +98,7 @@ def upload_object(token: str, bucket: str, storage_path: str, content: bytes, co
         timeout=timeout,
     )
     r.raise_for_status()
-    return f"{SUPABASE_URL}/storage/v1/object/public/{bucket}/{storage_path}"
+    return f"{PUBLIC_URL}/storage/v1/object/public/{bucket}/{storage_path}"
 
 
 def clear_post_media(token: str, post_ids: list[int], timeout: float) -> None:

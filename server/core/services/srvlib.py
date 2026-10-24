@@ -62,6 +62,27 @@ def b64url(data):
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode()
 
 
+def b64url_decode(s):
+    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
+
+
+SERVICE_ENV = ETC + "/service.env"
+
+
+def service_env():
+    """/etc/jaryan/service.env (640 root:jaryan): رازهایی که سرویس‌های غیر root لازم دارند."""
+    out = {}
+    try:
+        with open(SERVICE_ENV, encoding="utf-8") as f:
+            for line in f:
+                k, sep, v = line.strip().partition("=")
+                if sep and not k.startswith("#"):
+                    out[k] = v
+    except OSError:
+        pass
+    return out
+
+
 def make_jwt(payload, secret):
     head = b64url(json.dumps({"alg": "HS256", "typ": "JWT"}, separators=(",", ":")).encode())
     body = b64url(json.dumps(payload, separators=(",", ":")).encode())

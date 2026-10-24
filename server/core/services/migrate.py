@@ -73,6 +73,21 @@ log-level = "error"
     os.replace(tmp, S.POSTGREST_CONF)
 
 
+def write_service_env(sec):
+    """رازهای لازم سرویس‌های غیر root (فایل‌ها، تابع‌ها): 640 root:jaryan."""
+    body = f"JWT_SECRET={sec['jwt_secret']}\nANON_KEY={sec['anon_key']}\n"
+    tmp = S.SERVICE_ENV + ".tmp"
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o640)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(body)
+    if os.geteuid() == 0:
+        try:
+            os.chown(tmp, 0, grp.getgrnam("jaryan").gr_gid)
+        except KeyError:
+            pass
+    os.replace(tmp, S.SERVICE_ENV)
+
+
 def apply(rel):
     sec = S.load_secrets(create=True)
     with open(os.path.join(rel, "db", "compat.sql"), encoding="utf-8") as f:
@@ -105,6 +120,7 @@ insert into public.app_config (key, value) values ('jwt_secret', {S.lit(sec["jwt
 alter role authenticator password {S.lit(sec["authenticator_password"])};
 """)
     write_postgrest_conf(sec)
+    write_service_env(sec)
     print(f"migrationهای تازه: {count}، همه: {len(done) + count}")
 
 
