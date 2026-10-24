@@ -5,16 +5,16 @@
 نوشته شده تا وقتی خود سایت یا پایگاه داده خراب است هم کار کند. پشت nginx روی
 127.0.0.1:8090 گوش می‌دهد؛ nginx فقط از راه https به آن راه می‌دهد.
 
-کارها: ورود با «کلید اضطراری»، بارگذاری بسته‌ی به‌روزرسانی (.jarian)، بررسی
+کارها: ورود با «کلید اضطراری»، بارگذاری بسته‌ی به‌روزرسانی (.jaryan)، بررسی
 sha256 و امضا، نصب با برگشت خودکار اگر سایت بعد از نصب سالم بالا نیاید، برگشت
 دستی به نسخه‌های قبلی، و پشتیبان‌گیری/بازگردانی پایگاه داده.
 
 فرمان‌های خط فرمان (برای install.sh و systemd):
-  jarian_updater.py serve
-  jarian_updater.py set-key          (کلید تازه از stdin؛ فقط هش ذخیره می‌شود)
-  jarian_updater.py backup           (پشتیبان شبانه)
-  jarian_updater.py activate <نسخه>  (برگشت دستی روی خود سرور، لایه‌ی سوم)
-  jarian_updater.py status
+  jaryan_updater.py serve
+  jaryan_updater.py set-key          (کلید تازه از stdin؛ فقط هش ذخیره می‌شود)
+  jaryan_updater.py backup           (پشتیبان شبانه)
+  jaryan_updater.py activate <نسخه>  (برگشت دستی روی خود سرور، لایه‌ی سوم)
+  jaryan_updater.py status
 """
 import hashlib
 import hmac
@@ -35,32 +35,32 @@ import time
 import urllib.parse
 import urllib.request
 
-# همه‌ی مسیرها زیر JARIAN_ROOT تا آزمون‌ها روی پوشه‌ی موقت اجرا شوند (روی سرور خالی است).
-ROOT = os.environ.get("JARIAN_ROOT", "")
-BASE = ROOT + "/opt/jarian"
+# همه‌ی مسیرها زیر JARYAN_ROOT تا آزمون‌ها روی پوشه‌ی موقت اجرا شوند (روی سرور خالی است).
+ROOT = os.environ.get("JARYAN_ROOT", "")
+BASE = ROOT + "/opt/jaryan"
 RELEASES = BASE + "/releases"
 CURRENT = BASE + "/current"
-STATE = ROOT + "/var/lib/jarian/updater"
-BACKUPS = ROOT + "/var/lib/jarian/backups"
+STATE = ROOT + "/var/lib/jaryan/updater"
+BACKUPS = ROOT + "/var/lib/jaryan/backups"
 TMP = STATE + "/tmp"
 LOGS = STATE + "/logs"
 KEY_FILE = STATE + "/key.json"
 PUBKEY_FILE = STATE + "/pubkey.pem"
 HISTORY_FILE = STATE + "/history.json"
 
-LISTEN = os.environ.get("JARIAN_UPDATER_LISTEN", "127.0.0.1:8090")
+LISTEN = os.environ.get("JARYAN_UPDATER_LISTEN", "127.0.0.1:8090")
 # درگاه مستقیم https (بدون nginx) تا اگر nginx خراب شد هم /update باز شود
-TLS_LISTEN = os.environ.get("JARIAN_UPDATER_TLS_LISTEN", "")
-TLS_CERT = os.environ.get("JARIAN_TLS_CERT", "")
-TLS_KEY = os.environ.get("JARIAN_TLS_KEY", "")
-HEALTH_BASE = os.environ.get("JARIAN_HEALTH_BASE", "http://127.0.0.1")
-DB_NAME = os.environ.get("JARIAN_DB", "jarian")
+TLS_LISTEN = os.environ.get("JARYAN_UPDATER_TLS_LISTEN", "")
+TLS_CERT = os.environ.get("JARYAN_TLS_CERT", "")
+TLS_KEY = os.environ.get("JARYAN_TLS_KEY", "")
+HEALTH_BASE = os.environ.get("JARYAN_HEALTH_BASE", "http://127.0.0.1")
+DB_NAME = os.environ.get("JARYAN_DB", "jaryan")
 MAX_UPLOAD = 1024 * 1024 * 1024        # ۱ گیگ
 KEEP_RELEASES = 5
 KEEP_BACKUPS = 14
 SESSION_TTL = 30 * 60
 HOOK_TIMEOUT = 20 * 60
-HEALTH_WAIT = int(os.environ.get("JARIAN_HEALTH_WAIT", "90"))
+HEALTH_WAIT = int(os.environ.get("JARYAN_HEALTH_WAIT", "90"))
 
 _lock = threading.Lock()               # فقط یک کار (نصب/برگشت/پشتیبان) در هر لحظه
 _job = {"running": False, "kind": "", "title": "", "log": "", "started": 0, "result": None}
@@ -385,8 +385,8 @@ def run_hook(job, name, hook, rollback=False):
     if not os.path.exists(path):
         job.log(f"({hook} ندارد)")
         return
-    job.run(["bash", path], env={"JARIAN_RELEASE": os.path.join(RELEASES, name),
-                                 "JARIAN_ROLLBACK": "1" if rollback else "0"},
+    job.run(["bash", path], env={"JARYAN_RELEASE": os.path.join(RELEASES, name),
+                                 "JARYAN_ROLLBACK": "1" if rollback else "0"},
             cwd=os.path.join(RELEASES, name))
 
 
@@ -590,8 +590,8 @@ def dashboard(sess, flash=""):
     sig_note = ("<span class='ok'>امضای بسته‌ها بررسی می‌شود.</span>" if pub else
                 "<span class='warn'>کلید عمومی امضا هنوز تنظیم نشده؛ بسته‌ها فقط با sha256 بررسی می‌شوند.</span>")
     parts.append(f"""<section><h2>بارگذاری به‌روزرسانی</h2>
-<p class="muted">فایل <b>.jarian</b> را انتخاب کنید. پیش از نصب، فهرست تغییرات نشان داده می‌شود. {sig_note}</p>
-<div class="row"><input type="file" id="pkg" accept=".jarian"><button id="upbtn" {'disabled' if _job['running'] else ''}>بارگذاری و بررسی</button></div>
+<p class="muted">فایل <b>.jaryan</b> را انتخاب کنید. پیش از نصب، فهرست تغییرات نشان داده می‌شود. {sig_note}</p>
+<div class="row"><input type="file" id="pkg" accept=".jaryan"><button id="upbtn" {'disabled' if _job['running'] else ''}>بارگذاری و بررسی</button></div>
 <p id="upmsg" class="muted"></p><div id="preview"></div></section>
 <script>
 const CSRF={json.dumps(sess['csrf'])};
@@ -675,7 +675,7 @@ def preview_html(uid, manifest, signed, csrf):
 # ---------------------------------------------------------------- سرور HTTP
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    server_version = "jarian-updater"
+    server_version = "jaryan-updater"
     sys_version = ""
     behind_proxy = True                # فقط درگاه 127.0.0.1 پشت nginx است؛ سرآیندهای X-* در درگاه مستقیم جعل‌پذیرند
 
@@ -857,7 +857,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.send(413, json.dumps({"error": "حجم فایل مجاز نیست (حداکثر ۱ گیگابایت)."}), "application/json")
         if shutil.disk_usage(TMP).free < n * 3 + 512 * 1024 * 1024:
             return self.send(507, json.dumps({"error": "فضای خالی دیسک برای این بسته کافی نیست."}), "application/json")
-        fd, path = tempfile.mkstemp(dir=TMP, suffix=".jarian")
+        fd, path = tempfile.mkstemp(dir=TMP, suffix=".jaryan")
         try:
             with os.fdopen(fd, "wb") as out:
                 left = n
@@ -891,7 +891,7 @@ def serve():
     host, port = LISTEN.rsplit(":", 1)
     srv = http.server.ThreadingHTTPServer((host, int(port)), Handler)
     srv.daemon_threads = True
-    print(f"jarian-updater on {LISTEN}", flush=True)
+    print(f"jaryan-updater on {LISTEN}", flush=True)
     if TLS_LISTEN and os.path.exists(TLS_CERT):
         th, tp = TLS_LISTEN.rsplit(":", 1)
         direct = http.server.ThreadingHTTPServer((th, int(tp)), DirectHandler)
@@ -901,7 +901,7 @@ def serve():
         ctx.load_cert_chain(TLS_CERT, TLS_KEY)
         direct.socket = ctx.wrap_socket(direct.socket, server_side=True)
         threading.Thread(target=direct.serve_forever, daemon=True).start()
-        print(f"jarian-updater (https) on {TLS_LISTEN}", flush=True)
+        print(f"jaryan-updater (https) on {TLS_LISTEN}", flush=True)
     srv.serve_forever()
 
 

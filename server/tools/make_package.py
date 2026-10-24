@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""ساخت بسته‌ی به‌روزرسانی سرور (.jarian) از یک پوشه.
+"""ساخت بسته‌ی به‌روزرسانی سرور (.jaryan) از یک پوشه.
 
   python3 server/tools/make_package.py --src <پوشه> --version 5.40.0 \
       --note "تغییر ۱" --note "تغییر ۲" [--health / --health /api/] [--sign private.pem] --out <فایل>
 
-پوشه‌ی src همان چیزی است که روی سرور در /opt/jarian/releases/<نسخه> می‌نشیند؛
+پوشه‌ی src همان چیزی است که روی سرور در /opt/jaryan/releases/<نسخه> می‌نشیند؛
 اگر hooks/preinstall یا hooks/activate داشته باشد، به‌روزرسان اجرایشان می‌کند.
 بسته = tar ساده با manifest.json + payload.tar.gz + payload.sig (اگر --sign داده شود).
 """

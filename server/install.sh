@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # نصب پایه‌ی سرور «جریان» — یک‌بار، روی Ubuntu 24.04 (یا 26.04)، با دسترسی root.
 #
-#   sudo bash jarian-install.sh             نصب (اجرای دوباره هم بی‌خطر است)
-#   sudo bash jarian-install.sh --reset-key ساختن کلید اضطراری تازه
+#   sudo bash jaryan-install.sh             نصب (اجرای دوباره هم بی‌خطر است)
+#   sudo bash jaryan-install.sh --reset-key ساختن کلید اضطراری تازه
 #
 # فقط پایه را نصب می‌کند: Postgres، nginx، دیوار آتش، پشتیبان شبانه و به‌روزرسان
 # (صفحه‌ی /update). خودِ سایت، جدول‌ها و کالکتورها بعداً با «بسته‌ی به‌روزرسانی»
@@ -14,7 +14,7 @@ export LC_ALL=C.UTF-8 DEBIAN_FRONTEND=noninteractive
 RESET_KEY=0
 for a in "$@"; do [ "$a" = "--reset-key" ] && RESET_KEY=1; done
 
-LOG=/var/log/jarian-install.log
+LOG=/var/log/jaryan-install.log
 say()  { printf '\n\033[1;36m▶ %s\033[0m\n' "$*"; }
 ok()   { printf '  \033[32m✔\033[0m %s\n' "$*"; }
 warn() { printf '  \033[33m!\033[0m %s\n' "$*"; }
@@ -27,8 +27,8 @@ exec > >(tee -a "$LOG") 2>&1
 echo "==== نصب جریان $(date -u '+%Y-%m-%d %H:%M UTC') ===="
 
 SELF_DIR=$(cd "$(dirname "$0")" && pwd)
-BASE=/opt/jarian
-TLS=/etc/jarian/tls
+BASE=/opt/jaryan
+TLS=/etc/jaryan/tls
 
 # ------------------------------------------------------------------ ۱. بررسی‌ها
 say "۱ از ۸ — بررسی سرور"
@@ -38,7 +38,7 @@ case "${VERSION_ID:-}" in
   *) [ "${ID:-}" = ubuntu ] || die "این نصب فقط برای Ubuntu است (اینجا: ${PRETTY_NAME:-نامعلوم})."
      warn "نسخه‌ی $VERSION_ID آزموده نشده؛ نصب ادامه پیدا می‌کند." ;;
 esac
-[ -d /run/systemd/system ] || [ -n "${JARIAN_TEST_NO_SYSTEMD:-}" ] || die "systemd فعال نیست."
+[ -d /run/systemd/system ] || [ -n "${JARYAN_TEST_NO_SYSTEMD:-}" ] || die "systemd فعال نیست."
 FREE_GB=$(df -BG --output=avail / | tail -1 | tr -dc 0-9)
 [ "$FREE_GB" -ge 20 ] || die "فضای خالی دیسک کمتر از ۲۰ گیگابایت است ($FREE_GB)."
 ok "فضای خالی: ${FREE_GB}G"
@@ -54,10 +54,10 @@ ok "postgresql $(psql --version | awk '{print $3}')، nginx، python $(python3 -
 
 # ------------------------------------------------------------------ ۳. پوشه‌ها و کاربر
 say "۳ از ۸ — پوشه‌ها"
-id jarian >/dev/null 2>&1 || useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin jarian
+id jaryan >/dev/null 2>&1 || useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin jaryan
 install -d -m 755 "$BASE" "$BASE/releases" "$BASE/updater"
-install -d -m 750 -o jarian -g jarian /var/lib/jarian /var/lib/jarian/files
-install -d -m 700 /var/lib/jarian/updater /var/lib/jarian/backups /etc/jarian "$TLS"
+install -d -m 750 -o jaryan -g jaryan /var/lib/jaryan /var/lib/jaryan/files
+install -d -m 700 /var/lib/jaryan/updater /var/lib/jaryan/backups /etc/jaryan "$TLS"
 if [ ! -e "$BASE/current" ]; then
   install -d "$BASE/releases/0.0.0-base/site"
   cat > "$BASE/releases/0.0.0-base/site/index.html" <<'HTML'
@@ -74,19 +74,19 @@ ok "نسخه‌ی فعال: $(basename "$(readlink "$BASE/current")")"
 # ------------------------------------------------------------------ ۴. به‌روزرسان
 say "۴ از ۸ — به‌روزرسان (صفحه‌ی /update)"
 if declare -F embedded_updater >/dev/null; then
-  embedded_updater > "$BASE/updater/jarian_updater.py"
-elif [ -f "$SELF_DIR/updater/jarian_updater.py" ]; then
-  cp "$SELF_DIR/updater/jarian_updater.py" "$BASE/updater/jarian_updater.py"
+  embedded_updater > "$BASE/updater/jaryan_updater.py"
+elif [ -f "$SELF_DIR/updater/jaryan_updater.py" ]; then
+  cp "$SELF_DIR/updater/jaryan_updater.py" "$BASE/updater/jaryan_updater.py"
 else
   die "فایل به‌روزرسان پیدا نشد."
 fi
-chmod 755 "$BASE/updater/jarian_updater.py"
-python3 -m py_compile "$BASE/updater/jarian_updater.py"
+chmod 755 "$BASE/updater/jaryan_updater.py"
+python3 -m py_compile "$BASE/updater/jaryan_updater.py"
 NEW_KEY=""
-KEY_SHOWN=/var/lib/jarian/updater/key-shown   # کلیدی که هرگز نشان داده نشده (نصب نیمه‌کاره) دوباره ساخته می‌شود
-if [ "$RESET_KEY" = 1 ] || [ ! -e "$KEY_SHOWN" ] || ! python3 "$BASE/updater/jarian_updater.py" has-key; then
-  NEW_KEY=$(python3 "$BASE/updater/jarian_updater.py" new-key)
-  printf '%s\n' "$NEW_KEY" | python3 "$BASE/updater/jarian_updater.py" set-key
+KEY_SHOWN=/var/lib/jaryan/updater/key-shown   # کلیدی که هرگز نشان داده نشده (نصب نیمه‌کاره) دوباره ساخته می‌شود
+if [ "$RESET_KEY" = 1 ] || [ ! -e "$KEY_SHOWN" ] || ! python3 "$BASE/updater/jaryan_updater.py" has-key; then
+  NEW_KEY=$(python3 "$BASE/updater/jaryan_updater.py" new-key)
+  printf '%s\n' "$NEW_KEY" | python3 "$BASE/updater/jaryan_updater.py" set-key
   ok "کلید اضطراری ساخته شد (آخر نصب نشان داده می‌شود)"
 else
   ok "کلید اضطراری از قبل هست (برای کلید تازه: --reset-key)"
@@ -99,7 +99,7 @@ if [ ! -s "$TLS/cert.pem" ]; then
   SAN="DNS:localhost,IP:127.0.0.1"
   for ip in $IPS; do SAN="$SAN,IP:$ip"; done
   openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes -days 3650 \
-    -subj "/CN=jarian" -addext "subjectAltName=$SAN" -keyout "$TLS/key.pem" -out "$TLS/cert.pem" 2>/dev/null
+    -subj "/CN=jaryan" -addext "subjectAltName=$SAN" -keyout "$TLS/key.pem" -out "$TLS/cert.pem" 2>/dev/null
   chmod 600 "$TLS/key.pem"
 fi
 FPR=$(openssl x509 -in "$TLS/cert.pem" -noout -fingerprint -sha256 | cut -d= -f2)
@@ -107,9 +107,9 @@ ok "گواهی ساخته شد"
 
 # ------------------------------------------------------------------ ۶. nginx
 say "۶ از ۸ — وب‌سرور"
-cat > /etc/nginx/sites-available/jarian <<'NGINX'
+cat > /etc/nginx/sites-available/jaryan <<'NGINX'
 # پیکربندی پایه‌ی جریان (ساخته‌ی install.sh). بسته‌ها location خودشان را در
-# /opt/jarian/current/nginx/*.conf می‌گذارند؛ /update همیشه همین‌جا و ثابت است.
+# /opt/jaryan/current/nginx/*.conf می‌گذارند؛ /update همیشه همین‌جا و ثابت است.
 server_tokens off;
 map $http_upgrade $connection_upgrade { default upgrade; '' close; }
 
@@ -117,9 +117,9 @@ server {
     listen 80 default_server;
     #V6 listen [::]:80 default_server;
     server_name _;
-    root /opt/jarian/current/site;
+    root /opt/jaryan/current/site;
     location ^~ /update { return 301 https://$host$request_uri; }
-    include /opt/jarian/current/nginx/*.conf;
+    include /opt/jaryan/current/nginx/*.conf;
     location / { try_files $uri $uri/ /index.html; }
 }
 
@@ -127,10 +127,10 @@ server {
     listen 443 ssl default_server;
     #V6 listen [::]:443 ssl default_server;
     server_name _;
-    ssl_certificate     /etc/jarian/tls/cert.pem;
-    ssl_certificate_key /etc/jarian/tls/key.pem;
+    ssl_certificate     /etc/jaryan/tls/cert.pem;
+    ssl_certificate_key /etc/jaryan/tls/key.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
-    root /opt/jarian/current/site;
+    root /opt/jaryan/current/site;
 
     location = /update { return 301 /update/; }
     location ^~ /update/ {
@@ -142,46 +142,46 @@ server {
         proxy_read_timeout 900s;
         proxy_send_timeout 900s;
     }
-    include /opt/jarian/current/nginx/*.conf;
+    include /opt/jaryan/current/nginx/*.conf;
     location / { try_files $uri $uri/ /index.html; }
 }
 NGINX
 # IPv6 فقط اگر سرور داشته باشد؛ وگرنه nginx اصلاً بالا نمی‌آید
-if [ -s /proc/net/if_inet6 ]; then sed -i 's/^    #V6 /    /' /etc/nginx/sites-available/jarian; fi
+if [ -s /proc/net/if_inet6 ]; then sed -i 's/^    #V6 /    /' /etc/nginx/sites-available/jaryan; fi
 rm -f /etc/nginx/sites-enabled/default
-ln -sf /etc/nginx/sites-available/jarian /etc/nginx/sites-enabled/jarian
+ln -sf /etc/nginx/sites-available/jaryan /etc/nginx/sites-enabled/jaryan
 nginx -t
 ok "nginx پیکربندی شد"
 
 # ------------------------------------------------------------------ ۷. سرویس‌ها و پشتیبان شبانه
 say "۷ از ۸ — سرویس‌ها، پایگاه داده و پشتیبان شبانه"
-cat > /etc/systemd/system/jarian-updater.service <<'UNIT'
+cat > /etc/systemd/system/jaryan-updater.service <<'UNIT'
 [Unit]
-Description=Jarian updater (/update)
+Description=Jaryan updater (/update)
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 /opt/jarian/updater/jarian_updater.py serve
-Environment=JARIAN_UPDATER_TLS_LISTEN=0.0.0.0:8443
-Environment=JARIAN_TLS_CERT=/etc/jarian/tls/cert.pem
-Environment=JARIAN_TLS_KEY=/etc/jarian/tls/key.pem
+ExecStart=/usr/bin/python3 /opt/jaryan/updater/jaryan_updater.py serve
+Environment=JARYAN_UPDATER_TLS_LISTEN=0.0.0.0:8443
+Environment=JARYAN_TLS_CERT=/etc/jaryan/tls/cert.pem
+Environment=JARYAN_TLS_KEY=/etc/jaryan/tls/key.pem
 Restart=always
 RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
 UNIT
-cat > /etc/systemd/system/jarian-backup.service <<'UNIT'
+cat > /etc/systemd/system/jaryan-backup.service <<'UNIT'
 [Unit]
-Description=Jarian nightly database backup
+Description=Jaryan nightly database backup
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/python3 /opt/jarian/updater/jarian_updater.py backup
+ExecStart=/usr/bin/python3 /opt/jaryan/updater/jaryan_updater.py backup
 UNIT
-cat > /etc/systemd/system/jarian-backup.timer <<'UNIT'
+cat > /etc/systemd/system/jaryan-backup.timer <<'UNIT'
 [Unit]
-Description=Jarian nightly database backup
+Description=Jaryan nightly database backup
 
 [Timer]
 OnCalendar=*-*-* 02:30:00 Asia/Tehran
@@ -192,22 +192,22 @@ WantedBy=timers.target
 UNIT
 systemctl daemon-reload
 systemctl enable --now postgresql
-systemctl enable --now jarian-updater.service jarian-backup.timer
-systemctl restart jarian-updater.service
+systemctl enable --now jaryan-updater.service jaryan-backup.timer
+systemctl restart jaryan-updater.service
 systemctl enable nginx
 systemctl reload-or-restart nginx
-if ! runuser -u postgres -- psql -tAc "select 1 from pg_database where datname='jarian'" | grep -q 1; then
-  runuser -u postgres -- createdb jarian
+if ! runuser -u postgres -- psql -tAc "select 1 from pg_database where datname='jaryan'" | grep -q 1; then
+  runuser -u postgres -- createdb jaryan
 fi
 timedatectl set-ntp true 2>/dev/null || true
-ok "سرویس‌ها روشن شدند؛ پایگاه داده‌ی jarian ساخته شد"
+ok "سرویس‌ها روشن شدند؛ پایگاه داده‌ی jaryan ساخته شد"
 
 # ------------------------------------------------------------------ ۸. دیوار آتش
 say "۸ از ۸ — دیوار آتش"
 SSH_PORTS=$(ss -tlnpH 2>/dev/null | grep -w sshd | awk '{print $4}' | sed 's/.*://' | sort -u || true)
 if { for p in ${SSH_PORTS:-22}; do ufw allow "$p/tcp"; done
      ufw allow 80/tcp && ufw allow 443/tcp && ufw allow 8443/tcp
-     [ -n "${JARIAN_TEST_NO_SYSTEMD:-}" ] || ufw --force enable; } >/dev/null; then
+     [ -n "${JARYAN_TEST_NO_SYSTEMD:-}" ] || ufw --force enable; } >/dev/null; then
   ok "باز: ssh (${SSH_PORTS:-22})، 80، 443، 8443"
 else
   warn "دیوار آتش روشن نشد؛ نصب ادامه پیدا می‌کند (بعداً بررسی می‌شود)."
@@ -224,8 +224,8 @@ trap - ERR
 KEY_FILE_NOTE=""
 if [ -n "$NEW_KEY" ] && ! { true >/dev/tty; } 2>/dev/null; then
   # بدون ترمینال (مثلاً کنسول وب) کلید در گزارش نوشته نشود: فقط در فایلی که فقط root می‌خواند
-  ( umask 077; printf '%s\n' "$NEW_KEY" > /root/jarian-emergency-key.txt )
-  KEY_FILE_NOTE="/root/jarian-emergency-key.txt"; NEW_KEY=""
+  ( umask 077; printf '%s\n' "$NEW_KEY" > /root/jaryan-emergency-key.txt )
+  KEY_FILE_NOTE="/root/jaryan-emergency-key.txt"; NEW_KEY=""
 fi
 { true >/dev/tty; } 2>/dev/null && exec >/dev/tty 2>&1   # از اینجا به بعد (کلید) در گزارش نوشته نمی‌شود
 

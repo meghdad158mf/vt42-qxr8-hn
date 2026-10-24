@@ -8,15 +8,15 @@
 |---|---|
 | `check.sh` | بررسی فقط‌خواندنی سرور (سیستم‌عامل، دیسک، شبکه، مخزن apt). خروجی IP و رمز ندارد. |
 | `install.sh` | نصب پایه، یک‌بار: Postgres، nginx، دیوار آتش، گواهی https موقت، پشتیبان شبانه، به‌روزرسان. |
-| `updater/jarian_updater.py` | صفحه‌ی `/update` (فقط کتابخانه‌ی استاندارد پایتون). |
-| `tools/build_installer.py` | ساخت فایل تکی `jarian-install.sh` (به‌روزرسان درون آن) برای بردن با فلش. |
-| `tools/make_package.py` | ساخت بسته‌ی به‌روزرسانی `.jarian` از یک پوشه. |
+| `updater/jaryan_updater.py` | صفحه‌ی `/update` (فقط کتابخانه‌ی استاندارد پایتون). |
+| `tools/build_installer.py` | ساخت فایل تکی `jaryan-install.sh` (به‌روزرسان درون آن) برای بردن با فلش. |
+| `tools/make_package.py` | ساخت بسته‌ی به‌روزرسانی `.jaryan` از یک پوشه. |
 
 ## روی سرور (یک مراجعه)
 
 ```
 sudo bash check.sh            # متن خروجی را برای Claude بفرستید
-sudo bash jarian-install.sh   # کلید اضطراری را آخر کار روی کاغذ بنویسید
+sudo bash jaryan-install.sh   # کلید اضطراری را آخر کار روی کاغذ بنویسید
 ```
 
 اجرای دوباره‌ی نصب بی‌خطر است (داده و نسخه‌ها دست نمی‌خورند)؛ کلید فقط با `--reset-key` عوض می‌شود.
@@ -30,22 +30,22 @@ sudo bash jarian-install.sh   # کلید اضطراری را آخر کار رو�
 2. **`/update` مستقل**: هم از راه nginx (`https://IP/update/`) و هم **مستقیم** روی درگاه
    `8443` (اگر nginx خراب شد). ورود با کلید اضطراری (هش pbkdf2؛ ۵ اشتباه ← ۱۵ دقیقه قفل)،
    CSRF، کوکی HttpOnly/SameSite=Strict. روی درگاه مستقیم سرآیندهای `X-Real-IP` پذیرفته نمی‌شوند.
-3. **روی خود سرور**: `sudo python3 /opt/jarian/updater/jarian_updater.py activate <نسخه>`.
+3. **روی خود سرور**: `sudo python3 /opt/jaryan/updater/jaryan_updater.py activate <نسخه>`.
 
 ## ساختار بسته‌ی به‌روزرسانی
 
-`.jarian` = tar ساده با `manifest.json` (`version`، `notes`، `health`، `sha256`)، `payload.tar.gz`
+`.jaryan` = tar ساده با `manifest.json` (`version`، `notes`، `health`، `sha256`)، `payload.tar.gz`
 و `payload.sig` (امضای ed25519، اختیاری تا وقتی کلید عمومی در `/update ← امنیت` تنظیم نشده؛
-بعد از آن اجباری). محتوای payload در `/opt/jarian/releases/<نسخه>` باز و `current` به آن اشاره
+بعد از آن اجباری). محتوای payload در `/opt/jaryan/releases/<نسخه>` باز و `current` به آن اشاره
 می‌کند. `hooks/preinstall` و `hooks/activate` (bash، به‌عنوان root، باید **تکرارپذیر** باشند —
-در برگشت دوباره اجرا می‌شوند، با `JARIAN_ROLLBACK=1`). nginx فایل‌های `nginx/*.conf` نسخه‌ی
+در برگشت دوباره اجرا می‌شوند، با `JARYAN_ROLLBACK=1`). nginx فایل‌های `nginx/*.conf` نسخه‌ی
 فعال را include می‌کند؛ `/update` در پیکربندی پایه ثابت است و بسته نمی‌تواند جایش را بگیرد.
 
 ## مسیرها روی سرور
 
-`/opt/jarian/{releases,current,updater}`، `/var/lib/jarian/{files,backups,updater}`،
-`/etc/jarian/tls`، گزارش نصب `/var/log/jarian-install.log` (بدون کلید).
-سرویس‌ها: `jarian-updater.service`، `jarian-backup.timer` (هر شب ۰۲:۳۰ تهران، ۱۴ تای آخر).
+`/opt/jaryan/{releases,current,updater}`، `/var/lib/jaryan/{files,backups,updater}`،
+`/etc/jaryan/tls`، گزارش نصب `/var/log/jaryan-install.log` (بدون کلید).
+سرویس‌ها: `jaryan-updater.service`، `jaryan-backup.timer` (هر شب ۰۲:۳۰ تهران، ۱۴ تای آخر).
 
 ## آزمون
 

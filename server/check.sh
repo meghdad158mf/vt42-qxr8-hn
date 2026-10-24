@@ -5,7 +5,7 @@
 set -u
 export LC_ALL=C
 line(){ echo "------------------------------------------------------------"; }
-echo "JARIAN SERVER CHECK v1   $(date -u '+%Y-%m-%d %H:%M UTC')"
+echo "JARYAN SERVER CHECK v1   $(date -u '+%Y-%m-%d %H:%M UTC')"
 line
 echo "[system]"
 . /etc/os-release 2>/dev/null; echo "os: ${PRETTY_NAME:-?}"
@@ -19,7 +19,7 @@ echo "[disk]"
 lsblk -d -e7,11 -o NAME,ROTA,SIZE,TYPE,MODEL 2>/dev/null
 echo "(ROTA 0 = SSD, 1 = HDD)"
 df -h / | awk 'NR==2{print "root fs: size "$2", used "$3", free "$4}'
-T=$(mktemp -p /var/tmp jarian-dd.XXXX) && {
+T=$(mktemp -p /var/tmp jaryan-dd.XXXX) && {
   W=$(dd if=/dev/zero of="$T" bs=1M count=512 oflag=direct 2>&1 | tail -1 | awk -F, '{print $NF}')
   echo "write speed (512MB direct):${W}"; rm -f "$T"; }
 line
@@ -57,4 +57,4 @@ chk resend          https://api.resend.com
 chk google          https://www.google.com
 chk bbc-persian     https://www.bbc.com/persian
 line
-echo "END — copy everything from 'JARIAN SERVER CHECK' to here."
+echo "END — copy everything from 'JARYAN SERVER CHECK' to here."

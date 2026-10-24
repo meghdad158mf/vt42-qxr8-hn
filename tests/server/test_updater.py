@@ -1,6 +1,6 @@
 """آزمون به‌روزرسان سرور: نصب، برگشت خودکار، برگشت دستی، امضا، ورود و قفل.
 
-بدون systemd و پایگاه داده (JARIAN_ROOT = پوشه‌ی موقت)؛ «سایت» یک سرور ساده‌ی
+بدون systemd و پایگاه داده (JARYAN_ROOT = پوشه‌ی موقت)؛ «سایت» یک سرور ساده‌ی
 پایتون روی همان پوشه‌ی current/site است تا بررسی سلامت واقعی انجام شود.
 اجرا: python3 -m unittest discover -s tests/server
 """
@@ -22,7 +22,7 @@ import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
-UPDATER = os.path.join(REPO, "server", "updater", "jarian_updater.py")
+UPDATER = os.path.join(REPO, "server", "updater", "jaryan_updater.py")
 MAKE = os.path.join(REPO, "server", "tools", "make_package.py")
 
 
@@ -42,7 +42,7 @@ class SiteHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         # «سایت» سالم است اگر current/site/index.html وجود داشته باشد و BROKEN نداشته باشد
-        p = os.path.join(self.root, "opt/jarian/current/site/index.html")
+        p = os.path.join(self.root, "opt/jaryan/current/site/index.html")
         try:
             body = open(p, "rb").read()
         except OSError:
@@ -61,13 +61,13 @@ class UpdaterTest(unittest.TestCase):
         cls.site = http.server.ThreadingHTTPServer(("127.0.0.1", cls.site_port), SiteHandler)
         threading.Thread(target=cls.site.serve_forever, daemon=True).start()
         cls.port = free_port()
-        cls.env = dict(os.environ, JARIAN_ROOT=cls.root, JARIAN_UPDATER_LISTEN=f"127.0.0.1:{cls.port}",
-                       JARIAN_HEALTH_BASE=f"http://127.0.0.1:{cls.site_port}", JARIAN_HEALTH_WAIT="8", PYTHONUNBUFFERED="1")
+        cls.env = dict(os.environ, JARYAN_ROOT=cls.root, JARYAN_UPDATER_LISTEN=f"127.0.0.1:{cls.port}",
+                       JARYAN_HEALTH_BASE=f"http://127.0.0.1:{cls.site_port}", JARYAN_HEALTH_WAIT="8", PYTHONUNBUFFERED="1")
         # نسخه‌ی پایه مثل install.sh
-        base = os.path.join(cls.root, "opt/jarian/releases/0.0.0-base/site")
+        base = os.path.join(cls.root, "opt/jaryan/releases/0.0.0-base/site")
         os.makedirs(base)
         open(os.path.join(base, "index.html"), "w").write("base")
-        os.symlink(os.path.join(cls.root, "opt/jarian/releases/0.0.0-base"), os.path.join(cls.root, "opt/jarian/current"))
+        os.symlink(os.path.join(cls.root, "opt/jaryan/releases/0.0.0-base"), os.path.join(cls.root, "opt/jaryan/current"))
         cls.key = subprocess.run([sys.executable, UPDATER, "new-key"], capture_output=True, text=True, env=cls.env).stdout.strip()
         subprocess.run([sys.executable, UPDATER, "set-key"], input=cls.key + "\n", text=True, env=cls.env, check=True)
         cls.proc = subprocess.Popen([sys.executable, UPDATER, "serve"], env=cls.env,
@@ -113,7 +113,7 @@ class UpdaterTest(unittest.TestCase):
         if hook:
             os.makedirs(os.path.join(src, "hooks"))
             open(os.path.join(src, "hooks/activate"), "w").write(hook)
-        out = os.path.join(tempfile.mkdtemp(), f"{version}.jarian")
+        out = os.path.join(tempfile.mkdtemp(), f"{version}.jaryan")
         cmd = [sys.executable, MAKE, "--src", src, "--version", version, "--note", "آزمون " + version, "--out", out]
         if sign:
             cmd += ["--sign", sign]
@@ -149,7 +149,7 @@ class UpdaterTest(unittest.TestCase):
         self.fail("کار تمام نشد")
 
     def current_body(self):
-        return open(os.path.join(self.root, "opt/jarian/current/site/index.html")).read()
+        return open(os.path.join(self.root, "opt/jaryan/current/site/index.html")).read()
 
     # ---- آزمون‌ها (به ترتیب نام اجرا می‌شوند)
 
@@ -210,7 +210,7 @@ class UpdaterTest(unittest.TestCase):
         op, _, csrf = self.login()
         op.open(urllib.request.Request(self.url("/update/pubkey"), data=urllib.parse.urlencode(
             {"csrf": csrf, "key": self.key, "pem": open(pub).read()}).encode()))
-        self.assertTrue(os.path.exists(os.path.join(self.root, "var/lib/jarian/updater/pubkey.pem")))
+        self.assertTrue(os.path.exists(os.path.join(self.root, "var/lib/jaryan/updater/pubkey.pem")))
         code, _ = self.upload(op, csrf, self.pkg("5.0.0", "v5"))                  # بی‌امضا
         self.assertEqual(code, 400)
         code, _ = self.upload(op, csrf, self.pkg("5.0.0", "v5", sign=other))      # کلید دیگر
