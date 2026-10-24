@@ -1,0 +1,14 @@
+[Unit]
+Description=Jaryan setup page (/setup)
+After=network.target postgresql.service
+ConditionPathExists=/opt/jaryan/current/services/setup_page.py
+
+[Service]
+Environment=JARYAN_SETUP_LISTEN=127.0.0.1:8091
+ExecStart=/usr/bin/python3 /opt/jaryan/current/services/setup_page.py
+Restart=always
+RestartSec=3
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

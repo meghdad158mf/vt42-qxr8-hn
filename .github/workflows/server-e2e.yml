@@ -1,0 +1,37 @@
+name: Server e2e
+
+# آزمون سرتاسری سرور ایران روی Ubuntu 24.04 واقعی (با systemd): نصب پایه، نصب بسته‌ی
+# سرور از راه /update، صفحه‌ی /setup و ورود با رمز و پیامک، و برگشت خودکار بسته‌ی خراب.
+on:
+  push:
+    branches: ['claude/**']
+    paths: ['server/**', 'db/**', 'tests/server/**', '.github/workflows/server-e2e.yml']
+  pull_request:
+    branches: [claude/new-project-8ekywm]
+    paths: ['server/**', 'db/**', 'tests/server/**', '.github/workflows/server-e2e.yml']
+  workflow_dispatch: {}
+
+concurrency:
+  group: server-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: نصب پایه
+        run: sudo JARYAN_TEST_NO_SYSTEMD=1 JARYAN_MIN_FREE_GB=5 bash server/install.sh < /dev/null
+      - name: ساخت بسته‌ها
+        run: |
+          python3 server/tools/build_core.py --out /tmp
+          bash tests/server/make_broken.sh /tmp/jaryan-server-*.jaryan /tmp/broken.jaryan
+      - name: آزمون سرتاسری
+        run: sudo python3 tests/server/e2e_client.py /root/jaryan-emergency-key.txt /tmp/jaryan-server-$(cat server/core/VERSION).jaryan /tmp/broken.jaryan
+      - name: گزارش‌ها
+        if: failure()
+        run: |
+          sudo tail -n 80 /var/log/jaryan-install.log || true
+          sudo journalctl -u jaryan-updater -u jaryan-api -u jaryan-net -u jaryan-setup -u nginx -n 150 --no-pager || true
+          sudo sh -c 'tail -n 120 /var/lib/jaryan/updater/logs/*.log' || true

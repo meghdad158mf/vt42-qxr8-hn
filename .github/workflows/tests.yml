@@ -52,5 +52,5 @@ jobs:
       - run: python -m py_compile scripts/*.py
       - run: python -m unittest discover -s tests/python -v
       # سرور ایران: به‌روزرسان /update و ساخت بسته (بدون شبکه/پایگاه داده)
-      - run: bash -n server/install.sh server/check.sh && python -m py_compile server/updater/*.py server/tools/*.py
+      - run: bash -n server/install.sh server/check.sh && python -m py_compile server/updater/*.py server/tools/*.py server/core/services/*.py && bash -n server/core/hooks/preinstall server/core/hooks/activate
       - run: python -m unittest discover -s tests/server -v
