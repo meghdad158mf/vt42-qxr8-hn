@@ -12,11 +12,13 @@ public، نمک و هش کدهای ملی (migration_054 ← migration_export_ni
 فایل‌ها، شمارنده‌ها و بازنویسی نشانی‌های Supabase به نشانی همین سرور. رمز JWT و رمزهای ورود
 سرور دست نمی‌خورند (همان‌هایی که در /setup گذاشته شده).
 """
+import glob
 import gzip
 import io
 import json
 import mimetypes
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -84,12 +86,113 @@ class Supa:
 
 
 def table_defs(sb):
-    spec = sb.call("GET", "/rest/v1/")
+    """جدول‌های public و کلید اصلی هرکدام. Supabase از آبان ۱۴۰۵ فهرست OpenAPI (/rest/v1/) را فقط
+    با کلید service_role می‌دهد (۴۰۱ «Only the service_role API key…»)؛ آن وقت فهرست از خودِ
+    فایل‌های migration ساخته می‌شود — همان‌هایی که پایگاه داده‌ی Supabase را ساخته‌اند."""
+    try:
+        spec = sb.call("GET", "/rest/v1/")
+    except urllib.error.HTTPError as e:
+        if e.code not in (401, 403):
+            raise
+        out = tables_from_sql(sql_files())
+        log(f"  فهرست جدول‌ها از فایل‌های migration: {len(out)}")
+        return out
     out = {}
     for name, d in (spec.get("definitions") or {}).items():
         pk = [c for c, p in (d.get("properties") or {}).items() if "<pk/>" in (p.get("description") or "")]
         out[name] = pk
     return out
+
+
+def sql_files():
+    """schema.sql + migration_*.sql به ترتیب: در بسته‌ی سرور <نسخه>/db/migrations، در مخزن db/."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    for d in (os.path.join(here, "..", "db", "migrations"), os.path.join(here, "..", "..", "..", "db")):
+        if os.path.exists(os.path.join(d, "schema.sql")):
+            names = sorted(os.path.basename(p) for p in glob.glob(os.path.join(d, "migration_*.sql")))
+            return [os.path.join(d, n) for n in ["schema.sql"] + names]
+    raise RuntimeError("فایل‌های migration پیدا نشد")
+
+
+_IDENT = r'(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_]*)'
+_TABLE_RE = re.compile(rf"\bcreate\s+table\s+(?:if\s+not\s+exists\s+)?((?:{_IDENT}\.)?{_IDENT})\s*\(", re.I)
+_DROP_RE = re.compile(rf"\bdrop\s+table\s+(?:if\s+exists\s+)?((?:{_IDENT}\.)?{_IDENT}(?:\s*,\s*(?:{_IDENT}\.)?{_IDENT})*)", re.I)
+_ADD_PK_RE = re.compile(rf"\balter\s+table\s+(?:if\s+exists\s+)?(?:only\s+)?((?:{_IDENT}\.)?{_IDENT})\s+"
+                        r"add\s+(?:constraint\s+\S+\s+)?primary\s+key\s*\(([^)]*)\)", re.I)
+
+
+def _public_name(qual):
+    parts = [p.strip().strip('"') for p in qual.split(".")]
+    if len(parts) == 2 and parts[0].lower() != "public":
+        return None
+    return parts[-1].lower() if not qual.strip().endswith('"') else parts[-1]
+
+
+def _split_top(body):
+    out, depth, cur = [], 0, []
+    for ch in body:
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        if ch == "," and depth == 0:
+            out.append("".join(cur))
+            cur = []
+        else:
+            cur.append(ch)
+    out.append("".join(cur))
+    return [x.strip() for x in out if x.strip()]
+
+
+def _strip_comments(text):
+    text = re.sub(r"/\*.*?\*/", " ", text, flags=re.S)
+    return re.sub(r"--[^\n]*", " ", text)
+
+
+def tables_from_sql(paths):
+    """{جدول: [ستون‌های کلید اصلی]} از create/drop table و add primary key — به ترتیب فایل‌ها."""
+    tables = {}
+    for path in paths:
+        with open(path, encoding="utf-8") as f:
+            text = _strip_comments(f.read())
+        events = []
+        for m in _TABLE_RE.finditer(text):
+            events.append((m.start(), "create", m))
+        for m in _DROP_RE.finditer(text):
+            events.append((m.start(), "drop", m))
+        for m in _ADD_PK_RE.finditer(text):
+            events.append((m.start(), "pk", m))
+        for _, kind, m in sorted(events, key=lambda e: e[0]):
+            if kind == "drop":
+                for q in m.group(1).split(","):
+                    n = _public_name(q)
+                    if n:
+                        tables.pop(n, None)
+                continue
+            n = _public_name(m.group(1))
+            if not n:
+                continue
+            if kind == "pk":
+                if n in tables:
+                    tables[n] = [c.strip().strip('"') for c in m.group(2).split(",")]
+                continue
+            # بدنه‌ی create table تا پرانتز بسته‌ی هم‌تراز
+            i, depth = m.end(), 1
+            while i < len(text) and depth:
+                depth += {"(": 1, ")": -1}.get(text[i], 0)
+                i += 1
+            if n in tables and "if not exists" in m.group(0).lower():
+                continue
+            pk = []
+            for item in _split_top(text[m.end():i - 1]):
+                low = item.lower()
+                tm = re.match(r"(?:constraint\s+\S+\s+)?primary\s+key\s*\(([^)]*)\)", low)
+                if tm:
+                    pk = [c.strip().strip('"') for c in tm.group(1).split(",")]
+                elif re.search(r"\bprimary\s+key\b", low) and not re.match(r"(constraint|unique|check|foreign)\b", low):
+                    pk = [item.split()[0].strip('"')]
+            tables[n] = pk
+    return tables
 
 
 def export(out_path):

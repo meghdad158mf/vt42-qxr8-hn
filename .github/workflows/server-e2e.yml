@@ -36,6 +36,26 @@ jobs:
           ls -la /tmp/*.jaryan
       - name: آزمون سرتاسری
         run: sudo python3 tests/server/e2e_client.py /root/jaryan-emergency-key.txt /tmp/jaryan-server-$(cat server/core/VERSION).jaryan /tmp/broken.jaryan
+      - name: فهرست جدول‌های انتقال = پایگاه داده‌ی واقعی
+        run: |
+          sudo python3 - <<'PY'
+          import json, subprocess, sys
+          sys.path.insert(0, "/opt/jaryan/current/services")
+          import transfer as t
+          parsed = t.tables_from_sql(t.sql_files())
+          q = """select coalesce(json_object_agg(c.relname, coalesce((select json_agg(a.attname order by k.ord)
+                   from pg_index i cross join unnest(i.indkey) with ordinality k(attnum, ord)
+                   join pg_attribute a on a.attrelid = i.indrelid and a.attnum = k.attnum
+                  where i.indrelid = c.oid and i.indisprimary), '[]')), '{}')
+                 from pg_class c join pg_namespace n on n.oid = c.relnamespace
+                where n.nspname = 'public' and c.relkind in ('r','p')"""
+          real = json.loads(subprocess.run(["runuser", "-u", "postgres", "--", "psql", "-d", "jaryan", "-Atc", q],
+                                           capture_output=True, text=True, check=True).stdout)
+          bad = [f"{k}: migration={parsed.get(k)} واقعی={real.get(k)}" for k in sorted(set(parsed) | set(real))
+                 if parsed.get(k) != real.get(k)]
+          print(len(parsed), "جدول؛ تفاوت:", bad or "هیچ")
+          sys.exit(1 if bad else 0)
+          PY
       - name: آزمون سایت روی سرور
         run: |
           npx playwright install --with-deps chromium
