@@ -294,7 +294,11 @@ def main(keyfile, good, broken):
     check(bool(re.fullmatch(r"\d{5}", code)), "کد در صف ارسال")
     check(s.post("test-code", code=code), "ورود با کد پیامکی")
     sh("systemctl start jaryan-net")
-    time.sleep(4)
+    # وب‌سرویس پیامک بیرونی است و از رانر گاهی چند ثانیه طول می‌کشد (timeout همان ۱۵ ثانیه‌ی jarian_sms_send)
+    for _ in range(30):
+        time.sleep(1)
+        if sql("select count(*) from net._http_response where status_code is not null or error_msg is not null") != "0":
+            break
     check(sql("select count(*) from net.http_request_queue") == "0", "سرویس ارسال صف را خالی کرد")
     check(sql("select count(*) from net._http_response where status_code is not null or error_msg is not null") != "0",
           "پاسخ وب‌سرویس پیامک ثبت شد")
