@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: نصب پایه
-        run: sudo JARYAN_TEST_NO_SYSTEMD=1 JARYAN_MIN_FREE_GB=5 bash server/install.sh < /dev/null
+        run: sudo JARYAN_TEST_NO_SYSTEMD=1 bash server/install.sh < /dev/null
       - name: ساخت بسته‌ها
         run: |
           python3 server/tools/build_core.py --out /tmp

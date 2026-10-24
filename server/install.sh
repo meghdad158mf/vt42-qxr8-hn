@@ -40,7 +40,7 @@ case "${VERSION_ID:-}" in
 esac
 [ -d /run/systemd/system ] || [ -n "${JARYAN_TEST_NO_SYSTEMD:-}" ] || die "systemd فعال نیست."
 FREE_GB=$(df -BG --output=avail / | tail -1 | tr -dc 0-9)
-[ "$FREE_GB" -ge "${JARYAN_MIN_FREE_GB:-20}" ] || die "فضای خالی دیسک کمتر از ۲۰ گیگابایت است ($FREE_GB)."
+[ "$FREE_GB" -ge 20 ] || die "فضای خالی دیسک کمتر از ۲۰ گیگابایت است ($FREE_GB)."
 ok "فضای خالی: ${FREE_GB}G"
 ROTA=$(lsblk -dno ROTA "$(findmnt -no SOURCE / | sed 's/[0-9]*$//;s/p$//')" 2>/dev/null | head -1 || true)
 [ "$ROTA" = 1 ] && warn "دیسک از نوع HDD به نظر می‌رسد؛ پایگاه داده روی آن کُند خواهد بود." || true

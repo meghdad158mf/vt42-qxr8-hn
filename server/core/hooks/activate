@@ -15,7 +15,7 @@ nginx -t
 systemctl reload nginx
 echo "== منتظر رابط برنامه"
 for _ in $(seq 1 30); do
-  curl -fsS -o /dev/null http://127.0.0.1:3001/ready && { echo "رابط برنامه آماده است"; exit 0; }
+  curl -fsS -o /dev/null http://127.0.0.1:3001/ready 2>/dev/null && { echo "رابط برنامه آماده است"; exit 0; }
   sleep 1
 done
 echo "رابط برنامه بالا نیامد:"
