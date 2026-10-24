@@ -16,7 +16,7 @@ chmod 750 /var/lib/jaryan
 echo "== سایت"
 ANON=$(python3 -c "import json;print(json.load(open('/etc/jaryan/secrets.json'))['anon_key'])")
 if [ -d "$R/site/design/assets" ]; then
-  grep -rl "__JARYAN_ANON_KEY__" "$R/site/design/assets" | xargs -r sed -i "s/__JARYAN_ANON_KEY__/$ANON/g"
+  { grep -rl "__JARYAN_ANON_KEY__" "$R/site/design/assets" || true; } | xargs -r sed -i "s/__JARYAN_ANON_KEY__/$ANON/g"
 fi
 
 echo "== nginx"

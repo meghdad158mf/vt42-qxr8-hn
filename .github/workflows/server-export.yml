@@ -1,0 +1,36 @@
+name: Server export
+
+# مرحله‌ی ۶ مهاجرت: برون‌بری همه‌ی داده‌ها و فایل‌های Supabase به یک فایل رمزنگاری‌شده (.jaryandata)
+# برای بارگذاری در /setup سرور ایران. فقط با رمزهای موجود (SUPABASE_URL، SUPABASE_ANON_KEY، ADMIN_PASSWORD)
+# + یک رمز تازه‌ی EXPORT_PASSWORD (Settings → Secrets and variables → Actions). خروجی در Artifacts همین
+# اجرا، فقط ۱ روز نگه داشته می‌شود؛ بدون رمز قابل باز کردن نیست.
+# راه انداختن: Actions → Server export → Run workflow، یا تغییر فایل server/export-request.txt در شاخه‌ی claude/.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ['claude/**']
+    paths: ['server/export-request.txt']
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: برون‌بری
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          EXPORT_PASSWORD: ${{ secrets.EXPORT_PASSWORD }}
+        run: |
+          [ -n "$EXPORT_PASSWORD" ] || { echo "رمز EXPORT_PASSWORD در Secrets گیت‌هاب نیست"; exit 1; }
+          mkdir -p out
+          python3 server/core/services/transfer.py export --out "out/jaryan-$(date -u +%Y%m%d-%H%M).jaryandata"
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jaryan-data
+          path: out/
+          retention-days: 1
+          compression-level: 0

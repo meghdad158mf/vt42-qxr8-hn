@@ -180,7 +180,9 @@ def build_site(tmp, dest):
     src, n2 = re.subn(r"export const SUPABASE_ANON_KEY = '[^']*';", "export const SUPABASE_ANON_KEY = '__JARYAN_ANON_KEY__';", src)
     if n1 != 1 or n2 != 1:
         raise SystemExit("config.js سایت شکل مورد انتظار را ندارد (SUPABASE_URL/ANON_KEY).")
-    src += "\n// سرور خودمان (server/tools/build_core.py)\nexport const SERVER_MODE = true;\n"
+    src, n3 = re.subn(r"export const SERVER_MODE = false;", "export const SERVER_MODE = true;", src)
+    if n3 != 1:
+        src += "\n// سرور خودمان (server/tools/build_core.py)\nexport const SERVER_MODE = true;\n"
     open(cfg, "w", encoding="utf-8").write(src)
     subprocess.run(["npx", "vite", "build", "--logLevel", "warn"], cwd=w, check=True)
     shutil.copytree(os.path.join(w, "dist", "design"), os.path.join(dest, "design"))

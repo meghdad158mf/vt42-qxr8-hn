@@ -7,6 +7,7 @@ import { RETENTION_OPTIONS, mediaRetentionHours } from '../../data/site-settings
 import { saveSiteSetting } from '../site-settings.js';
 import { showToast } from '../../ui/toast.js';
 import { STORAGE_LIMIT_MB, SYS_BUCKET_NAMES, faMb } from './jobs.js';
+import { SERVER_MODE } from '../../core/config.js';
 import { tehranDateStr } from '../activity.js';
 import { uiConfirm } from '../../ui/confirm.js';
 
@@ -79,7 +80,7 @@ export async function saveMediaRetention(){
   renderSysRetention();
 }
 // ---- سابقه‌ی ظرفیت (۵.۲۵.۰، capacity_snapshots — migration_043) ----
-export const DB_LIMIT_MB = 500;
+export const DB_LIMIT_MB = SERVER_MODE ? 50 * 1024 : 500;
 export const CAP_DB_NAMES = { posts:'پست‌ها', hawza:'«درباره حوزه» (خزنده)', logs:'لاگ‌ها و آمار', other:'بقیه (منابع، روزنامه‌ها، تنظیمات…)' };
 export let CAP_ROWS = null, CAP_KIND = 'storage', CAP_RANGE = 30, CAP_MISSING = false;
 export function capLimitBytes(kind){ return (kind === 'db' ? DB_LIMIT_MB : STORAGE_LIMIT_MB) * 1048576; }

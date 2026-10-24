@@ -4,7 +4,7 @@ import { escAttr, escHtml, faNum, toFaDigits } from '../../core/text.js';
 import { fetchExactCount } from '../../core/api.js';
 import { mediaRetentionHours } from '../../data/site-settings.js';
 import { newsRelTime } from '../../core/date.js';
-import { SUPABASE_URL } from '../../core/config.js';
+import { SERVER_MODE, SUPABASE_URL } from '../../core/config.js';
 
 // صفحه‌ی «وضعیت سامانه» (sec-status، فقط مدیر). همه‌ی بررسی‌ها فقط با باز
 // کردن همین صفحه اجرا می‌شن، نه در بارگذاری عادی سایت.
@@ -27,12 +27,14 @@ export const SYS_STATUS_JOBS = [
   { job:'hawza', name:'خزنده‌ی «درباره حوزه»', path:'/crawl_seen?select=seen_at&order=seen_at.desc&limit=1', col:'seen_at', exp:'هر ۳ ساعت', warn:7, bad:14 },
 ];
 // تاریخ انقضای توکن‌ها — با ساخت توکن جدید، همین‌جا به‌روز بشه (CLAUDE.md)
-export const SYS_TOKENS = [
+// روی سرور خودمان (SERVER_MODE) هیچ‌کدام از این دو توکن به کار نمی‌آید
+export const SYS_TOKENS = SERVER_MODE ? [] : [
   { name:'نصب خودکار تابع‌های سوپابیس', key:'SUPABASE_ACCESS_TOKEN', where:'گیت‌هاب ← Settings ← Secrets', exp:'2026-12-04' },
   { name:'اجرای دستی کارها', key:'GITHUB_DISPATCH_TOKEN', where:'سوپابیس ← Edge Functions ← Secrets', exp:'2026-12-26' },
 ];
 export const SYS_BUCKET_NAMES = { 'post-media':'عکس/فیلم پست‌ها', 'newspaper-covers':'روزنامه‌ها', 'magazines':'مجلات', 'magazine-covers':'جلد مجلات', 'archive-reports':'بسته‌های تحلیلی', 'archive-report-covers':'جلد بسته‌ها', 'channel-avatars':'عکس منابع', 'school-reports':'گزارش مدارس', 'basirat-course-posters':'پوستر بصیرت' };
-export const STORAGE_LIMIT_MB = 1024;
+// سقف پلن رایگان سوپابیس ۱ گیگ؛ روی سرور خودمان سهم فایل‌ها از دیسک ۳۰۰ گیگی (قراردادی ۱۰۰ گیگ)
+export const STORAGE_LIMIT_MB = SERVER_MODE ? 100 * 1024 : 1024;
 export const faMb = bytes => toFaDigits((bytes/1048576).toFixed(1));
 export async function sysKeywordQueue(){
   const n = await fetchExactCount('/posts?ai_keywords=is.null&channels.show_in_news=eq.true&channels.platform=neq.bale', 'id,channels!inner(show_in_news,platform)');
