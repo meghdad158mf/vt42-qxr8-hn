@@ -1,0 +1,24 @@
+[Unit]
+Description=Jaryan scheduler and jobs (pg_cron + run-job + notify replacement, server link)
+After=network.target postgresql.service jaryan-api.service
+Wants=postgresql.service
+ConditionPathExists=/opt/jaryan/current/services/jobs.py
+
+[Service]
+User=jaryan
+Group=jaryan
+Environment=JARYAN_PSQL=psql
+EnvironmentFile=-/etc/jaryan/functions.env
+EnvironmentFile=-/etc/jaryan/telegram.env
+ExecStart=/usr/bin/python3 /opt/jaryan/current/services/jobs.py
+Restart=always
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

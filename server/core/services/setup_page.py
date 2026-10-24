@@ -14,6 +14,7 @@ import json
 import os
 import re
 import secrets
+import shutil
 import sys
 import threading
 import time
@@ -23,6 +24,7 @@ import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import srvlib as S  # noqa: E402
+import setup_more  # noqa: E402
 
 LISTEN = os.environ.get("JARYAN_SETUP_LISTEN", "127.0.0.1:8091")
 HEARTBEAT = os.environ.get("JARYAN_NET_HEARTBEAT", S.ROOT + "/run/jaryan-net/alive")
@@ -191,15 +193,15 @@ input.ltr{direction:ltr}label{display:flex;flex-direction:column;gap:2px;font-si
 """
 
 
-def page(body, sess=None):
+def page(body, sess=None, head=""):
     out = ""
     if sess:
         out = (f'<form method="post" action="/setup/logout"><input type="hidden" name="csrf" value="{esc(sess["csrf"])}">'
                '<button class="light">خروج</button></form>')
     return f"""<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
-<title>راه‌اندازی سرور جریان</title><style>{CSS}</style></head><body>
-<header><b>راه‌اندازی سرور جریان</b><span>پایگاه داده و ورود</span>{out}</header><main>{body}</main></body></html>"""
+<title>راه‌اندازی سرور جریان</title><style>{CSS}</style>{head}</head><body>
+<header><b>راه‌اندازی سرور جریان</b><span>نصب، اتصال و انتقال</span>{out}</header><main>{body}</main></body></html>"""
 
 
 def login_page(msg=""):
@@ -215,7 +217,7 @@ def dot(ok, warn=False):
     return '<b class="ok">✔</b>' if ok else ('<b class="warn">●</b>' if warn else '<b class="bad">✘</b>')
 
 
-def dashboard(sess):
+def dashboard(sess, nonce=""):
     st = status()
     flash = ""
     if sess.get("flash"):
@@ -303,7 +305,11 @@ def dashboard(sess):
 <label>کد ملی مدیر<input class="ltr" name="nid" inputmode="numeric" autocomplete="off"></label>
 <label>رمز مدیر<input class="ltr" type="password" name="pw" autocomplete="off"></label>
 <button class="light">ورود با رمز عبور</button></form></section>"""
-    return page(body, sess)
+    try:
+        body += setup_more.sections(csrf, nonce)
+    except Exception as e:  # noqa: BLE001 — بخش‌های تازه نباید کل صفحه را بیندازند
+        body += f'<section class="bad">بخش‌های تکمیلی نمایش داده نشد: {esc(e)}</section>'
+    return page(body, sess, setup_more.refresh_meta())
 
 
 # ---------------------------------------------------------------- کارها
@@ -448,7 +454,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Frame-Options", "DENY")
         self.send_header("Referrer-Policy", "no-referrer")
-        self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'")
+        self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; "
+                         f"connect-src 'self'; script-src 'nonce-{getattr(self, 'nonce', 'none')}'")
         for k, v in (headers or {}).items():
             self.send_header(k, v)
         self.end_headers()
@@ -469,15 +476,34 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path not in ("/setup", "/setup/"):
             return self.send(404, page("<section>صفحه پیدا نشد.</section>"))
         _, sess = self.session()
+        if path == "/setup/download/link-bundle":
+            fp = os.path.join(setup_more.UPLOADS, "link-bundle.jaryanlink")
+            if not sess or not os.path.isfile(fp):
+                return self.send(404, page("<section>پیدا نشد.</section>"))
+            self.send_response(200)
+            self.send_header("Content-Type", "application/octet-stream")
+            self.send_header("Content-Disposition", 'attachment; filename="jaryan-link-' + time.strftime("%Y%m%d-%H%M") + '.jaryanlink"')
+            self.send_header("Content-Length", str(os.path.getsize(fp)))
+            self.end_headers()
+            with open(fp, "rb") as f:
+                while True:
+                    chunk = f.read(1 << 20)
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+            return
         if not sess:
             return self.send(200, login_page())
+        self.nonce = secrets.token_urlsafe(12)
         with _lock:
-            body = dashboard(sess)
+            body = dashboard(sess, self.nonce)
         self.send(200, body)
 
     def do_POST(self):
         path = urllib.parse.urlsplit(self.path).path
         n = int(self.headers.get("Content-Length") or 0)
+        if path.startswith("/setup/upload/"):
+            return self.upload(path.rsplit("/", 1)[-1], n)
         if n > 20000:
             return self.send(413, page("<section>درخواست بزرگ است.</section>"))
         form = {k: v[0] for k, v in urllib.parse.parse_qs(self.rfile.read(n).decode("utf-8", "replace")).items()}
@@ -511,6 +537,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             "/setup/test-code": lambda: act_test_code(form, sess, ip),
             "/setup/test-pass": lambda: act_test_pass(form, ip),
         }
+        for k, fn in setup_more.ACTIONS.items():
+            actions[k] = (lambda fn=fn: fn(form, sess))
         if path not in actions:
             return self.send(404, page("<section>صفحه پیدا نشد.</section>"))
         with _lock:
@@ -521,6 +549,45 @@ class Handler(http.server.BaseHTTPRequestHandler):
             except Exception as e:  # noqa: BLE001 — صفحه نیفتد؛ خطا را نشان بده
                 sess["flash"] = (False, "خطا: " + esc(f"{e.__class__.__name__}: {e}"[:400]))
         self.redirect()
+
+
+def _upload(self, kind, n):
+    _, sess = self.session()
+    if not sess or not secrets.compare_digest(self.headers.get("X-CSRF", ""), sess["csrf"]):
+        return self.send(403, "forbidden", "text/plain")
+    if kind not in ("transfer", "link") or n <= 0 or n > 4 * 1024 ** 3:
+        return self.send(400, "bad request", "text/plain")
+    os.makedirs(setup_more.UPLOADS, exist_ok=True)
+    os.chmod(setup_more.UPLOADS, 0o700)
+    if shutil.disk_usage(setup_more.UPLOADS).free < n * 3 + (1 << 30):
+        sess["flash"] = (False, "فضای خالی دیسک برای این فایل کافی نیست.")
+        return self.send(507, "no space", "text/plain")
+    fp = os.path.join(setup_more.UPLOADS, f"{kind}-{secrets.token_hex(4)}.upload")
+    left = n
+    with open(fp, "wb") as f:
+        while left > 0:
+            chunk = self.rfile.read(min(left, 1 << 20))
+            if not chunk:
+                break
+            f.write(chunk)
+            left -= len(chunk)
+    if left:
+        os.remove(fp)
+        return self.send(400, "incomplete", "text/plain")
+    pw = urllib.parse.unquote(self.headers.get("X-Password", ""))
+    if kind == "transfer" and not pw:
+        os.remove(fp)
+        sess["flash"] = (False, "رمز فایل داده را بنویسید.")
+        return self.send(400, "password", "text/plain")
+    started = setup_more.upload_done(kind, fp, pw)
+    sess["flash"] = ((True, "فایل رسید؛ کار در پس‌زمینه شروع شد.") if started
+                     else (False, "کار دیگری در حال انجام است؛ بعداً دوباره بارگذاری کنید."))
+    if not started:
+        os.remove(fp)
+    self.send(200, "ok", "text/plain")
+
+
+Handler.upload = _upload
 
 
 def main():

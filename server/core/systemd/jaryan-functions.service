@@ -1,0 +1,25 @@
+[Unit]
+Description=Jaryan server functions (Deno: translate, news-insights, extract-post-keywords)
+After=network.target jaryan-api.service
+ConditionPathExists=/opt/jaryan/current/bin/deno
+
+[Service]
+User=jaryan
+Group=jaryan
+EnvironmentFile=/etc/jaryan/service.env
+EnvironmentFile=-/etc/jaryan/functions.env
+Environment=SUPABASE_URL=http://127.0.0.1
+Environment=DENO_DIR=/var/lib/jaryan/deno
+Environment=DENO_NO_UPDATE_CHECK=1
+Environment=DENO_NO_PROMPT=1
+WorkingDirectory=/opt/jaryan/current/functions
+ExecStart=/opt/jaryan/current/bin/deno run --allow-net --allow-env --allow-read=/opt/jaryan main.ts
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

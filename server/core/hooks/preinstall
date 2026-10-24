@@ -1,5 +1,5 @@
 #!/bin/bash
-# پیش از جابه‌جایی نسخه: بررسی پیش‌نیازها و به‌روز کردن پایگاه داده.
+# پیش از جابه‌جایی نسخه: پیش‌نیازها، اجزای بزرگ، پایگاه داده.
 # اگر چیزی رد شود، به‌روزرسان نصب را متوقف و پایگاه داده را از پشتیبانِ همین لحظه برمی‌گرداند.
 set -euo pipefail
 R="$JARYAN_RELEASE"
@@ -9,10 +9,16 @@ systemctl is-active --quiet postgresql || systemctl start postgresql
 V=$(runuser -u postgres -- psql -tAc "show server_version_num")
 [ "$V" -ge 140000 ] || { echo "نسخه‌ی Postgres قدیمی است: $V"; exit 1; }
 python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)' || { echo "پایتون ۳٫۱۰ یا تازه‌تر لازم است"; exit 1; }
-FREE=$(df -Pm /var/lib/postgresql | awk 'NR==2{print $4}')
-[ "$FREE" -ge 1024 ] || { echo "فضای خالی دیسک کمتر از ۱ گیگابایت است ($FREE مگابایت)"; exit 1; }
-"$R/bin/postgrest" --version
+PYV=$(python3 -c 'import sys; print(f"cp{sys.version_info.major}{sys.version_info.minor}")')
+FREE=$(df -Pm /opt/jaryan | awk 'NR==2{print $4}')
+[ "$FREE" -ge 2048 ] || { echo "فضای خالی دیسک کمتر از ۲ گیگابایت است ($FREE مگابایت)"; exit 1; }
 id jaryan >/dev/null 2>&1 || useradd --system --home-dir /opt/jaryan --shell /usr/sbin/nologin jaryan
+echo "== اجزای بزرگ"
+python3 "$R/services/components.py" install "$R" /opt/jaryan/current
+"$R/bin/postgrest" --version
+"$R/bin/deno" --version | head -1
+[ -d "$R/pylib/$PYV" ] || { echo "کتابخانه‌های پایتون برای $PYV در بسته نیست"; exit 1; }
+PYTHONPATH="$R/pylib/$PYV:$R/pylib/common" python3 -c "import requests, bs4, feedparser, trafilatura, telethon, lxml; print('کتابخانه‌های پایتون: سالم')"
 runuser -u postgres -- psql -tAc "select 1 from pg_database where datname='jaryan'" | grep -q 1 \
   || runuser -u postgres -- createdb jaryan
 echo "== پایگاه داده"

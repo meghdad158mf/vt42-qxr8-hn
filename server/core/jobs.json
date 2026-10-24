@@ -1,0 +1,31 @@
+{
+  "_": "کارهای خودکار سرور خودمان — همان برنامه‌ی pg_cron سوپابیس (migration_040/041/043/045)، ساعت‌ها UTC. roles: روی کدام سرور (iran = اصلی، foreign = خارجی). timeout ثانیه (همان timeout-minutes ورک‌فلوها).",
+  "jobs": {
+    "eitaa":      {"name": "جمع‌آوری ایتا", "script": "scripts/collect_eitaa.py", "cron": ["0 */2 * * *"], "timeout": 900, "roles": ["iran"]},
+    "telegram":   {"name": "جمع‌آوری تلگرام", "script": "scripts/collect_telegram.py", "cron": ["15 */2 * * *"], "timeout": 2400, "roles": ["foreign"]},
+    "website":    {"name": "جمع‌آوری وب‌سایت‌ها", "script": "scripts/collect_rss.py", "cron": ["5 */2 * * *"], "timeout": 900, "roles": ["iran", "foreign"]},
+    "bale":       {"name": "ادعاها و شایعات (بله)", "script": "scripts/collect_bale.py", "cron": ["30 1,5,7,9,11,13,15,17 * * *"], "timeout": 900, "roles": ["iran"]},
+    "newspapers": {"name": "روزنامه‌ها", "script": "scripts/collect_newspapers.py", "cron": ["30 0,2,4,6,10 * * *"], "timeout": 900, "roles": ["iran"]},
+    "insights":   {"name": "تحلیل «در یک نگاه»", "script": "scripts/analyze_news_insights.py", "cron": ["30 4,10,16,22 * * *"], "timeout": 600, "roles": ["iran"]},
+    "keywords":   {"name": "کلیدواژه‌ی هوش مصنوعی", "script": "scripts/extract_keywords.py", "cron": ["30 1-23/2 * * *"], "timeout": 600, "roles": ["iran"]},
+    "cleanup":    {"name": "پاک‌سازی رسانه‌های قدیمی", "script": "scripts/cleanup_media.py", "cron": ["15 6 * * *", "15 18 * * *"], "timeout": 900, "roles": ["iran", "foreign"]},
+    "hawza":      {"name": "خزنده‌ی «درباره حوزه»", "script": "scripts/crawl_hawza.py", "cron": ["45 2-23/3 * * *"], "timeout": 1800, "roles": ["iran", "foreign"]}
+  },
+  "internal": {
+    "capacity":     {"cron": ["50 20 * * *"], "roles": ["iran"]},
+    "notify-check": {"cron": ["7,37 * * * *"], "roles": ["iran"]},
+    "notify-daily": {"cron": ["52 3 * * *"], "roles": ["iran"]},
+    "link-sync":    {"cron": ["*/5 * * * *"], "roles": ["iran", "foreign"]},
+    "housekeeping": {"cron": ["40 23 * * *"], "roles": ["iran", "foreign"]}
+  },
+  "freshness": [
+    {"job": "eitaa", "path": "/posts?platform=eq.eitaa&select=scraped_at&order=scraped_at.desc&limit=1", "col": "scraped_at", "bad": 12},
+    {"job": "telegram", "path": "/posts?platform=eq.telegram&select=scraped_at&order=scraped_at.desc&limit=1", "col": "scraped_at", "bad": 12},
+    {"job": "website", "path": "/posts?platform=eq.website&select=scraped_at&order=scraped_at.desc&limit=1", "col": "scraped_at", "bad": 12},
+    {"job": "bale", "path": "/posts?platform=eq.bale&select=scraped_at&order=scraped_at.desc&limit=1", "col": "scraped_at", "bad": 36},
+    {"job": "newspapers", "path": "/newspapers?select=scraped_at&order=scraped_at.desc&limit=1", "col": "scraped_at", "bad": 54},
+    {"job": "insights", "path": "/news_ai_insights?select=computed_at&order=computed_at.desc&limit=1", "col": "computed_at", "bad": 24},
+    {"job": "keywords", "path": "/posts?ai_keywords_extracted_at=not.is.null&select=ai_keywords_extracted_at&order=ai_keywords_extracted_at.desc&limit=1", "col": "ai_keywords_extracted_at", "bad": 24},
+    {"job": "hawza", "path": "/crawl_seen?select=seen_at&order=seen_at.desc&limit=1", "col": "seen_at", "bad": 14}
+  ]
+}

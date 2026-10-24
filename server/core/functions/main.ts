@@ -21,6 +21,7 @@ for (const name of FUNCTIONS) {
 
 const port = Number(Deno.env.get("JARYAN_FUNCTIONS_PORT") || "8093");
 realServe({ hostname: "127.0.0.1", port, onListen: () => console.log("functions on", port) }, (req) => {
+  if (new URL(req.url).pathname === "/functions/v1/health") return new Response('{"ok":true}', { headers: { "Content-Type": "application/json" } });
   const m = new URL(req.url).pathname.match(/^\/functions\/v1\/([a-z-]+)\/?$/);
   const h = m && Object.hasOwn(handlers, m[1]) ? handlers[m[1]] : null;
   if (!h) return new Response(JSON.stringify({ error: "not found" }), { status: 404, headers: { "Content-Type": "application/json" } });

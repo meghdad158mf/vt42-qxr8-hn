@@ -1,0 +1,7 @@
+[Unit]
+Description=Jaryan TLS certificate renewal (acme.sh, only if a domain is set)
+ConditionPathExists=/var/lib/jaryan/acme/account.conf
+
+[Service]
+Type=oneshot
+ExecStart=/opt/jaryan/current/vendor/acme.sh --cron --home /var/lib/jaryan/acme

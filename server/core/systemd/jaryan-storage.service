@@ -1,0 +1,20 @@
+[Unit]
+Description=Jaryan files (Supabase Storage replacement)
+After=network.target postgresql.service
+Wants=postgresql.service
+ConditionPathExists=/opt/jaryan/current/services/storage.py
+
+[Service]
+User=jaryan
+Group=jaryan
+Environment=JARYAN_PSQL=psql
+ExecStart=/usr/bin/python3 /opt/jaryan/current/services/storage.py
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

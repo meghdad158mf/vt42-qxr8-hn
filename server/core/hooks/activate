@@ -1,23 +1,44 @@
 #!/bin/bash
-# بعد از جابه‌جایی نسخه (و در برگشت خودکار برای نسخه‌ی قبلی): سرویس‌ها و nginx.
+# بعد از جابه‌جایی نسخه (و در برگشت خودکار برای نسخه‌ی قبلی): سرویس‌ها، سایت و nginx. تکرارپذیر.
 set -euo pipefail
 R="$JARYAN_RELEASE"
 if [ "${JARYAN_ROLLBACK:-0}" = 1 ]; then
   # پایگاه داده از پشتیبان برگشته؛ لایه‌ی سازگاری و رمزها دوباره هماهنگ شوند
   python3 "$R/services/migrate.py" apply "$R"
 fi
-chmod 711 /etc/jaryan          # PostgREST (کاربر jaryan) فقط postgrest.conf را بخواند؛ بقیه 600 هستند
-install -m 644 "$R"/systemd/*.service /etc/systemd/system/
+chmod 711 /etc/jaryan          # سرویس‌های غیر root فقط فایل‌های 640 گروه jaryan را بخوانند؛ بقیه 600 هستند
+[ -f /etc/jaryan/server.json ] || python3 "$R/services/serverconf.py" init
+install -d -m 750 -o jaryan -g jaryan /var/lib/jaryan/files /var/lib/jaryan/jobs /var/lib/jaryan/deno
+install -d -m 755 /var/lib/jaryan/acme-www
+usermod -aG jaryan www-data    # nginx فایل‌های عمومی را مستقیم از دیسک بدهد
+chmod 750 /var/lib/jaryan
+
+echo "== سایت"
+ANON=$(python3 -c "import json;print(json.load(open('/etc/jaryan/secrets.json'))['anon_key'])")
+if [ -d "$R/site/design/assets" ]; then
+  grep -rl "__JARYAN_ANON_KEY__" "$R/site/design/assets" | xargs -r sed -i "s/__JARYAN_ANON_KEY__/$ANON/g"
+fi
+
+echo "== nginx"
+python3 "$R/services/serverconf.py" nginx "$R"
+install -m 644 "$R"/systemd/*.service "$R"/systemd/*.timer /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable jaryan-api.service jaryan-net.service jaryan-setup.service >/dev/null 2>&1
-systemctl restart jaryan-api.service jaryan-net.service jaryan-setup.service
+SVCS="jaryan-api jaryan-net jaryan-setup jaryan-storage jaryan-functions jaryan-jobs"
+for s in $SVCS; do systemctl enable "$s.service" >/dev/null 2>&1; done
+systemctl enable --now jaryan-acme.timer >/dev/null 2>&1 || true
+for s in $SVCS; do systemctl restart "$s.service"; done
 nginx -t
 systemctl reload nginx
-echo "== منتظر رابط برنامه"
-for _ in $(seq 1 30); do
-  curl -fsS -o /dev/null http://127.0.0.1:3001/ready 2>/dev/null && { echo "رابط برنامه آماده است"; exit 0; }
+echo "== منتظر سرویس‌ها"
+for _ in $(seq 1 40); do
+  if curl -fsS -o /dev/null http://127.0.0.1:3001/ready 2>/dev/null \
+     && curl -fsS -o /dev/null http://127.0.0.1:8092/storage/v1/health 2>/dev/null \
+     && curl -fsS -o /dev/null http://127.0.0.1:8093/functions/v1/health 2>/dev/null \
+     && curl -fsS -o /dev/null http://127.0.0.1:8094/health 2>/dev/null; then
+    echo "همه‌ی سرویس‌ها آماده‌اند"; exit 0
+  fi
   sleep 1
 done
-echo "رابط برنامه بالا نیامد:"
-journalctl -u jaryan-api.service -n 30 --no-pager || true
+echo "سرویسی بالا نیامد:"
+for s in $SVCS; do echo "--- $s: $(systemctl is-active $s)"; journalctl -u "$s" -n 15 --no-pager || true; done
 exit 1

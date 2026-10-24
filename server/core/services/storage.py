@@ -133,7 +133,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     # ------------------------------------------------------------ GET (لینک امن)
     def do_GET(self):
+        if self.path.split("?")[0] == "/storage/v1/health":
+            return self.reply(200, {"ok": True})
         rest, qs, _ = self.route()
+        if rest is not None and rest.startswith("authenticated/"):
+            return self.authenticated(rest[len("authenticated/"):])
         if rest is None or not rest.startswith("sign/"):
             return self.error(404, "not_found")
         bucket, _, name = rest[5:].partition("/")
@@ -149,6 +153,23 @@ class Handler(http.server.BaseHTTPRequestHandler):
         rel = "/".join(urllib.parse.quote(x) for x in [bucket] + name.split("/"))
         self.reply(200, raw=b"", headers={"X-Accel-Redirect": "/_jaryan_files/" + rel, "Content-Type": ctype,
                                           "Cache-Control": "private, max-age=600"})
+
+    def authenticated(self, tail):
+        """دریافت فایل با توکن (برای برون‌بری و ابزارها)؛ مجوز با RLS خواندن storage.objects."""
+        cl = self.claims()
+        bucket, _, name = tail.partition("/")
+        sp = safe_parts(bucket, name)
+        if not cl or not sp:
+            return self.error(400 if cl else 401, "invalid")
+        try:
+            ok = as_role(cl, f"select count(*) from storage.objects where bucket_id = {S.lit(bucket)} and name = {S.lit(name)};")
+        except S.DbError:
+            return self.error(403, "Unauthorized", 403)
+        if not ok or ok[-1].strip() != "1" or not os.path.isfile(disk_path(*sp)):
+            return self.error(404, "Object not found", 404)
+        ctype = mimetypes.guess_type(name)[0] or "application/octet-stream"
+        rel = "/".join(urllib.parse.quote(x) for x in [bucket] + name.split("/"))
+        self.reply(200, raw=b"", headers={"X-Accel-Redirect": "/_jaryan_files/" + rel, "Content-Type": ctype})
 
     # ------------------------------------------------------------ POST/PUT/DELETE
     def do_PUT(self):

@@ -55,7 +55,7 @@ db-extra-search-path = "public, extensions"
 db-max-rows = 1000
 db-pool = 20
 jwt-secret = "{sec["jwt_secret"]}"
-openapi-mode = "disabled"
+openapi-mode = "follow-privileges"
 server-host = "127.0.0.1"
 server-port = 3000
 admin-server-port = 3001
@@ -75,7 +75,7 @@ log-level = "error"
 
 def write_service_env(sec):
     """رازهای لازم سرویس‌های غیر root (فایل‌ها، تابع‌ها): 640 root:jaryan."""
-    body = f"JWT_SECRET={sec['jwt_secret']}\nANON_KEY={sec['anon_key']}\n"
+    body = f"JWT_SECRET={sec['jwt_secret']}\nANON_KEY={sec['anon_key']}\nSUPABASE_ANON_KEY={sec['anon_key']}\n"
     tmp = S.SERVICE_ENV + ".tmp"
     fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o640)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
