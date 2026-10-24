@@ -51,3 +51,6 @@ jobs:
       - run: pip install -r scripts/requirements.txt
       - run: python -m py_compile scripts/*.py
       - run: python -m unittest discover -s tests/python -v
+      # سرور ایران: به‌روزرسان /update و ساخت بسته (بدون شبکه/پایگاه داده)
+      - run: bash -n server/install.sh server/check.sh && python -m py_compile server/updater/*.py server/tools/*.py
+      - run: python -m unittest discover -s tests/server -v
