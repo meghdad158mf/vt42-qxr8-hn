@@ -1,0 +1,33 @@
+name: tmp key check
+on:
+  push:
+    branches: ['claude/exciting-wright-px9qdv']
+    paths: ['.github/workflows/tmp-keycheck.yml']
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - env:
+          K: ${{ secrets.SUPABASE_ANON_KEY }}
+          P: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import urllib.request, urllib.error, json, os
+          K=os.environ["K"]; U="https://komqnapfqrtxxaytpcdt.supabase.co"
+          def rq(m, path, body=None, tok=None, extra=None):
+              h={"apikey":K,"Content-Type":"application/json"}
+              if tok: h["Authorization"]="Bearer "+tok
+              h.update(extra or {})
+              r=urllib.request.Request(U+path, data=json.dumps(body).encode() if body is not None else None, headers=h, method=m)
+              try:
+                  with urllib.request.urlopen(r, timeout=60) as x: return x.status, x.read()
+              except urllib.error.HTTPError as e: return e.code, e.read()
+          s,b=rq("POST","/rest/v1/rpc/login",{"password":os.environ["P"]})
+          print("login", s, "token" in json.loads(b))
+          tok=json.loads(b).get("token")
+          for name,tk,ex in [("root admin",tok,None),("root anon",None,None),("root admin openapi",tok,{"Accept":"application/openapi+json"})]:
+              s,b=rq("GET","/rest/v1/",tok=tk,extra=ex); print(name, s, b[:250])
+          s,b=rq("GET","/rest/v1/channels?select=id&limit=1",tok=tok); print("channels", s, b[:80])
+          s,b=rq("POST","/rest/v1/rpc/migration_export_nids",{},tok=tok); print("nids", s, b[:60] if s!=200 else "ok")
+          s,b=rq("POST","/storage/v1/object/list/magazines",{"prefix":"","limit":2},tok=tok); print("storage list", s, b[:120])
+          PY
