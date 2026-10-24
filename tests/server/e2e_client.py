@@ -209,6 +209,28 @@ def stage2to7(key, tok):
     check(sql("select count(*) from posts where platform_post_id='e2e-1' and ai_keywords is null") == "1", "پست رسید و ستون هوش مصنوعی ایران دست نخورد")
     code, _ = req(opener(), "/storage/v1/object/public/post-media/telegram/e2e-1.jpg")
     check(code == 200, "رسانه‌ی پست هم رسید")
+    print("== فایل داده‌ی پیوند (لایه‌ی ۴) و ساختن دسته")
+    r = subprocess.run([sys.executable, "-c", """
+import sys, json; sys.path.insert(0, '/opt/jaryan/current/services')
+import link
+b = link.build_batch(None)
+ok = any(p.get('platform_post_id') == 'e2e-1' and p['_channel']['username'] == 'iranintltv' for p in b['posts'])
+n = link.export_bundle('/tmp/e2e.jaryanlink')
+m = link.import_bundle('/tmp/e2e.jaryanlink')
+snap = link.channels_snapshot()
+print(json.dumps({'batch': ok, 'media': 'telegram/e2e-1.jpg' in b['media'], 'exported': n, 'imported': m, 'channels': len(snap['channels'])}))
+"""], capture_output=True, text=True)
+    print(r.stdout[-500:], r.stderr[-1500:])
+    res = json.loads(r.stdout.strip().splitlines()[-1]) if r.returncode == 0 else {}
+    check(res.get("batch") and res.get("media"), "سرور خارجی: ساختن دسته با منبع و رسانه")
+    check(res.get("exported", 0) >= 1 and res.get("imported") == res.get("exported"), "فایل داده‌ی امضاشده: ساختن و ورود")
+    check(res.get("channels", 0) > 0, "فهرست منابع برای سرور خارجی")
+    with open("/tmp/e2e.jaryanlink", "r+b") as fh:
+        fh.seek(-6, 2)
+        fh.write(b"XXXXXX")
+    r = subprocess.run([sys.executable, "-c", "import sys; sys.path.insert(0, '/opt/jaryan/current/services'); import link; link.import_bundle('/tmp/e2e.jaryanlink')"],
+                       capture_output=True, text=True)
+    check(r.returncode != 0 and "امضا" in r.stderr, "فایل داده‌ی دستکاری‌شده رد شد")
     print("== انتقال داده (مرحله‌ی ۶، رفت و برگشت روی همین سرور)")
     users = sql("select count(*) from app_users")
     nids = sql("select count(*) from app_user_nids")
