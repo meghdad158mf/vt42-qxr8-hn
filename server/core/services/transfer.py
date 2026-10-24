@@ -49,8 +49,15 @@ class Supa:
     def __init__(self):
         self.url = os.environ["SUPABASE_URL"].rstrip("/")
         self.anon = os.environ["SUPABASE_ANON_KEY"]
-        self.token = self.call("POST", "/rest/v1/rpc/login", {"password": os.environ["ADMIN_PASSWORD"]},
-                               auth=False)["token"]
+        try:
+            self.token = self.call("POST", "/rest/v1/rpc/login", {"password": os.environ["ADMIN_PASSWORD"]},
+                                   auth=False)["token"]
+        except urllib.error.HTTPError as e:
+            if e.code == 401:
+                raise RuntimeError("رمز مدیر سایت فعلی درست نیست (همان رمزی که مدیر بعد از کد ملی با «ورود با رمز عبور» می‌زند)") from None
+            if e.code == 429:
+                raise RuntimeError("به‌خاطر چند رمز اشتباه، ورود از این سرور ۱۵ دقیقه قفل است؛ بعد دوباره امتحان کنید") from None
+            raise
 
     def req(self, method, path, body=None, auth=True, headers=None, raw=False):
         h = {"apikey": self.anon, "Content-Type": "application/json"}
