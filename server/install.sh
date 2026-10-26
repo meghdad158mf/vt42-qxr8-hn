@@ -54,7 +54,9 @@ ok "postgresql $(psql --version | awk '{print $3}')، nginx، python $(python3 -
 
 # ------------------------------------------------------------------ ۳. پوشه‌ها و کاربر
 say "۳ از ۸ — پوشه‌ها"
-id jaryan >/dev/null 2>&1 || useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin jaryan
+# گروه jaryan ممکن است از نصب قبلی مانده باشد (userdel گروهی را که عضو دارد پاک نمی‌کند)
+id jaryan >/dev/null 2>&1 || useradd --system --home-dir "$BASE" --shell /usr/sbin/nologin \
+  $(getent group jaryan >/dev/null && echo "-g jaryan") jaryan
 install -d -m 755 "$BASE" "$BASE/releases" "$BASE/updater"
 install -d -m 750 -o jaryan -g jaryan /var/lib/jaryan /var/lib/jaryan/files
 install -d -m 700 /var/lib/jaryan/updater /var/lib/jaryan/backups /etc/jaryan "$TLS"
