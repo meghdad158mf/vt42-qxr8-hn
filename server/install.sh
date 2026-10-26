@@ -148,6 +148,10 @@ server {
 NGINX
 # IPv6 فقط اگر سرور داشته باشد؛ وگرنه nginx اصلاً بالا نمی‌آید
 if [ -s /proc/net/if_inet6 ]; then sed -i 's/^    #V6 /    /' /etc/nginx/sites-available/jaryan; fi
+# Ubuntu 26.04 خودش server_tokens را در nginx.conf دارد و تکرارش nginx را از کار می‌اندازد
+NGX_OTHER="/etc/nginx/nginx.conf /etc/nginx/conf.d"
+if grep -rqsE '^[[:space:]]*server_tokens[[:space:]]' $NGX_OTHER; then sed -i '/^server_tokens /d' /etc/nginx/sites-available/jaryan; fi
+if grep -rqsE '\$connection_upgrade[[:space:]]*\{' $NGX_OTHER; then sed -i '/^map \$http_upgrade /d' /etc/nginx/sites-available/jaryan; fi
 rm -f /etc/nginx/sites-enabled/default
 ln -sf /etc/nginx/sites-available/jaryan /etc/nginx/sites-enabled/jaryan
 nginx -t
