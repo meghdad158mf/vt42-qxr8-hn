@@ -449,7 +449,7 @@ def deploy(job, name, prev, migrate_backup=True):
 
 FAIL_MSG = {
     "rolled_back": " و خودکار به {prev} برگشت داده شد؛ سایت سالم است.",
-    "rollback_failed": " و برگشت به {prev} هم کامل نشد — گزارش را برای Claude بفرستید.",
+    "rollback_failed": " و برگشت به {prev} هم کامل نشد — گزارش نصب را برای پشتیبانی فنی بفرستید.",
     "no_prev": ".",
 }
 
