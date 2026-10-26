@@ -1,0 +1,66 @@
+name: Server e2e (Ubuntu 26.04)
+
+# همان آزمون سرتاسری server-e2e، این بار روی Ubuntu 26.04 (سیستم‌عامل سرور ایران) — داخل یک
+# کانتینر با systemd، چون رانر گیت‌هاب 24.04 است. PostgreSQL، Python و nginx نسخه‌های 26.04.
+on:
+  push:
+    branches: ['claude/**']
+    paths: ['server/**', 'db/**', 'tests/server/**', '.github/workflows/server-e2e-ubuntu26.yml']
+  workflow_dispatch: {}
+
+concurrency:
+  group: server-e2e-26-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: آزاد کردن فضای رانر (نصب‌کننده ۲۰ گیگ فضای خالی می‌خواهد)
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
+      - name: کانتینر Ubuntu 26.04 با systemd
+        run: |
+          cat > /tmp/Dockerfile <<'DF'
+          FROM ubuntu:26.04
+          RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y systemd systemd-sysv python3 curl iproute2 sudo lsb-release && apt-get clean
+          CMD ["/sbin/init"]
+          DF
+          docker build -t jaryan26 -f /tmp/Dockerfile /tmp
+          docker run -d --name srv --privileged --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+            --tmpfs /run --tmpfs /run/lock -p 80:80 -p 443:443 -p 8443:8443 jaryan26
+          for i in $(seq 1 30); do docker exec srv systemctl is-system-running 2>/dev/null | grep -qE 'running|degraded' && break; sleep 2; done
+          docker exec srv bash -c '. /etc/os-release; echo "$PRETTY_NAME"; df -h /'
+          docker cp "$GITHUB_WORKSPACE" srv:/repo
+      - name: نصب پایه
+        run: docker exec -e JARYAN_TEST_NO_SYSTEMD=1 srv bash /repo/server/install.sh < /dev/null
+      - name: ساخت بسته‌ها
+        run: |
+          python3 server/tools/build_core.py --out /tmp
+          bash tests/server/make_broken.sh /tmp/jaryan-server-$(cat server/core/VERSION).jaryan /tmp/broken.jaryan
+          docker cp /tmp/jaryan-server-$(cat server/core/VERSION).jaryan srv:/tmp/good.jaryan
+          docker cp /tmp/broken.jaryan srv:/tmp/broken.jaryan
+      - name: آزمون سرتاسری
+        run: docker exec srv python3 /repo/tests/server/e2e_client.py /root/jaryan-emergency-key.txt /tmp/good.jaryan /tmp/broken.jaryan
+      - name: نسخه‌ها
+        if: always()
+        run: docker exec srv bash -c 'psql --version; python3 -V; nginx -v 2>&1; /opt/jaryan/current/bin/postgrest --version 2>/dev/null || true'
+      - name: آزمون سایت روی سرور
+        run: |
+          docker cp srv:/tmp/e2e-tokens.json /tmp/e2e-tokens.json
+          npx playwright install --with-deps chromium
+          node tests/server/site_smoke.mjs
+      - name: گزارش‌ها
+        if: failure()
+        run: |
+          docker exec srv tail -n 80 /var/log/jaryan-install.log || true
+          docker exec srv journalctl -u jaryan-updater -u jaryan-api -u jaryan-net -u jaryan-setup -u jaryan-storage -u jaryan-functions -u jaryan-jobs -u nginx -u postgresql -n 200 --no-pager || true
+          docker exec srv sh -c 'tail -n 150 /var/lib/jaryan/updater/logs/*.log' || true
