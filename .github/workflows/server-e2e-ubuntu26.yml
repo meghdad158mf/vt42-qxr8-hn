@@ -46,16 +46,16 @@ jobs:
         run: |
           python3 server/tools/build_core.py --out /tmp
           bash tests/server/make_broken.sh /tmp/jaryan-server-$(cat server/core/VERSION).jaryan /tmp/broken.jaryan
-          docker cp /tmp/jaryan-server-$(cat server/core/VERSION).jaryan srv:/tmp/good.jaryan
-          docker cp /tmp/broken.jaryan srv:/tmp/broken.jaryan
+          docker cp /tmp/jaryan-server-$(cat server/core/VERSION).jaryan srv:/root/good.jaryan
+          docker cp /tmp/broken.jaryan srv:/root/broken.jaryan
       - name: آزمون سرتاسری
-        run: docker exec srv python3 /repo/tests/server/e2e_client.py /root/jaryan-emergency-key.txt /tmp/good.jaryan /tmp/broken.jaryan
+        run: docker exec srv python3 /repo/tests/server/e2e_client.py /root/jaryan-emergency-key.txt /root/good.jaryan /root/broken.jaryan
       - name: نسخه‌ها
         if: always()
         run: docker exec srv bash -c 'psql --version; python3 -V; nginx -v 2>&1; /opt/jaryan/current/bin/postgrest --version 2>/dev/null || true'
       - name: آزمون سایت روی سرور
         run: |
-          docker cp srv:/tmp/e2e-tokens.json /tmp/e2e-tokens.json
+          docker exec srv cat /tmp/e2e-tokens.json > /tmp/e2e-tokens.json   # /tmp کانتینر tmpfs خودِ systemd است؛ docker cp آن را نمی‌بیند
           npx playwright install --with-deps chromium
           node tests/server/site_smoke.mjs
       - name: گزارش‌ها
