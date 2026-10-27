@@ -32,6 +32,9 @@ FILES = os.environ.get("JARYAN_FILES", S.ROOT + "/var/lib/jaryan/files")
 API = os.environ.get("JARYAN_API_BASE", "http://127.0.0.1")
 BATCH = 400
 MAX_MEDIA = 24 * 1024 * 1024            # حجم رسانه در هر دسته
+MAX_ONE_MEDIA = 50 * 1024 * 1024        # یک فایل بزرگ‌تر از سقف دسته تنها در یک دسته می‌رود؛ بزرگ‌تر از این نه
+EPOCH = "1970-01-01T00:00:00Z"
+REACH_EVERY = 6 * 3600                  # هر چند وقت سرور ایران دسترسی به سایت‌ها را می‌سنجد
 KEEP_DAYS = 7
 SKEW = 600
 # ستون‌هایی که سرور ایران خودش پر می‌کند و نباید با داده‌ی خارجی عوض شوند
@@ -129,38 +132,121 @@ def upload(bucket, path, content, ctype):
 
 
 # ---------------------------------------------------------------- سمت خارجی: ساختن دسته
+# نشانگر ادامه = (scraped_at، id) هم برای پست‌ها و هم برای یافته‌های خزنده، به شکل «t|id|t|id».
+# همه‌ی پست‌های یک درخواست جمع‌آوری scraped_at یکسان دارند؛ با scraped_at تنها، مرز دسته وسط
+# چنین گروهی بقیه‌ی گروه را برای همیشه جا می‌انداخت. نشانگر قدیمی (فقط زمان) هم پذیرفته می‌شود.
+
+def parse_cursor(s):
+    parts = (s or "").split("|")
+    if len(parts) == 4:
+        try:
+            return parts[0] or EPOCH, int(parts[1]), parts[2] or EPOCH, int(parts[3])
+        except ValueError:
+            pass
+    t = s if s and "|" not in s else EPOCH
+    return t, 0, t, 0
+
+
+def fmt_cursor(pt, pid, mt, mid):
+    return f"{pt}|{pid}|{mt}|{mid}"
+
+
+def after(t, i):
+    """شرط PostgREST: (scraped_at، id) بعد از (t، i)."""
+    return "or=" + urllib.parse.quote(f'(scraped_at.gt."{t}",and(scraped_at.eq."{t}",id.gt.{int(i)}))')
+
+
+def media_file(path):
+    return os.path.join(FILES, "post-media", *path.split("/"))
+
 
 def build_batch(since, limit=BATCH):
-    """پست‌های تازه‌تر از since (scraped_at) با شناسه‌ی منبع و رسانه؛ + یافته‌های خزنده."""
-    q = urllib.parse.quote(since or "1970-01-01T00:00:00Z")
-    posts = rest("GET", f"/posts?scraped_at=gt.{q}&order=scraped_at.asc&limit={limit}"
-                        "&select=*,channels(platform,username)") or []
-    media, size = {}, 0
-    for p in posts:
+    """پست‌های بعد از نشانگر با شناسه‌ی منبع و رسانه؛ + یافته‌های خزنده.
+
+    رسانه هرگز کنار گذاشته نمی‌شود: اگر جا نشد، دسته پیش از همان پست بسته می‌شود و پست
+    با رسانه‌اش در دسته‌ی بعد می‌رود (فقط فایل بزرگ‌تر از MAX_ONE_MEDIA بی‌رسانه می‌رود)."""
+    pt, pid, mt, mid = parse_cursor(since)
+    rows = rest("GET", f"/posts?{after(pt, pid)}&order=scraped_at.asc,id.asc&limit={limit}"
+                       "&select=*,channels(platform,username)") or []
+    posts, media, size, cut = [], {}, 0, False
+    for p in rows:
+        path = p.get("media_storage_path")
+        data = None
+        if path:
+            try:
+                n = os.path.getsize(media_file(path))
+            except OSError:
+                n = None
+            if n is not None and n <= MAX_ONE_MEDIA:
+                if posts and size + n > MAX_MEDIA:
+                    cut = True
+                    break
+                with open(media_file(path), "rb") as f:
+                    data = f.read()
         ch = p.pop("channels", None) or {}
         p["_channel"] = {"platform": ch.get("platform"), "username": ch.get("username")}
-        path = p.get("media_storage_path")
-        if path and size < MAX_MEDIA:
-            fp = os.path.join(FILES, "post-media", *path.split("/"))
-            try:
-                if os.path.getsize(fp) + size <= MAX_MEDIA:
-                    with open(fp, "rb") as f:
-                        data = f.read()
-                    media[path] = base64.b64encode(data).decode()
-                    size += len(data)
-            except OSError:
-                pass
-    upto = posts[-1]["scraped_at"] if posts else since
-    mentions = rest("GET", f"/hawza_mentions?post_id=is.null&scraped_at=gt.{q}&order=scraped_at.asc&limit=500") or []
-    return {"v": 1, "from": conf().get("public_url", ""), "since": since, "upto": upto,
-            "more": len(posts) >= limit, "posts": posts, "media": media, "mentions": mentions}
+        if data is not None:
+            media[path] = base64.b64encode(data).decode()
+            size += len(data)
+        posts.append(p)
+    if posts:
+        pt, pid = posts[-1]["scraped_at"], posts[-1]["id"]
+    mentions = rest("GET", f"/hawza_mentions?post_id=is.null&{after(mt, mid)}&order=scraped_at.asc,id.asc&limit=500") or []
+    if mentions:
+        mt, mid = mentions[-1]["scraped_at"], mentions[-1]["id"]
+    return {"v": 2, "from": conf().get("public_url", ""), "since": since, "upto": fmt_cursor(pt, pid, mt, mid),
+            "more": cut or len(rows) >= limit or len(mentions) >= 500, "posts": posts, "media": media,
+            "mentions": mentions}
 
 
 def channels_snapshot():
-    """فهرست منابعی که سرور خارجی باید جمع کند (سرور ایران منبع حقیقت است)."""
+    """فهرست منابعی که سرور خارجی باید جمع کند (سرور ایران منبع حقیقت است).
+
+    تلگرام همیشه؛ وب‌سایت‌ها و سایت‌های خزنده فقط آن‌هایی که از خودِ سرور ایران در دسترس
+    نیستند (سنجش هر ۶ ساعت در refresh_reach). تا نخستین سنجش، همه فرستاده می‌شوند."""
     chans = rest("GET", "/channels?select=*&platform=in.(telegram,website)") or []
     sites = rest("GET", "/crawl_sites?select=name,url,sitemap_url,active,source") or []
-    return {"channels": chans, "crawl_sites": sites}
+    reach = state().get("reach")
+    if reach:
+        bad_ch, bad_site = set(reach.get("channels") or []), set(reach.get("sites") or [])
+        chans = [c for c in chans if c["platform"] == "telegram" or c["username"] in bad_ch]
+        sites = [x for x in sites if x["url"] in bad_site]
+    return {"channels": chans, "crawl_sites": sites, "reach_known": bool(reach)}
+
+
+def probe(url, timeout=15):
+    """از همین سرور در دسترس است؟ (خطای شبکه، پایان مهلت یا ۵xx = نه)."""
+    try:
+        r = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (jaryan-reach)"})
+        with urllib.request.urlopen(r, timeout=timeout) as resp:
+            resp.read(512)
+            return resp.status < 500
+    except urllib.error.HTTPError as e:
+        return e.code < 500
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def refresh_reach(force=False):
+    """سرور ایران: کدام وب‌سایت‌ها و سایت‌های خزنده از اینجا باز نمی‌شوند (سرور خارجی همان‌ها را جمع کند)."""
+    st = state()
+    if not force and (st.get("reach") or {}).get("at", 0) > time.time() - REACH_EVERY:
+        return st["reach"]
+    from concurrent.futures import ThreadPoolExecutor
+    chans = rest("GET", "/channels?select=username&platform=eq.website&active=is.true") or []
+    sites = rest("GET", "/crawl_sites?select=url&active=is.true") or []
+    urls = sorted({c["username"] for c in chans if c.get("username")} | {x["url"] for x in sites if x.get("url")})
+    with ThreadPoolExecutor(12) as ex:
+        ok = dict(zip(urls, ex.map(probe, urls)))
+    # یک بار دیگر برای ناموفق‌ها (قطعی لحظه‌ای سایت دلیل فرستادن به خارج نیست)
+    with ThreadPoolExecutor(12) as ex:
+        again = [u for u in urls if not ok[u]]
+        ok.update(zip(again, ex.map(probe, again)))
+    reach = {"at": time.time(),
+             "channels": [c["username"] for c in chans if c.get("username") and not ok.get(c["username"], True)],
+             "sites": [x["url"] for x in sites if x.get("url") and not ok.get(x["url"], True)]}
+    save_state(reach=reach)
+    return reach
 
 
 def apply_snapshot(snap):
@@ -177,6 +263,12 @@ def apply_snapshot(snap):
     sites = snap.get("crawl_sites") or []
     if sites:
         rest("POST", "/crawl_sites?on_conflict=url", sites, "resolution=merge-duplicates,return=minimal")
+    if snap.get("reach_known"):
+        keep_sites = {x["url"] for x in sites}
+        mine = rest("GET", "/crawl_sites?select=id,url,active&active=is.true") or []
+        stale = [str(x["id"]) for x in mine if x["url"] not in keep_sites]
+        if stale:
+            rest("PATCH", f"/crawl_sites?id=in.({','.join(stale)})", {"active": False}, "return=minimal")
 
 
 # ---------------------------------------------------------------- سمت ایران: ورود دسته
@@ -203,7 +295,7 @@ def ingest(batch):
             if public:
                 row["media_path"] = f"{public}/storage/v1/object/public/post-media/{path}"
         elif path:
-            # رسانه به این دسته نرسید (سقف حجم)؛ بدون رسانه ثبت می‌شود تا نشانی شکسته نماند
+            # فایل رسانه روی سرور خارجی نبود یا بزرگ‌تر از MAX_ONE_MEDIA بود؛ بدون رسانه ثبت می‌شود
             for k in ("media_path", "media_storage_path", "media_fetched_at"):
                 row.pop(k, None)
         rows.append(row)
@@ -271,7 +363,13 @@ def tick():
                 apply_snapshot(res)
             if not batch["more"]:
                 return
-    elif sc.get("role", "iran") == "iran" and sc.get("link_peer"):
+    elif sc.get("role", "iran") == "iran":
+        try:
+            refresh_reach()
+        except (urllib.error.URLError, OSError, ValueError) as e:
+            print("link reach:", str(e)[:300], file=sys.stderr)
+        if not sc.get("link_peer"):
+            return
         st = state()
         if time.time() - st.get("last_ingest", 0) < 15 * 60:
             return                                # خارجی خودش می‌فرستد
@@ -320,7 +418,7 @@ def export_bundle(out_path, since=None):
     """همه‌ی یک هفته‌ی اخیر (یا از since) در یک فایل امضاشده."""
     since = since or (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=KEEP_DAYS)).isoformat()
     batches, cur = [], since
-    while True:
+    for _ in range(100000):
         b = build_batch(cur, limit=BATCH)
         batches.append(b)
         if not b["more"] or b["upto"] == cur:

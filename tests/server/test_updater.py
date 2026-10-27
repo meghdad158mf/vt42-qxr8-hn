@@ -160,6 +160,11 @@ class UpdaterTest(unittest.TestCase):
             self.login(key="WRONG-WRONG-WRONG-WRONG", ip="10.9.9.9")
         _, code, _ = self.login(ip="10.9.9.9")          # حتی کلید درست در حال قفل
         self.assertEqual(code, 429)
+        # ۱.۱.۲: خطاهای نشانی‌های دیگر (حتی بیش از ۲۰ در ساعت) نشانی تازه را قفل نمی‌کند
+        for n in range(25):
+            self.login(key="WRONG-WRONG-WRONG-WRONG", ip=f"10.8.{n}.1")
+        _, code, _ = self.login(ip="10.7.7.7")
+        self.assertEqual(code, 200)
         op, code, csrf = self.login(key=self.key.lower().replace("-", " "))   # شکل دیگر تایپ کلید
         self.assertEqual(code, 200)
         # بدون csrf بارگذاری رد می‌شود

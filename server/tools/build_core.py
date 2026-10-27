@@ -215,6 +215,9 @@ def main():
         fn = os.path.join(src, "functions")
         for name in ("translate", "news-insights", "extract-post-keywords", "_shared"):
             shutil.copytree(os.path.join(REPO, "supabase", "functions", name), os.path.join(fn, name))
+        # به‌روزرسان /update هم همراه بسته (۱.۱.۲): hooks/activate نسخه‌ی تازه را جایگزین می‌کند
+        os.makedirs(os.path.join(src, "updater"))
+        shutil.copy2(os.path.join(REPO, "server", "updater", "jaryan_updater.py"), os.path.join(src, "updater"))
         os.makedirs(os.path.join(src, "vendor"), exist_ok=True)
         shutil.copy2(fetch(*ACME), os.path.join(src, "vendor", "acme.sh"))
         os.chmod(os.path.join(src, "vendor", "acme.sh"), 0o755)

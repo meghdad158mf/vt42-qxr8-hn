@@ -34,6 +34,8 @@ jobs:
           python3 server/tools/build_core.py --out /tmp
           bash tests/server/make_broken.sh /tmp/jaryan-server-$(cat server/core/VERSION).jaryan /tmp/broken.jaryan
           ls -la /tmp/*.jaryan
+      - name: به‌روزرسان قدیمی‌تر از بسته (تا جایگزینی آن آزموده شود)
+        run: sudo sh -c 'echo "# old" >> /opt/jaryan/updater/jaryan_updater.py'
       - name: آزمون سرتاسری
         run: sudo python3 tests/server/e2e_client.py /root/jaryan-emergency-key.txt /tmp/jaryan-server-$(cat server/core/VERSION).jaryan /tmp/broken.jaryan
       - name: فهرست جدول‌های انتقال = پایگاه داده‌ی واقعی
@@ -56,6 +58,8 @@ jobs:
           print(len(parsed), "جدول؛ تفاوت:", bad or "هیچ")
           sys.exit(1 if bad else 0)
           PY
+      - name: بررسی‌های ۱.۱.۲ (به‌روزرسان، حافظه‌ی Postgres، فشرده‌سازی، پشتیبان فایل‌ها)
+        run: sudo bash tests/server/check_112.sh
       - name: آزمون سایت روی سرور
         run: |
           npx playwright install --with-deps chromium

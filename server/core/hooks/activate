@@ -19,6 +19,28 @@ if [ -d "$R/site/design/assets" ]; then
   { grep -rl "__JARYAN_ANON_KEY__" "$R/site/design/assets" || true; } | xargs -r sed -i "s/__JARYAN_ANON_KEY__/$ANON/g"
 fi
 
+echo "== پایگاه داده (تنظیم حافظه)"
+PGCONF=$(runuser -u postgres -- psql -tAc "show config_file" 2>/dev/null || true)
+set +e
+python3 "$R/services/pgtune.py" apply
+TUNE=$?
+set -e
+if [ "$TUNE" = 10 ]; then
+  systemctl restart postgresql || true
+  UP=0
+  for _ in $(seq 1 60); do
+    if runuser -u postgres -- psql -tAc "select 1" >/dev/null 2>&1; then UP=1; break; fi
+    sleep 1
+  done
+  if [ "$UP" = 0 ]; then
+    # با تنظیم تازه بالا نیامد: همان را برمی‌داریم تا پایگاه داده با تنظیم قبلی کار کند
+    echo "پایگاه داده با تنظیم حافظه‌ی تازه بالا نیامد؛ تنظیم برداشته شد"
+    [ -n "$PGCONF" ] && rm -f "$(dirname "$PGCONF")/conf.d/90-jaryan.conf"
+    systemctl restart postgresql
+    for _ in $(seq 1 60); do runuser -u postgres -- psql -tAc "select 1" >/dev/null 2>&1 && break; sleep 1; done
+  fi
+fi
+
 echo "== nginx"
 python3 "$R/services/serverconf.py" nginx "$R"
 install -m 644 "$R"/systemd/*.service "$R"/systemd/*.timer /etc/systemd/system/
@@ -26,9 +48,32 @@ systemctl daemon-reload
 SVCS="jaryan-api jaryan-net jaryan-setup jaryan-storage jaryan-functions jaryan-jobs"
 for s in $SVCS; do systemctl enable "$s.service" >/dev/null 2>&1; done
 systemctl enable --now jaryan-acme.timer >/dev/null 2>&1 || true
+systemctl enable --now jaryan-files-backup.timer >/dev/null 2>&1 || true
 for s in $SVCS; do systemctl restart "$s.service"; done
 nginx -t
 systemctl reload nginx
+echo "== به‌روزرسان /update"
+NEWUP="$R/updater/jaryan_updater.py"
+UP=/opt/jaryan/updater/jaryan_updater.py
+if [ "${JARYAN_ROLLBACK:-0}" != 1 ] && [ -f "$NEWUP" ] && ! cmp -s "$NEWUP" "$UP"; then
+  install -m 755 "$NEWUP" "$UP.next"
+  if python3 -m py_compile "$UP.next" && python3 "$UP.next" has-key; then
+    cp -p "$UP" "$UP.prev"
+    mv -f "$UP.next" "$UP"
+    # صفحه‌ی /update همین الان مشغول همین نصب است؛ برنامه‌ی تازه‌اش ساعت ۰۳:۲۰ تهران (۲۳:۵۰ UTC)
+    # بار می‌شود، نه وسط کار. پشتیبان شبانه از همین امشب با نسخه‌ی تازه است.
+    WHEN=$(date -u -d "today 23:50" +%s)
+    [ "$WHEN" -gt "$(date -u +%s)" ] || WHEN=$(date -u -d "tomorrow 23:50" +%s)
+    systemd-run --quiet --collect --unit "jaryan-updater-reload-$WHEN" \
+      --on-calendar="$(date -u -d "@$WHEN" '+%Y-%m-%d %H:%M:%S') UTC" \
+      /bin/systemctl restart jaryan-updater.service >/dev/null 2>&1 || true
+    echo "به‌روزرسان تازه نصب شد (بار شدن: $(date -u -d "@$WHEN" '+%Y-%m-%d %H:%M') UTC)"
+  else
+    rm -f "$UP.next"
+    echo "به‌روزرسان تازه آزمون را نگذراند؛ همان قبلی ماند"
+  fi
+fi
+
 echo "== منتظر سرویس‌ها"
 for _ in $(seq 1 40); do
   if curl -fsS -o /dev/null http://127.0.0.1:3001/ready 2>/dev/null \

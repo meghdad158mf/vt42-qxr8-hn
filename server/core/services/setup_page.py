@@ -73,8 +73,11 @@ def login_blocked(ip):
     t = time.time()
     recent = [x for x in _fails.get(ip, []) if t - x < 15 * 60]
     _fails[ip] = recent
-    total = sum(1 for v in _fails.values() for x in v if t - x < 3600)
-    return len(recent) >= 5 or total >= 20
+    # فقط همان نشانی قفل می‌شود (۱.۱.۲). قفل سراسری قبلی (۲۰ خطا در ساعت از هر جا) به هر کسی اجازه
+    # می‌داد مدیر را بیرون نگه دارد؛ کلید اضطراری ۲۴ نویسه‌ای است و حدس زدنش با این سرعت شدنی نیست.
+    for k in [k for k, v in _fails.items() if not v or t - v[-1] > 3600]:
+        _fails.pop(k, None)
+    return len(recent) >= 5
 
 
 def sql_json(sql, admin=False):

@@ -30,9 +30,12 @@ sudo bash jaryan-install.sh   # کلید اضطراری را آخر کار رو�
    بسته ۹۰ ثانیه بررسی می‌شوند. خطای hook یا سالم نبودن ← نسخه‌ی قبلی + بازگردانی پایگاه داده
    (در پایگاه داده‌ی تازه، بعد جایگزینی — `pg_restore --clean` جدول‌های تازه را پاک نمی‌کند).
 2. **`/update` مستقل**: هم از راه nginx (`https://IP/update/`) و هم **مستقیم** روی درگاه
-   `8443` (اگر nginx خراب شد). ورود با کلید اضطراری (هش pbkdf2؛ ۵ اشتباه ← ۱۵ دقیقه قفل)،
+   `8443` (اگر nginx خراب شد). ورود با کلید اضطراری (هش pbkdf2؛ ۵ اشتباه از **همان نشانی** ← ۱۵ دقیقه قفل همان نشانی — از ۱.۱.۲ قفل سراسری ندارد)،
    CSRF، کوکی HttpOnly/SameSite=Strict. روی درگاه مستقیم سرآیندهای `X-Real-IP` پذیرفته نمی‌شوند.
 3. **روی خود سرور**: `sudo python3 /opt/jaryan/updater/jaryan_updater.py activate <نسخه>`.
+4. **به‌روزرسان همراه بسته** (از ۱.۱.۲): `updater/jaryan_updater.py` بسته را `hooks/activate` (نه در برگشت) پس از
+   `py_compile` و `has-key` جایگزین `/opt/jaryan/updater/` می‌کند (نسخه‌ی قبلی `.prev`) و بار شدنش را با یک
+   زمان‌بند یک‌باره‌ی systemd برای ۲۳:۵۰ UTC می‌گذارد، نه وسط نصب جاری.
 
 ## ساختار بسته‌ی به‌روزرسانی
 
@@ -58,7 +61,7 @@ sudo bash jaryan-install.sh   # کلید اضطراری را آخر کار رو�
 | سایت | خروجی Vite همین مخزن با `SUPABASE_URL = location.origin`، کلید عمومی سرور (activate جایگزین می‌کند) و `SERVER_MODE = true` | `/design/ita-monitoring-prototype.html` |
 | تابع‌ها | `jaryan-functions`: همان کد `supabase/functions` (translate، news-insights، extract-post-keywords) با `functions/main.ts` که `Deno.serve` را می‌گیرد؛ کلید لیارا در `/etc/jaryan/functions.env` | `/functions/v1/` |
 | کارهای خودکار | `jaryan-jobs` (`services/jobs.py` + `jobs.json`): همان cronهای pg_cron، همان `scripts/*.py` با توکن کوتاه‌عمر `JARYAN_SERVICE_TOKEN` (رمز مدیر ذخیره نمی‌شود)؛ `run-job` (status/logs/health/اجرا) و `notify` با همان قالب تابع‌های Supabase؛ هشدار قرمز و گزارش روزانه با **پیامک** | `/functions/v1/run-job`، `/functions/v1/notify` |
-| پیوند دو سرور | `services/link.py` در همان jaryan-jobs: خارجی هر ۵ دقیقه push به ایران (پاسخ = تأیید + فهرست منابع)، ایران در صورت لزوم pull + ack، صف یک‌هفته‌ای روی خارجی، «فایل داده» برای قطع کامل؛ HMAC با `/etc/jaryan/link.key`؛ ستون‌های هوش مصنوعی/پنهان ایران بازنویسی نمی‌شوند | `/link/v1/` |
+| پیوند دو سرور | `services/link.py` در همان jaryan-jobs: خارجی هر ۵ دقیقه push به ایران (پاسخ = تأیید + فهرست منابع؛ نشانگر ادامه `(scraped_at، id)` جدا برای پست‌ها و یافته‌های خزنده — `t|id|t|id`؛ رسانه کنار گذاشته نمی‌شود، دسته پیش از آن بسته می‌شود؛ وب‌سایت‌ها/سایت‌های خزنده فقط آن‌هایی که از ایران باز نمی‌شوند — `refresh_reach` هر ۶ ساعت)، ایران در صورت لزوم pull + ack، صف یک‌هفته‌ای روی خارجی، «فایل داده» برای قطع کامل؛ HMAC با `/etc/jaryan/link.key`؛ ستون‌های هوش مصنوعی/پنهان ایران بازنویسی نمی‌شوند | `/link/v1/` |
 | انتقال از Supabase | `services/transfer.py export/import`؛ برون‌بری از راه همان رابط‌ها با رمز مدیر (`.github/workflows/server-export.yml` یا مستقیم از /setup)؛ کدهای ملی با `migration_export_nids()` (migration_054)؛ فایل رمزنگاری‌شده با `EXPORT_PASSWORD`؛ ورود = پشتیبان، جایگزینی کامل در یک تراکنش، فایل‌ها، شمارنده‌ها، بازنویسی نشانی‌ها | `/setup` |
 | دامنه | acme.sh (`vendor/`) با webroot، یا گواهی دستی؛ `jaryan-acme.timer` تمدید؛ بعد از دامنه http→https (map در `/etc/nginx/conf.d/jaryan-map.conf`) و بازنویسی نشانی‌ها | `/setup` |
 | راه‌اندازی | `jaryan-setup` (`setup_page.py` + `setup_more.py`) | `/setup/` |
@@ -71,7 +74,11 @@ sudo bash jaryan-install.sh   # کلید اضطراری را آخر کار رو�
 
 `/opt/jaryan/{releases,current,updater}`، `/var/lib/jaryan/{files,backups,updater}`،
 `/etc/jaryan/tls`، گزارش نصب `/var/log/jaryan-install.log` (بدون کلید).
-سرویس‌ها: `jaryan-updater.service`، `jaryan-backup.timer` (هر شب ۰۲:۳۰ تهران، ۱۴ تای آخر).
+سرویس‌ها: `jaryan-updater.service`، `jaryan-backup.timer` (پایگاه داده هر شب ۰۲:۳۰ تهران، ۱۴ تای آخر)،
+`jaryan-files-backup.timer` (از ۱.۱.۲، ۰۲:۴۰ تهران: `files-*.tar` همه‌ی bucketها جز post-media و newspaper-covers،
+فقط وقتی چیزی عوض شده؛ ۱۴ تای آخر؛ دانلود از /update). nginx: `nginx/05-gzip.conf` (فشرده‌سازی در سطح server —
+nginx.conf اوبونتو خودش `gzip on` دارد). Postgres: `services/pgtune.py` ← `conf.d/90-jaryan.conf` به اندازه‌ی حافظه
+(activate؛ اگر با آن بالا نیامد برداشته می‌شود).
 
 ## آزمون
 
@@ -84,4 +91,5 @@ sudo bash jaryan-install.sh   # کلید اضطراری را آخر کار رو�
 جعل نشانی، فایل‌ها (عمومی/خصوصی/لینک امن/RLS)، سایت، تابع‌ها، اجرای دستی یک کار و گزارشش، هشدار، ورود دسته‌ی
 امضاشده‌ی سرور خارجی، انتقال داده (برون‌بری و ورود رفت و برگشت روی همان سرور)، گواهی دستی و http→https،
 راه‌اندازی دوباره‌ی سرویس‌ها، و بسته‌ی خراب با برگشت پایگاه داده — `tests/server/e2e_client.py`؛ بعد سایت با
-Playwright برای مدیر و بیننده روی همان سرور (`tests/server/site_smoke.mjs`).
+Playwright برای مدیر و بیننده روی همان سرور (`tests/server/site_smoke.mjs`)؛ از ۱.۱.۲ `tests/server/check_112.sh`
+(جایگزینی به‌روزرسان، حافظه‌ی Postgres، فشرده‌سازی، پشتیبان فایل‌ها) و `tests/server/test_link.py` (صفحه‌بندی پیوند).

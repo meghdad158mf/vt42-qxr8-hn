@@ -1,0 +1,9 @@
+[Unit]
+Description=Jaryan nightly files backup (02:40 Tehran = 23:10 UTC, after the database backup)
+
+[Timer]
+OnCalendar=*-*-* 23:10:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

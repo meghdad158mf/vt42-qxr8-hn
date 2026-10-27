@@ -1,0 +1,9 @@
+[Unit]
+Description=Jaryan nightly backup of permanent files (uploads, covers)
+After=local-fs.target
+
+[Service]
+Type=oneshot
+Nice=10
+IOSchedulingClass=idle
+ExecStart=/usr/bin/python3 /opt/jaryan/current/services/backup_files.py run

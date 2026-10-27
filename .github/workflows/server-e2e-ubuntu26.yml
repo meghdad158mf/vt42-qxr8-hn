@@ -48,8 +48,12 @@ jobs:
           bash tests/server/make_broken.sh /tmp/jaryan-server-$(cat server/core/VERSION).jaryan /tmp/broken.jaryan
           docker cp /tmp/jaryan-server-$(cat server/core/VERSION).jaryan srv:/root/good.jaryan
           docker cp /tmp/broken.jaryan srv:/root/broken.jaryan
+      - name: به‌روزرسان قدیمی‌تر از بسته (تا جایگزینی آن آزموده شود)
+        run: docker exec srv sh -c 'echo "# old" >> /opt/jaryan/updater/jaryan_updater.py'
       - name: آزمون سرتاسری
         run: docker exec srv python3 /repo/tests/server/e2e_client.py /root/jaryan-emergency-key.txt /root/good.jaryan /root/broken.jaryan
+      - name: بررسی‌های ۱.۱.۲ (به‌روزرسان، حافظه‌ی Postgres، فشرده‌سازی، پشتیبان فایل‌ها)
+        run: docker exec srv bash /repo/tests/server/check_112.sh
       - name: نسخه‌ها
         if: always()
         run: docker exec srv bash -c 'psql --version; python3 -V; nginx -v 2>&1; /opt/jaryan/current/bin/postgrest --version 2>/dev/null || true'

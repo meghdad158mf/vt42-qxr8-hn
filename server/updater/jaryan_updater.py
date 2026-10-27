@@ -169,8 +169,11 @@ def login_blocked(ip):
     t = now()
     recent = [x for x in _fails.get(ip, []) if t - x < 15 * 60]
     _fails[ip] = recent
-    total = sum(1 for v in _fails.values() for x in v if t - x < 3600)
-    return len(recent) >= 5 or total >= 20
+    # فقط همان نشانی قفل می‌شود (۱.۱.۲). قفل سراسری قبلی (۲۰ خطا در ساعت از هر جا) به هر کسی اجازه
+    # می‌داد مدیر را بیرون نگه دارد؛ کلید اضطراری ۲۴ نویسه‌ای است و حدس زدنش با این سرعت شدنی نیست.
+    for k in [k for k, v in _fails.items() if not v or t - v[-1] > 3600]:
+        _fails.pop(k, None)
+    return len(recent) >= 5
 
 
 # ---------------------------------------------------------------- بسته‌ها
@@ -621,9 +624,14 @@ document.getElementById('upbtn').onclick=()=>{{
     parts.append(f"""<section><h2>نسخه‌ها</h2><p class="muted">نسخه‌ی فعال: <b>{ltr(cur or '—')}</b>. تا {KEEP_RELEASES} نسخه‌ی آخر نگه داشته می‌شوند.</p>
 <table><tr><th>نسخه</th><th>تغییرات</th><th></th></tr>{''.join(rows) or '<tr><td colspan=3>هنوز نسخه‌ای نیست.</td></tr>'}</table></section>""")
 
-    brow = []
-    for f in sorted(os.listdir(BACKUPS), reverse=True)[:30]:
-        if not f.endswith(".dump"):
+    brow, frow = [], []
+    for f in sorted(os.listdir(BACKUPS), reverse=True):
+        if f.startswith("files-") and f.endswith(".tar") and len(frow) < 14:
+            p = os.path.join(BACKUPS, f)
+            frow.append(f"""<tr><td style="direction:ltr;text-align:right">{esc(f)}</td><td>{fmt_size(os.path.getsize(p))}</td>
+<td><a class="btn light" style="background:#eef1f5;color:#16202a" href="/update/backups/{urllib.parse.quote(f)}">دانلود</a></td></tr>""")
+    for f in sorted(os.listdir(BACKUPS), reverse=True)[:60]:
+        if not f.endswith(".dump") or len(brow) >= 30:
             continue
         p = os.path.join(BACKUPS, f)
         brow.append(f"""<tr><td style="direction:ltr;text-align:right">{esc(f)}</td><td>{fmt_size(os.path.getsize(p))}</td>
@@ -635,6 +643,12 @@ document.getElementById('upbtn').onclick=()=>{{
 <p class="muted">هر شب خودکار؛ {KEEP_BACKUPS} پشتیبان شبانه‌ی آخر نگه داشته می‌شوند. فضای آزاد دیسک: {fmt_size(du.free)} از {fmt_size(du.total)}.</p>
 <form method="post" action="/update/backup"><input type="hidden" name="csrf" value="{csrf}"><button {'disabled' if _job['running'] else ''}>پشتیبان‌گیری همین الان</button></form>
 <table>{''.join(brow) or '<tr><td>هنوز پشتیبانی نیست.</td></tr>'}</table></section>""")
+    if frow:
+        parts.append(f"""<section><h2>پشتیبان فایل‌ها</h2>
+<p class="muted">فایل‌های بارگذاری‌شده (بسته‌ی تحلیلی، بسته‌های سایر نهادها، گزارش‌های مدارس، جلدها) هر شب؛ فقط وقتی چیزی عوض شده باشد فایل تازه ساخته می‌شود.</p>
+<table>{''.join(frow)}</table></section>""")
+    parts.append("""<section><h2>نسخه‌ی بیرون از سرور</h2><p class="muted">پشتیبان‌ها روی دیسک همین سرورند و اگر دیسک خراب شود با هم از بین می‌روند.
+دست‌کم ماهی یک بار آخرین پشتیبان پایگاه داده و آخرین پشتیبان فایل‌ها را دانلود و جای امنی بیرون از سرور نگه دارید.</p></section>""")
 
     hist = read_json(HISTORY_FILE, [])[:10]
     hrows = "".join(f"<tr><td>{fmt_time(h['at'])}</td><td class='{'ok' if h['ok'] else 'bad'}'>{esc_mixed(h['msg'])}</td>"

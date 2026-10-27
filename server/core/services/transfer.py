@@ -196,10 +196,17 @@ def tables_from_sql(paths):
 
 
 def export(out_path):
+    work = tempfile.mkdtemp()
+    try:
+        _export(out_path, work)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def _export(out_path, work):
     password = os.environ["EXPORT_PASSWORD"]
     sb = Supa()
     defs = table_defs(sb)
-    work = tempfile.mkdtemp()
     tar_path = os.path.join(work, "data.tar")
     counts = {}
     with tarfile.open(tar_path, "w") as tf:
@@ -213,20 +220,29 @@ def export(out_path):
             if t in SKIP_TABLES:
                 continue
             order = ",".join(pk) or None
-            rows, off = [], 0
+            rows, off, missing = [], 0, False
             while True:
                 q = f"/rest/v1/{t}?select=*&limit=1000&offset={off}" + (f"&order={order}" if order else "")
                 try:
                     part = sb.call("GET", q)
                 except urllib.error.HTTPError as e:
-                    log(f"  {t}: خوانده نشد ({e.code})")
-                    part = None
+                    if e.code == 404 and off == 0:
+                        # جدول در Supabase نیست (migration آن اجرا نشده)؛ این جدول روی سرور دست نمی‌خورد
+                        log(f"  {t}: در سایت فعلی نیست؛ رد شد")
+                        missing = True
+                        break
+                    raise RuntimeError(f"خواندن جدول «{t}» از سایت فعلی ناموفق بود (کد {e.code})؛ "
+                                       "انتقال متوقف شد تا داده‌ی ناقص منتقل نشود. چند دقیقه بعد دوباره امتحان کنید.") from None
+                except RuntimeError as e:
+                    raise RuntimeError(f"خواندن جدول «{t}» از سایت فعلی ناموفق بود ({e})؛ انتقال متوقف شد.") from None
                 if not part:
                     break
                 rows += part
                 off += len(part)
                 if len(part) < 1000:
                     break
+            if missing:
+                continue
             counts[t] = len(rows)
             add(f"tables/{t}.json.gz", gzip.compress(json.dumps(rows, ensure_ascii=False).encode()))
             log(f"  {t}: {len(rows)}")
@@ -236,25 +252,31 @@ def export(out_path):
             log(f"  کدهای ملی: {len(nids.get('nids') or [])}")
         except urllib.error.HTTPError as e:
             log(f"  ⚠ کدهای ملی برون‌بری نشد ({e.code}) — migration_054 روی Supabase اجرا شده؟")
-        files = 0
+        files, lost = 0, []
         for b in BUCKETS:
             for name in list_bucket(sb, b, ""):
                 try:
                     data, hdr = sb.req("GET", f"/storage/v1/object/authenticated/{b}/" + urllib.parse.quote(name),
                                        raw=True)
-                except (urllib.error.HTTPError, RuntimeError) as e:
-                    log(f"  ⚠ {b}/{name}: {e}")
-                    continue
+                except urllib.error.HTTPError as e:
+                    if e.code in (400, 404):
+                        # ردیفش هست ولی خودِ فایل در Supabase نیست؛ چیزی برای انتقال نیست
+                        lost.append(f"{b}/{name}")
+                        continue
+                    raise RuntimeError(f"دریافت فایل «{b}/{name}» ناموفق بود (کد {e.code})؛ انتقال متوقف شد.") from None
+                except RuntimeError as e:
+                    raise RuntimeError(f"دریافت فایل «{b}/{name}» ناموفق بود ({e})؛ انتقال متوقف شد.") from None
                 add(f"files/{b}/{name}", data)
                 files += 1
             log(f"  فایل‌ها تا {b}: {files}")
+        if lost:
+            log(f"  ⚠ {len(lost)} فایل در خودِ سایت فعلی وجود نداشت: " + "، ".join(lost[:10]) + (" …" if len(lost) > 10 else ""))
         add("manifest.json", json.dumps({"kind": "jaryan-transfer", "v": 1, "from": sb.url,
                                          "created": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),
                                          "counts": counts, "files": files}, ensure_ascii=False).encode())
     subprocess.run(["openssl", "enc", "-aes-256-cbc", "-pbkdf2", "-iter", "200000", "-salt",
                     "-in", tar_path, "-out", out_path, "-pass", "env:EXPORT_PASSWORD"],
                    check=True, env=dict(os.environ, EXPORT_PASSWORD=password))
-    shutil.rmtree(work, ignore_errors=True)
     log("خروجی:", out_path, os.path.getsize(out_path), "بایت")
 
 
@@ -264,8 +286,11 @@ def list_bucket(sb, bucket, prefix):
         try:
             items = sb.call("POST", f"/storage/v1/object/list/{bucket}",
                             {"prefix": prefix, "limit": 1000, "offset": off, "sortBy": {"column": "name", "order": "asc"}})
-        except urllib.error.HTTPError:
-            return out
+        except urllib.error.HTTPError as e:
+            if e.code in (400, 404) and off == 0 and not prefix:
+                log(f"  {bucket}: در سایت فعلی نیست؛ رد شد")
+                return out
+            raise RuntimeError(f"فهرست فایل‌های «{bucket}/{prefix}» خوانده نشد (کد {e.code})؛ انتقال متوقف شد.") from None
         for it in items or []:
             full = (prefix + "/" if prefix else "") + it["name"]
             if it.get("id") is None:
