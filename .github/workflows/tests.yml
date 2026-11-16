@@ -15,7 +15,8 @@ concurrency:
 
 jobs:
   e2e:
-    runs-on: ubuntu-latest
+    # Playwright 1.56 روی ubuntu-latest (۲۶.۰۴) مرورگر نصب نمی‌کند → نسخه‌ی ثابت
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
