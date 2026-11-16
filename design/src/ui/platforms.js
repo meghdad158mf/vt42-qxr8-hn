@@ -8,3 +8,14 @@ export const NEWS_PLATFORM_ICON = {
   bale: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-8.9 8.4 8.6 8.6 0 01-3.4-.7L3 20l1-4.8A8.4 8.4 0 1121 11.5z"/></svg>',
 };
 
+// نشانی عمومی یک منبع: کانال‌ها با شناسه، وب‌سایت‌ها (username = آدرس RSS) با ریشه‌ی سایت.
+// خروجی خام است؛ پیش از نشاندن در HTML با safeUrl/escHtml.
+export function channelPublicUrl(ch){
+  const u = String(ch.username || '').replace(/^@/, '');
+  if(ch.platform === 'website'){
+    try { const url = new URL(u); return /^https?:$/.test(url.protocol) ? url.origin : ''; } catch(e){ return ''; }
+  }
+  const base = { telegram: 'https://t.me/', eitaa: 'https://eitaa.com/', bale: 'https://ble.ir/' }[ch.platform];
+  return base && u ? base + encodeURIComponent(u) : '';
+}
+

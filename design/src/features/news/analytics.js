@@ -162,7 +162,8 @@ export function renderNewsAnalytics(){
         g.addColorStop(0, 'rgba(234,179,147,0.5)'); g.addColorStop(1, 'rgba(234,179,147,0.02)');
         return g;
       },
-      fill: true, tension: 0.35,
+      // tension صفر: منحنی نرم بین دو ساعت قله/دره‌ی ساختگی می‌ساخت (تعداد خبر عدد صحیح است)
+      fill: true, tension: 0,
       pointRadius: 2, pointBackgroundColor: '#b5651d', pointBorderColor: '#fff', pointBorderWidth: 1.5,
       pointHoverRadius: 6, pointHoverBackgroundColor: '#b5651d', pointHoverBorderWidth: 2,
     }] },
@@ -201,7 +202,7 @@ export function renderNewsAnalytics(){
 
   // موضوعات پرتکرار — تشخیص هوش مصنوعی (همون news_ai_insights بالا)؛ دونات
   // چون درباره‌ی «سهم» موضوعات از هم‌دیگه‌ست، نه رتبه‌بندی مطلق
-  const topicCounts = (NEWS_AI_INSIGHTS?.topics || []).map(t=>[t.name, t.weight]);
+  const topicCounts = (NEWS_AI_INSIGHTS?.topics || []).map(t=>[t.name ?? t.label ?? '', t.weight]);
   const topicsBox = document.getElementById('news-topics-chart-box');
   const topicsCanvas = document.getElementById('news-topics-chart');
   const topicsEmpty = document.getElementById('news-topics-empty');
@@ -233,7 +234,8 @@ export function renderNewsAnalytics(){
 }
 
 export function setupNewsAnalytics(){
-  document.getElementById('nga-kpis').addEventListener('click', e=>{
+  // کارت‌های شاخص و دکمه‌ی حالت خالی «اخبار منتخب» → اسکرول به موج‌ها
+  document.getElementById('news-analytics-panel').addEventListener('click', e=>{
     const b = e.target.closest('[data-scroll-to]');
     if(b) document.getElementById(b.dataset.scrollTo).scrollIntoView({behavior:'smooth'});
   });

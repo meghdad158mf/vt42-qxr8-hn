@@ -13,7 +13,7 @@ export function editPostKeywords(id){
   if(!rowEl || !p) return;
   const current = (p.ai_keywords||[]).join('، ');
   rowEl.innerHTML = `
-    <input type="text" id="news-kw-input-${id}" value="${escAttr(current)}" placeholder="کلیدواژه‌ها، جدا با ویرگول" style="flex:1;font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);font-family:inherit;" />
+    <input type="text" id="news-kw-input-${id}" value="${escAttr(current)}" placeholder="کلیدواژه‌ها، جدا با ویرگول" style="flex:1;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);font-family:inherit;" />
     <button type="button" class="news-kw-edit-btn" data-kw-save="${id}">ذخیره</button>
     <button type="button" class="news-kw-edit-btn" data-kw-cancel>انصراف</button>
   `;

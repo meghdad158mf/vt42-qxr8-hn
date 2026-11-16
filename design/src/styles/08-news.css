@@ -319,6 +319,13 @@ button.nga-kpi:hover{ border-color: rgba(234,179,147,0.9); box-shadow: 0 0 0 3px
 .nga-donut{ min-height:250px; }
 .nga-more{ background:none; border:none; color: var(--accent-strong); font:inherit; font-size:12px; font-weight:600; cursor:pointer; padding:2px 4px; }
 #news-waves-panel{ scroll-margin-top:90px; }
+/* حالت خالی «اخبار منتخب» (۵.۳۴.۲): وسط کادر کشیده‌شده، به‌جای یک خط تنها بالای کادر سفید بلند */
+.nga-selected{ display:flex; flex-direction:column; }
+.nga-empty{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:8px; padding:28px 16px; color: var(--text-faint); }
+.nga-empty > svg{ width:40px; height:40px; color: var(--accent-strong); opacity:.8; }
+.nga-empty-title{ margin:0; font-size:15px; font-weight:700; color: var(--text); }
+.nga-empty-sub{ margin:0; font-size:13px; line-height:1.9; max-width:420px; }
+.nga-empty-btn{ margin-top:6px; }
 @media (max-width:1100px){ .nga-kpis{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
 /* تک‌ستونه: ترتیب بر اساس اهمیت — منتخب، بعد موج‌ها، بعد موضوعات/ادعاها، بعد نمودارها */
 @media (max-width:900px){
@@ -335,6 +342,9 @@ button.nga-kpi:hover{ border-color: rgba(234,179,147,0.9); box-shadow: 0 0 0 3px
   .nga-kpi.is-date .k-val{ font-size:16px; padding-top:2px; }
   #news-analytics-panel .panel-head{ flex-wrap:wrap; gap:6px 12px; }
   #news-analytics-panel .panel-pill{ white-space:nowrap; }
+  /* دونات «موضوعات پرتکرار» روی گوشی کل عرض و ~۳۵۰px ارتفاع می‌گرفت (۵.۳۴.۲) */
+  .nga-donut{ height:240px; min-height:0; }
+  .nga-empty{ padding:18px 8px; }
 }
 /* موج‌های خبری («در یک نگاه») */
 .wave-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:start; }
