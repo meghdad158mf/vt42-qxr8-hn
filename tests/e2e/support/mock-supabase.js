@@ -51,7 +51,7 @@ function buildData(now = Date.now()) {
     news_ai_insights: [{
       id: 1, computed_at: iso(2), window_hours: 6,
       picks: posts.slice(0, 6).map((p, k) => ({ id: p.id, headline: 'خبر منتخب ' + (k + 1), score: 9 - k, tags: ['تنش سیاسی'], sources: 6 - k, posts: 8, channel_id: p.channel_id, time: p.posted_at, link: p.link })),
-      topics: [{ label: 'اقتصاد', weight: 30 }, { label: 'سیاست خارجی', weight: 20 }],
+      topics: [{ name: 'اقتصاد', weight: 30 }, { name: 'سیاست خارجی', weight: 20 }],
     }],
     newspapers: Array.from({ length: 8 }, (_, i) => ({ id: i + 1, slug: 'np' + i, title: 'روزنامه ' + (i + 1), edition_date: today, cover_url: 'images/analysis-illustration.webp', cover_storage_path: null })),
     app_users: [
