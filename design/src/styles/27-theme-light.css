@@ -26,6 +26,7 @@
 :root[data-theme="light"] #view-dash .topbar-brand-text .sep{ color: var(--cv-faint); }
 :root[data-theme="light"] #view-dash .topbar-brand-text #sec-title{ color: var(--cv-ink); }
 :root[data-theme="light"] #view-dash .topbar-status{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .topbar-status.is-stale{ color:#b45309; }
 :root[data-theme="light"] #view-dash .topbar .chip-btn.ghost{ color: var(--cv-dim); }
 :root[data-theme="light"] #view-dash .topbar .chip-btn.ghost:hover{ color: var(--cv-ink); background: rgba(22,32,42,0.06); }
 :root[data-theme="light"] #view-dash .topbar-divider{ background: rgba(22,32,42,0.2); }
@@ -125,3 +126,26 @@
 :root[data-theme="light"] #view-dash .topbar-theme-btn:hover{ color: var(--cv-ink); background: rgba(22,32,42,0.06); }
 :root[data-theme="light"] #view-dash .topbar-theme-btn .ic-sun{ display:none; }
 :root[data-theme="light"] #view-dash .topbar-theme-btn .ic-moon{ display:block; }
+/* ۵.۳۵.۰: صفحه‌ی نخست — کاشی‌های بنتو و «شماره‌ی تازه»ی بسته روی بوم روشن (29-home-v2.css) */
+:root[data-theme="light"] #view-dash .domain-orbits.is-bento .domain-grid > .domain-card{ background:#fff; border-color: var(--cv-line); box-shadow:0 12px 28px -22px rgba(22,32,42,0.35); }
+:root[data-theme="light"] #view-dash .domain-orbits.is-bento .domain-card:first-child{ background:linear-gradient(160deg,#fff,#fbefe4); border-color:#EAB393; }
+:root[data-theme="light"] #view-dash .domain-orbits.is-bento .dc-desc{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .domain-orbits.is-bento .dc-live{ color:#a0561a; }
+:root[data-theme="light"] #view-dash .pkg-spot-info h3{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .pkg-spot-meta, :root[data-theme="light"] #view-dash .pkg-prev-lb, :root[data-theme="light"] #view-dash .pkg-spot-empty{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .pkg-spot-sub{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .pkg-spot-btns .s{ color: var(--cv-ink); border-color: var(--cv-ctl-line); }
+:root[data-theme="light"] #view-dash .pkg-prev-it{ background:#fff; border-color: var(--cv-line); color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .pkg-prev-it small{ color: var(--cv-dim); }
+/* ۵.۳۵.۰: فهرست روشن/تیره/خودکار — کارت سفید در هر دو نما */
+.theme-wrap{ position:relative; display:inline-flex; }
+.topbar-theme-btn.is-auto::after{ content:'A'; position:absolute; bottom:3px; left:3px; font:800 8px/1 'IRANSansX',Tahoma,sans-serif; color: var(--accent); }
+.theme-menu{ position:absolute; top:calc(100% + 8px); left:0; z-index:75; min-width:200px; padding:6px; border-radius:12px;
+  background:#fff; box-shadow:0 14px 34px rgba(0,0,0,0.3); display:flex; flex-direction:column; gap:2px; }
+.theme-menu[hidden]{ display:none; }
+.theme-menu button{ display:flex; align-items:center; gap:10px; width:100%; min-height:40px; padding:8px 12px; border:none; border-radius:8px;
+  background:none; color:#16202a; font:inherit; font-size:14px; font-weight:600; text-align:start; cursor:pointer; }
+.theme-menu button:hover{ background:#f2f4f8; }
+.theme-menu button[aria-checked="true"]{ background:#fbefe4; color:#8a4a12; }
+.theme-menu svg{ width:18px; height:18px; flex:none; }
+.theme-menu small{ display:block; font-size:12px; font-weight:500; color:#646f80; }

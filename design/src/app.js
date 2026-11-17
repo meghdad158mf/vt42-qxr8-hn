@@ -17,6 +17,8 @@ import { showToast } from './ui/toast.js';
 import { setupConfirm } from './ui/confirm.js';
 import { setupMenus, closeNavMenu, closeAdminMenu } from './ui/menus.js';
 import { setupThemeToggle } from './ui/theme.js';
+import { renderFreshness } from './ui/freshness.js';
+import { renderDomainLive } from './features/home/domain-live.js';
 import { setupTabBars, updateTabInk, restoreLastTab, peekTabBar } from './ui/tabs.js';
 import { setupToTop } from './ui/scroll.js';
 import { setupKeyboardButtons } from './ui/keyboard.js';
@@ -640,7 +642,9 @@ async function loadAll(){
   // (بخش «سرعت ورود» CLAUDE.md رو ببین).
   await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadProfileGroups(), loadChannelProfileGroups(), loadPosts(), loadAnnouncements(), loadHiddenPostIds(), loadSiteSettings(), loadNewsPickEdits()]);
   renderAnnBar();
+  renderFreshness();
   renderDashHeroStats();
+  renderDomainLive();
   renderChannelCards();
   populatePostFilters();
   renderPosts();

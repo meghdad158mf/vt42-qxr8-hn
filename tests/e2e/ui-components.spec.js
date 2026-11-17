@@ -132,15 +132,27 @@ test('نمای روشن/تیره: دکمه‌ی نوار بالا عوض می‌
   const canvas = () => page.evaluate(() => getComputedStyle(document.getElementById('sec-title')).color);
   expect(await theme()).toBe('dark');
   const darkTitle = await canvas();
-  await page.click('#theme-btn');
+  // ۵.۳۵.۰: دکمه فهرست روشن/تیره/خودکار باز می‌کند
+  const pick = async (t) => { await page.click('#theme-btn'); await page.click(`#theme-menu [data-theme-set="${t}"]`); };
+  await pick('light');
   expect(await theme()).toBe('light');
   await expect(page.locator('#theme-btn')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#theme-menu')).toBeHidden();
   expect(await canvas()).not.toBe(darkTitle);
   await page.reload();
   await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
   expect(await theme()).toBe('light');
-  await page.click('#theme-btn');
+  await pick('dark');
   expect(await theme()).toBe('dark');
   expect(await canvas()).toBe(darkTitle);
+  // «خودکار» از تنظیم دستگاه پیروی می‌کند و با عوض شدنش هم‌زمان عوض می‌شود
+  await page.emulateMedia({ colorScheme: 'light' });
+  await pick('auto');
+  expect(await theme()).toBe('light');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect.poll(theme).toBe('dark');
+  await page.reload();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  expect(await theme()).toBe('dark');
   expect(page.appErrors).toEqual([]);
 });

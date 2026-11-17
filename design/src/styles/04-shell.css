@@ -64,6 +64,9 @@
 .topbar-right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .topbar-status{ display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color: rgba(255,255,255,0.5); }
 .topbar-status .dot2{ width:6px; height:6px; border-radius:50%; background: var(--ok); animation: pulse 1.8s infinite; flex-shrink:0; }
+/* ۵.۳۵.۰: داده بیش از ۳ ساعت تازه نشده (ui/freshness.js) */
+.topbar-status.is-stale{ color:#fbbf24; }
+.topbar-status.is-stale .dot2{ background:#f59e0b; }
 .topbar .chip-btn.ghost{ color: rgba(255,255,255,0.6); }
 .topbar .chip-btn.ghost:hover{ color:#fff; background: rgba(255,255,255,0.1); }
 

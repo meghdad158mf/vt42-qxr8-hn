@@ -317,6 +317,33 @@ button.nga-kpi:hover{ border-color: rgba(234,179,147,0.9); box-shadow: 0 0 0 3px
 .nga-side > .panel:last-child{ flex:1; }
 .nga-charts{ grid-template-columns:minmax(0,7fr) minmax(0,5fr); align-items:stretch; }
 .nga-donut{ min-height:250px; }
+/* ۵.۳۵.۰: حباب‌های «موضوعات پرتکرار» */
+.chart-box.topic-bubbles{ height:260px; min-height:0; }
+.tb-bubble{ position:absolute; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:6px; box-sizing:border-box; line-height:1.35; font-weight:700; box-shadow:0 4px 14px rgba(22,32,42,0.12);
+  transition: transform .2s ease; cursor:default; overflow:hidden; }
+.tb-bubble:hover{ transform:scale(1.04); }
+.tb-name{ overflow-wrap:normal; word-break:keep-all; }
+.tb-share{ font-size:.82em; font-weight:600; opacity:.8; margin-top:2px; }
+@media (prefers-reduced-motion: reduce){ .tb-bubble{ transition:none; } }
+/* ۵.۳۵.۰: شاخص امروز در برابر «دیروز تا همین ساعت» — رنگ خنثی، چون بیشتر/کمتر بودن خبر خوب یا بد نیست */
+.nga-kpi .k-delta{ display:inline-flex; align-items:center; gap:3px; margin-inline-start:8px; padding:2px 7px; border-radius:100px;
+  font-size:12px; font-weight:700; vertical-align:middle; background: var(--surface-2); color: var(--text-dim); }
+.nga-kpi .k-delta.is-up{ background: rgba(234,179,147,0.28); color:#8a4a12; }
+.nga-kpi .k-delta.is-down{ background: rgba(91,100,114,0.14); color:#3a4756; }
+.nga-kpi.is-date .k-delta{ display:none; }
+/* ۵.۳۵.۰: چیپ «از نمودار: …» بالای فید خبرها */
+.news-drill-chip{ display:inline-flex; align-items:center; gap:8px; margin:0 0 14px; padding:7px 8px 7px 14px; border-radius:100px;
+  background: var(--accent); color:#16202a; font-size:13px; font-weight:700; }
+.news-drill-chip[hidden]{ display:none; }
+.news-drill-chip .ndc-x{ width:26px; height:26px; border-radius:50%; border:none; background:rgba(22,32,42,.12); color:#16202a; cursor:pointer; font-size:12px; line-height:1; }
+.news-drill-chip .ndc-x:hover{ background:rgba(22,32,42,.22); }
+/* راهنمای نمودار ساعتی (دو خط) */
+.trend-legend{ display:flex; gap:16px; font-size:12px; color: var(--text-dim); margin:-4px 0 6px; }
+.trend-legend span{ display:inline-flex; align-items:center; gap:6px; }
+.trend-legend span::before{ content:''; width:18px; height:0; border-top:2.5px solid #b5651d; }
+.trend-legend .tl-prev::before{ border-top:2px dashed rgba(91,100,114,0.7); }
+.trend-legend[hidden]{ display:none; }
 .nga-more{ background:none; border:none; color: var(--accent-strong); font:inherit; font-size:12px; font-weight:600; cursor:pointer; padding:2px 4px; }
 #news-waves-panel{ scroll-margin-top:90px; }
 /* حالت خالی «اخبار منتخب» (۵.۳۴.۲): وسط کادر کشیده‌شده، به‌جای یک خط تنها بالای کادر سفید بلند */
@@ -344,6 +371,8 @@ button.nga-kpi:hover{ border-color: rgba(234,179,147,0.9); box-shadow: 0 0 0 3px
   #news-analytics-panel .panel-pill{ white-space:nowrap; }
   /* دونات «موضوعات پرتکرار» روی گوشی کل عرض و ~۳۵۰px ارتفاع می‌گرفت (۵.۳۴.۲) */
   .nga-donut{ height:240px; min-height:0; }
+  .nga-kpi .k-delta{ margin-inline-start:6px; padding:1px 6px; }
+  .chart-box.topic-bubbles{ height:240px; }
   .nga-empty{ padding:18px 8px; }
 }
 /* موج‌های خبری («در یک نگاه») */
