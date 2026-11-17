@@ -1,0 +1,86 @@
+/* صفحه‌ی نخست ۵.۳۵.۰ (انتخاب کاربر از ماکت‌ها):
+   ۱) عرصه‌ها با چینش «بنتو» به‌جای مدار و شهاب — هر کاشی آیکون، توضیح یک‌خطی و عدد زنده (domain-live.js)؛
+      «اخبار و رویدادها» و «مواضع» پهن (.is-wide).
+   ۲) بسته‌ی تحلیلی: «شماره‌ی تازه» با جلد بزرگ در مرکز + ردیف شماره‌های قبلی، به‌جای جلدها روی قوس.
+   نسخه‌ی روشن هر دو در 27-theme-light.css. */
+
+/* ---- ۱) بنتو ---- */
+.domain-orbits.is-bento{ display:block; max-width:1100px; margin:0 auto 26px; }
+.domain-orbits.is-bento > .domain-grid{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:16px; margin:0; }
+.domain-orbits.is-bento .domain-grid > .domain-card{
+  width:auto; min-width:0; position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:12px; text-align:start;
+  padding:20px; border-radius:20px; cursor:pointer;
+  background:linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025)); border:1px solid rgba(255,255,255,0.09);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.domain-orbits.is-bento .domain-grid > .domain-card:hover{ transform:translateY(-3px); border-color:rgba(234,179,147,0.5); box-shadow:0 18px 36px -22px rgba(0,0,0,0.7); }
+.domain-orbits.is-bento .domain-card.is-wide{ grid-column:span 2; flex-direction:row; align-items:center; gap:20px; }
+.domain-orbits.is-bento .domain-card:first-child{ background:linear-gradient(160deg, rgba(234,179,147,0.16), rgba(255,255,255,0.03)); border-color:rgba(234,179,147,0.3); }
+.domain-orbits.is-bento .domain-icon.is-illustrated,
+.domain-orbits.is-bento .domain-icon.is-illustrated img{ width:96px; height:96px; max-width:96px; margin:0; }
+.domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated,
+.domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated img{ width:140px; height:140px; max-width:140px; flex:none; }
+.domain-orbits.is-bento .dc-body{ min-width:0; }
+.domain-orbits.is-bento .domain-card h3{ justify-content:flex-start; font-size:17px; margin:0 0 6px; }
+.domain-orbits.is-bento .domain-card.is-wide h3{ font-size:21px; }
+.domain-orbits.is-bento .dc-desc{ margin:0; font-size:13px; line-height:1.85; color:rgba(255,255,255,0.62); }
+.domain-orbits.is-bento .dc-live{ display:inline-block; margin-top:10px; font-size:12px; font-weight:700; color: var(--accent); }
+.domain-orbits.is-bento .dc-live:empty{ display:none; }
+@media (max-width:900px){
+  .domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated,
+  .domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated img{ width:110px; height:110px; max-width:110px; }
+}
+@media (max-width:640px){
+  .domain-orbits.is-bento > .domain-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+  .domain-orbits.is-bento .domain-grid > .domain-card{ padding:14px; gap:8px; border-radius:16px; }
+  .domain-orbits.is-bento .domain-card.is-wide{ gap:14px; }
+  .domain-orbits.is-bento .domain-icon.is-illustrated,
+  .domain-orbits.is-bento .domain-icon.is-illustrated img{ width:64px; height:64px; max-width:64px; }
+  .domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated,
+  .domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated img{ width:84px; height:84px; max-width:84px; }
+  .domain-orbits.is-bento .domain-card h3{ font-size:14px; line-height:1.6; }
+  .domain-orbits.is-bento .domain-card.is-wide h3{ font-size:16px; }
+  .domain-orbits.is-bento .domain-card:not(.is-wide) .dc-desc{ display:none; }
+  .domain-orbits.is-bento .dc-live{ margin-top:4px; }
+}
+@media (prefers-reduced-motion: reduce){ .domain-orbits.is-bento .domain-grid > .domain-card{ transition:none; } }
+
+/* ---- ۲) بسته‌ی تحلیلی: شماره‌ی تازه ---- */
+.pkg-spot{ max-width:1100px; margin:30px auto 0; display:grid; grid-template-columns:auto minmax(0,1fr); gap:36px; align-items:center; }
+.pkg-spot-cover{ width:230px; aspect-ratio:3/4; border-radius:10px; overflow:hidden; cursor:pointer; position:relative;
+  background:linear-gradient(160deg,#2c3a4a,#121a24); border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 30px 60px -25px rgba(0,0,0,0.8), 0 0 0 6px rgba(234,179,147,0.08);
+  display:flex; align-items:center; justify-content:center; color: var(--accent); transition: transform .2s ease; }
+.pkg-spot-cover:hover{ transform:translateY(-4px); }
+.pkg-spot-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+.pkg-spot-cover svg{ width:56px; height:56px; opacity:.8; }
+.pkg-spot-eyebrow{ display:inline-block; font-size:12px; font-weight:700; color:#16202a; background: var(--accent); border-radius:100px; padding:3px 12px; }
+.pkg-spot-info h3{ font-size:24px; font-weight:800; color:#fff; margin:12px 0 6px; line-height:1.5; }
+.pkg-spot-meta{ font-size:13px; color:rgba(255,255,255,0.6); }
+.pkg-spot-sub{ font-size:14px; line-height:2; color:rgba(255,255,255,0.78); margin:10px 0 0; max-width:560px; }
+.pkg-spot-btns{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+.pkg-spot-btns button{ min-height:42px; padding:0 22px; border-radius:100px; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+.pkg-spot-btns .p{ background: var(--accent); color:#16202a; border:none; }
+.pkg-spot-btns .s{ background:none; color:#fff; border:1px solid rgba(255,255,255,0.25); }
+.pkg-spot-btns .s:hover{ border-color: var(--accent); }
+.pkg-prev{ max-width:1100px; margin:34px auto 0; }
+.pkg-prev-lb{ font-size:13px; color:rgba(255,255,255,0.6); margin-bottom:12px; }
+.pkg-prev-row{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px; }
+.pkg-prev-it{ display:flex; align-items:center; gap:12px; padding:10px; border-radius:14px; cursor:pointer; text-align:start;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#fff; font:inherit; transition:border-color .2s ease; }
+.pkg-prev-it:hover{ border-color:rgba(234,179,147,0.5); }
+.pkg-prev-cv{ width:46px; aspect-ratio:3/4; border-radius:5px; overflow:hidden; flex:none; background:linear-gradient(160deg,#34455a,#18212c);
+  display:flex; align-items:center; justify-content:center; color: var(--accent); }
+.pkg-prev-cv img{ width:100%; height:100%; object-fit:cover; display:block; }
+.pkg-prev-cv svg{ width:20px; height:20px; }
+.pkg-prev-it b{ display:block; font-size:13px; }
+.pkg-prev-it small{ font-size:12px; color:rgba(255,255,255,0.55); }
+.pkg-spot-empty{ text-align:center; color:rgba(255,255,255,0.6); font-size:14px; }
+@media (max-width:760px){
+  .pkg-spot{ grid-template-columns:1fr; justify-items:center; text-align:center; gap:20px; }
+  .pkg-spot-sub{ margin-inline:auto; }
+  .pkg-spot-btns{ justify-content:center; }
+  .pkg-spot-cover{ width:180px; }
+  .pkg-prev-row{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion: reduce){ .pkg-spot-cover, .pkg-prev-it{ transition:none; } }

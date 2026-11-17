@@ -16,7 +16,8 @@ import { pickAddBtnHtml, onPicksChanged } from './picks.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
 import { postHideBtnHtml, updateMobileFilterBadges } from '../../app.js';
 
-export const newsState = { region: '', time: 'all', sources: [], query: '', page: 1, dateFrom: '', dateTo: '', platform: 'social' };
+// drill = فیلتری که از کلیک روی نمودارهای «در یک نگاه» آمده (۵.۳۵.۰): { label, range?: {from,to} (ms) }
+export const newsState = { region: '', time: 'all', sources: [], query: '', page: 1, dateFrom: '', dateTo: '', platform: 'social', drill: null };
 // platform: 'social' = پیام‌رسان‌ها (ایتا/تلگرام)، 'website' = سایت‌های خبری عمومی،
 // 'hawza' = سایت‌های خبری اختصاصی حوزه (هم platform=website ولی show_in_hawza=true،
 // برای همین از سطل 'website' مستثنا می‌شن تا دوبار نمایش داده نشن)،
@@ -95,6 +96,11 @@ export function filteredNewsPosts(){
     if(newsState.platform === 'hawza' && p.hawza_relevant !== true) return false;
     if(newsState.region && String(ch.region_id) !== newsState.region) return false;
     if(newsState.sources.length && !newsState.sources.includes(String(p.channel_id))) return false;
+    const dr = newsState.drill && newsState.drill.range;
+    if(dr){
+      const t = new Date(p.posted_at || p.scraped_at).getTime();
+      if(t < dr.from || t >= dr.to) return false;
+    }
     if(newsState.time === 'custom'){
       const postedMs = p.posted_at ? new Date(p.posted_at).getTime() : (p.scraped_at ? new Date(p.scraped_at).getTime() : 0);
       if(newsState.dateFrom && postedMs < new Date(newsState.dateFrom+'T00:00:00').getTime()) return false;
@@ -118,7 +124,24 @@ export function filteredNewsPosts(){
     return true;
   }).sort((a,b)=> new Date(b.posted_at||b.scraped_at) - new Date(a.posted_at||a.scraped_at));
 }
+// چیپ «از نمودار: …» بالای فید؛ ✕ فیلتر نمودار (و منبعی که خودش گذاشته) را برمی‌دارد
+function renderNewsDrillChip(){
+  const el = document.getElementById('news-drill-chip');
+  if(!el) return;
+  const d = newsState.drill;
+  el.hidden = !d;
+  if(d) el.querySelector('.ndc-label').textContent = 'از نمودار: ' + d.label;
+}
+export function clearNewsDrill(){
+  if(!newsState.drill) return;
+  if(newsState.drill.source) newsState.sources = newsState.sources.filter(id=>id !== newsState.drill.source);
+  newsState.drill = null;
+  newsState.page = 1;
+  populateNewsSourceOptions();
+  renderNewsFeed();
+}
 export function renderNewsFeed(){
+  renderNewsDrillChip();
   updateMobileFilterBadges();
   const feed = document.getElementById('news-feed');
   const empty = document.getElementById('news-empty');
@@ -268,6 +291,7 @@ export function keywordChipsHtml(keywords){
 }
 export function setupNewsFeed(){
   onPicksChanged(renderNewsFeed);   // «افزودن به منتخب» → دکمه‌های کارت‌ها تازه بشن
+  document.getElementById('news-drill-clear').addEventListener('click', clearNewsDrill);
   document.getElementById('news-view-list-btn').addEventListener('click', ()=>setNewsView('list'));
   document.getElementById('news-view-grid-btn').addEventListener('click', ()=>setNewsView('grid'));
   document.getElementById('news-feed').addEventListener('click', e=>{
