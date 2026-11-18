@@ -58,6 +58,23 @@ test('صفحه‌ی نخست: شش عرصه در یک مدار و بدون عر�
   expect(page.appErrors).toEqual([]);
 });
 
+// ۵.۳۶.۰: ستون «امروز در جریان» کنار کاشی‌های عرصه‌ها (features/home/today-col.js)
+test('صفحه‌ی نخست: ستون «امروز در جریان» — زبانه‌ها، توقف چرخش با کلیک و رفتن به بخش', async ({ page }) => {
+  await openAs(page, 'viewer');
+  const col = page.locator('#today-col');
+  await expect(col).toBeVisible();
+  await expect(col.locator('.tc-tab').first()).toContainText('اخبار');
+  const claimTab = col.locator('.tc-tab', { hasText: 'شایعه' });
+  await claimTab.click();
+  await expect(claimTab).toHaveAttribute('aria-selected', 'true');
+  await expect(col.locator('.tc-feat-lbl')).toHaveText('تازه‌ترین شایعه');
+  await expect(col).not.toHaveClass(/is-rotating/); // کلیک کاربر چرخش خودکار را متوقف می‌کند
+  await col.locator('.tc-more').click();
+  await expect(page.locator('#sec-overview')).toHaveClass(/active/);
+  await expect.poll(() => page.evaluate(() => location.hash)).toContain('overview/claims');
+  expect(page.appErrors).toEqual([]);
+});
+
 test('منوی بخش‌ها: شماره‌های بسته تحلیلی زیر «بسته تحلیلی جریان» و باز شدن در نمایشگر سند', async ({ page }) => {
   await openAs(page, 'viewer');
   await page.click('#nav-menu-btn');
