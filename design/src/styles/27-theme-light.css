@@ -130,7 +130,8 @@
 :root[data-theme="light"] #view-dash .domain-orbits.is-bento .domain-grid > .domain-card{ background:#fff; border-color: var(--cv-line); box-shadow:0 12px 28px -22px rgba(22,32,42,0.35); }
 :root[data-theme="light"] #view-dash .domain-orbits.is-bento .domain-card:first-child{ background:linear-gradient(160deg,#fff,#fbefe4); border-color:#EAB393; }
 :root[data-theme="light"] #view-dash .domain-orbits.is-bento .dc-desc{ color: var(--cv-dim); }
-:root[data-theme="light"] #view-dash .domain-orbits.is-bento .dc-live{ color:#a0561a; }
+:root[data-theme="light"] #view-dash .domain-orbits.is-bento .dc-live{ color:#a0561a; background:#fbefe4; border-color:#efc9ab; }
+:root[data-theme="light"] #view-dash .domain-orbits.is-bento .domain-card:hover .dc-live{ background:#EAB393; color:#16202a; border-color:#EAB393; }
 :root[data-theme="light"] #view-dash .pkg-spot-info h3{ color: var(--cv-ink); }
 :root[data-theme="light"] #view-dash .pkg-spot-meta, :root[data-theme="light"] #view-dash .pkg-prev-lb, :root[data-theme="light"] #view-dash .pkg-spot-empty{ color: var(--cv-dim); }
 :root[data-theme="light"] #view-dash .pkg-spot-sub{ color: var(--cv-ink); }
