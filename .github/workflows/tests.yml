@@ -14,10 +14,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e:
-    # Playwright 1.56 روی ubuntu-latest (۲۶.۰۴) مرورگر نصب نمی‌کند → نسخه‌ی ثابت
+  checks:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,17 +26,42 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run test:unit
+
+  e2e:
+    # همه‌ی آزمون‌های مرورگر، تقسیم‌شده بین ۴ ماشین هم‌زمان (همان آزمون‌ها، فقط موازی — ۵.۳۶.۱)
+    # Playwright 1.56 روی ubuntu-latest (۲۶.۰۴) مرورگر نصب نمی‌کند → نسخه‌ی ثابت
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:dist
+      - run: npm run test:dist -- --shard=${{ matrix.shard }}/4
         env:
           CI: "1"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 7
+
+  # یک نتیجه‌ی واحد برای همه‌ی آزمون‌های سایت (سبز فقط وقتی همه‌ی تکه‌ها و بررسی‌ها سبزند)
+  site-ok:
+    if: always()
+    needs: [checks, e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.checks.result }}" = success && test "${{ needs.e2e.result }}" = success
 
   python:
     runs-on: ubuntu-latest
