@@ -54,8 +54,8 @@
 | `npm test` / `npm run test:dist` | Playwright (`tests/e2e/`) با سوپابیس ساختگی (`tests/e2e/support/mock-supabase.js`) روی رایانه و گوشی — خام یا ساخته‌شده |
 | `python -m unittest discover -s tests/python` | آزمون‌های پایتون کالکتورها، بدون شبکه |
 
-- `.github/workflows/tests.yml` همه‌ی این‌ها را روی هر PR به شاخه‌ی زنده اجرا می‌کند.
-- `.github/workflows/pages.yml` با هر push به شاخه‌ی زنده می‌سازد، آزمون‌های dist را اجرا می‌کند و اگر سبز بود روی GitHub Pages منتشر می‌کند.
+- `.github/workflows/tests.yml` همه‌ی این‌ها را روی هر PR به شاخه‌ی زنده اجرا می‌کند؛ آزمون‌های مرورگر بین ۴ ماشین هم‌زمان تقسیم می‌شوند (`--shard`) و job `site-ok` نتیجه‌ی واحد است.
+- `.github/workflows/pages.yml` با هر push به شاخه‌ی زنده lint و آزمون واحد را اجرا می‌کند، می‌سازد و روی GitHub Pages منتشر می‌کند (آزمون مرورگر پیش‌تر روی PR انجام شده؛ شاخه‌ی PR پیش از مرج باید به‌روز باشد).
 - `.github/workflows/deploy-edge-functions.yml` با تغییر `supabase/functions/**` تابع‌ها را دیپلوی می‌کند.
 
 ## سمت سرور (Supabase)
