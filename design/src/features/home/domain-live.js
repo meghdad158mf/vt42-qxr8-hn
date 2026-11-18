@@ -16,9 +16,10 @@ function countPosts(chFilter, since, postFilter = () => true){
   return n;
 }
 
-export function renderDomainLive(){
+// شمارش‌ها جدا export شده تا اسلاید «عرصه‌های رصد و پایش» هرو (hero-slider.js) هم همین عددها را نشان دهد
+export function domainLiveCounts(){
   const today = iranTodayStartMs(), week = Date.now() - WEEK;
-  const counts = {
+  return {
     overview: [countPosts(c => c.show_in_news && c.platform !== 'bale' && !c.show_in_hawza, today), 'مطلب امروز'],
     people: [countPosts(c => c.show_in_people || c.show_in_orgs || c.show_in_thinktanks, week), 'یادداشت این هفته'],
     hawza: [countPosts(c => c.show_in_hawza, today, p => p.hawza_relevant === true), 'خبر حوزه امروز'],
@@ -27,6 +28,11 @@ export function renderDomainLive(){
     // مواضع فقط پس از تأیید هوش مصنوعی دیده می‌شوند (section_relevant) — همان که کاربر در بخش می‌بیند
     positions: [countPosts(c => c.show_in_positions, week, p => p.section_relevant === true), 'موضع این هفته'],
   };
+}
+export const domainLiveText = (c) => c && c[0] > 0 ? toFaDigits(c[0]) + ' ' + c[1] : '';
+
+export function renderDomainLive(){
+  const counts = domainLiveCounts();
   document.querySelectorAll('.dc-live[data-live]').forEach(el => {
     const c = counts[el.dataset.live];
     if(!c) return;

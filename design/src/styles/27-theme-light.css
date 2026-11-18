@@ -41,6 +41,8 @@
 :root[data-theme="light"] #view-dash .app-footer-intro:hover{ color: var(--cv-ink); }
 
 /* صفحه‌ی نخست */
+/* هرو سه‌اسلایدی (۵.۳۷.۰) عمداً تیره می‌ماند؛ فقط محوشدن پایینش به رنگ بوم روشن */
+:root[data-theme="light"] #view-dash .hs{ --hs-fade:#eef2f6; }
 :root[data-theme="light"] #view-dash .dash-hero-grid{ background: linear-gradient(160deg, #16202a, #24323f); border-color: transparent; box-shadow: 0 24px 44px -26px rgba(22,32,42,0.55); }
 :root[data-theme="light"] #view-dash .datebar .db-top{ color: var(--cv-dim); }
 :root[data-theme="light"] #view-dash .datebar .db-top b, :root[data-theme="light"] #view-dash .datebar .db-clock{ color: var(--cv-ink); }

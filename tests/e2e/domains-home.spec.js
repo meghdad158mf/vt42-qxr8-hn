@@ -75,6 +75,24 @@ test('صفحه‌ی نخست: ستون «امروز در جریان» — زبا
   expect(page.appErrors).toEqual([]);
 });
 
+// ۵.۳۷.۰: هرو سه‌اسلایدی (features/home/hero-slider.js)
+test('صفحه‌ی نخست: هرو سه‌اسلایدی — زبانه‌ها، اسلاید فعال و رفتن به عرصه', async ({ page }) => {
+  await openAs(page, 'viewer');
+  const hs = page.locator('#hero-slider');
+  const tabs = hs.locator('.hs-tab');
+  await expect(tabs).toHaveCount(3);
+  await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
+  await expect(hs.locator('.hs-slide.on')).toHaveAttribute('data-i', '0');
+  await tabs.nth(1).click();
+  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+  await expect(hs.locator('.hs-slide.on')).toHaveAttribute('data-i', '1');
+  await expect(hs).not.toHaveClass(/is-rotating/); // کلیک کاربر چرخش خودکار را متوقف می‌کند
+  await expect(hs.locator('.hs-here')).toContainText('عرصه‌های رصد و پایش');
+  await hs.locator('.hs-slide.on .hs-dc[data-go="positions"]').click();
+  await expect(page.locator('#sec-positions')).toHaveClass(/active/);
+  expect(page.appErrors).toEqual([]);
+});
+
 test('منوی بخش‌ها: شماره‌های بسته تحلیلی زیر «بسته تحلیلی جریان» و باز شدن در نمایشگر سند', async ({ page }) => {
   await openAs(page, 'viewer');
   await page.click('#nav-menu-btn');
@@ -102,10 +120,14 @@ test('صفحه‌ی نخست: دکمه‌های دسترسی سریع به عر�
     const r = document.querySelector(s).getBoundingClientRect();
     return r.top < window.innerHeight && r.bottom > 0;
   }, sel);
-  await page.locator('[data-home-scroll="package"]').click();
+  // ۵.۳۷.۰: دکمه‌ها داخل اسلایدهای هرو‌اند — اول زبانه‌ی همان اسلاید
+  const tabs = page.locator('#hero-slider .hs-tab');
+  await tabs.nth(2).click();
+  await page.locator('.hs-slide.on [data-home-scroll="package"]').click();
   await expect.poll(() => inView('#pkg-flow')).toBe(true);
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.locator('[data-home-scroll="domains"]').click();
+  await tabs.nth(1).click();
+  await page.locator('.hs-slide.on [data-home-scroll="domains"]').click();
   await expect.poll(() => inView('.section-label')).toBe(true);
   expect(page.appErrors).toEqual([]);
 });

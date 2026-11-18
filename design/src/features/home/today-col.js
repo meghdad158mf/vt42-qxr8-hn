@@ -7,6 +7,7 @@ import { escAttr, escHtml, safeUrl, toFaDigits } from '../../core/text.js';
 import { iranTodayStartMs, newsRelTime } from '../../core/date.js';
 import { newsPickItems } from '../news/picks.js';
 import { POS_TAB_LABEL } from '../positions/positions.js';
+import { heroShownPostIds } from './hero-slider.js';
 
 const ROTATE_MS = 15000; // آرام‌تر از کاشی‌های عرصه‌ها، تا با آن‌ها رقابت نکند
 const PER_TAB = 4; // ۱ برجسته + ۳ فهرستی
@@ -63,12 +64,14 @@ function buildTabs(){
     featLabel: 'تازه‌ترین شایعه', more: { label: 'همه‌ی ادعاها و شایعه‌ها', newsGo: 'claims' } });
   // موضع: فقط آنچه در خود بخش هم دیده می‌شود (تأیید هوش مصنوعی، section_relevant)
   const posCh = new Map(CHANNELS.filter(c => c.show_in_positions).map(c => [c.id, c]));
-  const positions = postsOf(new Set(posCh.keys()), p => p.section_relevant === true);
+  // مواضعی که همین حالا در هرو (اسلاید ۱) دیده می‌شوند اینجا تکرار نمی‌شوند
+  const inHero = heroShownPostIds();
+  const positions = postsOf(new Set(posCh.keys()), p => p.section_relevant === true && !inHero.has(p.id));
   tabs.push({ key: 'pos', label: 'موضع', count: positions.filter(p => tOf(p) >= today).length,
     items: positions.map(p => { const g = POS_TAB_LABEL[posCh.get(p.channel_id)?.positions_tab]; return { text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: g ? [['g', g]] : [], thumb: '', link: p.link }; }),
     featLabel: 'تازه‌ترین موضع', more: { label: 'همه‌ی مواضع', go: 'positions' } });
   // درباره حوزه: اخبار حوزه (سیاسی‌اجتماعی به تشخیص هوش مصنوعی، hawza_relevant)
-  const hawza = postsOf(channelsWhere(c => c.show_in_hawza), p => p.hawza_relevant === true);
+  const hawza = postsOf(channelsWhere(c => c.show_in_hawza), p => p.hawza_relevant === true && !inHero.has(p.id));
   tabs.push({ key: 'hawza', label: 'درباره حوزه', count: hawza.filter(p => tOf(p) >= today).length,
     items: hawza.map(p => ({ text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: [], thumb: thumbOf(p), link: p.link })),
     featLabel: 'تازه‌ترین خبر حوزه', more: { label: 'همه‌ی مطالب درباره حوزه', go: 'hawza' } });
