@@ -62,19 +62,23 @@ export function renderMagazines(){
 // مدیر، حداکثر NAV_ISSUES_MAX تا؛ کلیک = همان «مطالعه». بقیه‌ی شماره‌ها با خودِ «بسته تحلیلی جریان».
 const NAV_ISSUES_MAX = 5;
 export function renderNavMenuIssues(){
-  const box = document.getElementById('nav-menu-issues');
-  if(!box) return;
-  box.innerHTML = '';
-  MAGAZINES.filter(m=>Array.isArray(m.files) && m.files.length).slice(0, NAV_ISSUES_MAX).forEach(m=>{
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'nav-menu-sub nav-menu-issue';
-    // «شماره ۱۲ — عنوان»؛ عنوان پیش‌فرض «بسته تحلیلی جریان» تکرار نمی‌شود
-    const title = faTitle(m.title || '').trim();
-    const label = [m.issue_no ? 'شماره ' + toFaDigits(m.issue_no) : '', title === 'بسته تحلیلی جریان' ? '' : title].filter(Boolean).join(' — ') || title;
-    b.innerHTML = `<span>${escHtml(label)}</span>`;
-    b.title = label;
-    b.addEventListener('click', ()=>{ closeNavMenu(); openMagazineViewer(m); });
-    box.appendChild(b);
+  const issues = MAGAZINES.filter(m=>Array.isArray(m.files) && m.files.length).slice(0, NAV_ISSUES_MAX);
+  // منوی «بخش‌ها» + ستون کناری رایانه‌ی پهن (۵.۳۸.۰، #sn-issues)
+  [['nav-menu-issues', 'nav-menu-sub nav-menu-issue'], ['sn-issues', 'sn-issue'], ['snd-issues', 'snd-issue']].forEach(([id, cls])=>{
+    const box = document.getElementById(id);
+    if(!box) return;
+    box.innerHTML = '';
+    issues.forEach(m=>{
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = cls;
+      // «شماره ۱۲ — عنوان»؛ عنوان پیش‌فرض «بسته تحلیلی جریان» تکرار نمی‌شود
+      const title = faTitle(m.title || '').trim();
+      const label = [m.issue_no ? 'شماره ' + toFaDigits(m.issue_no) : '', title === 'بسته تحلیلی جریان' ? '' : title].filter(Boolean).join(' — ') || title;
+      b.innerHTML = `<span>${escHtml(label)}</span>`;
+      b.title = label;
+      b.addEventListener('click', ()=>{ closeNavMenu(); openMagazineViewer(m); });
+      box.appendChild(b);
+    });
   });
 }
 export function openMagazineViewer(m){

@@ -15,7 +15,8 @@ import { navMark, navRestoring, startRouter, restoreScrollY } from './core/route
 import { setupAmbient } from './ui/ambient.js';
 import { showToast } from './ui/toast.js';
 import { setupConfirm } from './ui/confirm.js';
-import { setupMenus, closeNavMenu, closeAdminMenu } from './ui/menus.js';
+import { setupMenus, closeNavMenu, closeAdminMenu, updateSideNavCurrent } from './ui/menus.js';
+import { setupSideNav } from './ui/side-nav.js';
 import { setupThemeToggle } from './ui/theme.js';
 import { renderFreshness } from './ui/freshness.js';
 import { renderDomainLive } from './features/home/domain-live.js';
@@ -212,6 +213,7 @@ function adminMenuGo(key){
 }
 setupMenus({ current: navCurrentState, navigate: navMenuGo, adminGo: adminMenuGo });
 setupThemeToggle();
+setupSideNav();
 
 // آکاردئون بخش‌های صفحه‌ی «تنظیمات» — هر بار یه details.settings-accordion
 // باز می‌شه، بقیه‌شون بسته می‌شن (تک‌بخش باز، بقیه جمع)
@@ -965,7 +967,7 @@ function onNavPop(state){
 startRouter({
   current: navCurrentState,
   isActive: ()=>document.getElementById('view-dash').classList.contains('active'),
-  onEnter: logPageView,
+  onEnter: st=>{ logPageView(st); updateSideNavCurrent(st); },
   onPop: onNavPop,
 });
 

@@ -5,6 +5,7 @@ import { CHANNELS, POSTS_CACHE } from '../../data/store.js';
 import { toFaDigits } from '../../core/text.js';
 import { iranTodayStartMs } from '../../core/date.js';
 import { SCHOOL_REPORTS } from '../schools/school-reports.js';
+import { MAGAZINES } from '../reports/magazines.js';
 
 const WEEK = 7 * 24 * 3600 * 1000;
 const postTime = (p) => new Date(p.posted_at || p.scraped_at).getTime();
@@ -37,5 +38,13 @@ export function renderDomainLive(){
     const c = counts[el.dataset.live];
     if(!c) return;
     el.textContent = c[0] > 0 ? toFaDigits(c[0]) + ' ' + c[1] + ' ←' : 'مشاهده ←';
+  });
+  // ستون کناری (۵.۳۸.۰): عدد کوتاه «۱۲ امروز» / «۳۴ این هفته»، متن کامل در title؛ صفر = خالی
+  counts.reports = [MAGAZINES.length, 'شماره'];
+  document.querySelectorAll('.sn-live[data-live]').forEach(el => {
+    const c = counts[el.dataset.live];
+    const n = c ? c[0] : 0;
+    el.textContent = n > 0 ? toFaDigits(n) + ' ' + (/امروز/.test(c[1]) ? 'امروز' : /هفته/.test(c[1]) ? 'این هفته' : c[1]) : '';
+    el.title = n > 0 ? toFaDigits(n) + ' ' + c[1] : '';
   });
 }

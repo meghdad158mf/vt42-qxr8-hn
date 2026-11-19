@@ -72,8 +72,13 @@ test('مواضع: تب‌ها گالری مشترک را نشان می‌دهن�
   await expect(page.locator('#pf-logo-grid > *').first()).toBeVisible();
   await page.goBack();
   await expect(page.locator('#positions-page-tabs [data-pos-tab="leader"]')).toHaveClass(/active/);
-  await page.click('#nav-menu-btn');
-  await page.locator('#nav-menu button[data-nav="people/figures"]').click();
+  if (await page.locator('#side-nav').isVisible()) { // رایانه‌ی پهن: ستون کناری (۵.۳۸.۰)
+    await page.locator('#side-nav .sn-item[data-nav="people"]').click();
+    await page.locator('#side-nav button[data-nav="people/figures"]').click();
+  } else {
+    await page.click('#nav-menu-btn');
+    await page.locator('#nav-menu button[data-nav="people/figures"]').click();
+  }
   await expect(page.locator('#sec-people #people-tab-figures')).toBeVisible();
   expect(page.appErrors).toEqual([]);
 });

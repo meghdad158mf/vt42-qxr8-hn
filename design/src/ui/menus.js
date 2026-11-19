@@ -15,21 +15,32 @@ export function closeAdminMenu(){
 }
 const navMenuEl = document.getElementById('nav-menu');
 const navMenuBtn = document.getElementById('nav-menu-btn');
-// پررنگ‌کردن جای فعلی کاربر در منو — فقط موقع باز شدن منو حساب می‌شه
-function updateNavMenuCurrent(){
-  const st = HOOKS.current();
+// پررنگ‌کردن جای فعلی کاربر — منوی «بخش‌ها» موقع باز شدن، ستون کناری (۵.۳۸.۰) بعد از هر جابه‌جایی
+function markCurrent(root, st){
   const t = st.t || (st.s === 'hawza' ? 'news' : null);
   const exact = t ? st.s + '/' + t : null;
   let hasExact = false;
-  navMenuEl.querySelectorAll('button[data-nav]').forEach(b=>{
+  root.querySelectorAll('button[data-nav]').forEach(b=>{
     const isExact = b.dataset.nav === exact;
     if(isExact) hasExact = true;
     b.classList.toggle('is-current', isExact);
     b.removeAttribute('aria-current');
   });
   // بخشی که زیرشاخه‌ی منو نداره (صفحه نخست، برنامه مدارس، بسته تحلیلی...) خودش پررنگ می‌شه
-  navMenuEl.querySelectorAll('button[data-nav]').forEach(b=>{
+  root.querySelectorAll('button[data-nav]').forEach(b=>{
     if(b.classList.contains('is-current') || (!hasExact && b.dataset.nav === st.s)){ b.classList.add('is-current'); b.setAttribute('aria-current', 'page'); }
+  });
+}
+function updateNavMenuCurrent(){ markCurrent(navMenuEl, HOOKS.current()); }
+const sideNavEl = document.getElementById('side-nav');
+const sideDetailEl = document.getElementById('sn-detail');   // پنل «نمایش کامل» کنار ستون
+// ستون کناری: بخش فعلی پررنگ و زیرتب‌های همان عرصه باز (st = حالتی که router ثبت کرد، از app.js)
+export function updateSideNavCurrent(st){
+  if(!st) return;
+  [sideNavEl, sideDetailEl].forEach(root=>{
+    if(!root) return;
+    markCurrent(root, st);
+    root.querySelectorAll('.sn-group, .snd-card').forEach(g=>g.classList.toggle('is-open', g.dataset.sn === st.s));
   });
 }
 function toggleNavMenu(){
@@ -51,6 +62,10 @@ export function setupMenus(hooks){
     const b = e.target.closest('button[data-nav]');
     if(b){ HOOKS.navigate(b.dataset.nav); closeNavMenu(); }
   });
+  [sideNavEl, sideDetailEl].forEach(root=>root?.addEventListener('click', e=>{
+    const b = e.target.closest('button[data-nav]');
+    if(b) HOOKS.navigate(b.dataset.nav);
+  }));
   adminLinks.addEventListener('click', e=>{
     const b = e.target.closest('button[data-admin-go]');
     if(b){ HOOKS.adminGo(b.dataset.adminGo); closeAdminMenu(); }
