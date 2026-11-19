@@ -20,6 +20,7 @@ import { setupThemeToggle } from './ui/theme.js';
 import { renderFreshness } from './ui/freshness.js';
 import { renderDomainLive } from './features/home/domain-live.js';
 import { renderTodayCol, setupTodayCol } from './features/home/today-col.js';
+import { renderHeroSlider, setupHeroSlider } from './features/home/hero-slider.js';
 import { setupTabBars, updateTabInk, restoreLastTab, peekTabBar } from './ui/tabs.js';
 import { setupToTop } from './ui/scroll.js';
 import { setupKeyboardButtons } from './ui/keyboard.js';
@@ -186,8 +187,10 @@ document.querySelectorAll('[data-logout]').forEach(b=>b.addEventListener('click'
 
 setupHome();
 setupTodayCol();
-// کارت‌های عرصه‌ی صفحه‌ی نخست و «مشاهده‌ی همه‌ی شماره‌ها»: data-go = بخش مقصد
-document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click', ()=>switchSection(el.dataset.go)));
+setupHeroSlider();
+// کارت‌های عرصه‌ی صفحه‌ی نخست، «مشاهده‌ی همه‌ی شماره‌ها» و دکمه‌های ساخته‌شده بعد از بارگذاری (هرو، ستون «امروز در جریان»):
+// data-go = بخش مقصد. واگذاری روی سند — دکمه‌هایی که بعداً با innerHTML ساخته می‌شوند هم کار کنند.
+document.addEventListener('click', e=>{ const el = e.target.closest('[data-go]'); if(el && !el.disabled) switchSection(el.dataset.go); });
 // نام سامانه در نوار بالا = صفحه‌ی نخست
 const topbarBrand = document.querySelector('.topbar-brand-text');
 topbarBrand.addEventListener('click', ()=>switchSection('dashboard'));
@@ -647,6 +650,7 @@ async function loadAll(){
   renderFreshness();
   renderDashHeroStats();
   renderDomainLive();
+  renderHeroSlider(); // پیش از ستون «امروز در جریان» — آن ستون مطالب هرو را تکرار نمی‌کند
   renderTodayCol();
   renderChannelCards();
   populatePostFilters();

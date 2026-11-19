@@ -81,8 +81,11 @@ export function setupHome(){
   onMagazinesRendered(renderMagazineCarousel);
   document.getElementById('notify-subscribe-btn').addEventListener('click', subscribeNotify);
   document.getElementById('notify-phone').addEventListener('keydown', e=>{ if(e.key === 'Enter') subscribeNotify(); });
-  document.querySelectorAll('[data-home-scroll]').forEach(b=>b.addEventListener('click', ()=>{
+  // واگذاری روی سند: دکمه‌های اسکرول هرو (hero-slider.js) بعد از بارگذاری داده ساخته می‌شوند
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-home-scroll]');
+    if(!b) return;
     if(b.dataset.homeScroll === 'package') scrollToPackageCard(); else scrollToDomainGrid();
-  }));
+  });
 }
 
