@@ -5,6 +5,7 @@ const sectionOf = (page) => page.evaluate(() => (document.querySelector('.sectio
 
 test('منوی بخش‌ها: هر گزینه به بخش و تب خودش می‌برد و منو بسته می‌شود', async ({ page }) => {
   test.setTimeout(120_000); // ~۳۰ گزینه، هر کدوم یه جابه‌جایی کامل
+  await page.setViewportSize({ width: Math.min(page.viewportSize().width, 1100), height: page.viewportSize().height }); // منوی نوار بالا زیر ۱۲۸۰px
   await openAs(page, 'viewer');
   // گزینه‌های «به‌زودی» برای بیننده پنهان‌ان
   const keys = await page.$$eval('#nav-menu button[data-nav]:not(.soon-item)', (bs) => bs.map((b) => b.dataset.nav));
@@ -22,7 +23,76 @@ test('منوی بخش‌ها: هر گزینه به بخش و تب خودش می�
   expect(page.appErrors).toEqual([]);
 });
 
+// ۵.۳۸.۰: رایانه‌ی پهن (≥۱۲۸۰px) به‌جای منوی «بخش‌ها» ستون ثابت کناری دارد
+test('ستون کناری (رایانه‌ی پهن): هر گزینه به بخش و تب خودش می‌برد و جای فعلی پررنگ است', async ({ page }) => {
+  test.setTimeout(120_000);
+  await openAs(page, 'viewer');
+  test.skip(!(await page.locator('#side-nav').isVisible()), 'ستون کناری فقط روی رایانه‌ی پهن');
+  await expect(page.locator('#nav-menu-btn')).toBeHidden();
+  await expect(page.locator('#sn-kpis .sn-kpi:visible')).toHaveCount(3); // دو عدد دیگر فقط در «نمایش کامل»
+  const keys = [...new Set(await page.$$eval('#side-nav button[data-nav]:not(.soon-item)', (bs) => bs.map((b) => b.dataset.nav)))];
+  expect(keys.length).toBeGreaterThan(20);
+  for (const key of keys) {
+    const [s, t] = key.split('/');
+    // زیرتب‌ها فقط زیر عرصه‌ی فعلی باز است
+    if (t) await page.locator(`#side-nav .sn-item[data-nav="${s}"]`).click();
+    const btn = page.locator(`#side-nav button[data-nav="${key}"]`).last();
+    await btn.click();
+    expect(await sectionOf(page), key).toBe('sec-' + s);
+    if (t && s !== 'posts') await expect.poll(() => page.evaluate(() => location.hash), key).toContain(`#${s}/${t}`);
+    // عرصه: ردیفش باز (هلویی)؛ زیرتب و صفحه نخست/بسته: خودِ دکمه پررنگ
+    const group = page.locator(`#side-nav .sn-group[data-sn="${s}"]`);
+    if (!t && await group.count()) await expect(group, key).toHaveClass(/is-open/);
+    else await expect(btn, key).toHaveClass(/is-current/);
+  }
+  expect(page.appErrors).toEqual([]);
+});
+
+test('ستون کناری: هدر و فوتر داخل ستون و «نمایش کامل» با جزئیات هر بخش', async ({ page }) => {
+  await openAs(page, 'admin');
+  test.skip(!(await page.locator('#side-nav').isVisible()), 'ستون کناری فقط روی رایانه‌ی پهن');
+  // ابزارهای نوار بالا و فوتر خودشان (نه کپی) به ستون منتقل شده‌اند
+  await expect(page.locator('#sn-tools #theme-btn')).toBeVisible();
+  await expect(page.locator('#sn-tools #admin-menu-btn')).toBeVisible();
+  await expect(page.locator('#sn-foot .app-footer')).toHaveCount(1);
+  await expect(page.locator('.topbar')).toBeHidden();
+  await page.click('#admin-menu-btn');
+  await page.locator('#admin-menu [data-admin-go="status"]').click();
+  await expect(page.locator('#sec-status')).toHaveClass(/active/);
+  // «نمایش کامل»: ستون با گزینه‌هایش می‌ماند و پنل روشن جزئیات کنارش تقریباً تمام صفحه باز می‌شود؛
+  // بستن با ×، Esc، پس‌زمینه یا رفتن به بخش
+  const side = page.locator('#side-nav'), detail = page.locator('#sn-detail');
+  await expect(detail).toBeHidden();
+  await page.click('#sn-toggle');
+  await expect(detail).toBeVisible();
+  await expect(page.locator('#sn-toggle')).toHaveAttribute('aria-expanded', 'true');
+  await expect(side.locator('.sn-item[data-nav="overview"]')).toBeVisible(); // گزینه‌های ستون سر جایشان
+  const vw = page.viewportSize().width;
+  expect((await detail.boundingBox()).width + (await side.boundingBox()).width).toBeGreaterThan(vw * 0.85);
+  await expect(detail.locator('.snd-card[data-sn="positions"] > p')).toBeVisible();
+  await expect(detail.locator('#snd-kpis .sn-kpi')).toHaveCount(5);
+  await page.keyboard.press('Escape');
+  await expect(detail).toBeHidden();
+  await page.click('#sn-toggle');
+  await page.locator('#sn-backdrop').click({ position: { x: 10, y: 300 } });
+  await expect(detail).toBeHidden();
+  await page.click('#sn-toggle');
+  await page.click('#snd-close');
+  await expect(detail).toBeHidden();
+  await page.click('#sn-toggle');
+  await detail.locator('button[data-nav="positions/imams"]').click();
+  await expect(detail).toBeHidden();
+  await expect(page.locator('#sec-positions')).toHaveClass(/active/);
+  await expect.poll(() => page.evaluate(() => location.hash)).toContain('#positions/imams');
+  // پهنای کمتر: ابزارها و فوتر به جای اصلی برمی‌گردند
+  await page.setViewportSize({ width: 1100, height: 800 });
+  await expect(page.locator('.topbar #theme-btn')).toBeVisible();
+  await expect(page.locator('main > .app-footer')).toHaveCount(1);
+  expect(page.appErrors).toEqual([]);
+});
+
 test('منو با کلیک بیرون و Esc بسته می‌شود', async ({ page }) => {
+  await page.setViewportSize({ width: Math.min(page.viewportSize().width, 1100), height: page.viewportSize().height }); // منوی نوار بالا زیر ۱۲۸۰px
   await openAs(page, 'viewer');
   await page.click('#nav-menu-btn');
   await expect(page.locator('#nav-menu')).toHaveClass(/open/);

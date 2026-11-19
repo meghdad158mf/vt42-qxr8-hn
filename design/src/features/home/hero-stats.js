@@ -85,6 +85,13 @@ export async function renderDashHeroStats(){
     stat('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.4-6.4"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', domainCount, 'بخش رصد') +
     stat('<path d="M2 5.5c2.5-1 6-1 10 1.5 4-2.5 7.5-2.5 10-1.5V19c-2.5-1-6-1-10 1.5C8 18 4.5 18 2 19z"/><path d="M12 7v13.5"/>', magazinesCount, 'بسته تحلیلی');
   animateHeroStatCounters(wrap);
+  // ستون کناری (۵.۳۸.۰، طرح «دونیمه‌ی عمودی»): سه عدد اصلی همین پنل؛ هر پنج عدد در پنل «نمایش کامل»
+  const k = (v, l) => `<div class="sn-kpi"><b>${fmtHeroStat(v)}</b><span>${l}</span></div>`;
+  const three = k(todayCount, 'رصد امروز') + k(sourceCount, 'منبع رصد') + k(trackedContentCount, 'محتوای رصد شده');
+  const side = document.getElementById('sn-kpis');
+  if(side) side.innerHTML = three;
+  const detail = document.getElementById('snd-kpis');
+  if(detail) detail.innerHTML = three + k(domainCount, 'بخش رصد') + k(magazinesCount, 'بسته تحلیلی');
 }
 // «۳۷٬۹۶۶» — جداکننده‌ی هزارگان فارسی برای خوانایی عددهای بزرگ
 export function fmtHeroStat(n){ return toFaDigits(String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '٬')); }

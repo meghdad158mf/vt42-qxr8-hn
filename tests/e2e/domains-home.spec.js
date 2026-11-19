@@ -95,6 +95,16 @@ test('صفحه‌ی نخست: هرو سه‌اسلایدی — زبانه‌ها
 
 test('منوی بخش‌ها: شماره‌های بسته تحلیلی زیر «بسته تحلیلی جریان» و باز شدن در نمایشگر سند', async ({ page }) => {
   await openAs(page, 'viewer');
+  // رایانه‌ی پهن: همان شماره‌ها در ستون کناری (۵.۳۸.۰)؛ بعد منوی نوار بالا در پهنای کمتر
+  if (await page.locator('#side-nav').isVisible()) {
+    const side = page.locator('#sn-issues .sn-issue');
+    await expect(side).toHaveCount(4);
+    await side.first().click();
+    await expect(page.locator('#doc-viewer')).toHaveClass(/active/);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#doc-viewer')).not.toHaveClass(/active/);
+    await page.setViewportSize({ width: 1100, height: page.viewportSize().height });
+  }
   await page.click('#nav-menu-btn');
   const items = page.locator('#nav-menu-issues .nav-menu-issue');
   await expect(items).toHaveCount(4); // فقط شماره‌های دارای فایل
