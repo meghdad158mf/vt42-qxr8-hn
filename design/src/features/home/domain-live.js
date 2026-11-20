@@ -37,7 +37,9 @@ export function renderDomainLive(){
   document.querySelectorAll('.dc-live[data-live]').forEach(el => {
     const c = counts[el.dataset.live];
     if(!c) return;
-    el.textContent = c[0] > 0 ? toFaDigits(c[0]) + ' ' + c[1] + ' ←' : 'مشاهده ←';
+    // ۵.۳۹.۰: برچسب کوتاه «۳۵۸ امروز» / «۳۴ این هفته»؛ صفر = خالی (CSS پنهانش می‌کند)
+    el.textContent = c[0] > 0 ? toFaDigits(c[0]) + ' ' + (/امروز/.test(c[1]) ? 'امروز' : /هفته/.test(c[1]) ? 'این هفته' : c[1]) : '';
+    el.title = c[0] > 0 ? toFaDigits(c[0]) + ' ' + c[1] : '';
   });
   // ستون کناری (۵.۳۸.۰): عدد کوتاه «۱۲ امروز» / «۳۴ این هفته»، متن کامل در title؛ صفر = خالی
   counts.reports = [MAGAZINES.length, 'شماره'];

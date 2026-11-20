@@ -20,8 +20,8 @@ import { setupSideNav } from './ui/side-nav.js';
 import { setupThemeToggle } from './ui/theme.js';
 import { renderFreshness } from './ui/freshness.js';
 import { renderDomainLive } from './features/home/domain-live.js';
-import { renderTodayCol, setupTodayCol } from './features/home/today-col.js';
-import { renderHeroSlider, setupHeroSlider } from './features/home/hero-slider.js';
+import { renderHome, setupHomeV3 } from './features/home/home-v3.js';
+import { maybeShowWelcome, setupWelcome, resetWelcome } from './features/home/welcome.js';
 import { setupTabBars, updateTabInk, restoreLastTab, peekTabBar } from './ui/tabs.js';
 import { setupToTop } from './ui/scroll.js';
 import { setupKeyboardButtons } from './ui/keyboard.js';
@@ -108,6 +108,7 @@ async function loadAllAndEnter(){
     if(hashSt) navApply(hashSt);
     navMark();
     admin()?.startAlerts();
+    maybeShowWelcome();
     maybeShowIntro();
     if(document.body.classList.contains('app-loading')){
       // رفرش: اسکرول همون جایی که کاربر بود (بعد از رسیدن محتوا، تا ارتفاع صفحه درست باشه)
@@ -177,6 +178,7 @@ function logout(){
   // بستن زبانه پاکش می‌کرد و بعد از خروج/ورود در همون زبانه اطلاعیه‌ی مهم برنمی‌گشت)
   try{ sessionStorage.removeItem('jarian_last_section'); sessionStorage.removeItem('jarian_last_scroll'); sessionStorage.removeItem('jarian_ann_dismissed_s'); sessionStorage.removeItem('jarian_pv_session'); sessionStorage.removeItem('jarian_user_name'); }catch(e){}
   PV_LAST = '';
+  resetWelcome();
   admin()?.stopAlerts();
   clearInterval(SITE_POLL_TIMER);
   try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
@@ -187,8 +189,8 @@ document.querySelectorAll('[data-logout]').forEach(b=>b.addEventListener('click'
 
 
 setupHome();
-setupTodayCol();
-setupHeroSlider();
+setupHomeV3();
+setupWelcome();
 // کارت‌های عرصه‌ی صفحه‌ی نخست، «مشاهده‌ی همه‌ی شماره‌ها» و دکمه‌های ساخته‌شده بعد از بارگذاری (هرو، ستون «امروز در جریان»):
 // data-go = بخش مقصد. واگذاری روی سند — دکمه‌هایی که بعداً با innerHTML ساخته می‌شوند هم کار کنند.
 document.addEventListener('click', e=>{ const el = e.target.closest('[data-go]'); if(el && !el.disabled) switchSection(el.dataset.go); });
@@ -652,8 +654,7 @@ async function loadAll(){
   renderFreshness();
   renderDashHeroStats();
   renderDomainLive();
-  renderHeroSlider(); // پیش از ستون «امروز در جریان» — آن ستون مطالب هرو را تکرار نمی‌کند
-  renderTodayCol();
+  renderHome();
   renderChannelCards();
   populatePostFilters();
   renderPosts();

@@ -29,7 +29,7 @@ test('ستون کناری (رایانه‌ی پهن): هر گزینه به بخ�
   await openAs(page, 'viewer');
   test.skip(!(await page.locator('#side-nav').isVisible()), 'ستون کناری فقط روی رایانه‌ی پهن');
   await expect(page.locator('#nav-menu-btn')).toBeHidden();
-  await expect(page.locator('#sn-kpis .sn-kpi:visible')).toHaveCount(3); // دو عدد دیگر فقط در «نمایش کامل»
+  await expect(page.locator('#sn-kpis .sn-kpi:visible')).toHaveCount(0); // ۵.۳۹.۰: آمار در صفحه‌ی خوش‌آمد و «نمایش کامل»، نه در ستون
   const keys = [...new Set(await page.$$eval('#side-nav button[data-nav]:not(.soon-item)', (bs) => bs.map((b) => b.dataset.nav)))];
   expect(keys.length).toBeGreaterThan(20);
   for (const key of keys) {
@@ -188,7 +188,8 @@ test('دکمه‌ی «فیلترها» روی گوشی باز و بسته می�
 });
 
 test('دکمه‌ی «بالای صفحه»', async ({ page }) => {
-  await openAs(page, 'viewer');
+  // صفحه‌ی نخست روی رایانه‌ی پهن از ۵.۳۹.۰ اسکرول ندارد — صفحه‌ی بلند اخبار
+  await openAs(page, 'viewer', 'overview/study');
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await expect(page.locator('#to-top')).toHaveClass(/show/);
   await page.click('#to-top');
@@ -196,25 +197,25 @@ test('دکمه‌ی «بالای صفحه»', async ({ page }) => {
   expect(page.appErrors).toEqual([]);
 });
 
-test('نمای روشن/تیره: دکمه‌ی نوار بالا عوض می‌کند و بعد از رفرش می‌ماند', async ({ page }) => {
+test('نمای روشن/تیره: پیش‌فرض روشن، دکمه عوض می‌کند و بعد از رفرش می‌ماند', async ({ page }) => {
   await openAs(page, 'viewer');
   const theme = () => page.evaluate(() => document.documentElement.dataset.theme || 'dark');
-  const canvas = () => page.evaluate(() => getComputedStyle(document.getElementById('sec-title')).color);
-  expect(await theme()).toBe('dark');
-  const darkTitle = await canvas();
-  // ۵.۳۵.۰: دکمه فهرست روشن/تیره/خودکار باز می‌کند
+  const canvas = () => page.evaluate(() => getComputedStyle(document.getElementById('view-dash')).backgroundColor + getComputedStyle(document.getElementById('view-dash')).backgroundImage);
+  // ۵.۳۹.۰: پیش‌فرض روشن (مریم‌گلی)
+  expect(await theme()).toBe('light');
+  const lightBg = await canvas();
   const pick = async (t) => { await page.click('#theme-btn'); await page.click(`#theme-menu [data-theme-set="${t}"]`); };
-  await pick('light');
-  expect(await theme()).toBe('light');
-  await expect(page.locator('#theme-btn')).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('#theme-menu')).toBeHidden();
-  expect(await canvas()).not.toBe(darkTitle);
-  await page.reload();
-  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
-  expect(await theme()).toBe('light');
   await pick('dark');
   expect(await theme()).toBe('dark');
-  expect(await canvas()).toBe(darkTitle);
+  await expect(page.locator('#theme-btn')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#theme-menu')).toBeHidden();
+  expect(await canvas()).not.toBe(lightBg);
+  await page.reload();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  expect(await theme()).toBe('dark');
+  await pick('light');
+  expect(await theme()).toBe('light');
+  expect(await canvas()).toBe(lightBg);
   // «خودکار» از تنظیم دستگاه پیروی می‌کند و با عوض شدنش هم‌زمان عوض می‌شود
   await page.emulateMedia({ colorScheme: 'light' });
   await pick('auto');

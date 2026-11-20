@@ -19,7 +19,7 @@
   try{ if(sessionStorage.getItem('jarian_token')) document.documentElement.classList.add('has-session'); }catch(e){}
   try{ history.scrollRestoration = 'manual'; }catch(e){}
   // نمای روشن/تیره‌ی انتخاب‌شده پیش از رسم صفحه (ui/theme.js)
-  try{ var jt=localStorage.getItem('jarian_theme'); if(jt==='light' || (jt==='auto' && matchMedia('(prefers-color-scheme: light)').matches)) document.documentElement.dataset.theme='light'; }catch(e){}
+  try{ var jt=localStorage.getItem('jarian_theme'); if(jt!=='dark' && !(jt==='auto' && !matchMedia('(prefers-color-scheme: light)').matches)) document.documentElement.dataset.theme='light'; }catch(e){ document.documentElement.dataset.theme='light'; }
 </script>
 <style>html.has-session #view-login{ display:none !important; }
 </style>
@@ -38,7 +38,7 @@
         <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
         <h1>سامانه هوشمند جریان</h1>
         <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۳۸.۰</span></span>
+        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۳۹.۰</span></span>
       </div>
     </div>
     <div class="login-panel">
@@ -205,6 +205,8 @@
         <div class="sn-subs sn-issues" id="sn-issues"></div>
       </div>
     </nav>
+    <!-- ارتباط با ما (اطلاع از انتشار + نظر و پیشنهاد) روی رایانه‌ی پهن اینجا منتقل می‌شود (۵.۳۹.۰) -->
+    <div class="sn-contact" id="sn-contact"></div>
     <!-- فوتر سایت روی رایانه‌ی پهن اینجا منتقل می‌شود -->
     <div class="sn-foot" id="sn-foot"></div>
   </aside>
@@ -282,6 +284,21 @@
     </div>
   </section>
   <div class="sn-backdrop" id="sn-backdrop" hidden></div>
+  <!-- صفحه‌ی خوش‌آمد بعد از ورود (۵.۳۹.۰، features/home/welcome.js): راست متن، وسط جلد نشریه، چپ آمار؛ «شروع» = جمع شدن به ستون راست -->
+  <section class="welcome" id="welcome" aria-label="خوش‌آمد" hidden>
+    <div class="wl-in">
+      <div class="wl-txt">
+        <div class="wl-brand"><img src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b>سامانه هوشمند جریان</b></div>
+        <h1>نبض جریان</h1>
+        <h2>فضای سیاسی اجتماعی، به روایت حوزه</h2>
+        <p>جریان هر روز اخبار، مواضع، یادداشت‌ها و فضای مجازی را رصد می‌کند و مهم‌ترین‌های امروز را در یک نگاه پیش روی شما می‌گذارد.</p>
+        <div class="wl-date"></div>
+        <button type="button" class="wl-go" id="wl-go">شروع <span aria-hidden="true">←</span></button>
+      </div>
+      <div class="wl-mid" aria-hidden="true"></div>
+      <div class="wl-stats" id="wl-stats" aria-label="آمار رصد"></div>
+    </div>
+  </section>
   <main class="main">
     <div class="topbar">
       <div class="topbar-brand">
@@ -630,102 +647,52 @@
       </div>
     </div>
 
-    <!-- DASHBOARD: hero (pitch + illustration) + three feature cards to posts / analytics / channels & people -->
+    <!-- صفحه‌ی نخست (۵.۳۹.۰، انتخاب کاربر بعد از چند دور ماکت؛ الگوی داشبورد «Planti»): روی رایانه‌ی پهن بدون اسکرول —
+         سرصفحه‌ی خوش‌آمد + جست‌وجو؛ ستون «امروز در جریان» (مطلب اصلی روی دیوار روزنامه‌ها + فهرست تازه‌ترین‌ها)؛
+         شش کارت عرصه؛ کارت باریک «بسته تحلیلی جریان». داده و رسم: features/home/home-v3.js. گوشی: همین‌ها زیر هم. -->
     <section class="section active" id="sec-dashboard">
-      <!-- ۵.۳۷.۰: هرو سه‌اسلایدی (انتخاب کاربر) — اسلایدها و زبانه‌ها با features/home/hero-slider.js بعد از بارگذاری داده ساخته می‌شوند -->
-      <section class="hs" id="hero-slider" aria-roledescription="carousel" aria-label="معرفی صفحه‌ی نخست">
-        <div class="hs-slides"></div>
-        <div class="hs-here" aria-live="polite"></div>
-        <div class="hs-tabs" role="tablist" aria-label="اسلایدهای صفحه‌ی نخست"></div>
-      </section>
-      <div class="dash-hero-stats" id="dash-hero-stats"></div>
-      <!-- نوار تاریخ/ساعت/مناسبت (مهر ۱۴۰۵، خواست کاربر: «زیر هرو») — renderDatebar() -->
-      <div class="datebar" id="datebar" aria-live="off"></div>
-
-      <div class="section-label">عرصه‌های رصد و پایش</div>
-      <!-- ۵.۳۵.۰: چینش «بنتو» (انتخاب کاربر به‌جای مدار و شهاب) — عدد زنده‌ی هر عرصه از features/home/domain-live.js
-           ۵.۳۶.۰: ستون «امروز در جریان» کنارش (features/home/today-col.js) تا عرصه‌ها و تازه‌ترین‌ها بی‌اسکرول با هم دیده شوند -->
-      <div class="home-split">
-      <div class="domain-orbits is-bento">
-      <div class="domain-grid">
-        <div class="domain-card is-wide" data-vis="overview" data-go="overview" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-news.webp" alt="" loading="lazy" decoding="async" /></div>
-          <div class="dc-body"><h3>اخبار و رویدادها</h3><p class="dc-desc">خبرگزاری‌ها، شبکه‌های اجتماعی، روزنامه‌ها و ادعاها</p><span class="dc-live" data-live="overview"></span></div>
-        </div>
-        <div class="domain-card" data-vis="people" data-go="people" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-people.webp" alt="" loading="lazy" decoding="async" /></div>
-          <div class="dc-body"><h3>یادداشت‌ها</h3><p class="dc-desc">تحلیل چهره‌ها، سازمان‌ها و اندیشکده‌ها</p><span class="dc-live" data-live="people"></span></div>
-        </div>
-        <div class="domain-card" data-vis="hawza" data-go="hawza" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-hawza.webp" alt="" loading="lazy" decoding="async" /></div>
-          <div class="dc-body"><h3>درباره حوزه</h3><p class="dc-desc">اخبار حوزه و آنچه درباره‌ی حوزه گفته می‌شود</p><span class="dc-live" data-live="hawza"></span></div>
-        </div>
-        <div class="domain-card" data-vis="posts" data-go="posts" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-cyberspace.webp" alt="" loading="lazy" decoding="async" /></div>
-          <div class="dc-body"><h3>کنشگری مجازی</h3><p class="dc-desc">پست‌ها و فعالیت کنشگران فضای مجازی</p><span class="dc-live" data-live="posts"></span></div>
-        </div>
-        <div class="domain-card" data-vis="schools" data-go="schools" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-schools.webp" alt="" loading="lazy" decoding="async" /></div>
-          <div class="dc-body"><h3>برنامه مدارس</h3><p class="dc-desc">گزارش‌های برنامه‌های مدارس علمیه</p><span class="dc-live" data-live="schools"></span></div>
-        </div>
-        <div class="domain-card is-wide" data-vis="positions" data-go="positions" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-positions.webp" alt="" loading="lazy" decoding="async" /></div>
-          <div class="dc-body"><h3>مواضع مراجع و علماء</h3><p class="dc-desc">مواضع رهبری، مراجع، ائمه جمعه و تشکل‌ها</p><span class="dc-live" data-live="positions"></span></div>
-        </div>
-      </div>
-      </div>
-      <aside class="today-col" id="today-col" aria-label="امروز در جریان" hidden>
-        <div class="tc-hd"><b>امروز در جریان</b><small>از همه‌ی عرصه‌ها</small></div>
-        <div class="tc-tabs" role="tablist" aria-label="نوع مطلب"></div>
-        <div class="tc-body" role="tabpanel"></div>
-      </aside>
-      </div>
-      <p class="domain-caption">جریان هر عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، یادداشت‌های افراد، سازمان‌ها و اندیشکده‌های تأثیرگذار، اخبار پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود، کنشگری فضای مجازی، برنامه‌های مدارس و مواضع مراجع و علماء. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
-
-      <div class="why-jarian-card">
-        <div class="why-jarian-grid">
-          <div class="why-jarian-item">
-            <div class="why-jarian-tag">رصد لحظه‌ای</div>
-            <div class="why-jarian-bar"></div>
-            <p>اخبار و رویدادها، کنشگری مجازی، مدارس و افراد را در یک سامانه‌ی واحد و به‌روز دنبال می‌کنیم. هر عرصه با روش پایش مخصوص به خودش رصد می‌شود تا هیچ تحولی در فضای سیاسی‌اجتماعی از دید جریان دور نماند.</p>
+      <div class="hm">
+        <header class="hm-hd">
+          <div class="hm-hi">
+            <h1>سلام، به جریان خوش آمدید</h1>
+            <p id="hm-sub">مهم‌ترین‌های امروز از همه‌ی عرصه‌ها</p>
           </div>
-          <div class="why-jarian-item">
-            <div class="why-jarian-tag">تحلیل تخصصی</div>
-            <div class="why-jarian-bar"></div>
-            <p>با نگاه جامعه‌شناسی سیاسی، رویدادها را از دل داده‌ها استخراج و تحلیل می‌کنیم. حاصل این تحلیل در قالب بسته‌ی تحلیلی جریان، هر شماره در اختیار مخاطب قرار می‌گیرد.</p>
-          </div>
-          <div class="why-jarian-item">
-            <div class="why-jarian-tag">دسترسی اختصاصی</div>
-            <div class="why-jarian-bar"></div>
-            <p>با سطح‌بندی دقیق نقش‌ها، اطلاعات حساس فقط در اختیار افراد مجاز قرار می‌گیرد. مدیران و بینندگان هرکدام دسترسی متناسب با نیاز خود را دارند، بدون افشای داده‌های حساس.</p>
+          <form class="hm-search" id="hm-search" role="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input type="search" id="hm-search-input" aria-label="جست‌وجو در اخبار" placeholder="جست‌وجو در اخبار و رویدادها…" />
+          </form>
+        </header>
+        <div class="hm-body">
+          <aside class="hm-today" id="hm-today" aria-label="امروز در جریان">
+            <div class="hm-lead" id="hm-lead"></div>
+            <div class="hm-list">
+              <div class="hm-sx"><h2>امروز در جریان</h2><button type="button" class="hm-more" data-news-go="study">همه ←</button></div>
+              <div class="hm-items" id="hm-items"></div>
+            </div>
+          </aside>
+          <div class="hm-main">
+            <div class="hm-sx section-label"><h2>عرصه‌های رصد</h2></div>
+            <div class="domain-orbits hm-domains">
+            <div class="domain-grid">
+              <div class="domain-card" data-vis="overview" data-go="overview" role="button" tabindex="0"><img src="images/domain-icon-news.webp" alt="" loading="lazy" decoding="async" /><h3>اخبار و رویدادها</h3><span class="dc-live" data-live="overview"></span></div>
+              <div class="domain-card" data-vis="positions" data-go="positions" role="button" tabindex="0"><img src="images/domain-icon-positions.webp" alt="" loading="lazy" decoding="async" /><h3>مواضع مراجع و علماء</h3><span class="dc-live" data-live="positions"></span></div>
+              <div class="domain-card" data-vis="hawza" data-go="hawza" role="button" tabindex="0"><img src="images/domain-icon-hawza.webp" alt="" loading="lazy" decoding="async" /><h3>درباره حوزه</h3><span class="dc-live" data-live="hawza"></span></div>
+              <div class="domain-card" data-vis="people" data-go="people" role="button" tabindex="0"><img src="images/domain-icon-people.webp" alt="" loading="lazy" decoding="async" /><h3>یادداشت‌ها</h3><span class="dc-live" data-live="people"></span></div>
+              <div class="domain-card" data-vis="posts" data-go="posts" role="button" tabindex="0"><img src="images/domain-icon-cyberspace.webp" alt="" loading="lazy" decoding="async" /><h3>کنشگری مجازی</h3><span class="dc-live" data-live="posts"></span></div>
+              <div class="domain-card" data-vis="schools" data-go="schools" role="button" tabindex="0"><img src="images/domain-icon-schools.webp" alt="" loading="lazy" decoding="async" /><h3>برنامه مدارس</h3><span class="dc-live" data-live="schools"></span></div>
+            </div>
+            </div>
+            <div class="hm-pkg" id="pkg-flow" data-vis="reports"></div>
           </div>
         </div>
       </div>
 
-      <div class="section-label pkg-flow-label" id="pkg-flow">بسته تحلیلی جریان</div>
-      <p class="domain-caption pkg-caption">بسته تحلیلی جریان، خلاصه‌ای تحلیلی، دقیق و چندلایه از تحولات سیاسی‌اجتماعی است که سعی دارد نگاهی جامع را در اختیار مخاطب قرار دهد. این بسته شامل ۱۰ بخش است.</p>
-      <div class="pkg-parts" aria-label="بخش‌های بسته">
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4a16 16 0 0116 16M4 11a9 9 0 019 9"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>خط خبری</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/></svg>تحلیل اخبار روز</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l2.6 5.6 6.2.6-4.6 4.2 1.3 6.1L12 16.8 6.5 19.5l1.3-6.1L3.2 9.2l6.2-.6L12 3z"/></svg>مهم‌ترین اخبار</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="5.5" r="2.5"/><circle cx="5" cy="17.5" r="2.5"/><circle cx="19" cy="17.5" r="2.5"/><path d="M10.7 7.7l-4.4 7.6M13.3 7.7l4.4 7.6M7.5 17.5h9"/></svg>نگاه جامعه‌شناسی سیاسی</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8M10.5 8v3.2M10.5 13.6h.01"/></svg>اصل ماجرا</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/></svg>تحلیل سازمان‌ها</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 21H6.5A1.5 1.5 0 015 19.5v-15A1.5 1.5 0 016.5 3H14l4 4v2"/><path d="M8.5 8.5h5M8.5 12.5h3.5"/><path d="M20.4 11.6a1.6 1.6 0 00-2.3 0L12.5 17.2V20h2.8l5.1-5.1a1.6 1.6 0 000-2.3z"/></svg>یادداشت طلاب</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M6.7 6.7C4.6 8.1 3 12 3 12s2.4 4.2 6.3 5.9M14 5.1c5.4.7 7 6.9 7 6.9a12.9 12.9 0 01-2.2 3"/></svg>خارج از دید</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>نبض افکار</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>تحلیل اندیشگده‌ها</span>
-      </div>
-      <div class="pkg-flow">
-        <div id="pkg-covers"></div>
-      </div>
-      <div class="pkg-more" data-vis="reports"><button type="button" class="pkg-more-btn" data-go="reports">مشاهده‌ی همه‌ی شماره‌ها<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button></div>
-
-      <div class="home-bottom-row">
+      <!-- ارتباط با ما: روی رایانه‌ی پهن خودِ این بخش به ستون کناری منتقل می‌شود (ui/side-nav.js)؛ گوشی: ته صفحه‌ی نخست -->
+      <section class="home-contact" id="home-contact" aria-label="ارتباط با ما">
+        <h2 class="hc-title">ارتباط با ما</h2>
         <div class="notify-card">
           <div class="notify-card-text">
             <h3>اطلاع از انتشار بسته تحلیلی جریان</h3>
-            <div class="home-bottom-bar"></div>
             <p>شماره موبایل خود را ثبت کنید تا هر وقت شماره‌ی جدید «بسته تحلیلی جریان» منتشر شد، پیامک اطلاع‌رسانی برایتان ارسال شود.</p>
           </div>
           <div class="notify-card-form">
@@ -733,19 +700,15 @@
             <button type="button" class="btn primary" id="notify-subscribe-btn">ثبت</button>
           </div>
         </div>
-
-        <div class="home-bottom-divider"></div>
-
         <div class="feedback-card">
-          <h3>برای بهتر شدن بسته‌های جریان به ما کمک کنید</h3>
-          <div class="home-bottom-bar"></div>
+          <h3>نظر و پیشنهاد</h3>
           <form class="feedback-form">
             <input type="text" id="feedback-name" aria-label="نام (اختیاری)" placeholder="نام (اختیاری)" />
             <textarea id="feedback-message" aria-label="متن نظر یا پیشنهاد" placeholder="نظر یا پیشنهاد خود را بنویسید..." required></textarea>
             <button type="submit" class="btn primary" id="feedback-submit-btn">ارسال</button>
           </form>
         </div>
-      </div>
+      </section>
     </section>
 
     <!-- OVERVIEW / SCHOOLS / PEOPLE — placeholders, غیرفعال به‌خواست کاربر -->
@@ -1761,7 +1724,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۳۸.۰</span></small>
+          <small>ویرایش <span class="app-version">۵.۳۹.۰</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">

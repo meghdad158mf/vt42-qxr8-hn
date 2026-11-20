@@ -1,16 +1,13 @@
-// ستون «امروز در جریان» کنار کاشی‌های عرصه‌ها (۵.۳۶.۰، انتخاب کاربر بعد از چند دور ماکت):
-// پنج زبانه‌ی اخبار / شایعه / موضع / درباره حوزه / یادداشت؛ بالای هر زبانه یک مطلب برجسته و زیرش سه مطلب.
-// زبانه‌ها خودکار می‌چرخند (هر ۱۰ ثانیه) — با رفتن ماوس/فوکوس/لمس مکث، با کلیک کاربر متوقف،
-// و با prefers-reduced-motion اصلاً نمی‌چرخند. داده فقط از آنچه loadAll آورده (بدون درخواست اضافه).
+// داده‌ی «امروز در جریان» صفحه‌ی نخست (از ۵.۳۹.۰ فقط داده؛ رسم در home-v3.js). پنج گروه: اخبار / شایعه /
+// موضع / درباره حوزه / یادداشت — از آنچه loadAll آورده، بدون درخواست اضافه. todayFeed() آن‌ها را یکی‌درمیان
+// (گروه‌به‌گروه) در یک فهرست می‌چیند تا از هر عرصه چیزی دیده شود.
 import { CHANNELS, POSTS_CACHE, HIDDEN_POST_IDS, chName } from '../../data/store.js';
-import { escAttr, escHtml, safeUrl, toFaDigits } from '../../core/text.js';
+import { toFaDigits } from '../../core/text.js';
 import { iranTodayStartMs, newsRelTime } from '../../core/date.js';
 import { newsPickItems } from '../news/picks.js';
 import { POS_TAB_LABEL } from '../positions/positions.js';
-import { heroShownPostIds } from './hero-slider.js';
 
-const ROTATE_MS = 15000; // آرام‌تر از کاشی‌های عرصه‌ها، تا با آن‌ها رقابت نکند
-const PER_TAB = 4; // ۱ برجسته + ۳ فهرستی
+const PER_TAB = 4;
 const IC = {
   news: '<path d="M4 4h12v16H6a2 2 0 01-2-2V4zM16 8h4v10a2 2 0 01-2 2M8 8h4M8 12h4M8 16h3"/>',
   claim: '<path d="M12 3l9 16H3L12 3zM12 10v4M12 17h.01"/>',
@@ -40,6 +37,7 @@ function channelsWhere(fn){ return new Set(CHANNELS.filter(fn).map(c => c.id)); 
 function postsOf(ids, extra = () => true){ return POSTS_CACHE.filter(p => ids.has(p.channel_id) && visible(p) && extra(p)).sort(byNew); }
 
 // هر زبانه: { key, label, count (امروز), items:[{text, meta, badges:[[cls,txt]], thumb, link}], more:{label, go|newsGo}, featLabel }
+let EXCLUDE = new Set();
 function buildTabs(){
   const today = iranTodayStartMs();
   const tabs = [];
@@ -65,7 +63,7 @@ function buildTabs(){
   // موضع: فقط آنچه در خود بخش هم دیده می‌شود (تأیید هوش مصنوعی، section_relevant)
   const posCh = new Map(CHANNELS.filter(c => c.show_in_positions).map(c => [c.id, c]));
   // مواضعی که همین حالا در هرو (اسلاید ۱) دیده می‌شوند اینجا تکرار نمی‌شوند
-  const inHero = heroShownPostIds();
+  const inHero = EXCLUDE;
   const positions = postsOf(new Set(posCh.keys()), p => p.section_relevant === true && !inHero.has(p.id));
   tabs.push({ key: 'pos', label: 'موضع', count: positions.filter(p => tOf(p) >= today).length,
     items: positions.map(p => { const g = POS_TAB_LABEL[posCh.get(p.channel_id)?.positions_tab]; return { text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: g ? [['g', g]] : [], thumb: '', link: p.link }; }),
@@ -84,84 +82,16 @@ function buildTabs(){
   return tabs.map(t => ({ ...t, items: t.items.filter(i => i.text).slice(0, PER_TAB) })).filter(t => t.items.length);
 }
 
-const badgesHtml = (b) => b.length ? `<div class="tc-bd">${b.map(([c, t]) => `<span class="${c}">${escHtml(t)}</span>`).join('')}</div>` : '';
-// عنوان هر مطلب: پیوند به منبع اصلی (زبانه‌ی تازه)، اگر نشانی معتبر داشته باشد
-const titleHtml = (i, tag) => {
-  const u = i.link ? safeUrl(i.link) : '#';
-  return u !== '#' ? `<${tag}><a href="${u}" target="_blank" rel="noopener">${escHtml(i.text)}</a></${tag}>` : `<${tag}>${escHtml(i.text)}</${tag}>`;
-};
-function bodyHtml(t){
-  const [f, ...rest] = t.items;
-  const feat = `<div class="tc-feat t-${t.key}${f.thumb ? '' : ' no-img'}">
-      ${f.thumb ? `<div class="tc-feat-img"><img src="${escAttr(f.thumb)}" alt="" loading="lazy" data-no-menu /></div>` : `<span class="tc-feat-ic">${icon(t.key)}</span>`}
-      <span class="tc-feat-lbl">${escHtml(t.featLabel)}</span>
-      <div class="tc-feat-tx">${badgesHtml(f.badges)}${titleHtml(f, 'p')}<small>${escHtml(f.meta)}</small></div></div>`;
-  const list = rest.map(i => `<div class="tc-it t-${t.key}">${i.thumb ? `<span class="tc-th"><img src="${escAttr(i.thumb)}" alt="" loading="lazy" data-no-menu /></span>` : `<span class="tc-tic">${icon(t.key)}</span>`}
-      <div>${badgesHtml(i.badges)}${titleHtml(i, 'p')}<small>${escHtml(i.meta)}</small></div></div>`).join('');
-  const more = t.more.newsGo ? `data-news-go="${t.more.newsGo}"` : `data-go="${t.more.go}"`;
-  return `${feat}${list}<button type="button" class="tc-more" ${more}>${escHtml(t.more.label)} ←</button>`;
-}
-
-let TABS = [], current = 0, timer = null, stopped = false, paused = false;
-const reduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function show(i, fromUser){
-  const col = document.getElementById('today-col');
-  if(!col || !TABS.length) return;
-  current = (i + TABS.length) % TABS.length;
-  col.querySelectorAll('.tc-tab').forEach((b, j) => { b.classList.toggle('on', j === current); b.setAttribute('aria-selected', j === current ? 'true' : 'false'); });
-  const body = col.querySelector('.tc-body');
-  body.innerHTML = bodyHtml(TABS[current]);
-  body.setAttribute('aria-labelledby', 'tc-tab-' + TABS[current].key);
-  fitTodayCol();
-  if(fromUser){ stopped = true; col.classList.remove('is-rotating'); }
-  restartProgress(col);
-}
-// ستون هم‌قد کاشی‌هاست (CSS)؛ مطالب فهرستی که جا نشوند از ته کنار گذاشته می‌شوند تا هیچ مطلبی نصفه بریده نشود
-// و پایین ستون با پایین کاشی‌ها هم‌تراز بماند. روی گوشی (ستون زیر کاشی‌ها) لازم نیست.
-function fitTodayCol(){
-  const body = document.querySelector('#today-col .tc-body');
-  if(!body || !body.clientHeight) return;
-  body.querySelectorAll('.tc-it[hidden]').forEach(el => { el.hidden = false; });
-  const items = [...body.querySelectorAll('.tc-it')];
-  while(body.scrollHeight > body.clientHeight + 1 && items.length){ items.pop().hidden = true; }
-}
-function restartProgress(col){
-  clearTimeout(timer);
-  if(stopped || reduced() || TABS.length < 2) return;
-  // نوار پیشرفت زیر زبانه‌ی فعال با انیمیشن CSS هم‌زمان با زمان‌سنج
-  col.classList.remove('is-rotating'); void col.offsetWidth; col.classList.add('is-rotating');
-  col.style.setProperty('--tc-rotate', ROTATE_MS + 'ms');
-  timer = setTimeout(() => { if(!paused && !stopped) show(current + 1); else restartProgress(col); }, ROTATE_MS);
-}
-
-export function renderTodayCol(){
-  const col = document.getElementById('today-col');
-  if(!col) return;
-  TABS = buildTabs();
-  col.hidden = !TABS.length;
-  document.querySelector('.home-split')?.classList.toggle('no-col', !TABS.length);
-  if(!TABS.length) return;
-  col.querySelector('.tc-tabs').innerHTML = TABS.map((t, j) =>
-    `<button type="button" role="tab" class="tc-tab" id="tc-tab-${t.key}" data-tc="${j}" aria-selected="false">${icon(t.key)}${escHtml(t.label)}${t.count ? `<em>${toFaDigits(t.count)}</em>` : ''}</button>`).join('');
-  show(Math.min(current, TABS.length - 1));
-}
-
-export function setupTodayCol(){
-  const col = document.getElementById('today-col');
-  if(!col) return;
-  col.querySelector('.tc-tabs').addEventListener('click', e => { const b = e.target.closest('[data-tc]'); if(b) show(Number(b.dataset.tc), true); });
-  // مکث چرخش وقتی کاربر روی ستون است
-  const pause = () => { paused = true; col.classList.add('is-paused'); };
-  const resume = () => { paused = false; col.classList.remove('is-paused'); };
-  col.addEventListener('mouseenter', pause); col.addEventListener('mouseleave', resume);
-  col.addEventListener('focusin', pause); col.addEventListener('focusout', resume);
-  col.addEventListener('touchstart', () => { stopped = true; col.classList.remove('is-rotating'); clearTimeout(timer); }, { passive: true });
-  // تغییر اندازه‌ی پنجره یا کاشی‌ها (مثلاً رسیدن عددهای زنده) → جا دادن دوباره
-  if(typeof ResizeObserver !== 'undefined'){
-    let lastH = 0;
-    new ResizeObserver(() => { const h = col.clientHeight; if(h !== lastH){ lastH = h; fitTodayCol(); } }).observe(col);
+// فهرست یکی‌درمیان؛ exclude = شناسه‌ی پستی که بالای ستون (مطلب اصلی) آمده
+export function todayFeed(exclude = new Set(), max = 12){
+  EXCLUDE = exclude;
+  const tabs = buildTabs();
+  const out = [];
+  for(let i = 0; out.length < max; i++){
+    let any = false;
+    for(const t of tabs){ const it = t.items[i]; if(it){ any = true; out.push({ ...it, kind: t.key, label: t.label }); } }
+    if(!any) break;
   }
-  // زبانه‌ی پنهان مرورگر: زمان‌سنج‌ها بی‌فایده‌اند
-  document.addEventListener('visibilitychange', () => { if(document.hidden) clearTimeout(timer); else restartProgress(col); });
+  return out.slice(0, max);
 }
+export const todayIcon = icon;

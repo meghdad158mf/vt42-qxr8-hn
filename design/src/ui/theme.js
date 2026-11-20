@@ -7,7 +7,8 @@ const KEY = 'jarian_theme';
 const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: light)') : null;
 
 function storedPref(){
-  try{ const v = localStorage.getItem(KEY); return v === 'light' || v === 'auto' ? v : 'dark'; }catch(e){ return 'dark'; }
+  // ۵.۳۹.۰: پیش‌فرض روشن (زمینه‌ی مریم‌گلی)؛ تیره فقط با انتخاب کاربر
+  try{ const v = localStorage.getItem(KEY); return v === 'dark' || v === 'auto' ? v : 'light'; }catch(e){ return 'light'; }
 }
 export function currentTheme(){
   return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
