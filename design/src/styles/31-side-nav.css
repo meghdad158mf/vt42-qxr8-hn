@@ -43,8 +43,8 @@
 .sn-brand{ display:flex; align-items:center; gap:10px; min-width:0; padding:2px; margin:0; background:none; border:none; color:#fff; font:inherit; text-align:start; cursor:pointer; border-radius:12px; }
 .sn-brand img{ width:34px; height:34px; flex:none; }
 .sn-brand > span{ min-width:0; }
-.sn-brand b{ display:block; font-size:14px; font-weight:800; white-space:nowrap; }
-.sn-brand small{ display:block; font-size:12px; font-weight:600; color: var(--accent); margin-top:1px; white-space:nowrap; }
+.sn-brand b{ display:block; font-size:13px; font-weight:800; white-space:nowrap; }
+.sn-brand small{ display:block; font-size:12px; font-weight:500; color: var(--accent); margin-top:1px; white-space:nowrap; }
 .sn-brand:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 .sn-head{ padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); }
 
@@ -54,7 +54,7 @@
 .sn-group{ position:relative; }
 .sn-item{
   display:flex; align-items:center; gap:10px; width:100%; min-height:38px; padding:4px 10px; margin:0;
-  background:none; border:none; border-radius:10px; color: rgba(255,255,255,0.86); font:inherit; font-size:13px; font-weight:700; text-align:start; cursor:pointer;
+  background:none; border:none; border-radius:10px; color: rgba(255,255,255,0.86); font:inherit; font-size:13px; font-weight:500; text-align:start; cursor:pointer;
   transition: background .15s ease, color .15s ease;
 }
 .sn-group:has(.sn-exp) > .sn-item{ padding-inline-end:40px; }
@@ -76,7 +76,7 @@
 .sn-group.is-exp > .sn-exp svg{ transform:rotate(180deg); }
 
 /* بخش فعلی: زمینه‌ی کم‌رنگ + لبه‌ی هلویی */
-.sn-group.is-open > .sn-item, .sn-item.sn-top.is-current{ background: rgba(255,255,255,0.1); color:#fff; box-shadow: inset -3px 0 0 #EAB393; }
+.sn-group.is-open > .sn-item, .sn-item.sn-top.is-current{ background: rgba(255,255,255,0.1); color:#fff; font-weight:700; box-shadow: inset -3px 0 0 #EAB393; }
 .sn-item.sn-top.is-current .sn-ic{ color:#EAB393; }
 
 /* زیرمجموعه‌ها: فقط وقتی تیتر باز است */
@@ -85,7 +85,7 @@
 .sn-group .sn-subs:empty{ display:none; }
 .sn-subs button{
   position:relative; min-width:0; min-height:28px; padding:3px 12px; margin:0; background:none; border:none; border-radius:8px;
-  color: rgba(255,255,255,0.68); font:inherit; font-size:12px; font-weight:600; text-align:start; cursor:pointer;
+  color: rgba(255,255,255,0.68); font:inherit; font-size:12px; font-weight:500; text-align:start; cursor:pointer;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .sn-subs button::before{ content:''; position:absolute; inset-inline-start:2px; top:50%; width:4px; height:4px; margin-top:-2px; border-radius:50%; background: rgba(255,255,255,0.25); }
