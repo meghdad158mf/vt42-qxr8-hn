@@ -196,6 +196,9 @@ test('دکمه‌ی «فیلترها» روی گوشی باز و بسته می�
 test('دکمه‌ی «بالای صفحه»', async ({ page }) => {
   // صفحه‌ی نخست روی رایانه‌ی پهن از ۵.۳۹.۰ اسکرول ندارد — صفحه‌ی بلند اخبار
   await openAs(page, 'viewer', 'overview/study');
+  // ۵.۴۱.۰: نمای خواندن هم‌قد صفحه است — نمای فهرستی صفحه را بلند می‌کند
+  const list = page.locator('#news-view-list-btn');
+  if(await list.isVisible()) await list.click();
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await expect(page.locator('#to-top')).toHaveClass(/show/);
   await page.click('#to-top');
