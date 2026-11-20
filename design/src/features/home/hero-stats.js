@@ -6,6 +6,7 @@ import { MAGAZINES } from '../reports/magazines.js';
 import { NEWSPAPERS } from '../news/newspapers.js';
 import { SITE_VIS_ITEMS } from '../../data/site-sections.js';
 import { toFaDigits } from '../../core/text.js';
+import { setHomeTodayCount } from './home-v3.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
 import { visHidden } from '../../app.js';
 
@@ -35,8 +36,8 @@ export async function fetchMonitoredSourceCount(){
     + new Set(NEWSPAPERS.filter(n=>n.edition_date >= since).map(n=>n.slug)).size;
 }
 export async function renderDashHeroStats(){
+  // ۵.۳۹.۰: پنل آمار هرو از صفحه‌ی نخست برداشته شد — عددها به صفحه‌ی خوش‌آمد (#wl-stats)، زیرعنوان سرصفحه و پنل «نمایش کامل» می‌روند
   const wrap = document.getElementById('dash-hero-stats');
-  if(!wrap) return;
 
   // پنج کارت = مسیر کار سامانه از منبع تا تحلیل (۵.۳۰.۰، خواست کاربر: کارت‌ها «منطقی و به هم
   // مرتبط» باشن): از کجا (منبع رصد) ← چقدر (محتوای رصد شده) ← زنده بودن (رصد امروز) ← در چه
@@ -78,13 +79,17 @@ export async function renderDashHeroStats(){
 
   const ic = d => `<span class="dash-hero-stat-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg></span>`;
   const stat = (icon, value, label) => `<div class="dash-hero-stat">${ic(icon)}<span class="dash-hero-stat-t"><b data-value="${value}">۰</b><span class="dash-hero-stat-l">${label}</span></span></div>`;
-  wrap.innerHTML =
+  if(wrap) wrap.innerHTML =
     stat('<circle cx="12" cy="12" r="2"/><path d="M8.5 15.5a5 5 0 010-7M15.5 8.5a5 5 0 010 7M5.6 18.4a9 9 0 010-12.8M18.4 5.6a9 9 0 010 12.8"/>', sourceCount, 'منبع رصد') +
     stat('<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>', trackedContentCount, 'محتوای رصد شده') +
     stat('<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>', todayCount, 'رصد امروز') +
     stat('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.4-6.4"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', domainCount, 'بخش رصد') +
     stat('<path d="M2 5.5c2.5-1 6-1 10 1.5 4-2.5 7.5-2.5 10-1.5V19c-2.5-1-6-1-10 1.5C8 18 4.5 18 2 19z"/><path d="M12 7v13.5"/>', magazinesCount, 'بسته تحلیلی');
-  animateHeroStatCounters(wrap);
+  if(wrap) animateHeroStatCounters(wrap);
+  setHomeTodayCount(todayCount);
+  const wl = document.getElementById('wl-stats');
+  if(wl) wl.innerHTML = [[todayCount, 'رصد امروز'], [sourceCount, 'منبع رصد'], [trackedContentCount, 'محتوای رصد شده'], [magazinesCount, 'شماره‌ی بسته تحلیلی']]
+    .map(([v, l]) => `<div><b>${fmtHeroStat(v)}</b><span>${l}</span></div>`).join('');
   // ستون کناری (۵.۳۸.۰، طرح «دونیمه‌ی عمودی»): سه عدد اصلی همین پنل؛ هر پنج عدد در پنل «نمایش کامل»
   const k = (v, l) => `<div class="sn-kpi"><b>${fmtHeroStat(v)}</b><span>${l}</span></div>`;
   const three = k(todayCount, 'رصد امروز') + k(sourceCount, 'منبع رصد') + k(trackedContentCount, 'محتوای رصد شده');

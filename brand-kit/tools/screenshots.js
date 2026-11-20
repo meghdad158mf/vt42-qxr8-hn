@@ -43,7 +43,7 @@ const mk = d=>fs.mkdirSync(path.join(OUT,d),{recursive:true});
     const ctx = await browser.newContext({ serviceWorkers:'block', viewport:{width:W,height:Hh}, deviceScaleFactor:dpr||1 });
     await setup(ctx); const page = await ctx.newPage();
     await page.goto('http://localhost:8765/ita-monitoring-prototype.html');
-    await page.evaluate(()=>{ sessionStorage.setItem('jarian_token','x'); sessionStorage.setItem('jarian_role','app_viewer'); localStorage.setItem('jarian_intro_seen','1'); });
+    await page.evaluate(()=>{ sessionStorage.setItem('jarian_token','x'); sessionStorage.setItem('jarian_role','app_viewer'); localStorage.setItem('jarian_intro_seen','1'); sessionStorage.setItem('jarian_welcome_seen','1'); });
     // ۵.۳۴.۰: نمای روشن/تیره (ui/theme.js)
     await page.evaluate(t=>{ if(t) localStorage.setItem('jarian_theme',t); else localStorage.removeItem('jarian_theme'); }, theme||'');
     await page.reload(); await page.waitForTimeout(2500);

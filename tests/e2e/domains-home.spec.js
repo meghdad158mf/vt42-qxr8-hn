@@ -50,7 +50,7 @@ test.describe('آنچه درباره حوزه گفته می‌شود', () => {
 });
 
 // ۵.۳۳.۰: «درباره مردم»، «قوانین و مصوبات» و «از جریان بپرس» حذف شدند (خواست کاربر)
-test('صفحه‌ی نخست: شش عرصه در یک مدار و بدون عرصه‌های حذف‌شده در منو', async ({ page }) => {
+test('صفحه‌ی نخست: شش کارت عرصه و بدون عرصه‌های حذف‌شده در منو', async ({ page }) => {
   await openAs(page, 'admin');
   await expect(page.locator('.domain-orbits .domain-card')).toHaveCount(6);
   await expect(page.locator('.domain-grid')).toHaveCount(1);
@@ -58,38 +58,41 @@ test('صفحه‌ی نخست: شش عرصه در یک مدار و بدون عر�
   expect(page.appErrors).toEqual([]);
 });
 
-// ۵.۳۶.۰: ستون «امروز در جریان» کنار کاشی‌های عرصه‌ها (features/home/today-col.js)
-test('صفحه‌ی نخست: ستون «امروز در جریان» — زبانه‌ها، توقف چرخش با کلیک و رفتن به بخش', async ({ page }) => {
+// ۵.۳۹.۰: صفحه‌ی نخست تازه (features/home/home-v3.js) و صفحه‌ی خوش‌آمد (welcome.js)
+test('صفحه‌ی نخست: «امروز در جریان»، کارت بسته و رفتن به عرصه', async ({ page }) => {
   await openAs(page, 'viewer');
-  const col = page.locator('#today-col');
-  await expect(col).toBeVisible();
-  await expect(col.locator('.tc-tab').first()).toContainText('اخبار');
-  const claimTab = col.locator('.tc-tab', { hasText: 'شایعه' });
-  await claimTab.click();
-  await expect(claimTab).toHaveAttribute('aria-selected', 'true');
-  await expect(col.locator('.tc-feat-lbl')).toHaveText('تازه‌ترین شایعه');
-  await expect(col).not.toHaveClass(/is-rotating/); // کلیک کاربر چرخش خودکار را متوقف می‌کند
-  await col.locator('.tc-more').click();
-  await expect(page.locator('#sec-overview')).toHaveClass(/active/);
-  await expect.poll(() => page.evaluate(() => location.hash)).toContain('overview/claims');
+  await expect(page.locator('#hm-lead h3')).not.toBeEmpty();
+  expect(await page.locator('#hm-items .hm-it').count()).toBeGreaterThan(2);
+  await expect(page.locator('#pkg-flow .hm-pkg-tx h3')).toContainText('بسته تحلیلی جریان');
+  await expect(page.locator('#hm-sub')).toContainText('امروز');
+  await page.locator('.hm-domains .domain-card[data-go="positions"]').click();
+  await expect(page.locator('#sec-positions')).toHaveClass(/active/);
   expect(page.appErrors).toEqual([]);
 });
 
-// ۵.۳۷.۰: هرو سه‌اسلایدی (features/home/hero-slider.js)
-test('صفحه‌ی نخست: هرو سه‌اسلایدی — زبانه‌ها، اسلاید فعال و رفتن به عرصه', async ({ page }) => {
+test('صفحه‌ی نخست: جست‌وجوی سرصفحه به اخبار و رویدادها می‌برد', async ({ page }) => {
   await openAs(page, 'viewer');
-  const hs = page.locator('#hero-slider');
-  const tabs = hs.locator('.hs-tab');
-  await expect(tabs).toHaveCount(3);
-  await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
-  await expect(hs.locator('.hs-slide.on')).toHaveAttribute('data-i', '0');
-  await tabs.nth(1).click();
-  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
-  await expect(hs.locator('.hs-slide.on')).toHaveAttribute('data-i', '1');
-  await expect(hs).not.toHaveClass(/is-rotating/); // کلیک کاربر چرخش خودکار را متوقف می‌کند
-  await expect(hs.locator('.hs-here')).toContainText('عرصه‌های رصد و پایش');
-  await hs.locator('.hs-slide.on .hs-dc[data-go="positions"]').click();
-  await expect(page.locator('#sec-positions')).toHaveClass(/active/);
+  await page.fill('#hm-search-input', 'مجلس');
+  await page.press('#hm-search-input', 'Enter');
+  await expect(page.locator('#sec-overview')).toHaveClass(/active/);
+  await expect(page.locator('#news-search-input')).toHaveValue('مجلس');
+  expect(page.appErrors).toEqual([]);
+});
+
+test('صفحه‌ی خوش‌آمد: بعد از ورود، آمار و «شروع»؛ با رفرش دوباره نمی‌آید', async ({ page }) => {
+  await openAs(page, 'viewer');
+  // ستاپ آزمون‌ها صفحه‌ی خوش‌آمد را «دیده‌شده» می‌گذارد؛ این آزمون آن را می‌خواهد
+  await page.evaluate(() => { sessionStorage.setItem('jarian_test_show_welcome', '1'); sessionStorage.removeItem('jarian_welcome_seen'); });
+  await page.reload();
+  const wl = page.locator('#welcome');
+  await expect(wl).toBeVisible();
+  await expect(page.locator('#wl-stats > div')).toHaveCount(4);
+  await page.click('#wl-go');
+  await expect(wl).toBeHidden();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  await page.reload();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  await expect(wl).toBeHidden();
   expect(page.appErrors).toEqual([]);
 });
 
@@ -121,24 +124,6 @@ test('پیوند قدیمی عرصه‌های حذف‌شده به صفحه‌ی
     await openAs(page, 'viewer', old);
     await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
   }
-  expect(page.appErrors).toEqual([]);
-});
-
-test('صفحه‌ی نخست: دکمه‌های دسترسی سریع به عرصه‌ها و بسته‌ها اسکرول می‌کنند', async ({ page }) => {
-  await openAs(page, 'viewer');
-  const inView = (sel) => page.evaluate((s) => {
-    const r = document.querySelector(s).getBoundingClientRect();
-    return r.top < window.innerHeight && r.bottom > 0;
-  }, sel);
-  // ۵.۳۷.۰: دکمه‌ها داخل اسلایدهای هرو‌اند — اول زبانه‌ی همان اسلاید
-  const tabs = page.locator('#hero-slider .hs-tab');
-  await tabs.nth(2).click();
-  await page.locator('.hs-slide.on [data-home-scroll="package"]').click();
-  await expect.poll(() => inView('#pkg-flow')).toBe(true);
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await tabs.nth(1).click();
-  await page.locator('.hs-slide.on [data-home-scroll="domains"]').click();
-  await expect.poll(() => inView('.section-label')).toBe(true);
   expect(page.appErrors).toEqual([]);
 });
 

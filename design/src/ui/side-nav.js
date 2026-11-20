@@ -47,6 +47,7 @@ export function setupSideNav(){
   DETAIL = document.getElementById('sn-detail');
   if(!SIDE || !BTN || !BACKDROP || !DETAIL) return;
   track('#view-dash .topbar-right', 'sn-tools');
+  track('#home-contact', 'sn-contact');
   track('#view-dash .app-footer', 'sn-foot');
   place();
   MQ.addEventListener('change', place);
