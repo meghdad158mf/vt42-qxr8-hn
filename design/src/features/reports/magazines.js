@@ -64,7 +64,7 @@ const NAV_ISSUES_MAX = 5;
 export function renderNavMenuIssues(){
   const issues = MAGAZINES.filter(m=>Array.isArray(m.files) && m.files.length).slice(0, NAV_ISSUES_MAX);
   // منوی «بخش‌ها» + ستون کناری رایانه‌ی پهن (۵.۳۸.۰، #sn-issues)
-  [['nav-menu-issues', 'nav-menu-sub nav-menu-issue'], ['sn-issues', 'sn-issue'], ['snd-issues', 'snd-issue']].forEach(([id, cls])=>{
+  [['nav-menu-issues', 'nav-menu-sub nav-menu-issue'], ['sn-issues', 'sn-issue']].forEach(([id, cls])=>{
     const box = document.getElementById(id);
     if(!box) return;
     box.innerHTML = '';

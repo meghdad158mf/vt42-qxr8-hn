@@ -21,7 +21,7 @@
 .hm-search svg{ width:16px; height:16px; flex:none; }
 .hm-search input{ flex:1; min-width:0; border:none; outline:none; background:none; font:inherit; font-size:13px; color:inherit; }
 .hm-search:focus-within{ border-color:#EAB393; }
-.hm-body{ display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:22px; align-items:start; }
+.hm-body{ display:grid; grid-template-columns:minmax(0,1fr) clamp(360px, 31%, 430px); gap:22px; align-items:start; }
 .hm-main{ display:flex; flex-direction:column; gap:14px; min-width:0; }
 .hm-sx{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0; text-align:start; scroll-margin-top:24px; }
 #sec-dashboard .hm-sx h2{ margin:0; font-size:15px; font-weight:900; }
@@ -48,40 +48,13 @@
 @media (hover:hover) and (pointer:fine){ #sec-dashboard .hm-domains .domain-card:hover{ transform:translateY(-2px); border-color:#b9c5bb; } }
 #sec-dashboard .hm-domains .domain-card:focus-visible{ outline:2px solid #16202a; outline-offset:2px; }
 
-/* بسته تحلیلی: کارت باریک با خط هلویی بالایش */
-.hm-pkg{ display:flex; align-items:center; gap:16px; padding:10px 16px; border-radius:16px; background:#fbfcfa; border:1px solid #dfe5de; border-top:2px solid #EAB393; color:#22302c; }
-.hm-pkg-cv{ flex:none; width:48px; aspect-ratio:3/4; padding:0; border:none; border-radius:5px; overflow:hidden; cursor:pointer; background:#16202a; color:#EAB393; font:inherit; font-size:11px; font-weight:900; }
-.hm-pkg-cv img{ width:100%; height:100%; object-fit:cover; display:block; }
-.hm-pkg-tx{ flex:1; min-width:0; }
-.hm-pkg-tx h3{ margin:0; font-size:14px; font-weight:800; }
-.hm-pkg-tx p{ margin:2px 0 0; font-size:12.5px; color:#5c6a64; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.hm-pkg .hm-more{ color:#16202a; }
-
 /* ستون «امروز در جریان» */
 .hm-today{ border-radius:16px; overflow:hidden; background:#fbfcfa; border:1px solid #dfe5de; color:#22302c; display:flex; flex-direction:column; }
-.hm-lead{ position:relative; overflow:hidden; background:#0e151c; color:#fff; min-height:190px; padding:16px 18px; display:flex; align-items:flex-end; }
-.hm-lead[hidden]{ display:none; }
-.hm-wall{ position:absolute; inset:-30% -10%; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; transform:rotate(-8deg); opacity:.55; }
-.hm-wall img{ width:100%; aspect-ratio:3/4; object-fit:cover; object-position:top; border-radius:3px; }
-.hm-lead::after{ content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,21,28,.3), rgba(14,21,28,.95) 60%); }
-.hm-lead-tx{ position:relative; z-index:1; }
-.hm-eb{ font-size:11.5px; font-weight:800; color:#EAB393; }
-.hm-lead h3{ margin:4px 0 4px; font-size:16px; font-weight:900; line-height:1.6; }
-.hm-lead h3 a{ color:inherit; text-decoration:none; }
-.hm-lead small{ font-size:12px; color: rgba(255,255,255,.7); }
-.hm-lead-btns{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
-.hm-lead .hm-btn:not(.g){ background:#EAB393; color:#16202a; }
 .hm-list{ padding:10px 16px 4px; }
 .hm-list .hm-sx h2{ color:#22302c; }
 .hm-list .hm-more{ color:#16202a; }
-.hm-it{ display:grid; grid-template-columns:32px minmax(0,1fr); gap:10px; padding:9px 0; border-top:1px solid #e6ebe5; }
 .hm-ic{ width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#f1f3f0; color:#5c6a64; }
 .hm-ic svg{ width:16px; height:16px; }
-.hm-it em{ display:block; font-style:normal; font-size:11.5px; font-weight:800; color:#5c6a64; }
-.hm-it b{ display:block; font-size:13px; line-height:1.6; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.hm-it b a{ color:inherit; text-decoration:none; }
-.hm-it b a:hover{ text-decoration:underline; }
-.hm-it small{ font-size:11.5px; color:#7a867f; }
 
 /* نمای تیره (فقط با انتخاب کاربر): سرصفحه روی بوم تیره خواناست؛ کارت‌ها روشن می‌مانند */
 :root[data-theme="light"] #view-dash .hm-hi h1{ color: var(--cv-ink); }
@@ -93,7 +66,7 @@
 
 /* رایانه‌ی پهن: کل صفحه‌ی نخست در یک صفحه‌نمایش (بدون اسکرول)؛ ستون «امروز» هم‌قد ردیف و فهرستش هرچه جا شود */
 @media (min-width:1280px){
-  #sec-dashboard .hm-body{ height:min(calc(100vh - 150px), 640px); min-height:470px; align-items:stretch; }
+  #sec-dashboard .hm-body{ height:min(calc(100vh - 160px), 900px); min-height:470px; align-items:stretch; }
   #sec-dashboard .hm-domains .domain-card img{ width:clamp(64px, 8vh, 84px); height:clamp(64px, 8vh, 84px); }
   #sec-dashboard .hm-today{ min-height:0; order:2; }
   #sec-dashboard .hm-list{ flex:1; min-height:0; overflow:hidden; }
@@ -123,27 +96,17 @@
 .home-contact textarea{ min-height:70px; resize:vertical; }
 .home-contact .btn.primary{ background:#16202a; border-color:#16202a; color:#fff; padding:8px 18px; font-size:13px; box-shadow:none; }
 @media (max-width:640px){ .home-contact{ grid-template-columns:1fr; } }
-/* داخل ستون کناری (سرمه‌ای): فشرده و یک‌ستونه */
-.sn-contact:empty{ display:none; }
-.sn-contact{ margin-top:18px; }
-.sn-contact .home-contact{ margin:0; grid-template-columns:1fr; gap:14px; padding:14px 0 0; background:none; border:none; border-top:1px solid rgba(255,255,255,.1); border-radius:0; color:#fff; }
-.sn-contact .home-contact .hc-title{ font-size:12px; font-weight:700; color: rgba(255,255,255,.5); }
+/* داخل پنجره‌ی کوچک «ارتباط با ما» کنار ستون (سرمه‌ای): یک‌ستونه */
+.sn-contact .home-contact{ margin:0; grid-template-columns:1fr; gap:14px; padding:0; background:none; border:none; border-radius:0; color:#fff; }
+.sn-contact .home-contact .hc-title{ font-size:15px; font-weight:900; color:#fff; }
 .sn-contact .home-contact h3{ font-size:13px; color:#fff; }
 .sn-contact .home-contact .notify-card-text p{ font-size:12px; color: rgba(255,255,255,.62); }
-.sn-contact .home-contact input, .sn-contact .home-contact textarea{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.14); color:#fff; font-size:12.5px; padding:8px 10px; }
+.sn-contact .home-contact input, .sn-contact .home-contact textarea{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.14); color:#fff; font-size:13px; padding:8px 10px; }
 .sn-contact .home-contact input::placeholder, .sn-contact .home-contact textarea::placeholder{ color: rgba(255,255,255,.45); }
-.sn-contact .home-contact textarea{ min-height:56px; }
-.sn-contact .home-contact .btn.primary{ background:#EAB393; border-color:#EAB393; color:#16202a; padding:6px 14px; font-size:12.5px; }
+.sn-contact .home-contact textarea{ min-height:70px; }
+.sn-contact .home-contact .btn.primary{ background:#EAB393; border-color:#EAB393; color:#16202a; padding:6px 14px; font-size:13px; }
 
-/* ---- (۴) سایدبار جمع‌وجور: بدون آمار و عدد کنار عرصه‌ها؛ گزینه‌ی فعلی با لبه‌ی هلویی ---- */
-.side-nav .sn-kpis, .side-nav .sn-live{ display:none !important; }
-.side-nav .sn-motto{ font-size:21px; margin:20px 4px 4px; }
-.side-nav .sn-sub{ font-size:12px; margin-bottom:14px; }
-.side-nav .sn-item{ min-height:40px; font-size:13px; }
-.side-nav .sn-img{ width:28px; height:28px; }
-.side-nav .sn-ic{ width:28px; height:28px; }
-.side-nav .sn-group.is-open > .sn-item, .side-nav .sn-item.sn-top.is-current{ background: rgba(255,255,255,.1); color:#fff; box-shadow: inset -3px 0 0 #EAB393; }
-.side-nav .sn-item.sn-top.is-current .sn-ic{ background: rgba(234,179,147,.14); color:#EAB393; }
+/* ---- (۴) سایدبار جمع‌وجور: از ۵.۴۰.۰ در 31-side-nav.css ---- */
 
 /* ---- (۵) صفحه‌ی خوش‌آمد ---- */
 .welcome{ position:fixed; inset:0; z-index:120; overflow:hidden; color:#fff;
@@ -189,7 +152,7 @@ html.wl-open{ overflow:hidden; }
 @keyframes wlIn{ from{ opacity:0; translate:0 10px; } }
 /* بستن: رایانه‌ی پهن → جمع شدن به ستون ۲۸۰px راست؛ بقیه → محو */
 .welcome.go .wl-in{ opacity:0; }
-.welcome.go.to-side{ clip-path: inset(0 0 0 calc(100% - 280px)); transition: clip-path .62s cubic-bezier(0.32,0.72,0,1); }
+.welcome.go.to-side{ clip-path: inset(0 0 0 calc(100% - var(--sn-w))); transition: clip-path .62s cubic-bezier(0.32,0.72,0,1); }
 .welcome.go.fade{ opacity:0; transition: opacity .3s ease; }
 @media (max-width:900px){
   .wl-in{ grid-template-columns:1fr; grid-template-rows:auto auto auto; align-content:center; gap:20px; overflow-y:auto; padding:30px 0; }
@@ -202,11 +165,161 @@ html.wl-open{ overflow:hidden; }
   .welcome:not([hidden]) .wl-txt > *, .welcome:not([hidden]) .wl-stats, .welcome:not([hidden]) .wl-mid > *{ animation:none; }
   .welcome.go.to-side{ transition:none; }
 }
-/* گوشی و رایانه‌ی باریک (صفحه زیر هم): فهرست «امروز در جریان» کوتاه — ۵ مطلب */
-@media (max-width:1279px){ .hm-items .hm-it:nth-child(n+6){ display:none; } }
 /* «مقایسه‌ی تیترها» (به‌زودی، فقط مدیر) روی بوم روشن — اسکن کنتراست ۵.۳۹.۰ */
 :root[data-theme="light"] #view-dash .np-compare-soon{ color: var(--cv-dim); }
 :root[data-theme="light"] #view-dash .np-compare-soon b{ color: var(--cv-ink); }
 /* ستون کناری سرمه‌ای می‌ماند — قانون‌های نمای روشنِ کارت‌های پایین صفحه (27-theme-light) داخل ستون برگردانده می‌شوند */
 :root[data-theme="light"] #view-dash .sn-contact .home-contact h3, :root[data-theme="light"] #view-dash .sn-contact .notify-card-text h3{ color:#fff; }
 :root[data-theme="light"] #view-dash .sn-contact .notify-card-text p{ color: rgba(255,255,255,.62); }
+
+/* ---- ۵.۴۰.۰ (خواست کاربر): بسته تحلیلی بالای عرصه‌ها، عرصه‌ها کاشی افقی ۲ × ۳ با توضیح کوتاه، ستون «امروز» پهن‌تر ---- */
+/* بسته تحلیلی: جلد تازه‌ترین شماره + عنوان و دکمه‌ها + جلد شماره‌های قبلی */
+.hm-pkg{ display:flex; align-items:center; gap:18px; padding:14px 18px; border-radius:16px; background:#fbfcfa; border:1px solid #dfe5de;
+  border-top:2px solid #EAB393; color:#22302c; }
+.hm-pkg-cv{ flex:none; width:68px; aspect-ratio:3/4; padding:0; border:none; border-radius:6px; overflow:hidden; cursor:pointer; background:#16202a; color:#EAB393;
+  font:inherit; font-size:12px; font-weight:900; box-shadow:0 8px 18px -10px rgba(22,32,42,.55); transition: transform .2s cubic-bezier(.23,1,.32,1); }
+.hm-pkg-cv img{ width:100%; height:100%; object-fit:cover; display:block; }
+@media (hover:hover) and (pointer:fine){ .hm-pkg-cv:hover{ transform:translateY(-2px); } }
+.hm-pkg-cv:focus-visible, .hm-pkg-prev button:focus-visible{ outline:2px solid #16202a; outline-offset:2px; }
+.hm-pkg-tx{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.hm-pkg-tx .hm-eb{ color:#9a4f12; font-size:12px; font-weight:800; }
+.hm-pkg-tx h3{ margin:0; font-size:15px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hm-pkg-tx p{ margin:0; font-size:13px; color:#5c6a64; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hm-pkg-acts{ display:flex; align-items:center; gap:14px; margin-top:8px; }
+.hm-pkg .hm-more{ color:#16202a; }
+.hm-pkg-prev{ flex:none; display:flex; align-items:flex-end; gap:8px; padding-inline-start:18px; border-inline-start:1px solid #e6ebe5; }
+.hm-pkg-prev button{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:0; margin:0; border:none; background:none; font:inherit; cursor:pointer; color:#5c6a64; }
+.hm-pkg-prev i{ display:block; width:40px; aspect-ratio:3/4; border-radius:4px; overflow:hidden; background:#16202a; box-shadow:0 4px 10px -6px rgba(22,32,42,.5); }
+.hm-pkg-prev img{ width:100%; height:100%; object-fit:cover; display:block; }
+.hm-pkg-prev small{ font-size:12px; font-weight:700; }
+.hm-pkg-prev button:hover small{ color:#22302c; }
+@media (max-width:1100px){ .hm-pkg-prev{ display:none; } }
+
+/* عرصه‌ها (۵.۴۰.۰، خواست کاربر: اندازه‌ی کاشی به ترتیب اهمیت) —
+   ۱ اخبار و رویدادها (بزرگ‌ترین، دو ردیف) › ۲ مواضع مراجع و علماء (ردیف بلند) › ۳ درباره حوزه (ردیف میانی)
+   › ۴ یادداشت‌ها / کنشگری مجازی / برنامه مدارس (هم‌اندازه، ردیف کوتاه پایین). شبکه‌ی ۱۲ ستونه، RTL: اولین ستون راست */
+#sec-dashboard .hm-domains .domain-grid{ grid-template-columns:repeat(12,minmax(0,1fr)); gap:12px;
+  grid-template-areas:
+    "news news news news news news pos pos pos pos pos pos"
+    "news news news news news news haw haw haw haw haw haw"
+    "peo peo peo peo pst pst pst pst sch sch sch sch"; }
+#sec-dashboard .hm-domains .domain-card[data-go="overview"]{ grid-area:news; }
+#sec-dashboard .hm-domains .domain-card[data-go="positions"]{ grid-area:pos; }
+#sec-dashboard .hm-domains .domain-card[data-go="hawza"]{ grid-area:haw; }
+#sec-dashboard .hm-domains .domain-card[data-go="people"]{ grid-area:peo; }
+#sec-dashboard .hm-domains .domain-card[data-go="posts"]{ grid-area:pst; }
+#sec-dashboard .hm-domains .domain-card[data-go="schools"]{ grid-area:sch; }
+
+#sec-dashboard .hm-domains .domain-card{ position:relative; min-width:0; text-align:start; }
+#sec-dashboard .hm-domains .domain-card h3{ margin:0; }
+#sec-dashboard .hm-domains .dc-desc{ margin:0; max-width:100%; font-size:12px; line-height:1.8; color:#5c6a64; }
+#sec-dashboard .hm-domains .dc-live{ margin-top:6px; }
+
+/* ۱) اخبار: تصویر بزرگ بالا، نام درشت، توضیح کامل؛ زمینه‌ی ملایم هلویی */
+#sec-dashboard .hm-domains .domain-card[data-go="overview"]{ display:flex; flex-direction:column; justify-content:flex-end; align-items:flex-start; gap:4px; padding:22px 24px;
+  background: radial-gradient(90% 70% at 20% 10%, rgba(234,179,147,.18), transparent 60%), #fbfcfa; }
+#sec-dashboard .hm-domains .domain-card[data-go="overview"] img{ width:clamp(96px, 17vh, 160px); height:clamp(96px, 17vh, 160px); margin-bottom:auto; align-self:flex-end; }
+#sec-dashboard .hm-domains .domain-card[data-go="overview"] h3{ font-size:21px; font-weight:900; }
+#sec-dashboard .hm-domains .domain-card[data-go="overview"] .dc-desc{ font-size:13px; max-width:36ch; }
+/* ۲ و ۳) مواضع و حوزه: افقی با توضیح؛ مواضع تصویر و نام درشت‌تر */
+#sec-dashboard .hm-domains .domain-card:is([data-go="positions"],[data-go="hawza"]){
+  display:grid; grid-template-columns:auto minmax(0,1fr); align-content:center; align-items:center; justify-items:start; column-gap:16px; row-gap:2px; padding:14px 20px; }
+#sec-dashboard .hm-domains .domain-card:is([data-go="positions"],[data-go="hawza"]) img{ grid-row:1 / 4; }
+#sec-dashboard .hm-domains .domain-card[data-go="positions"] img{ width:clamp(64px, 11vh, 96px); height:clamp(64px, 11vh, 96px); }
+#sec-dashboard .hm-domains .domain-card[data-go="positions"] h3{ font-size:18px; font-weight:900; }
+#sec-dashboard .hm-domains .domain-card[data-go="hawza"] img{ width:clamp(54px, 8.5vh, 76px); height:clamp(54px, 8.5vh, 76px); }
+#sec-dashboard .hm-domains .domain-card[data-go="hawza"] h3{ font-size:16px; }
+#sec-dashboard .hm-domains .domain-card[data-go="hawza"] .dc-desc{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* ۴) یادداشت‌ها / کنشگری / مدارس: هم‌اندازه، فشرده — آیکون کنار نام، بدون توضیح */
+#sec-dashboard .hm-domains .domain-card:is([data-go="people"],[data-go="posts"],[data-go="schools"]){
+  display:grid; grid-template-columns:auto minmax(0,1fr); align-content:center; align-items:center; justify-items:start; column-gap:12px; padding:10px 16px; }
+#sec-dashboard .hm-domains .domain-card:is([data-go="people"],[data-go="posts"],[data-go="schools"]) img{ grid-row:1 / 3; width:clamp(42px, 6.5vh, 56px); height:clamp(42px, 6.5vh, 56px); }
+#sec-dashboard .hm-domains .domain-card:is([data-go="people"],[data-go="posts"],[data-go="schools"]) h3{ font-size:14px; }
+#sec-dashboard .hm-domains .domain-card:is([data-go="people"],[data-go="posts"],[data-go="schools"]) .dc-desc{ display:none; }
+#sec-dashboard .hm-domains .domain-card:is([data-go="people"],[data-go="posts"],[data-go="schools"]) .dc-live{ margin-top:2px; }
+
+/* فلش کم‌رنگ گوشه‌ی پایین‌چپ همه‌ی کاشی‌ها */
+#sec-dashboard .hm-domains .domain-card::after{ content:''; position:absolute; left:16px; bottom:16px; width:7px; height:7px;
+  border-left:2px solid #b9c5bb; border-bottom:2px solid #b9c5bb; transform:rotate(45deg); transition: left .2s cubic-bezier(.23,1,.32,1), border-color .2s ease; }
+#sec-dashboard .hm-domains .domain-card:is([data-go="people"],[data-go="posts"],[data-go="schools"])::after{ bottom:auto; top:50%; margin-top:-4px; }
+@media (hover:hover) and (pointer:fine){
+  #sec-dashboard .hm-domains .domain-card:hover{ transform:none; border-color:#EAB393; box-shadow:0 10px 24px -18px rgba(22,32,42,.45); }
+  #sec-dashboard .hm-domains .domain-card:hover::after{ left:12px; border-color:#B5651D; }
+}
+@media (min-width:1280px){
+  /* ردیف‌ها به ترتیب اهمیت کوتاه‌تر می‌شوند */
+  #sec-dashboard .hm-domains .domain-grid{ grid-template-rows:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.72fr); }
+}
+@media (max-width:1279px){ #sec-dashboard .hm-domains .domain-grid{ grid-template-rows:auto; grid-auto-rows:auto; } #sec-dashboard .hm-domains .domain-card{ min-height:96px; } #sec-dashboard .hm-domains .domain-card[data-go="overview"]{ min-height:260px; } }
+/* گوشی: اخبار، مواضع و حوزه تمام‌عرض (به ترتیب کوچک‌تر)، سه عرصه‌ی آخر کنار هم */
+@media (max-width:640px){
+  #sec-dashboard .hm-domains .domain-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-areas: "news news news" "pos pos pos" "haw haw haw" "peo pst sch"; }
+  #sec-dashboard .hm-domains .domain-card[data-go="overview"]{ display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:14px; align-items:center; min-height:0; padding:16px; }
+  #sec-dashboard .hm-domains .domain-card[data-go="overview"] img{ grid-row:1 / 4; width:92px; height:92px; margin:0; }
+  #sec-dashboard .hm-domains .domain-card[data-go="overview"] h3{ font-size:18px; }
+  #sec-dashboard .hm-domains .domain-card[data-go="overview"] .dc-live{ justify-self:start; }
+  #sec-dashboard .hm-domains .domain-card[data-go="positions"] img{ width:72px; height:72px; }
+  #sec-dashboard .hm-domains .domain-card[data-go="hawza"] img{ width:56px; height:56px; }
+  #sec-dashboard .hm-domains .domain-card:is([data-go="people"],[data-go="posts"],[data-go="schools"]){ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:12px 6px; min-height:0; text-align:center; }
+  #sec-dashboard .hm-domains .domain-card:is([data-go="people"],[data-go="posts"],[data-go="schools"]) h3{ font-size:13px; }
+  #sec-dashboard .hm-domains .domain-card:is([data-go="people"],[data-go="posts"],[data-go="schools"])::after{ display:none; }
+  .hm-pkg{ flex-wrap:wrap; }
+  .hm-pkg-tx{ flex-basis:calc(100% - 90px); }
+  .hm-pkg-acts{ flex-wrap:wrap; gap:8px 14px; }
+}
+/* نمای تیره: کارت‌ها روشن می‌مانند — توضیح کاشی‌ها هم */
+:root:not([data-theme="light"]) #sec-dashboard .hm-domains .dc-desc{ color:#5c6a64; }
+
+@media (min-width:1280px){
+  #sec-dashboard .hm-today .hm-list{ height:100%; }
+  #sec-dashboard .hm-items{ flex:1; overflow:hidden; -webkit-mask-image:linear-gradient(#000 88%, transparent); mask-image:linear-gradient(#000 88%, transparent); }
+}
+
+
+/* ---- ستون «امروز در جریان» ۵.۴۰.۰ — «خلاصه‌ی روز»، درگاه صفحه‌ی «منتخب مطالب امروز» (انتخاب کاربر) ---- */
+.hm-today .hm-list{ display:flex; flex-direction:column; padding:14px 16px 6px; }
+.hm-items{ min-height:0; }
+.hm-tabs[hidden], .hm-today-foot[hidden]{ display:none; }
+.hm-today-foot{ flex:none; }
+.hm-today :is(.dg-card, .dg-row){ font:inherit; text-align:start; cursor:pointer; }
+.hm-today :is(.dg-card, .dg-row):focus-visible{ outline:2px solid #16202a; outline-offset:2px; }
+
+/* خلاصه‌ی روز */
+.dg-card{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-areas:"eb eb" "n sub" "bars bars"; align-items:end; column-gap:10px; width:100%;
+  margin:10px 0 6px; padding:14px 16px 12px; border:none; border-radius:14px; color:#fff;
+  background: radial-gradient(80% 120% at 0% 0%, rgba(234,179,147,.18), transparent 60%), linear-gradient(160deg,#1b2733,#121b24); transition: filter .15s ease; }
+.dg-card:hover{ filter:brightness(1.12); }
+.dg-eb{ grid-area:eb; font-size:12px; font-weight:800; color:#EAB393; }
+.dg-card > b{ grid-area:n; font-size:30px; font-weight:900; line-height:1.3; font-variant-numeric:tabular-nums; }
+.dg-sub{ grid-area:sub; padding-bottom:7px; font-size:12px; color: rgba(255,255,255,.7); }
+.dg-bars{ grid-area:bars; display:flex; align-items:flex-end; gap:2px; height:30px; margin-top:8px; direction:ltr; }
+.dg-bars i{ flex:1; height:var(--h); min-height:2px; border-radius:2px 2px 0 0; background: rgba(255,255,255,.26); }
+.dg-bars i.now{ background:#EAB393; }
+.dg-bars i.fut{ background: rgba(255,255,255,.07); height:2px; }
+.dg-row{ display:grid; grid-template-columns:32px minmax(0,1fr) 16px; gap:10px; align-items:center; width:100%; padding:10px 4px; border:none; border-bottom:1px solid #eef1ec; background:none; border-radius:10px; color:#22302c; transition: background .15s ease; }
+.dg-row:hover{ background:#f1f4f0; }
+.dg-tx{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.dg-h{ display:flex; align-items:center; gap:8px; }
+.dg-h em{ font-style:normal; font-size:12px; font-weight:900; color:#22302c; }
+.dg-h i{ font-style:normal; font-size:12px; font-weight:700; color:#9a4f12; }
+.dg-tx b{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; font-weight:600; color:#5c6a64; }
+.dg-ar{ width:16px; height:16px; color:#b9c5bb; transition: transform .2s cubic-bezier(.23,1,.32,1), color .15s ease; }
+.dg-row:hover .dg-ar{ color:#B5651D; transform:translateX(-3px); }
+
+@media (prefers-reduced-motion: reduce){ .dg-ar{ transition:none; } }
+
+/* رایانه‌ی پهن: ردیف‌ها کل ارتفاع ستون را پر می‌کنند */
+@media (min-width:1280px){
+  #sec-dashboard .hm-today .hm-items{ display:flex; flex-direction:column; -webkit-mask-image:none; mask-image:none; }
+  .hm-today .dg-row{ flex:1; min-height:0; overflow:hidden; }
+  .hm-today .dg-tx b{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; white-space:normal; line-height:1.7; }
+}
+
+/* رایانه‌ی کوتاه: تیتر هر ردیف «خلاصه‌ی روز» یک‌خطی تا ردیف‌ها روی هم نیفتند */
+@media (min-width:1280px) and (max-height:820px){
+  .hm-today .dg-tx b{ -webkit-line-clamp:1; }
+  .hm-today .dg-row{ padding:6px 4px; }
+  .dg-card{ padding:10px 14px 10px; margin-top:8px; }
+  .dg-card > b{ font-size:26px; }
+  .dg-bars{ height:22px; }
+}

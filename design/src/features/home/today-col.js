@@ -38,7 +38,7 @@ function postsOf(ids, extra = () => true){ return POSTS_CACHE.filter(p => ids.ha
 
 // هر زبانه: { key, label, count (امروز), items:[{text, meta, badges:[[cls,txt]], thumb, link}], more:{label, go|newsGo}, featLabel }
 let EXCLUDE = new Set();
-function buildTabs(){
+function buildTabs(per = PER_TAB){
   const today = iranTodayStartMs();
   const tabs = [];
   // اخبار: «اخبار منتخب» (سنجاق مدیر + هوش مصنوعی)؛ تا هوش مصنوعی برنگشته، تازه‌ترین خبرها
@@ -50,15 +50,15 @@ function buildTabs(){
         text: sp.headline || (post && headline(post)) || '',
         meta: chName(post ? post.channel_id : sp.channel_id) + (sp.sources > 1 ? ' و ' + toFaDigits(sp.sources - 1) + ' منبع دیگر' : '') + (sp.time ? '، ' + newsRelTime(sp.time) : ''),
         badges: [...(sp.sources >= 5 ? [['w', 'پرتکرار']] : []), ...((Array.isArray(sp.tags) ? sp.tags : []).slice(0, 1).map(t => ['', t]))],
-        thumb: thumbOf(post), link: (post && post.link) || sp.link || '',
+        thumb: thumbOf(post), link: (post && post.link) || sp.link || '', time: sp.time || (post && (post.posted_at || post.scraped_at)) || '', cid: post ? post.channel_id : sp.channel_id,
       }))
-    : newsAll.map(p => ({ text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: [], thumb: thumbOf(p), link: p.link }));
+    : newsAll.map(p => ({ text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: [], thumb: thumbOf(p), link: p.link, time: p.posted_at || p.scraped_at, cid: p.channel_id }));
   tabs.push({ key: 'news', label: 'اخبار', count: newsAll.filter(p => tOf(p) >= today).length, items: newsItems,
     featLabel: picks.length ? 'مهم‌ترین امروز' : 'تازه‌ترین خبر', more: { label: 'همه‌ی اخبار', newsGo: picks.length ? 'analytics' : 'study' } });
   // شایعه: کانال «رصد شایعات» (بله)
   const claims = POSTS_CACHE.filter(p => p.platform === 'bale' && visible(p)).sort(byNew);
   tabs.push({ key: 'claim', label: 'شایعه', count: claims.filter(p => tOf(p) >= today).length,
-    items: claims.map(p => { const v = claimVerdict(p); return { text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: v ? [['f', v]] : [], thumb: '', link: p.link }; }),
+    items: claims.map(p => { const v = claimVerdict(p); return { text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: v ? [['f', v]] : [], thumb: '', link: p.link, time: p.posted_at || p.scraped_at, cid: p.channel_id }; }),
     featLabel: 'تازه‌ترین شایعه', more: { label: 'همه‌ی ادعاها و شایعه‌ها', newsGo: 'claims' } });
   // موضع: فقط آنچه در خود بخش هم دیده می‌شود (تأیید هوش مصنوعی، section_relevant)
   const posCh = new Map(CHANNELS.filter(c => c.show_in_positions).map(c => [c.id, c]));
@@ -66,23 +66,25 @@ function buildTabs(){
   const inHero = EXCLUDE;
   const positions = postsOf(new Set(posCh.keys()), p => p.section_relevant === true && !inHero.has(p.id));
   tabs.push({ key: 'pos', label: 'موضع', count: positions.filter(p => tOf(p) >= today).length,
-    items: positions.map(p => { const g = POS_TAB_LABEL[posCh.get(p.channel_id)?.positions_tab]; return { text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: g ? [['g', g]] : [], thumb: '', link: p.link }; }),
+    items: positions.map(p => { const g = POS_TAB_LABEL[posCh.get(p.channel_id)?.positions_tab]; return { text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: g ? [['g', g]] : [], thumb: '', link: p.link, time: p.posted_at || p.scraped_at, cid: p.channel_id }; }),
     featLabel: 'تازه‌ترین موضع', more: { label: 'همه‌ی مواضع', go: 'positions' } });
   // درباره حوزه: اخبار حوزه (سیاسی‌اجتماعی به تشخیص هوش مصنوعی، hawza_relevant)
   const hawza = postsOf(channelsWhere(c => c.show_in_hawza), p => p.hawza_relevant === true && !inHero.has(p.id));
   tabs.push({ key: 'hawza', label: 'درباره حوزه', count: hawza.filter(p => tOf(p) >= today).length,
-    items: hawza.map(p => ({ text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: [], thumb: thumbOf(p), link: p.link })),
+    items: hawza.map(p => ({ text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: [], thumb: thumbOf(p), link: p.link, time: p.posted_at || p.scraped_at, cid: p.channel_id })),
     featLabel: 'تازه‌ترین خبر حوزه', more: { label: 'همه‌ی مطالب درباره حوزه', go: 'hawza' } });
   // یادداشت: چهره‌ها، سازمان‌ها و اندیشکده‌ها
   const notes = postsOf(channelsWhere(c => c.show_in_people || c.show_in_orgs || c.show_in_thinktanks));
   tabs.push({ key: 'note', label: 'یادداشت', count: notes.filter(p => tOf(p) >= today).length,
-    items: notes.map(p => ({ text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: [], thumb: '', link: p.link })),
+    items: notes.map(p => ({ text: headline(p), meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at), badges: [], thumb: '', link: p.link, time: p.posted_at || p.scraped_at, cid: p.channel_id })),
     featLabel: 'تازه‌ترین یادداشت', more: { label: 'همه‌ی یادداشت‌ها', go: 'people' } });
   // زبانه‌ی بی‌مطلب نشان داده نمی‌شود
-  return tabs.map(t => ({ ...t, items: t.items.filter(i => i.text).slice(0, PER_TAB) })).filter(t => t.items.length);
+  return tabs.map(t => ({ ...t, items: t.items.filter(i => i.text).slice(0, per) })).filter(t => t.items.length);
 }
 
 // فهرست یکی‌درمیان؛ exclude = شناسه‌ی پستی که بالای ستون (مطلب اصلی) آمده
+// گروه‌ها جدا (برای چیدمان‌های گروه‌بندی‌شده/زبانه‌ای): [{key,label,count,items,more}]
+export function todayTabs(per){ EXCLUDE = new Set(); return buildTabs(per); }
 export function todayFeed(exclude = new Set(), max = 12){
   EXCLUDE = exclude;
   const tabs = buildTabs();

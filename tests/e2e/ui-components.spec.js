@@ -29,7 +29,7 @@ test('ستون کناری (رایانه‌ی پهن): هر گزینه به بخ�
   await openAs(page, 'viewer');
   test.skip(!(await page.locator('#side-nav').isVisible()), 'ستون کناری فقط روی رایانه‌ی پهن');
   await expect(page.locator('#nav-menu-btn')).toBeHidden();
-  await expect(page.locator('#sn-kpis .sn-kpi:visible')).toHaveCount(0); // ۵.۳۹.۰: آمار در صفحه‌ی خوش‌آمد و «نمایش کامل»، نه در ستون
+  await expect(page.locator('#sn-kpis .sn-kpi:visible')).toHaveCount(0); // ۵.۳۹.۰: آمار در صفحه‌ی خوش‌آمد، نه در ستون
   const keys = [...new Set(await page.$$eval('#side-nav button[data-nav]:not(.soon-item)', (bs) => bs.map((b) => b.dataset.nav)))];
   expect(keys.length).toBeGreaterThan(20);
   for (const key of keys) {
@@ -48,7 +48,7 @@ test('ستون کناری (رایانه‌ی پهن): هر گزینه به بخ�
   expect(page.appErrors).toEqual([]);
 });
 
-test('ستون کناری: هدر و فوتر داخل ستون و «نمایش کامل» با جزئیات هر بخش', async ({ page }) => {
+test('ستون کناری: هدر و فوتر داخل ستون', async ({ page }) => {
   await openAs(page, 'admin');
   test.skip(!(await page.locator('#side-nav').isVisible()), 'ستون کناری فقط روی رایانه‌ی پهن');
   // ابزارهای نوار بالا و فوتر خودشان (نه کپی) به ستون منتقل شده‌اند
@@ -59,35 +59,41 @@ test('ستون کناری: هدر و فوتر داخل ستون و «نمایش 
   await page.click('#admin-menu-btn');
   await page.locator('#admin-menu [data-admin-go="status"]').click();
   await expect(page.locator('#sec-status')).toHaveClass(/active/);
-  // «نمایش کامل»: ستون با گزینه‌هایش می‌ماند و پنل روشن جزئیات کنارش تقریباً تمام صفحه باز می‌شود؛
-  // بستن با ×، Esc، پس‌زمینه یا رفتن به بخش
-  const side = page.locator('#side-nav'), detail = page.locator('#sn-detail');
-  await expect(detail).toBeHidden();
-  await page.click('#sn-toggle');
-  await expect(detail).toBeVisible();
-  await expect(page.locator('#sn-toggle')).toHaveAttribute('aria-expanded', 'true');
-  await expect(side.locator('.sn-item[data-nav="overview"]')).toBeVisible(); // گزینه‌های ستون سر جایشان
-  const vw = page.viewportSize().width;
-  expect((await detail.boundingBox()).width + (await side.boundingBox()).width).toBeGreaterThan(vw * 0.85);
-  await expect(detail.locator('.snd-card[data-sn="positions"] > p')).toBeVisible();
-  await expect(detail.locator('#snd-kpis .sn-kpi')).toHaveCount(5);
-  await page.keyboard.press('Escape');
-  await expect(detail).toBeHidden();
-  await page.click('#sn-toggle');
-  await page.locator('#sn-backdrop').click({ position: { x: 10, y: 300 } });
-  await expect(detail).toBeHidden();
-  await page.click('#sn-toggle');
-  await page.click('#snd-close');
-  await expect(detail).toBeHidden();
-  await page.click('#sn-toggle');
-  await detail.locator('button[data-nav="positions/imams"]').click();
-  await expect(detail).toBeHidden();
+  // ۵.۴۰.۰: دکمه و پنل «نمایش کامل» حذف شد (خواست کاربر)
+  await expect(page.locator('#sn-toggle, #sn-detail')).toHaveCount(0);
+  await page.locator('#side-nav .sn-group[data-sn="positions"] .sn-exp').click();
+  await page.locator('#side-nav button[data-nav="positions/imams"]').click();
   await expect(page.locator('#sec-positions')).toHaveClass(/active/);
   await expect.poll(() => page.evaluate(() => location.hash)).toContain('#positions/imams');
   // پهنای کمتر: ابزارها و فوتر به جای اصلی برمی‌گردند
   await page.setViewportSize({ width: 1100, height: 800 });
   await expect(page.locator('.topbar #theme-btn')).toBeVisible();
   await expect(page.locator('main > .app-footer')).toHaveCount(1);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('ستون کناری: بدون اسکرول، تیترهای بازشو و پنجره‌های «ارتباط با ما» و «درباره‌ی سامانه»', async ({ page }) => {
+  await openAs(page, 'viewer', 'positions/imams');
+  test.skip(!(await page.locator('#side-nav').isVisible()), 'ستون کناری فقط روی رایانه‌ی پهن');
+  const side = page.locator('#side-nav');
+  // ۵.۴۰.۰: ستون اسکرول ندارد؛ تیترها باز/بسته می‌شوند (هم‌زمان یکی)؛ «ارتباط با ما» و «درباره‌ی سامانه» پنجره‌ی کوچک
+  const pos = side.locator('.sn-group[data-sn="positions"]'), news = side.locator('.sn-group[data-sn="overview"]');
+  await expect(pos).toHaveClass(/is-exp/);
+  await news.locator('.sn-exp').click();
+  await expect(news).toHaveClass(/is-exp/);
+  await expect(pos).not.toHaveClass(/is-exp/);
+  await expect(news.locator('button[data-nav="overview/dossier"]')).toBeVisible();
+  expect(await side.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(0);
+  await news.locator('.sn-exp').click();
+  await expect(news.locator('button[data-nav="overview/dossier"]')).toBeHidden();
+  await expect(page.locator('#sn-contact #notify-phone')).toBeHidden();
+  await page.click('#sn-contact-btn');
+  await expect(page.locator('#sn-contact #notify-phone')).toBeVisible();
+  await page.click('#sn-info-btn');
+  await expect(page.locator('#sn-contact')).toBeHidden();
+  await expect(page.locator('#sn-foot .afo-item').first()).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#sn-foot')).toBeHidden();
   expect(page.appErrors).toEqual([]);
 });
 

@@ -21,6 +21,7 @@ import { setupThemeToggle } from './ui/theme.js';
 import { renderFreshness } from './ui/freshness.js';
 import { renderDomainLive } from './features/home/domain-live.js';
 import { renderHome, setupHomeV3 } from './features/home/home-v3.js';
+import { renderTodayPage, setupTodayPage } from './features/home/today-page.js';
 import { maybeShowWelcome, setupWelcome, resetWelcome } from './features/home/welcome.js';
 import { setupTabBars, updateTabInk, restoreLastTab, peekTabBar } from './ui/tabs.js';
 import { setupToTop } from './ui/scroll.js';
@@ -190,6 +191,7 @@ document.querySelectorAll('[data-logout]').forEach(b=>b.addEventListener('click'
 
 setupHome();
 setupHomeV3();
+setupTodayPage();
 setupWelcome();
 // کارت‌های عرصه‌ی صفحه‌ی نخست، «مشاهده‌ی همه‌ی شماره‌ها» و دکمه‌های ساخته‌شده بعد از بارگذاری (هرو، ستون «امروز در جریان»):
 // data-go = بخش مقصد. واگذاری روی سند — دکمه‌هایی که بعداً با innerHTML ساخته می‌شوند هم کار کنند.
@@ -518,6 +520,7 @@ export function switchSection(key){
   // پنل و newsState.platform به «اخبار و رویدادها» برگردن
   if(key === 'overview'){ setNewsPageTab(NEWS_CURRENT_TAB); renderNewsFeed(); renderNewsAnalytics(); }
   if(key === 'hawza') setHawzaTab(HAWZA_TAB);
+  if(key === 'today') renderTodayPage();
   if(key === 'posts'){ renderPosts(); renderCyberPeopleGrid(); }
   admin()?.enterSection(key); // بخش‌های مدیریت (admin/admin.js — فقط وقتی بسته‌ی مدیر بار شده)
   if(key === 'posts') restoreLastTab('posts-page-tabs', 'posts-tab', 'jarian_last_posts_tab');
@@ -655,6 +658,7 @@ async function loadAll(){
   renderDashHeroStats();
   renderDomainLive();
   renderHome();
+  if(document.getElementById('sec-today')?.classList.contains('active')) renderTodayPage();
   renderChannelCards();
   populatePostFilters();
   renderPosts();

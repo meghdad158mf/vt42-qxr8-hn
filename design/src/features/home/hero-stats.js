@@ -90,13 +90,11 @@ export async function renderDashHeroStats(){
   const wl = document.getElementById('wl-stats');
   if(wl) wl.innerHTML = [[todayCount, 'رصد امروز'], [sourceCount, 'منبع رصد'], [trackedContentCount, 'محتوای رصد شده'], [magazinesCount, 'شماره‌ی بسته تحلیلی']]
     .map(([v, l]) => `<div><b>${fmtHeroStat(v)}</b><span>${l}</span></div>`).join('');
-  // ستون کناری (۵.۳۸.۰، طرح «دونیمه‌ی عمودی»): سه عدد اصلی همین پنل؛ هر پنج عدد در پنل «نمایش کامل»
+  // ستون کناری (۵.۳۸.۰، طرح «دونیمه‌ی عمودی»): سه عدد اصلی همین پنل (پنهان در ستون از ۵.۳۹.۰)
   const k = (v, l) => `<div class="sn-kpi"><b>${fmtHeroStat(v)}</b><span>${l}</span></div>`;
   const three = k(todayCount, 'رصد امروز') + k(sourceCount, 'منبع رصد') + k(trackedContentCount, 'محتوای رصد شده');
   const side = document.getElementById('sn-kpis');
   if(side) side.innerHTML = three;
-  const detail = document.getElementById('snd-kpis');
-  if(detail) detail.innerHTML = three + k(domainCount, 'بخش رصد') + k(magazinesCount, 'بسته تحلیلی');
 }
 // «۳۷٬۹۶۶» — جداکننده‌ی هزارگان فارسی برای خوانایی عددهای بزرگ
 export function fmtHeroStat(n){ return toFaDigits(String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '٬')); }

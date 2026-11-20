@@ -2,6 +2,7 @@
 
 export const TITLES = {
   dashboard: 'صفحه نخست',
+  today: 'منتخب مطالب امروز جریان',
   posts: 'کنشگری مجازی',
   analytics: 'آنالیز',
   channels: 'کانال‌ها و افراد',

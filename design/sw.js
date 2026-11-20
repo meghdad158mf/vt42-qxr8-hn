@@ -3,8 +3,9 @@
 // داده‌ها همیشه زنده بمونن. فایل‌های ثابت هم‌دامنه (فونت/تصویر/کتابخونه/آیکون)
 // cache-first؛ خودِ صفحه network-first تا هر انتشار جدید فوراً دیده بشه.
 // با تغییر فهرست فایل‌های ثابت یا منطق این فایل، CACHE رو یک شماره بالا ببر.
+// v8 (۵.۴۰.۰): تصویرهای تازه‌ی کاشی عرصه‌ها (domain-icon-*.webp) با همان نام
 // v7 (۵.۳۲.۰): ساخت با Vite — فونت و تصویرهای HTML/CSS با نام hash‌دار در assets/
-const CACHE = 'jarian-static-v7';
+const CACHE = 'jarian-static-v8';
 const PRECACHE = [
   'ita-monitoring-prototype.html',
   'manifest.webmanifest',
