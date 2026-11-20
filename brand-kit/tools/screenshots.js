@@ -59,31 +59,32 @@ const mk = d=>fs.mkdirSync(path.join(OUT,d),{recursive:true});
     }
     return ctx;
   };
-  const toEl = sel=>`(()=>{ const e=document.querySelector('${sel}'); window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 40); })()`;
+  // عنصر نبود (مثلاً قسمت خالیِ «منتخب امروز» که ساخته نمی‌شود) → همان‌جا بماند
+  const toEl = sel=>`(()=>{ const e=document.querySelector('${sel}'); if(e) window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 40); })()`;
   // ۵.۳۳.۰: از ماژولار کردن (۵.۳۲.۹) تابع‌های سایت سراسری نیستند — رفتن به هر بخش با آدرس (#بخش/تب)
   // که از popstate همان سازوکار «برگشت» سایت را صدا می‌زند
+  // ۵.۴۰.۰: صفحه‌ی نخست تک‌صفحه‌ای (۵.۳۹.۰) و صفحه‌ی «منتخب مطالب امروز» — تصویرهای ۰۲ تا ۰۵ قدیمی (تکراری) کنار رفتند
   const desktop = [
-    ['01-home-hero', `location.hash='#dashboard'; window.scrollTo(0,0)`],
-    ['02-home-date-and-domains', toEl('#datebar')],
-    ['03-home-domains', toEl('.domain-grid')],
-    ['04-home-why-jarian', toEl('.why-jarian, [class*="why-jarian"]')],
-    ['05-home-analysis-package', toEl('.pkg-flow')],
-    ['06-news-at-a-glance', `location.hash='#overview/analytics'; window.scrollTo(0,0)`],
-    ['07-news-waves-and-charts', toEl('#news-waves-panel')],
-    ['08-news-social-feed', `location.hash='#overview/study'; window.scrollTo(0,0)`],
-    ['09-news-claims', `location.hash='#overview/claims'; window.scrollTo(0,0)`],
-    ['10-cyberspace-posts', `location.hash='#posts/feed'; window.scrollTo(0,0)`],
-    ['11-notes-figures', `location.hash='#people/figures'; window.scrollTo(0,0)`],
+    ['01-home', `location.hash='#dashboard'; window.scrollTo(0,0)`],
+    ['02-today-picks', `location.hash='#today'; window.scrollTo(0,0)`],
+    ['03-today-picks-more', toEl('.td-row')],
+    ['04-news-at-a-glance', `location.hash='#overview/analytics'; window.scrollTo(0,0)`],
+    ['05-news-waves-and-charts', toEl('#news-waves-panel')],
+    ['06-news-social-feed', `location.hash='#overview/study'; window.scrollTo(0,0)`],
+    ['07-news-claims', `location.hash='#overview/claims'; window.scrollTo(0,0)`],
+    ['08-cyberspace-posts', `location.hash='#posts/feed'; window.scrollTo(0,0)`],
+    ['09-notes-figures', `location.hash='#people/figures'; window.scrollTo(0,0)`],
+    ['10-positions', `location.hash='#positions/maraji'; window.scrollTo(0,0)`],
   ];
-  const c1 = await shot(1920,1080,1,'desktop-1920x1080',desktop); await c1.close();
+  // ۵.۳۹.۰: نمای روشن پیش‌فرض است — پوشه‌های بدون light- صریحاً نمای تیره
+  const c1 = await shot(1920,1080,1,'desktop-1920x1080',desktop,'dark'); await c1.close();
   const mobile = [
-    ['01-home-hero', `location.hash='#dashboard'; window.scrollTo(0,0)`],
-    // روی گوشی .domain-grid با display:contents جعبه نداره؛ ۹۰px بالاتر تا تیتر بخش هم دیده بشه
-    ['02-home-domains', `(()=>{ const e=document.querySelector('.domain-orbits'); window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 90); })()`],
-    ['03-news-at-a-glance', `location.hash='#overview/analytics'; window.scrollTo(0,0)`],
+    ['01-home', `location.hash='#dashboard'; window.scrollTo(0,0)`],
+    ['02-home-domains', toEl('.hm-domains')],
+    ['03-today-picks', `location.hash='#today'; window.scrollTo(0,0)`],
+    ['04-news-at-a-glance', `location.hash='#overview/analytics'; window.scrollTo(0,0)`],
   ];
-  const c2 = await shot(390,844,3,'mobile',mobile); await c2.close();
-  // نمای روشن (۵.۳۴.۰): همان صفحه‌های اصلی
+  const c2 = await shot(390,844,3,'mobile',mobile,'dark'); await c2.close();
   const c3 = await shot(1920,1080,1,'light-desktop-1920x1080',desktop.slice(0,8),'light'); await c3.close();
   const c4 = await shot(390,844,3,'light-mobile',mobile,'light'); await c4.close();
   console.log('screens done');

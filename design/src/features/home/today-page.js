@@ -49,7 +49,7 @@ function heroHtml(tabs){
   const day = new Intl.DateTimeFormat('fa-IR', { ...TZ, weekday: 'long' }).format(now) + ' ' +
     new Intl.DateTimeFormat('fa-IR-u-ca-persian', { ...TZ, day: 'numeric', month: 'long', year: 'numeric' }).format(now);
   const bars = hours.map((n, h) => `<i class="${h === cur ? 'now' : h > cur ? 'fut' : ''}" style="--h:${h > cur ? 0 : Math.max(4, Math.round(n / max * 100))}%" title="ساعت ${toFaDigits(String(h))}: ${toFaDigits(String(n))} مطلب"></i>`).join('');
-  const jumps = [['td-news', 'اخبار منتخب', 'news'], ['td-claim', 'شایعه‌ها', 'claim'], ['td-pos', 'مواضع', 'pos'], ['td-hawza', 'درباره حوزه', 'hawza'], ['td-note', 'یادداشت‌ها', 'note'], ['td-np', 'روزنامه‌ها', null]]
+  const jumps = [['td-news', 'اخبار', 'news'], ['td-claim', 'شایعه‌ها', 'claim'], ['td-pos', 'مواضع', 'pos'], ['td-hawza', 'درباره حوزه', 'hawza'], ['td-note', 'یادداشت‌ها', 'note'], ['td-np', 'روزنامه‌ها', null]]
     .filter(([id, , k]) => (k ? tabs.some(t => t.key === k) : id !== 'td-np' || NEWSPAPERS.some(n => n.image_url)))
     .map(([id, l, k]) => { const t = k && tabs.find(x => x.key === k); return `<button type="button" class="td-jump" data-td-jump="${id}">${escHtml(l)}${t && t.count ? `<i>${toFaDigits(String(t.count))}</i>` : ''}</button>`; }).join('');
   return `<header class="td-hero">
@@ -100,18 +100,21 @@ export function renderTodayPage(){
   const tabs = todayTabs(7);
   const by = (k) => tabs.find(t => t.key === k);
   const news = by('news'), claim = by('claim'), pos = by('pos'), hawza = by('hawza'), note = by('note');
+  // قسمتی که امروز مطلبی ندارد اصلاً ساخته نمی‌شود (کادر خالی نه)؛ ستون/ردیف تک‌کادره تمام‌عرض می‌شود
+  const side = [
+    claim && `<section class="td-box">${head('td-claim', 'ادعاها و شایعه‌ها', claim, 'راستی‌آزمایی «رصد شایعات»')}${simpleList({ ...claim, items: claim.items.slice(0, 3) })}</section>`,
+    pos && `<section class="td-box">${head('td-pos', 'مواضع مراجع و علماء', pos)}${simpleList({ ...pos, items: pos.items.slice(0, 3) })}</section>`,
+  ].filter(Boolean).join('');
+  const row = [
+    hawza && `<section class="td-box">${head('td-hawza', 'درباره حوزه', hawza)}${hawzaHtml(hawza)}</section>`,
+    note && `<section class="td-box">${head('td-note', 'یادداشت‌ها', note, 'چهره‌ها، سازمان‌ها و اندیشکده‌ها')}${notesHtml({ ...note, items: note.items.slice(0, 4) })}</section>`,
+  ].filter(Boolean).join('');
   box.innerHTML = `${heroHtml(tabs)}
-    <div class="td-main">
+    <div class="td-main${side ? '' : ' is-solo'}">
       <section class="td-box td-news">${head('td-news', news ? news.featLabel === 'مهم‌ترین امروز' ? 'اخبار منتخب امروز' : 'تازه‌ترین خبرها' : 'اخبار منتخب امروز', news, 'به انتخاب ویراستار و هوش مصنوعی، بر اساس تعداد منابع و اهمیت')}${newsHtml(news)}</section>
-      <div class="td-side">
-        <section class="td-box">${head('td-claim', 'ادعاها و شایعه‌ها', claim, 'راستی‌آزمایی «رصد شایعات»')}${simpleList(claim ? { ...claim, items: claim.items.slice(0, 3) } : null, 'امروز ادعا یا شایعه‌ی تازه‌ای ثبت نشده است.')}</section>
-        <section class="td-box">${head('td-pos', 'مواضع مراجع و علماء', pos)}${simpleList(pos ? { ...pos, items: pos.items.slice(0, 3) } : null, 'امروز موضع تازه‌ای ثبت نشده است.')}</section>
-      </div>
+      ${side ? `<div class="td-side">${side}</div>` : ''}
     </div>
-    <div class="td-row">
-      <section class="td-box">${head('td-hawza', 'درباره حوزه', hawza)}${hawzaHtml(hawza)}</section>
-      <section class="td-box">${head('td-note', 'یادداشت‌ها', note, 'چهره‌ها، سازمان‌ها و اندیشکده‌ها')}${notesHtml(note ? { ...note, items: note.items.slice(0, 4) } : null)}</section>
-    </div>
+    ${row ? `<div class="td-row">${row}</div>` : ''}
     ${papersHtml()}`;
 }
 

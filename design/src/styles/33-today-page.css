@@ -56,6 +56,8 @@
 
 /* اخبار منتخب | ستون کناری */
 .td-main{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:16px; align-items:start; }
+.td-main.is-solo{ grid-template-columns:1fr; }
+.td-row > :only-child{ grid-column:1 / -1; }
 .td-side{ display:flex; flex-direction:column; gap:16px; min-width:0; }
 .td-lead{ display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:18px; align-items:center; padding-bottom:16px; border-bottom:1px solid #e6ebe5; }
 .td-lead.no-img{ grid-template-columns:1fr; }
