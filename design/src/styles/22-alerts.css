@@ -4,7 +4,7 @@
 .sys-alerts-grid{ display:grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap:20px; align-items:start; }
 .sys-alerts-form{ display:flex; flex-direction:column; gap:10px; }
 .sys-alerts-form .field{ margin-bottom:0; }
-.sys-alerts-form .ce-check small{ font-size:11px; color: var(--text-faint); margin-inline-start:4px; }
+.sys-alerts-form .ce-check small{ font-size:12px; color: var(--text-faint); margin-inline-start:4px; }
 .sys-alerts-stat{ display:flex; flex-direction:column; gap:8px; }
 .sys-alerts-stat > div{ display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:8px 12px; border-radius:10px; background: var(--surface-2); }
 .sys-alerts-stat span{ color: var(--text-dim); }

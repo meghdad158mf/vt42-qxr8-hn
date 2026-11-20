@@ -24,7 +24,7 @@
 .act-day{ flex:1; min-width:0; height:100%; display:flex; align-items:flex-end; }
 .act-day i{ display:block; width:100%; min-height:2px; background: var(--accent); border-radius:4px 4px 0 0; }
 .act-day:hover i{ background: var(--accent-strong); }
-.act-days-axis{ display:flex; justify-content:space-between; font-size:11px; color: var(--text-faint); padding:5px 2px 0; }
+.act-days-axis{ display:flex; justify-content:space-between; font-size:12px; color: var(--text-faint); padding:5px 2px 0; }
 .act-secs{ display:flex; flex-direction:column; gap:2px; }
 .act-sec-row{ display:grid; grid-template-columns: minmax(110px,190px) minmax(0,1fr) 64px; align-items:center; gap:10px; padding:6px 0; font-size:13px; color: var(--text); }
 .act-sec-row b{ font-weight:800; }
@@ -35,7 +35,7 @@
 .act-sec-row.sub .act-bar{ height:6px; }
 .act-sec-row.sub .act-bar i{ background: rgba(181,101,29,0.45); }
 .act-sec-row > span:last-child{ text-align:left; font-variant-numeric: tabular-nums; }
-.act-op{ display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; background: var(--primary-soft); color: var(--primary-strong); white-space:nowrap; }
+.act-op{ display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:700; background: var(--primary-soft); color: var(--primary-strong); white-space:nowrap; }
 .act-op.add{ background: var(--ok-soft); color: var(--ok); }
 .act-op.del{ background: var(--danger-soft); color: var(--danger); }
 .act-op.sec{ background: var(--accent-soft); color: var(--accent-strong); }
@@ -61,9 +61,9 @@
 }
 /* «سرویس‌های مرتبط» — نمای فهرستی گروه‌بندی‌شده (متفاوت از کارت‌های کارهای خودکار) */
 .svc-summary{ display:flex; align-items:center; gap:14px; padding:4px 2px 14px; margin-bottom:14px; border-bottom:1px dashed var(--border); }
-.svc-summary-num{ font-size:30px; font-weight:800; line-height:1; color: var(--text-dim); }
+.svc-summary-num{ font-size:26px; font-weight:800; line-height:1; color: var(--text-dim); }
 .svc-summary-num small{ font-size:15px; font-weight:700; color: var(--text-faint); }
-.svc-summary-text{ font-size:14px; font-weight:700; color: var(--text); }
+.svc-summary-text{ font-size:13px; font-weight:700; color: var(--text); }
 .svc-summary.ok .svc-summary-num{ color: var(--ok); }
 .svc-summary.warn .svc-summary-num{ color:#d99a1e; } .svc-summary.warn .svc-summary-text{ color:#b7800f; }
 .svc-summary.bad .svc-summary-num, .svc-summary.bad .svc-summary-text{ color: var(--danger); }
@@ -94,12 +94,12 @@
 .cat-card .name.renamable, .cat-card .pg-name.renamable{ cursor:text; border-bottom:1px dashed transparent; }
 .cat-card .name.renamable:hover, .cat-card .pg-name.renamable:hover{ border-bottom-color: var(--accent-strong); }
 .rename-input{ width:100%; font:inherit; font-size:13px; padding:4px 6px; border:1px solid var(--accent-strong); border-radius:6px; background: var(--surface); color: var(--text); }
-.cat-card .count{ font-family:inherit !important; font-size:11px !important; color: var(--text-faint) !important; font-weight:600 !important; white-space:nowrap; }
+.cat-card .count{ font-family:inherit !important; font-size:12px !important; color: var(--text-faint) !important; font-weight:500 !important; white-space:nowrap; }
 .pw-item-note{ font-size:12px; color: var(--text-faint); font-weight:400; }
 .pw-modal-card{ max-width:440px; }
 .pw-modal-card .field{ margin-bottom:12px; }
-.pw-modal-card .field label{ display:block; font-size:12px; font-weight:600; color: var(--text-dim); margin-bottom:5px; }
-.pw-modal-card .field input{ width:100%; box-sizing:border-box; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius:8px; font:inherit; font-size:14px; direction:ltr; text-align:left; }
+.pw-modal-card .field label{ display:block; font-size:12px; font-weight:500; color: var(--text-dim); margin-bottom:5px; }
+.pw-modal-card .field input{ width:100%; box-sizing:border-box; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius:8px; font:inherit; font-size:13px; direction:ltr; text-align:left; }
 .pw-modal-warn{ font-size:13px !important; background: rgba(234,179,147,0.18); color: var(--accent-strong) !important; padding:9px 12px; border-radius:8px; margin-bottom:14px; }
 .pw-modal-error{ font-size:13px !important; color: var(--danger) !important; min-height:20px; margin:8px 0 4px !important; }
 .settings-row-2col{ display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
@@ -108,13 +108,13 @@
 .row-item{ display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); font-size:13px; }
 .row-item:last-child{ border-bottom:none; }
 .row-item .chan{ font-family: ui-monospace,monospace; direction:ltr; color: var(--text-dim); }
-.role{ font-size:11px; padding:2px 9px; border-radius:100px; border:1px solid var(--border-strong); color: var(--text-faint); font-weight:600; }
+.role{ font-size:12px; padding:2px 9px; border-radius:100px; border:1px solid var(--border-strong); color: var(--text-faint); font-weight:500; }
 .role.admin{ color: var(--accent-strong); border-color: transparent; background: var(--accent-soft); }
 .pw-item{ padding:12px 0; border-bottom:1px solid var(--border); }
 .pw-item:last-child{ border-bottom:none; padding-bottom:0; }
 .pw-item-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:13px; }
 .pw-item-body{ display:flex; gap:8px; }
-.pw-item-body input{ flex:1; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text-dim); padding:9px 12px; border-radius: var(--radius-control); font-size:14px; letter-spacing:2px; }
+.pw-item-body input{ flex:1; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text-dim); padding:9px 12px; border-radius: var(--radius-control); font-size:13px; letter-spacing:2px; }
 .kv{ display:flex; flex-direction:column; gap:9px; font-size:13px; }
 .kv div{ display:flex; justify-content:space-between; gap:10px; padding:8px 10px; background: var(--surface-2); border-radius:7px; }
 .kv b{ color: var(--text-faint); font-weight:500; }

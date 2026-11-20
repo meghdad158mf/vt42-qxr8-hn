@@ -31,8 +31,8 @@
 @media (max-width:640px){ .topbar .topbar-brand{ gap:11px; } .topbar .topbar-brand-text{ padding-inline-start:11px; } }
 .app-footer-title-row{ display:flex; align-items:center; gap:10px; }
 .app-footer-logo{ width:34px; height:34px; flex-shrink:0; }
-.lv-content h1{ font-size:clamp(28px,3.8vw,46px); font-weight:600; line-height:1.1; letter-spacing:-0.01em; color:#fff; margin-top:0; }
-.lv-content p{ color: rgba(255,255,255,0.62); font-size:16px; line-height:1.7; margin-top:18px; max-width:360px; }
+.lv-content h1{ font-size:clamp(28px,3.8vw,46px); font-weight:500; line-height:1.1; letter-spacing:-0.01em; color:#fff; margin-top:0; }
+.lv-content p{ color: rgba(255,255,255,0.62); font-size:15px; line-height:1.7; margin-top:18px; max-width:360px; }
 .lv-features{ margin-top:30px; display:flex; flex-direction:column; gap:12px; }
 .lv-features div{ display:flex; align-items:center; gap:10px; font-size:13px; color: var(--text-dim); }
 .lv-features .dot{ width:6px; height:6px; border-radius:50%; background: var(--accent); flex-shrink:0; }
@@ -51,11 +51,11 @@ body.app-loading .section.active .news-page-tabs,
 body.app-loading .section.active .news-tab-subtitle{ visibility:visible; }
 .login-form-wrap .back{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color: var(--text-faint); background:none; border:none; cursor:pointer; padding:0; margin-bottom:28px; }
 .login-form-wrap .back:hover{ color: var(--primary-strong); }
-.login-form-wrap h2{ font-size:21px; font-weight:700; margin-bottom:6px; }
+.login-form-wrap h2{ font-size:20px; font-weight:700; margin-bottom:6px; }
 .login-form-wrap .lede{ font-size:13px; color: var(--text-faint); margin:0 0 26px; }
 .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
-.field label{ font-size:13px; color: var(--text-dim); font-weight:600; }
-.field input{ background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius: var(--radius-control); font-size:14px; font-family:inherit; direction:rtl; width:100%; box-sizing:border-box; }
+.field label{ font-size:13px; color: var(--text-dim); font-weight:500; }
+.field input{ background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius: var(--radius-control); font-size:13px; font-family:inherit; direction:rtl; width:100%; box-sizing:border-box; }
 .field input:focus{ border-color: var(--primary-strong); outline:none; }
 .login-kb-hint{ font-size:12px; color:#b5651d; background: rgba(234,179,147,0.16); border-radius:8px; padding:7px 10px; margin:-8px 0 14px; line-height:1.7; }
 .login-form-wrap .btn.primary{ width:100%; margin-top:6px; padding:11px; position:relative; overflow:hidden; }
@@ -104,7 +104,7 @@ body.app-loading .section.active .news-tab-subtitle{ visibility:visible; }
 .notify-card-form{ display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; }
 .notify-card-form input{
   background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text);
-  padding:10px 12px; border-radius: var(--radius-control); font-size:14px; font-family:inherit;
+  padding:10px 12px; border-radius: var(--radius-control); font-size:13px; font-family:inherit;
   direction:ltr; text-align:center; width:220px; box-sizing:border-box;
 }
 .notify-card-form input:focus{ border-color: var(--primary-strong); outline:none; }
