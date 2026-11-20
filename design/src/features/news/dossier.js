@@ -6,6 +6,7 @@ import { NEWS_PLATFORM_ICON, NEWS_PLATFORM_LABEL } from '../../ui/platforms.js';
 import { newsRelTime, tehranDayDiff } from '../../core/date.js';
 import { POSTS_CACHE, chById, regionNameOf } from '../../data/store.js';
 import { wireMediaViewerClicks } from '../../ui/media-viewer.js';
+import { createReader, feedsReaderOn, onFeedsView, postRelated } from './news-reader.js';
 
 export let DOSSIER_TOPICS = []; // {id, name, keywords, active, sort_order} — موضوعات موقت «پرونده‌های موضوعی»
 export let DOSSIER_TOPIC_POSTS = []; // {id, topic_id, post_id, source, excluded} — پست‌های منتسب به هر موضوع
@@ -24,6 +25,9 @@ export async function loadDossierTopicPosts(){
 // چیدمان سایدباریه: موضوعات ستون راست زیر هم، فقط یکی در هر لحظه
 // انتخاب/نمایش داده می‌شه (نه accordion چندبازِ قبلی)
 export let dossierState = { time: 'all', topicId: null };
+var DOSSIER_READER_I = null;
+function dossierReader(){ return DOSSIER_READER_I || (DOSSIER_READER_I = createReader({ key: 'nrd', readKey: 'jarian_news_read', related: postRelated,
+  cardHtml: (p) => dossierPostCardHtml(p, dossierState.topicId) })); }
 export function renderDossierTab(){
   const sidebar = document.getElementById('dossier-sidebar');
   const wrap = document.getElementById('dossier-groups');
@@ -60,6 +64,12 @@ export function renderDossierTab(){
   `).join('');
 
   const active = groups.find(g=>g.topic.id===dossierState.topicId);
+  // ۵.۴۱.۰: نمای «خواندن» روی رایانه (news-reader.js)؛ پرونده صفحه‌بندی ندارد
+  if(feedsReaderOn()){
+    wrap.innerHTML = '<div class="news-feed dossier-feed" id="dossier-feed"></div>';
+    dossierReader().render(document.getElementById('dossier-feed'), active.posts, { total: active.posts.length });
+    return;
+  }
   wrap.innerHTML = `<div class="news-feed grid-view dossier-feed">${active.posts.map(p=>dossierPostCardHtml(p, active.topic.id)).join('')}</div>`;
   wireMediaViewerClicks(wrap);
   updateDossierMoreButtons(wrap);
@@ -79,7 +89,7 @@ export function dossierPostCardHtml(p, topicId){
   const thumbHtml = hasThumb
     ? `<div class="news-thumb"><img src="${escAttr(p.media_path)}" alt="" loading="lazy" data-viewer-kind="image" data-viewer-src="${escAttr(p.media_path)}"${p.media_type==='video' && p.link ? ` data-viewer-link="${escAttr(p.link)}"` : ''} /></div>`
     : ch.avatar_url
-      ? `<div class="news-thumb"><img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" /></div>`
+      ? `<div class="news-thumb is-avatar"><img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" /></div>`
       : `<div class="news-thumb placeholder">${ICONS.doc}</div>`;
   const uid = topicId + '-' + p.id;
   return `
@@ -127,6 +137,7 @@ export function updateDossierMoreButtons(scopeEl){
   });
 }
 export function setupDossierTab(){
+  onFeedsView(renderDossierTab);
   document.getElementById('dossier-groups').addEventListener('click', e=>{
     const b = e.target.closest('[data-dossier-more]');
     if(b) toggleDossierText(b.dataset.dossierMore);

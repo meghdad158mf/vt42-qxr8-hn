@@ -77,3 +77,34 @@ test.describe('ترجمه', () => {
     expect(page.appErrors).toEqual([]);
   });
 });
+
+// ۵.۴۱.۰: نمای «خواندن» — فهرست فشرده + ستون متن کامل، کلیدهای ↑↓، خوانده‌شده‌ها، و برگشت به نمای کارت
+test('نمای خواندن: انتخاب، کلیدهای جهت، خوانده‌شده و تعویض نما', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'نمای خواندن فقط روی رایانه‌ی پهن');
+  await openAs(page, 'viewer', 'overview/study');
+  const feed = page.locator('#news-feed');
+  await expect(feed).toHaveClass(/reader-view/);
+  const rows = feed.locator('.nr-row');
+  expect(await rows.count()).toBeGreaterThan(5);
+  await expect(rows.first()).toHaveClass(/on/);
+  await expect(feed.locator('#nr-pane .news-card')).toHaveCount(1);
+  const firstText = await feed.locator('#nr-pane .news-text').innerText();
+  // ↓ = مطلب بعدی؛ ستون خواندن عوض می‌شود و ردیف قبلی «خوانده‌شده» است
+  await page.locator('body').press('ArrowDown');
+  await expect(rows.nth(1)).toHaveClass(/on/);
+  await expect(rows.first()).toHaveClass(/is-read/);
+  await expect(feed.locator('#nr-pane .news-text')).not.toHaveText(firstText);
+  // کلیک روی ردیف
+  await rows.nth(3).click();
+  await expect(rows.nth(3)).toHaveClass(/on/);
+  // «همه خوانده شد»
+  await feed.locator('[data-nr-readall]').click();
+  await expect(feed.locator('.nr-row:not(.is-read)')).toHaveCount(0);
+  // نمای چندستونه و برگشت
+  await page.click('#news-view-grid-btn');
+  await expect(feed).toHaveClass(/grid-view/);
+  await expect(feed.locator('.news-card').first()).toBeVisible();
+  await page.click('#news-view-reader-btn');
+  await expect(feed).toHaveClass(/reader-view/);
+  expect(page.appErrors).toEqual([]);
+});

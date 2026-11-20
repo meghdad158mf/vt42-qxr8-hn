@@ -13,10 +13,15 @@ import { searchHay, searchNorm } from '../../core/search.js';
 import { setupJalaliRange } from '../../ui/jalali-range.js';
 import { wireMediaViewerClicks } from '../../ui/media-viewer.js';
 import { pickAddBtnHtml, onPicksChanged } from './picks.js';
+import { lsGet, lsSet } from '../../core/local-store.js';
+import { READER_PAGE_SIZE, READER_MQ, renderNewsReader, setupNewsReader } from './news-reader.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
 import { postHideBtnHtml, updateMobileFilterBadges } from '../../app.js';
 
 // drill = فیلتری که از کلیک روی نمودارهای «در یک نگاه» آمده (۵.۳۵.۰): { label, range?: {from,to} (ms) }
+// نمای فید: 'reader' (۵.۴۱.۰، پیش‌فرض رایانه: فهرست فشرده + ستون خواندن) / 'list' / 'grid'؛ زیر ۱۱۰۰px همیشه کارت
+export let NEWS_VIEW = lsGet('jarian_news_view', 'reader');
+export const readerOn = () => NEWS_VIEW === 'reader' && READER_MQ.matches;
 export const newsState = { region: '', time: 'all', sources: [], query: '', page: 1, dateFrom: '', dateTo: '', platform: 'social', drill: null };
 // platform: 'social' = پیام‌رسان‌ها (ایتا/تلگرام)، 'website' = سایت‌های خبری عمومی،
 // 'hawza' = سایت‌های خبری اختصاصی حوزه (هم platform=website ولی show_in_hawza=true،
@@ -148,14 +153,35 @@ export function renderNewsFeed(){
   if(!feed) return;
   const fullList = filteredNewsPosts();
   empty.style.display = fullList.length ? 'none' : 'block';
-  const totalPages = Math.max(1, Math.ceil(fullList.length / NEWS_PAGE_SIZE));
+  const size = readerOn() ? READER_PAGE_SIZE : NEWS_PAGE_SIZE;
+  const totalPages = Math.max(1, Math.ceil(fullList.length / size));
   if(newsState.page > totalPages) newsState.page = totalPages;
   if(newsState.page < 1) newsState.page = 1;
-  const start = (newsState.page - 1) * NEWS_PAGE_SIZE;
-  const list = fullList.slice(start, start + NEWS_PAGE_SIZE);
-  renderNewsPagination(totalPages);
+  const start = (newsState.page - 1) * size;
+  const list = fullList.slice(start, start + size);
+  renderNewsPagination(readerOn() ? 1 : totalPages);
   const isAdmin = currentRole === 'app_admin';
-  feed.innerHTML = list.map(p=>{
+  if(readerOn()){
+    feed.classList.remove('grid-view');
+    feed.classList.add('reader-view');
+    renderNewsReader(feed, list, {
+      total: fullList.length, page: newsState.page, totalPages,
+      cardHtml: (p)=>newsCardHtml(p, isAdmin), goPage: goNewsPage, afterPane: (p)=>updateNewsMoreButtons([p]),
+    });
+    return;
+  }
+  feed.classList.remove('reader-view');
+  feed.classList.toggle('grid-view', NEWS_VIEW === 'grid');
+  feed.innerHTML = list.map(p=>newsCardHtml(p, isAdmin)).join('');
+  wireMediaViewerClicks(feed);
+  updateNewsMoreButtons(list);
+  if(document.fonts && document.fonts.status !== 'loaded'){
+    document.fonts.ready.then(()=> updateNewsMoreButtons(list));
+  }
+}
+// کارت یک مطلب — مشترک نمای فهرستی/چندستونه و ستون خواندنِ نمای «خواندن»
+export function newsCardHtml(p, isAdmin){
+  {
     const ch = chById(p.channel_id) || {};
     const topic = catNameOf(p.channel_id);
     const isClaims = ch.platform === 'bale';
@@ -166,13 +192,14 @@ export function renderNewsFeed(){
     // خالی placeholder، کارت کاملاً متنی (تمام‌عرض) طراحی می‌شه
     // اگه خودِ پست عکس نداره، عکس پیش‌فرض همون کانال (اگه از پنل «مدیریت
     // کانال‌ها» آپلود شده باشه) به‌جای باکس خالی placeholder نشون داده می‌شه
+    // ۵.۴۱.۰ (خواست کاربر): بدون عکس → بدون کادر خالی (کارت فقط متن)؛ قبلاً یک کادر تیره‌ی بزرگ با آیکون می‌گرفت
     const thumbHtml = isClaims ? '' : hasThumb
       ? `<div class="news-thumb" style="position:relative">${thumbBadge}<img src="${escAttr(p.media_path)}" alt="" loading="lazy" data-viewer-kind="image" data-viewer-src="${escAttr(p.media_path)}"${p.media_type==='video' && p.link ? ` data-viewer-link="${escAttr(p.link)}"` : ''} /></div>`
       : ch.avatar_url
         ? `<div class="news-thumb"><img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" /></div>`
-        : `<div class="news-thumb placeholder">${ICONS.doc}</div>`;
+        : '';
     return `
-    <div class="news-card">
+    <div class="news-card${thumbHtml ? '' : ' no-thumb'}">
       ${thumbHtml}
       <div class="news-body">
         <div class="news-head">
@@ -204,19 +231,9 @@ export function renderNewsFeed(){
         </div>` : ''}
       </div>
     </div>`;
-  }).join('');
-  wireMediaViewerClicks(feed);
-  // دکمه‌ی «نمایش بیشتر» فقط وقتی نشون داده بشه که متن واقعاً از ۳ خط رد شده
-  // باشه — وگرنه برای پست‌های کوتاه، کلیک روش هیچ تغییری ایجاد نمی‌کرد.
-  // فونت فارسی سفارشی (IRANSansX) به‌صورت async لود می‌شه؛ اگه اندازه‌گیری
-  // قبل از لود کامل فونت انجام بشه، ارتفاع متن با فونت جایگزین محاسبه
-  // می‌شه و ممکنه اشتباهاً «سرریز نشده» تشخیص داده بشه — برای همین بعد از
-  // آماده‌شدن فونت‌ها هم یه‌بار دیگه چک می‌کنیم.
-  updateNewsMoreButtons(list);
-  if(document.fonts && document.fonts.status !== 'loaded'){
-    document.fonts.ready.then(()=> updateNewsMoreButtons(list));
   }
 }
+// دکمه‌ی «نمایش بیشتر» فقط وقتی متن واقعاً از ۳ خط رد شده؛ بعد از آماده شدن فونت IRANSansX دوباره اندازه‌گیری می‌شود
 export function updateNewsMoreButtons(list){
   list.forEach(p=>{
     const textEl = document.getElementById('news-text-'+p.id);
@@ -243,10 +260,14 @@ export function toggleNewsText(postId){
   b.firstChild.textContent = isOpen ? 'بستن ' : 'نمایش بیشتر ';
 }
 export function setNewsView(mode){
-  const feed = document.getElementById('news-feed');
-  feed.classList.toggle('grid-view', mode === 'grid');
-  document.getElementById('news-view-list-btn').classList.toggle('active', mode === 'list');
-  document.getElementById('news-view-grid-btn').classList.toggle('active', mode === 'grid');
+  NEWS_VIEW = mode;
+  lsSet('jarian_news_view', mode);
+  syncNewsViewButtons();
+  newsState.page = 1;
+  renderNewsFeed();
+}
+function syncNewsViewButtons(){
+  ['list', 'grid', 'reader'].forEach(m=>document.getElementById('news-view-'+m+'-btn')?.classList.toggle('active', NEWS_VIEW === m));
 }
 export function updateDateRangeSummary(){
   const summary = document.getElementById('news-daterange-summary');
@@ -294,6 +315,10 @@ export function setupNewsFeed(){
   document.getElementById('news-drill-clear').addEventListener('click', clearNewsDrill);
   document.getElementById('news-view-list-btn').addEventListener('click', ()=>setNewsView('list'));
   document.getElementById('news-view-grid-btn').addEventListener('click', ()=>setNewsView('grid'));
+  document.getElementById('news-view-reader-btn').addEventListener('click', ()=>setNewsView('reader'));
+  syncNewsViewButtons();
+  setupNewsReader();
+  READER_MQ.addEventListener('change', ()=>{ newsState.page = 1; renderNewsFeed(); });
   document.getElementById('news-feed').addEventListener('click', e=>{
     const more = e.target.closest('[data-news-more]');
     if(more) toggleNewsText(Number(more.dataset.newsMore));

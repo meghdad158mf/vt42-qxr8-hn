@@ -11,6 +11,7 @@ import { NEWS_PLATFORM_ICON, NEWS_PLATFORM_LABEL } from '../../ui/platforms.js';
 import { scrollToListTop } from '../../ui/scroll.js';
 import { searchHay, searchNorm } from '../../core/search.js';
 import { wireMediaViewerClicks } from '../../ui/media-viewer.js';
+import { READER_PAGE_SIZE, createReader, feedsReaderOn, onFeedsView, postRow } from '../news/news-reader.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
 import { postHideBtnHtml } from '../../app.js';
 
@@ -249,11 +250,33 @@ export function renderPoliticalFigures(){
   // کانال/فیلتر به صفحه‌ی ۱ برمی‌گرده
   const pfKey = [pfSelectedChannel, pfFilterTimeEl ? pfFilterTimeEl.value : '', pfSearchEl ? pfSearchEl.value : ''].join('|');
   if(pfKey !== PF_PAGE_KEY){ PF_PAGE_KEY = pfKey; PF_PAGE = 1; }
-  const pfPages = Math.max(1, Math.ceil(filtered.length / NEWS_PAGE_SIZE));
+  const reader = feedsReaderOn();
+  const size = reader ? READER_PAGE_SIZE : NEWS_PAGE_SIZE;
+  const pfPages = Math.max(1, Math.ceil(filtered.length / size));
   if(PF_PAGE > pfPages) PF_PAGE = pfPages;
-  const list = filtered.slice((PF_PAGE - 1) * NEWS_PAGE_SIZE, PF_PAGE * NEWS_PAGE_SIZE);
-  renderPagination('pf-pagination', PF_PAGE, pfPages, goPfPage);
-  pfList.innerHTML = list.map(p=>{
+  const list = filtered.slice((PF_PAGE - 1) * size, PF_PAGE * size);
+  renderPagination('pf-pagination', PF_PAGE, reader ? 1 : pfPages, goPfPage);
+  // ۵.۴۱.۰: نمای «خواندن» روی رایانه (news-reader.js)؛ همه‌ی مطالب از یک منبع‌اند، پس «مطالب دیگر» ندارد
+  if(reader){
+    pfList.classList.remove('grid-view');
+    pfReader().render(pfList, list, { total: filtered.length, page: PF_PAGE, totalPages: pfPages });
+    return;
+  }
+  pfList.classList.remove('reader-view');
+  pfList.classList.add('grid-view');
+  pfList.innerHTML = list.map(pfPostCardHtml).join('');
+  wireMediaViewerClicks(pfList);
+  updatePoliticalFigureMoreButtons(list);
+  if(document.fonts && document.fonts.status !== 'loaded'){
+    document.fonts.ready.then(()=> updatePoliticalFigureMoreButtons(list));
+  }
+}
+// var + تابع: renderPoliticalFigures ممکن است پیش از اجرای این خط صدا زده شود (مثل PF_PAGE)
+var PF_READER_I = null;
+function pfReader(){ return PF_READER_I || (PF_READER_I = createReader({ key: 'nrf', readKey: 'jarian_news_read',
+  // همه‌ی مطالب از همین منبع‌اند: نام منبع در ردیف تکرار نمی‌شود
+  row: (p) => ({ ...postRow(p), src: '' }), cardHtml: (p) => pfPostCardHtml(p), goPage: (p) => goPfPage(p) })); }
+export function pfPostCardHtml(p){
     const ch = chById(p.channel_id) || {};
     const topic = catNameOf(p.channel_id);
     const isRealVideo = p.media_type === 'video' && p.media_path && /\.mp4($|\?)/i.test(p.media_path);
@@ -288,12 +311,6 @@ export function renderPoliticalFigures(){
         ${currentRole === 'app_admin' ? `<div class="post-admin-row">${postHideBtnHtml(p)}</div>` : ''}
       </div>
     </div>`;
-  }).join('');
-  wireMediaViewerClicks(pfList);
-  updatePoliticalFigureMoreButtons(list);
-  if(document.fonts && document.fonts.status !== 'loaded'){
-    document.fonts.ready.then(()=> updatePoliticalFigureMoreButtons(list));
-  }
 }
 export function updatePoliticalFigureMoreButtons(list){
   list.forEach(p=>{
@@ -331,6 +348,7 @@ export function placePfPanel(where){
   }
 }
 export function setupProfileGallery(){
+  onFeedsView(renderPoliticalFigures);
   if(pfLogoGridEl) pfLogoGridEl.addEventListener('click', e=>{
     const card = e.target.closest('.pf-logo-card'); if(!card) return;
     openPfChannel(Number(card.dataset.ch));

@@ -34,8 +34,21 @@ test.describe('آنچه درباره حوزه گفته می‌شود', () => {
     expect(page.appErrors).toEqual([]);
   });
 
+  test('نمای خواندن: فهرست، انتخاب و مطالب دیگر همین منبع', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'نمای خواندن فقط رایانه');
+    await openAs(page, 'viewer', 'hawza/about');
+    await expect(page.locator('#hab-feed')).toHaveClass(/reader-view/);
+    const rows = page.locator('#hab-feed .nr-row');
+    await expect(rows).toHaveCount(2);
+    await rows.nth(1).click();
+    await expect(page.locator('#nrh-pane #hab-title-2')).toBeVisible();
+    expect(page.appErrors).toEqual([]);
+  });
+
   test('مدیر: پنهان کردن خبر بعد از تأیید', async ({ page }) => {
     await openAs(page, 'admin', 'hawza/about');
+    const cards = page.locator('[data-rv="cards"]:visible');   // ۵.۴۱.۰: رایانه با نمای خواندن باز می‌شود
+    if(await cards.count()) await cards.click();
     await expect(page.locator('#hab-feed article')).toHaveCount(2);
     await page.locator('#hab-feed [data-hab-hide="2"]').click();
     await expect(page.locator('#ui-confirm-modal')).toHaveClass(/active/);
