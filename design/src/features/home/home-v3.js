@@ -1,71 +1,59 @@
-// صفحه‌ی نخست ۵.۳۹.۰ (انتخاب کاربر بعد از چند دور ماکت؛ الگوی داشبورد «Planti»):
-//   ستون «امروز در جریان»: مطلب اصلی امروز روی دیوار جلد روزنامه‌ها + فهرست تازه‌ترین مطالب همه‌ی عرصه‌ها
-//   شش کارت عرصه (عدد زنده از domain-live.js)، کارت باریک «بسته تحلیلی جریان»، و جست‌وجوی سرصفحه.
-// مطلب اصلی: یافته‌ی «آنچه درباره حوزه گفته می‌شود» (ترجیح اشاره در تیتر، ۴۸ ساعت اخیر)؛ نبود → اولین مطلب فهرست.
-import { api } from '../../core/api.js';
-import { CHANNELS, POSTS_CACHE, HIDDEN_POST_IDS, chName } from '../../data/store.js';
-import { escAttr, escHtml, faTitle, safeUrl, toFaDigits } from '../../core/text.js';
-import { newsRelTime } from '../../core/date.js';
-import { NEWSPAPERS } from '../news/newspapers.js';
+// صفحه‌ی نخست ۵.۳۹.۰ (انتخاب کاربر بعد از چند دور ماکت؛ الگوی داشبورد «Planti»)؛ ۵.۴۰.۰ (خواست کاربر):
+//   ستون «امروز در جریان» = خلاصه‌ی روز و درگاه صفحه‌ی «منتخب مطالب امروز» (today-page.js)
+//   شش کاشی عرصه (کوچک و بزرگ؛ عدد زنده از domain-live.js)، کارت «بسته تحلیلی جریان» و جست‌وجوی سرصفحه.
+import { escAttr, escHtml, faTitle, toFaDigits } from '../../core/text.js';
+import { iranTodayStartMs } from '../../core/date.js';
+import { POSTS_CACHE, HIDDEN_POST_IDS } from '../../data/store.js';
 import { MAGAZINES, openMagazineViewer, onMagazinesRendered } from '../reports/magazines.js';
-import { todayFeed, todayIcon } from './today-col.js';
+import { todayTabs, todayIcon } from './today-col.js';
 import { goToNewsTab } from '../news/news-tabs.js';
 
-const tOf = (p) => new Date(p.posted_at || p.scraped_at).getTime();
-const visible = (p) => !p.hidden_at && !HIDDEN_POST_IDS.has(Number(p.id));
-const oneLine = (s) => String(s || '').replace(/\s+/g, ' ').trim();
-const link = (text, url) => {
-  const u = url ? safeUrl(url) : '#';
-  return u !== '#' ? `<a href="${u}" target="_blank" rel="noopener">${escHtml(text)}</a>` : escHtml(text);
-};
+const TZ = { timeZone: 'Asia/Tehran' };
+const ms = (iso) => (iso ? new Date(iso).getTime() : 0);
+const faNum = (n) => toFaDigits(String(n));
+const tehranHour = (t) => Number(new Intl.DateTimeFormat('en-US', { ...TZ, hour: 'numeric', hour12: false }).format(t)) % 24;
+const EMPTY = '<p class="hm-empty">هنوز مطلبی برای امروز رصد نشده است.</p>';
 
-// یافته‌های خزنده فقط با باز شدن تب خودشان بار می‌شوند؛ اینجا فقط ۳۰ ردیف آخر، یک‌بار در هر بارگذاری
-let MENTIONS = null, MENTIONS_LOADING = null;
-function loadMentions(){
-  if(MENTIONS || MENTIONS_LOADING) return MENTIONS_LOADING;
-  MENTIONS_LOADING = api('/hawza_mentions?select=id,url,site,site_name,title,excerpt,kind,in_title,published_at,scraped_at,hidden_at&order=scraped_at.desc&limit=30')
-    .then(r => r.ok ? r.json() : []).then(rows => { MENTIONS = rows.filter(x => !x.hidden_at && x.title); })
-    .catch(() => { MENTIONS = []; }).finally(() => { MENTIONS_LOADING = null; });
-  return MENTIONS_LOADING;
+// ستون «امروز در جریان» = درگاه صفحه‌ی «منتخب مطالب امروز» (۵.۴۰.۰، مدل «خلاصه‌ی روز» به انتخاب کاربر):
+// هر ردیف/دکمه = رفتن به صفحه‌ی منتخب (data-go="today") و با data-td-scroll پرش به همان قسمت آن صفحه.
+const SEC = { news: 'td-news', claim: 'td-claim', pos: 'td-pos', hawza: 'td-hawza', note: 'td-note' };
+const go = (k) => `data-go="today"${k && SEC[k] ? ` data-td-scroll="${SEC[k]}"` : ''}`;
+function todayPulse(){
+  const d0 = iranTodayStartMs(), now = Date.now();
+  const hours = new Array(24).fill(0);
+  const srcs = new Set();
+  POSTS_CACHE.forEach(p => {
+    const t = ms(p.posted_at || p.scraped_at);
+    if(t >= d0 && t <= now && !p.hidden_at && !HIDDEN_POST_IDS.has(Number(p.id))){ hours[tehranHour(t)]++; srcs.add(p.channel_id); }
+  });
+  return { hours, total: hours.reduce((a, b) => a + b, 0), sources: srcs.size, cur: tehranHour(now) };
 }
-function leadStory(){
-  const DAY2 = Date.now() - 48 * 3600e3;
-  const t = (x) => new Date(x.published_at || x.scraped_at).getTime();
-  if(MENTIONS && MENTIONS.length){
-    const fresh = MENTIONS.filter(x => t(x) >= DAY2);
-    const m = fresh.find(x => x.in_title) || fresh[0] || MENTIONS[0];
-    return { kind: 'درباره حوزه', title: oneLine(m.title), url: m.url, postId: null,
-      meta: [m.site_name || m.site, newsRelTime(m.published_at || m.scraped_at)].filter(Boolean).join('، ') };
-  }
-  const ids = new Set(CHANNELS.filter(c => c.show_in_hawza).map(c => c.id));
-  const p = POSTS_CACHE.filter(x => ids.has(x.channel_id) && visible(x) && x.hawza_relevant === true).sort((a, b) => tOf(b) - tOf(a))[0];
-  if(!p) return null;
-  return { kind: 'درباره حوزه', title: oneLine(p.title || p.text).slice(0, 140), url: p.link, postId: p.id,
-    meta: chName(p.channel_id) + '، ' + newsRelTime(p.posted_at || p.scraped_at) };
-}
-function wallHtml(){
-  const imgs = NEWSPAPERS.filter(n => n.image_url).slice(0, 8);
-  if(!imgs.length) return '';
-  return `<div class="hm-wall" aria-hidden="true">${imgs.map(n => `<img src="${escAttr(n.image_url)}" alt="" loading="lazy" data-no-menu />`).join('')}</div>`;
+const barsHtml = ({ hours, cur }) => {
+  const max = Math.max(1, ...hours);
+  return hours.map((n, h) => `<i class="${h === cur ? 'now' : h > cur ? 'fut' : ''}" style="--h:${h > cur ? 0 : Math.max(6, Math.round(n / max * 100))}%"></i>`).join('');
+};
+const goBtn = (txt = 'مشاهده‌ی منتخب مطالب امروز') => `<button type="button" class="hm-today-go" data-go="today"><span>${escHtml(txt)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>`;
+
+// خلاصه‌ی روز: کارت سرمه‌ای با شمار امروز و نمودار ریز ساعتی؛ زیرش یک ردیف برای هر نوع مطلب
+//    (آیکون، نام، شمار امروز، تازه‌ترین تیتر) — کلیک = همان قسمت در صفحه‌ی منتخب
+function vDigest(tabs){
+  const p = todayPulse();
+  const top = `<button type="button" class="dg-card" ${go()}><span class="dg-eb">منتخب مطالب امروز</span><b>${faNum(p.total)}</b><span class="dg-sub">مطلب از ${faNum(p.sources)} منبع تا این ساعت</span><span class="dg-bars" aria-hidden="true">${barsHtml(p)}</span></button>`;
+  const rows = tabs.map(t => { const i = t.items[0]; return `<button type="button" class="dg-row" ${go(t.key)}>
+      <span class="hm-ic">${todayIcon(t.key)}</span>
+      <span class="dg-tx"><span class="dg-h"><em>${escHtml(t.label)}</em>${t.count ? `<i>${faNum(t.count)} امروز</i>` : ''}</span><b>${escHtml(i.text)}</b></span>
+      <svg class="dg-ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>`; }).join('');
+  return { top, list: rows || EMPTY, foot: goBtn() };
 }
 
 function renderToday(){
-  const lead = leadStory();
-  const feed = todayFeed(lead && lead.postId ? new Set([lead.postId]) : new Set(), 10);
-  const top = lead || (feed[0] ? { kind: feed[0].label, title: feed[0].text, url: feed[0].link, meta: feed[0].meta } : null);
-  const items = lead ? feed : feed.slice(1);
-  const leadEl = document.getElementById('hm-lead');
-  if(leadEl){
-    leadEl.hidden = !top;
-    leadEl.innerHTML = top ? `${wallHtml()}<div class="hm-lead-tx"><span class="hm-eb">مهم‌ترین مطلب امروز · ${escHtml(top.kind)}</span>
-      <h3>${link(top.title, top.url)}</h3><small>${escHtml(top.meta || '')}</small>
-      <div class="hm-lead-btns">${safeUrl(top.url || '') !== '#' ? `<a class="hm-btn" href="${safeUrl(top.url)}" target="_blank" rel="noopener">ادامه‌ی مطلب</a>` : ''}<button type="button" class="hm-btn g" data-go="hawza">همه‌ی مطالب حوزه</button></div></div>` : '';
-  }
-  const list = document.getElementById('hm-items');
-  if(list){
-    list.innerHTML = items.length ? items.map(i => `<div class="hm-it"><span class="hm-ic">${todayIcon(i.kind)}</span><div><em>${escHtml(i.label)}</em><b>${link(i.text, i.link)}</b><small>${escHtml(i.meta)}</small></div></div>`).join('')
-      : '<p class="hm-empty">هنوز مطلبی برای امروز رصد نشده است.</p>';
-  }
+  const box = document.getElementById('hm-today');
+  const topEl = document.getElementById('hm-tabs'), list = document.getElementById('hm-items'), foot = document.getElementById('hm-today-foot');
+  if(!box || !list) return;
+  const out = vDigest(todayTabs());
+  if(topEl){ topEl.hidden = !out.top; topEl.innerHTML = out.top || ''; }
+  list.innerHTML = out.list;
+  if(foot){ foot.hidden = !out.foot; foot.innerHTML = out.foot || ''; }
 }
 
 function renderPackage(){
@@ -76,13 +64,20 @@ function renderPackage(){
   const files = Array.isArray(m.files) ? m.files : [];
   const label = m.issue_no ? 'شماره ' + toFaDigits(String(m.issue_no)) : faTitle(m.title);
   const sub = m.title && !/بسته\s*(ی\s*)?تحلیلی\s*جریان/.test(m.title) ? faTitle(m.title) : '';
+  // ۵.۴۰.۰: سه شماره‌ی قبلیِ دارای فایل کنار کارت (رایانه)
+  const prev = MAGAZINES.slice(1).filter(x => Array.isArray(x.files) && x.files.length).slice(0, 3);
   box.innerHTML = `<button type="button" class="hm-pkg-cv" aria-label="مطالعه‌ی ${escAttr(label)}">${m.cover_url ? `<img src="${escAttr(m.cover_url)}" alt="" data-no-menu />` : '<span>جریان</span>'}</button>
-    <div class="hm-pkg-tx"><h3>بسته تحلیلی جریان — ${escHtml(label)}</h3>${sub ? `<p>${escHtml(sub)}</p>` : ''}</div>
-    <button type="button" class="hm-btn hm-pkg-read"${files.length ? '' : ' disabled'}>مطالعه‌ی این شماره</button>
-    <button type="button" class="hm-more" data-go="reports">همه‌ی شماره‌ها ←</button>`;
+    <div class="hm-pkg-tx"><span class="hm-eb">بسته تحلیلی جریان — تازه‌ترین شماره</span><h3>${escHtml(label)}</h3>${sub ? `<p>${escHtml(sub)}</p>` : ''}
+      <div class="hm-pkg-acts"><button type="button" class="hm-btn hm-pkg-read"${files.length ? '' : ' disabled'}>مطالعه‌ی این شماره</button>
+      <button type="button" class="hm-more" data-go="reports">همه‌ی شماره‌ها ←</button></div></div>
+    ${prev.length ? `<div class="hm-pkg-prev" aria-label="شماره‌های قبلی">${prev.map((x, i) => {
+      const l = x.issue_no ? 'شماره ' + toFaDigits(String(x.issue_no)) : faTitle(x.title);
+      return `<button type="button" data-pkg-prev="${i}" aria-label="مطالعه‌ی ${escAttr(l)}"><i>${x.cover_url ? `<img src="${escAttr(x.cover_url)}" alt="" loading="lazy" data-no-menu />` : ''}</i><small>${escHtml(l)}</small></button>`;
+    }).join('')}</div>` : ''}`;
   const open = () => { if(files.length) openMagazineViewer(m); };
   box.querySelector('.hm-pkg-cv').addEventListener('click', open);
   box.querySelector('.hm-pkg-read').addEventListener('click', open);
+  box.querySelectorAll('[data-pkg-prev]').forEach(b => b.addEventListener('click', () => openMagazineViewer(prev[Number(b.dataset.pkgPrev)])));
 }
 
 // شمار مطالب امروز (از hero-stats.js) در زیرعنوان سرصفحه
@@ -97,12 +92,16 @@ export function setHomeTodayCount(n){
 export function renderHome(){
   renderToday();
   renderPackage();
-  if(!MENTIONS) loadMentions()?.then(renderToday);
 }
 
 export function setupHomeV3(){
   setHomeTodayCount(0);
   onMagazinesRendered(renderPackage);
+  // رفتن به صفحه‌ی منتخب (data-go روی سند) و پرش به قسمت همان نوع مطلب
+  document.getElementById('hm-today')?.addEventListener('click', e => {
+    const b = e.target.closest('[data-td-scroll]');
+    if(b) setTimeout(() => document.getElementById(b.dataset.tdScroll)?.scrollIntoView({ block: 'start' }), 80);
+  });
   // جست‌وجوی سرصفحه = جست‌وجو در اخبار و رویدادها (تب شبکه‌های اجتماعی، همان کادر جست‌وجوی آنجا)
   document.getElementById('hm-search')?.addEventListener('submit', e => {
     e.preventDefault();

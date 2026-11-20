@@ -61,12 +61,34 @@ test('صفحه‌ی نخست: شش کارت عرصه و بدون عرصه‌ها
 // ۵.۳۹.۰: صفحه‌ی نخست تازه (features/home/home-v3.js) و صفحه‌ی خوش‌آمد (welcome.js)
 test('صفحه‌ی نخست: «امروز در جریان»، کارت بسته و رفتن به عرصه', async ({ page }) => {
   await openAs(page, 'viewer');
-  await expect(page.locator('#hm-lead h3')).not.toBeEmpty();
-  expect(await page.locator('#hm-items .hm-it').count()).toBeGreaterThan(2);
-  await expect(page.locator('#pkg-flow .hm-pkg-tx h3')).toContainText('بسته تحلیلی جریان');
+  // ۵.۴۰.۰: «خلاصه‌ی روز» — کارت شمار امروز + یک ردیف برای هر نوع مطلب؛ همه به صفحه‌ی «منتخب مطالب امروز»
+  await expect(page.locator('#hm-lead')).toHaveCount(0);
+  await expect(page.locator('#hm-tabs .dg-card b')).not.toBeEmpty();
+  expect(await page.locator('#hm-items .dg-row').count()).toBeGreaterThan(2);
+  await expect(page.locator('#hm-today-foot .hm-today-go')).toBeVisible();
+  await expect(page.locator('#pkg-flow .hm-pkg-tx')).toContainText('بسته تحلیلی جریان');
   await expect(page.locator('#hm-sub')).toContainText('امروز');
   await page.locator('.hm-domains .domain-card[data-go="positions"]').click();
   await expect(page.locator('#sec-positions')).toHaveClass(/active/);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('منتخب مطالب امروز: رفتن از ستون «امروز در جریان»، پرش به هر قسمت و برگشت', async ({ page }) => {
+  await openAs(page, 'viewer');
+  await page.locator('#hm-today-foot .hm-today-go').click();
+  await expect(page.locator('#sec-today')).toHaveClass(/active/);
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#today');
+  await expect(page.locator('#today-page .td-hero h1')).not.toBeEmpty();
+  expect(await page.locator('#today-page .td-news article').count()).toBeGreaterThan(1);
+  await expect(page.locator('#td-claim')).toBeVisible();
+  await page.locator('[data-td-jump="td-note"]').click();
+  await expect(page.locator('#td-note')).toBeInViewport();
+  // ردیف «شایعه» ستون، مستقیم به همان قسمت صفحه
+  await page.goBack();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  await page.locator('#hm-items .dg-row[data-td-scroll="td-claim"]').click();
+  await expect(page.locator('#sec-today')).toHaveClass(/active/);
+  await expect(page.locator('#td-claim')).toBeInViewport();
   expect(page.appErrors).toEqual([]);
 });
 
@@ -102,6 +124,11 @@ test('منوی بخش‌ها: شماره‌های بسته تحلیلی زیر �
   if (await page.locator('#side-nav').isVisible()) {
     const side = page.locator('#sn-issues .sn-issue');
     await expect(side).toHaveCount(4);
+    // ۵.۴۰.۰: تیترهای ستون بازشو هستند — شماره‌ها با فلش «بسته تحلیلی جریان» دیده می‌شوند
+    await expect(side.first()).toBeHidden();
+    const exp = page.locator('#side-nav .sn-group[data-sn="reports"] .sn-exp');
+    await exp.click();
+    await expect(exp).toHaveAttribute('aria-expanded', 'true');
     await side.first().click();
     await expect(page.locator('#doc-viewer')).toHaveClass(/active/);
     await page.keyboard.press('Escape');
@@ -129,6 +156,8 @@ test('پیوند قدیمی عرصه‌های حذف‌شده به صفحه‌ی
 
 test('صفحه‌ی نخست: «اطلاع از انتشار» با دکمه و با Enter ثبت می‌شود', async ({ page }) => {
   await openAs(page, 'viewer');
+  // رایانه‌ی پهن (۵.۴۰.۰): «ارتباط با ما» در پنجره‌ی کوچک کنار ستون
+  if (await page.locator('#side-nav').isVisible()) await page.click('#sn-contact-btn');
   const phone = page.locator('#notify-phone');
   await phone.fill('۰۹۱۲ ۱۲۳ ۴۵۶۷');
   const isPost = (r) => r.url().includes('/rest/v1/notify_subscribers') && r.method() === 'POST';
@@ -141,6 +170,8 @@ test('صفحه‌ی نخست: «اطلاع از انتشار» با دکمه و 
 
 test('معرفی سامانه: باز شدن از فوتر، قبلی/بعدی و رفتن به «در یک نگاه»', async ({ page }) => {
   await openAs(page, 'viewer');
+  // رایانه‌ی پهن (۵.۴۰.۰): فوتر در پنجره‌ی «درباره‌ی سامانه» کنار ستون
+  if (await page.locator('#side-nav').isVisible()) await page.click('#sn-info-btn');
   await page.locator('.app-footer-intro').click();
   const modal = page.locator('#intro-modal');
   await expect(modal).toHaveClass(/active/);

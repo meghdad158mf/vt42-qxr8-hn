@@ -1,6 +1,7 @@
 // منوی «بخش‌ها» و منوی «مدیریت» نوار بالا
 // هر دکمه‌ی منوی بخش‌ها data-nav="بخش" یا "بخش/تب" داره (برای پررنگ کردن جای فعلی و رفتن)،
 // هر دکمه‌ی منوی مدیریت data-admin-go="بخش". رفتن واقعی با hookهای setupMenus (app.js).
+import { expandSideGroup } from './side-nav.js';
 
 const HOOKS = { current: ()=>({}), navigate: ()=>{}, adminGo: ()=>{} };
 const adminLinks = document.getElementById('admin-menu');
@@ -33,15 +34,15 @@ function markCurrent(root, st){
 }
 function updateNavMenuCurrent(){ markCurrent(navMenuEl, HOOKS.current()); }
 const sideNavEl = document.getElementById('side-nav');
-const sideDetailEl = document.getElementById('sn-detail');   // پنل «نمایش کامل» کنار ستون
 // ستون کناری: بخش فعلی پررنگ و زیرتب‌های همان عرصه باز (st = حالتی که router ثبت کرد، از app.js)
 export function updateSideNavCurrent(st){
   if(!st) return;
-  [sideNavEl, sideDetailEl].forEach(root=>{
+  [sideNavEl].forEach(root=>{
     if(!root) return;
     markCurrent(root, st);
-    root.querySelectorAll('.sn-group, .snd-card').forEach(g=>g.classList.toggle('is-open', g.dataset.sn === st.s));
+    root.querySelectorAll('.sn-group').forEach(g=>g.classList.toggle('is-open', g.dataset.sn === st.s));
   });
+  expandSideGroup(st.s);
 }
 function toggleNavMenu(){
   if(!navMenuEl.classList.contains('open')) updateNavMenuCurrent();
@@ -62,7 +63,7 @@ export function setupMenus(hooks){
     const b = e.target.closest('button[data-nav]');
     if(b){ HOOKS.navigate(b.dataset.nav); closeNavMenu(); }
   });
-  [sideNavEl, sideDetailEl].forEach(root=>root?.addEventListener('click', e=>{
+  [sideNavEl].forEach(root=>root?.addEventListener('click', e=>{
     const b = e.target.closest('button[data-nav]');
     if(b) HOOKS.navigate(b.dataset.nav);
   }));

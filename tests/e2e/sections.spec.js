@@ -4,7 +4,7 @@ import { test, expect, openAs } from './support/fixtures.js';
 
 // همان فهرست تب‌های SITE_VIS_ITEMS سایت (+ صفحه‌ی نخست)
 const VIEWER_ROUTES = [
-  'dashboard',
+  'dashboard', 'today',
   'overview/analytics', 'overview/claims', 'overview/study', 'overview/website',
   'overview/newspapers', 'overview/dossier', 'overview/newsletter',
   'people/orgs', 'people/figures', 'people/thinktanks', 'people/archive',

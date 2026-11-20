@@ -1,0 +1,114 @@
+/* «منتخب مطالب امروز جریان» (۵.۴۰.۰، features/home/today-page.js) — همان رنگ‌بندی «مریم‌گلی» صفحه‌ی نخست:
+   کارت روشن روی بوم، سربرگ سرمه‌ای، هلویی فقط برای خط و نقطه‌ی ریز. مقیاس قلم ۱۲/۱۳/۱۴/۱۵/۱۷/۲۲/۲۶ */
+
+/* دکمه‌ی ته ستون «امروز در جریان» صفحه‌ی نخست */
+.hm-today-go{ flex:none; display:flex; align-items:center; justify-content:center; gap:8px; width:100%; height:40px; margin:8px 0 10px; border:none; border-radius:12px;
+  background:#16202a; color:#fff; font:inherit; font-size:13px; font-weight:800; cursor:pointer; transition: filter .15s ease; }
+.hm-today-go svg{ width:16px; height:16px; color:#EAB393; transition: transform .2s cubic-bezier(.23,1,.32,1); }
+.hm-today-go:hover{ filter:brightness(1.15); }
+.hm-today-go:hover svg{ transform:translateX(-3px); }
+.hm-today-go:focus-visible{ outline:2px solid #16202a; outline-offset:2px; }
+
+.td{ display:flex; flex-direction:column; gap:16px; color:#22302c; }
+.td h1, .td h2, .td h3{ margin:0; }
+.td h3 a{ color:inherit; text-decoration:none; }
+.td h3 a:hover{ color:#9a4f12; }
+
+/* سربرگ */
+.td-hero{ display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,38%); gap:28px; align-items:end; padding:24px 28px; border-radius:18px; color:#fff;
+  background: radial-gradient(70% 120% at 100% 0%, rgba(234,179,147,.16), transparent 60%), linear-gradient(160deg,#1b2733,#121b24); }
+.td-eb{ display:inline-block; font-size:12px; font-weight:800; color:#EAB393; }
+.td-hero h1{ margin-top:6px; font-size:26px; font-weight:900; line-height:1.4; color:#fff; }
+.td-hero p{ margin:6px 0 0; font-size:14px; line-height:1.9; color: rgba(255,255,255,.72); }
+.td-hero p b{ color:#fff; font-weight:900; }
+.td-jumps{ display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; }
+.td-jump{ display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.04);
+  font:inherit; font-size:12px; font-weight:800; color: rgba(255,255,255,.85); cursor:pointer; transition: background .15s ease, border-color .15s ease; }
+.td-jump i{ font-style:normal; color:#EAB393; }
+.td-jump:hover{ background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.3); }
+.td-jump:focus-visible{ outline:2px solid #EAB393; outline-offset:2px; }
+.td-bars{ display:flex; align-items:flex-end; gap:3px; height:84px; direction:ltr; }
+.td-bars i{ flex:1; height:var(--h); min-height:2px; border-radius:3px 3px 0 0; background: rgba(255,255,255,.26); }
+.td-bars i.now{ background:#EAB393; }
+.td-bars i.fut{ background: rgba(255,255,255,.07); height:2px; }
+.td-axis{ display:flex; justify-content:space-between; margin-top:6px; font-size:12px; color: rgba(255,255,255,.45); direction:ltr; }
+
+/* کادرها */
+.td-box{ min-width:0; padding:18px 20px; border-radius:16px; background:#fbfcfa; border:1px solid #dfe5de; box-shadow:0 1px 2px rgba(20,30,40,.04); scroll-margin-top:24px; }
+.td-h{ display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; scroll-margin-top:24px; }
+.td-h-ic{ flex:none; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:10px; background:#eef1ec; color:#5c6a64; }
+.td-h-ic svg{ width:16px; height:16px; }
+.td-h > div{ flex:1; min-width:0; }
+.td-h h2{ font-size:15px; font-weight:900; color:#22302c; }
+.td-h p{ margin:2px 0 0; font-size:12px; color:#7a867f; }
+.td-more{ flex:none; border:none; background:none; padding:6px 0; font:inherit; font-size:12px; font-weight:800; color:#16202a; cursor:pointer; white-space:nowrap; }
+.td-more:hover{ text-decoration:underline; text-underline-offset:4px; }
+.td-empty{ margin:0; padding:12px 0; font-size:13px; color:#7a867f; }
+.td-meta{ display:flex; align-items:center; gap:6px; min-width:0; font-size:12px; color:#7a867f; white-space:nowrap; }
+.td-src{ min-width:0; overflow:hidden; text-overflow:ellipsis; font-weight:700; color:#5c6a64; }
+.td-src + .td-time::before{ content:'·'; margin-inline-end:6px; color:#b9c5bb; }
+.td-time{ flex:none; font-variant-numeric:tabular-nums; }
+.td-badges{ display:flex; flex-wrap:wrap; gap:4px; }
+.td-badges:empty{ display:none; }
+.td-badge{ padding:1px 8px; border-radius:999px; border:1px solid #d3dbd2; font-size:12px; font-weight:800; color:#5c6a64; }
+.td-badge.is-w{ border-color:#EAB393; color:#9a4f12; }
+.td-badge.is-f{ border-color:#e3b5ad; color:#a2382b; }
+
+/* اخبار منتخب | ستون کناری */
+.td-main{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:16px; align-items:start; }
+.td-side{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+.td-lead{ display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:18px; align-items:center; padding-bottom:16px; border-bottom:1px solid #e6ebe5; }
+.td-lead.no-img{ grid-template-columns:1fr; }
+.td-lead-img{ display:block; aspect-ratio:16/10; border-radius:12px; overflow:hidden; background:#eef1ec; }
+.td-lead-img img, .td-thumb img, .td-tile-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+.td-lead-tx{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+.td-lead h3{ font-size:17px; font-weight:900; line-height:1.8; }
+.td-rank{ flex:none; width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background:#16202a; color:#EAB393; font-size:14px; font-weight:900; }
+.td-rank.sm{ width:26px; height:26px; font-size:12px; background:#eef1ec; color:#22302c; }
+.td-grid2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 20px; }
+.td-card{ display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; align-items:start; padding:14px 0; border-bottom:1px solid #eef1ec; }
+.td-thumb{ display:block; width:64px; height:64px; border-radius:10px; overflow:hidden; background:#eef1ec; }
+.td-card-tx{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+.td-card h3, .td-li h3, .td-tile h3, .td-note h3{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:13px; line-height:1.8; font-weight:800; }
+.td-list{ display:flex; flex-direction:column; }
+.td-li{ display:flex; flex-direction:column; gap:6px; padding:12px 0; border-top:1px solid #eef1ec; }
+.td-li:first-child{ border-top:none; padding-top:0; }
+
+/* درباره حوزه | یادداشت‌ها */
+.td-row{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:stretch; }
+.td-tiles{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.td-tile{ display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:12px; background:#fff; border:1px solid #e6ebe5; min-width:0; }
+.td-tile-img{ display:block; aspect-ratio:16/9; border-radius:8px; overflow:hidden; background:#eef1ec; }
+.td-note{ display:grid; grid-template-columns:40px minmax(0,1fr); gap:12px; padding:12px 0; border-top:1px solid #eef1ec; }
+.td-note:first-child{ border-top:none; padding-top:0; }
+.td-note > div{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.td-av{ width:40px; height:40px; border-radius:50%; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; background:#16202a; color:#EAB393; font-size:13px; font-weight:800; }
+.td-av img{ width:100%; height:100%; object-fit:cover; }
+
+/* روزنامه‌ها */
+.td-papers{ position:relative; }
+.td-np-more{ position:absolute; top:22px; left:20px; }
+.td-papers .td-h .td-more{ display:none; }
+.td-covers{ display:flex; gap:14px; overflow-x:auto; padding:4px 2px 6px; scrollbar-width:thin; }
+.td-cover{ flex:none; width:118px; display:flex; flex-direction:column; gap:6px; padding:0; border:none; background:none; font:inherit; cursor:pointer; text-align:center; }
+.td-cover img{ width:100%; aspect-ratio:3/4; object-fit:cover; object-position:top; border-radius:6px; box-shadow:0 8px 18px -12px rgba(22,32,42,.6); transition: transform .2s cubic-bezier(.23,1,.32,1); }
+.td-cover span{ font-size:12px; font-weight:700; color:#5c6a64; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.td-cover:focus-visible{ outline:2px solid #16202a; outline-offset:2px; border-radius:6px; }
+@media (hover:hover) and (pointer:fine){ .td-cover:hover img{ transform:translateY(-3px); } }
+
+@media (max-width:1100px){
+  .td-main{ grid-template-columns:1fr; }
+}
+@media (max-width:900px){
+  .td-hero{ grid-template-columns:1fr; gap:16px; padding:20px; }
+  .td-row{ grid-template-columns:1fr; }
+}
+@media (max-width:640px){
+  .td-hero h1{ font-size:22px; }
+  .td-box{ padding:16px; }
+  .td-lead{ grid-template-columns:1fr; }
+  .td-grid2{ grid-template-columns:1fr; }
+  .td-tiles{ grid-template-columns:1fr; }
+  .td-np-more{ position:static; }
+}
+@media (prefers-reduced-motion: reduce){ .td-cover img, .hm-today-go svg{ transition:none; } }
