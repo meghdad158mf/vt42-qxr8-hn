@@ -4,6 +4,7 @@
 // فقط یک‌بار در هر ورود (sessionStorage: jarian_welcome_seen؛ خروج پاکش می‌کند). کاهش حرکت → فقط محو.
 import { escAttr } from '../../core/text.js';
 import { MAGAZINES } from '../reports/magazines.js';
+import { animateWelcomeStats } from './hero-stats.js';
 
 const KEY = 'jarian_welcome_seen';
 const wide = () => typeof matchMedia === 'function' && matchMedia('(min-width:1280px)').matches;
@@ -29,6 +30,7 @@ export function maybeShowWelcome(){
   if(d) d.textContent = new Intl.DateTimeFormat('fa-IR', { ...tz, weekday: 'long' }).format(now) + ' ' + new Intl.DateTimeFormat('fa-IR-u-ca-persian', { ...tz, day: 'numeric', month: 'long', year: 'numeric' }).format(now);
   el.hidden = false;
   document.documentElement.classList.add('wl-open');
+  animateWelcomeStats(); // اگر عددها از قبل رسیده‌اند (وگرنه renderDashHeroStats با رسیدنشان می‌شمارد)
 }
 
 function closeWelcome(){
