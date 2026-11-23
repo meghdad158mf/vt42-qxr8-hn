@@ -4,7 +4,6 @@
 body:not(.is-admin) .vis-off{ display:none !important; }
 body.is-admin .vis-off{ opacity:.6; }
 .vis-badge{ display:inline-flex; align-items:center; margin-inline-start:6px; padding:1px 7px; border-radius:999px; font-size:12px; font-weight:700; line-height:1.6; color:#fff; background: var(--danger); vertical-align:middle; white-space:nowrap; }
-.domain-grid.vis-partial .dom-orbit{ display:none; }
 .login-maint{ display:flex; flex-direction:column; gap:3px; margin:0 0 16px; padding:10px 12px; border-radius:10px; border:1px solid rgba(217,154,30,0.5); background: rgba(217,154,30,0.1); font-size:12px; line-height:1.8; color: var(--text); }
 .login-maint b{ font-size:13px; color:#9a6a0c; }
 .login-maint .login-maint-admin{ color: var(--text-faint); }

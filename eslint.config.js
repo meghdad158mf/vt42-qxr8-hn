@@ -9,8 +9,8 @@ export default [
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: 'module',
-      // کتابخانه‌های design/vendor به‌صورت سراسری (gsap با تگ ثابت، بقیه با loadScriptOnce)
-      globals: { ...globals.browser, gsap: 'readonly', Chart: 'readonly', html2canvas: 'readonly', jspdf: 'readonly' },
+      // کتابخانه‌های design/vendor به‌صورت سراسری (با loadScriptOnce)
+      globals: { ...globals.browser, Chart: 'readonly', html2canvas: 'readonly', jspdf: 'readonly' },
     },
     rules: {
       ...js.configs.recommended.rules,

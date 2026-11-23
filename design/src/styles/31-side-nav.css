@@ -22,9 +22,7 @@
   #view-dash > .main{ padding-top:28px; }
 
   /* هرو صفحه‌ی نخست: به‌جای تمام‌عرض پنجره، هم‌عرض ستون محتوا با گوشه‌ی گرد */
-  .hs{ width:auto; margin:-6px 0 0; border-radius:22px; overflow:clip; }
-  .hs-slide{ min-height:600px; }
-  .hs-brand{ display:none; }   /* همان شعار بالای ستون کناری */
+  .hs{ width:auto; margin:-6px 0 0; border-radius:22px; overflow:clip; }   /* همان شعار بالای ستون کناری */
   /* سه عدد اصلی پنل آمار در ستون کناری است */
   #dash-hero-stats{ display:none; }
   .hs + .dash-hero-stats + .datebar{ margin-top:36px; }
@@ -60,7 +58,6 @@
 .sn-group:has(.sn-exp) > .sn-item{ padding-inline-end:40px; }
 .sn-item:hover{ background: rgba(255,255,255,0.06); color:#fff; }
 .sn-item:focus-visible, .sn-subs button:focus-visible, .sn-exp:focus-visible, .sn-dock-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
-.sn-img{ width:26px; height:26px; flex:none; object-fit:contain; }
 .sn-ic{ width:22px; height:22px; flex:none; display:flex; align-items:center; justify-content:center; background:none; color: rgba(255,255,255,0.55); transition: color .15s ease; }
 .sn-ic svg{ width:19px; height:19px; }
 .sn-item:hover .sn-ic{ color: rgba(255,255,255,0.85); }

@@ -53,7 +53,7 @@ import { setupHawzaAbout } from './features/hawza/hawza-about.js';
 import { maybeShowIntro, setupIntro } from './features/home/intro.js';
 import { setupHome } from './features/home/home.js';
 import { loadMagazines, renderMagazines } from './features/reports/magazines.js';
-import { renderDashHeroStats } from './features/home/hero-stats.js';
+import { renderDashHeroStats, prefetchHeroCounts } from './features/home/hero-stats.js';
 import { loadSchoolReports, renderSchoolReports, setupSchoolReports } from './features/schools/school-reports.js';
 import { setupDatebar } from './features/home/datebar.js';
 import { SITE_VIS_ITEMS } from './data/site-sections.js';
@@ -652,6 +652,7 @@ async function loadAll(){
   // کوئری اضافه‌ی پشت‌سرهم داخل خودِ loadPosts (loadHawzaPosts/
   // loadClaimsPosts) این تأخیر برای زمان ورود به سایت محسوس شده بود
   // (بخش «سرعت ورود» CLAUDE.md رو ببین).
+  prefetchHeroCounts(); // ۶.۰.۲: شمارش‌های آمار هم‌زمان با بقیه‌ی داده‌ها (قبلاً بعد از همه)
   await Promise.all([loadChannels(), loadCategories(), loadRegions(), loadNewsTopics(), loadDossierTopics(), loadDossierTopicPosts(), loadNewsletterPosts(), loadMagazines(), loadArchiveReports(), loadNewspapers(), loadSchoolReports(), loadNewsAiInsights(), loadProfileGroups(), loadChannelProfileGroups(), loadPosts(), loadAnnouncements(), loadHiddenPostIds(), loadSiteSettings(), loadNewsPickEdits()]);
   renderAnnBar();
   renderFreshness();

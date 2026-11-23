@@ -3,7 +3,6 @@
 /* ---- ورود با کد ملی + پیامک (۵.۳۱.۰) ---- */
 .otp-ltr{ direction:ltr; text-align:left; }
 .otp-code-input{ text-align:center; font-size:20px; font-weight:700; letter-spacing:8px; }
-.otp-hint{ font-size:12px; color: var(--text-faint); line-height:1.9; margin:-4px 0 12px; }
 .otp-sent{ font-size:13px; color: var(--text); line-height:1.9; margin:0 0 14px; padding:10px 12px; border-radius:10px; background: rgba(234,179,147,0.14); }
 .otp-sent bdi{ font-weight:700; letter-spacing:1px; }
 .otp-row{ display:flex; justify-content:space-between; gap:10px; margin:-4px 0 12px; }

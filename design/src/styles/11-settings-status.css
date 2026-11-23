@@ -16,8 +16,6 @@
   background: var(--surface); border:1px solid var(--border-strong); border-radius: var(--radius-control); padding:12px 14px;
   box-shadow: var(--shadow-hover); min-width:170px;
 }
-.chan-news-toggle{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:500; color: var(--text-dim); white-space:nowrap; cursor:pointer; }
-.chan-news-toggle input{ cursor:pointer; }
 .chan-row-domains-details{ position:relative; flex-shrink:0; }
 .chan-row-domains-details summary{
   display:inline-flex; align-items:center; list-style:none; cursor:pointer; font-size:12px; font-weight:400; font-family:inherit; color: var(--text-dim);
@@ -29,16 +27,9 @@
   background: var(--surface); border:1px solid var(--border-strong); border-radius: var(--radius-control); padding:10px 12px;
   box-shadow: var(--shadow-hover); min-width:150px;
 }
-.chan-row-news{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:500; color: var(--text-faint); flex-shrink:0; cursor:pointer; white-space:nowrap; }
-.chan-row-news input{ cursor:pointer; }
-.chan-row-profile-fields{ min-width:190px; }
-.chan-row-profile-fields label{ display:flex; flex-direction:column; gap:4px; font-size:12px; font-weight:500; color: var(--text-faint); }
-.chan-row-profile-fields input{ font-size:12px; font-weight:500; font-family:inherit; color: var(--text); background: var(--surface-2); border:1px solid var(--border-strong); border-radius: var(--radius-control); padding:5px 7px; }
-.chan-row-profile-fields input:focus{ outline:none; border-color: var(--accent); }
 /* چک‌باکس «طلبه‌ی حوزه‌ی خراسان» با کلاس مشترک chan-row-news داخل همین
    پنل «پروفایل» هم می‌شینه — باید override بشه، وگرنه قانون ستونی بالا
    (label{flex-direction:column}) روش هم اعمال می‌شه و چیدمانش می‌شکنه */
-.chan-row-profile-fields label.chan-row-news{ flex-direction:row; }
 #chan-list{ max-height:520px; overflow-y:auto; }
 .chan-intro{ font-size:13px; color: var(--text-dim); line-height:1.8; margin:0 0 12px; }
 .chan-toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
@@ -96,21 +87,11 @@
 .ce-groups{ display:flex; flex-wrap:wrap; gap:8px 16px; }
 .ce-actions{ display:flex; gap:10px; justify-content:flex-end; border-top:1px solid var(--border); padding-top:16px; }
 .ce-actions .btn{ min-width:110px; }
-.chan-filter-row{ padding-top:12px; border-top:1px dashed var(--border); }
-.chan-filter-row #chan-search{ flex:2; min-width:180px; }
 .chan-filter-count{ font-size:12px; color: var(--text-faint); white-space:nowrap; margin-inline-start:auto; }
 #dossier-topic-admin-list{ max-height:420px; overflow-y:auto; padding-inline-end:4px; }
 .chan-row{ display:flex; align-items:center; gap:8px; padding:9px 0; border-bottom:1px solid var(--border); }
-.chan-avatar-btn{ position:relative; flex-shrink:0; width:32px; height:32px; border-radius:50%; overflow:hidden; background: var(--surface-2); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; color: var(--text-faint); cursor:pointer; }
-.chan-avatar-btn img{ width:100%; height:100%; object-fit:cover; display:block; }
-.chan-avatar-btn svg{ width:15px; height:15px; }
-.chan-avatar-btn input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
 .chan-row:last-child{ border-bottom:none; }
-.chan-row input.name-edit{ flex:1; min-width:90px; background:none; border:1px solid transparent; color: var(--text); font-size:13px; font-weight:500; padding:5px 6px; border-radius: var(--radius-control); font-family:inherit; }
-.chan-row input.name-edit:hover{ border-color: var(--border); }
-.chan-row input.name-edit:focus{ background: var(--surface-2); border-color: var(--border-strong); outline:none; }
 .chan-row .chan{ font-size:12px; color: var(--text-faint); flex-shrink:0; }
-.chan-row select.cat-select{ font-size:12px; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text-dim); border-radius: var(--radius-control); padding:5px 8px; flex-shrink:0; max-width:110px; }
 .del-btn{ background:none; border:none; color: var(--text-faint); cursor:pointer; font-size:13px; min-width:36px; min-height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius: var(--radius-control); flex-shrink:0; line-height:1; transition: color .15s ease, background .15s ease; }
 .del-btn:hover{ color: var(--danger); background: var(--danger-soft); }
 

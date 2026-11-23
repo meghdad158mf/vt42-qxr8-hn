@@ -193,8 +193,6 @@
   .topbar #admin-menu-btn .chev{ display:none; }
   .topbar .chip-btn.ghost{ padding:6px 10px; font-size:12px; }
 }
-.seg-compact{ margin-bottom:0; }
-.seg-compact button{ padding:7px 14px; font-size:12px; }
 
 .section{ display:none; }
 .section.active{ display:block; animation: rise .35s ease both; }

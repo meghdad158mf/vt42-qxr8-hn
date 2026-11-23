@@ -5,45 +5,6 @@
    نسخه‌ی روشن هر دو در 27-theme-light.css. */
 
 /* ---- ۱) بنتو ---- */
-.domain-orbits.is-bento{ display:block; max-width:1100px; margin:0 auto 26px; }
-.domain-orbits.is-bento > .domain-grid{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:16px; margin:0; }
-.domain-orbits.is-bento .domain-grid > .domain-card{
-  width:auto; min-width:0; position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:12px; text-align:start;
-  padding:20px; border-radius:20px; cursor:pointer;
-  background:linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025)); border:1px solid rgba(255,255,255,0.09);
-  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
-}
-.domain-orbits.is-bento .domain-grid > .domain-card:hover{ transform:translateY(-3px); border-color:rgba(234,179,147,0.5); box-shadow:0 18px 36px -22px rgba(0,0,0,0.7); }
-.domain-orbits.is-bento .domain-card.is-wide{ grid-column:span 2; flex-direction:row; align-items:center; gap:20px; }
-.domain-orbits.is-bento .domain-card:first-child{ background:linear-gradient(160deg, rgba(234,179,147,0.16), rgba(255,255,255,0.03)); border-color:rgba(234,179,147,0.3); }
-.domain-orbits.is-bento .domain-icon.is-illustrated,
-.domain-orbits.is-bento .domain-icon.is-illustrated img{ width:96px; height:96px; max-width:96px; margin:0; }
-.domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated,
-.domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated img{ width:140px; height:140px; max-width:140px; flex:none; }
-.domain-orbits.is-bento .dc-body{ min-width:0; }
-.domain-orbits.is-bento .domain-card h3{ justify-content:flex-start; font-size:17px; margin:0 0 6px; }
-.domain-orbits.is-bento .domain-card.is-wide h3{ font-size:20px; }
-.domain-orbits.is-bento .dc-desc{ margin:0; font-size:13px; line-height:1.85; color:rgba(255,255,255,0.62); }
-.domain-orbits.is-bento .dc-live{ display:inline-block; margin-top:10px; font-size:12px; font-weight:700; color: var(--accent); }
-.domain-orbits.is-bento .dc-live:empty{ display:none; }
-@media (max-width:900px){
-  .domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated,
-  .domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated img{ width:110px; height:110px; max-width:110px; }
-}
-@media (max-width:640px){
-  .domain-orbits.is-bento > .domain-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
-  .domain-orbits.is-bento .domain-grid > .domain-card{ padding:14px; gap:8px; border-radius:16px; }
-  .domain-orbits.is-bento .domain-card.is-wide{ gap:14px; }
-  .domain-orbits.is-bento .domain-icon.is-illustrated,
-  .domain-orbits.is-bento .domain-icon.is-illustrated img{ width:64px; height:64px; max-width:64px; }
-  .domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated,
-  .domain-orbits.is-bento .domain-card.is-wide .domain-icon.is-illustrated img{ width:84px; height:84px; max-width:84px; }
-  .domain-orbits.is-bento .domain-card h3{ font-size:13px; line-height:1.6; }
-  .domain-orbits.is-bento .domain-card.is-wide h3{ font-size:15px; }
-  .domain-orbits.is-bento .domain-card:not(.is-wide) .dc-desc{ display:none; }
-  .domain-orbits.is-bento .dc-live{ margin-top:4px; }
-}
-@media (prefers-reduced-motion: reduce){ .domain-orbits.is-bento .domain-grid > .domain-card{ transition:none; } }
 
 /* ---- ۲) بسته‌ی تحلیلی: شماره‌ی تازه ---- */
 .pkg-spot{ max-width:1100px; margin:30px auto 0; display:grid; grid-template-columns:auto minmax(0,1fr); gap:36px; align-items:center; }
@@ -87,103 +48,15 @@
 
 /* ---- ۳) ستون «امروز در جریان» کنار کاشی‌ها (۵.۳۶.۰، features/home/today-col.js) ----
    کاشی‌ها دو سوم (دوستونه) و ستون یک سوم؛ ستون هم‌قد کاشی‌ها و هنگام اسکرول چسبان. گوشی: ستون زیر کاشی‌ها. */
-.home-split{ max-width:1100px; margin:0 auto 26px; display:grid; grid-template-columns:minmax(0,2.1fr) minmax(0,1fr); gap:16px; align-items:stretch; }
-.home-split.no-col{ grid-template-columns:minmax(0,1fr); }
-.home-split .domain-orbits.is-bento{ margin:0; max-width:none; }
-.home-split:not(.no-col) .domain-orbits.is-bento > .domain-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
-@media (min-width:641px){
-.home-split:not(.no-col) .domain-orbits.is-bento .domain-card:not(.is-wide){ flex-direction:row; align-items:center; gap:14px; }
-.home-split:not(.no-col) .domain-orbits.is-bento .domain-card:not(.is-wide) .domain-icon.is-illustrated,
-.home-split:not(.no-col) .domain-orbits.is-bento .domain-card:not(.is-wide) .domain-icon.is-illustrated img{ width:72px; height:72px; max-width:72px; flex:none; }
-}
 .today-col{ position:relative; align-self:stretch; display:flex; flex-direction:column; background:#fff; color:#16202a; border-radius:20px; padding:16px 16px 0;
   box-shadow:0 20px 40px -26px rgba(0,0,0,0.7); min-width:0; }
 .today-col[hidden]{ display:none; }
-.tc-hd{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.tc-hd b{ display:inline-flex; align-items:center; gap:8px; font-size:15px; }
-.tc-hd b::before{ content:''; width:8px; height:8px; border-radius:50%; background:#22c55e; box-shadow:0 0 0 4px rgba(34,197,94,0.15); }
-.tc-hd small{ font-size:12px; color:#646f80; }
-.tc-tabs{ display:flex; flex-wrap:wrap; gap:6px; margin:0 -16px; padding:0 16px 12px; border-bottom:1px solid #eef0f3; }
-.tc-tab{ position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:5px; min-height:32px; padding:5px 10px; border:none; border-radius:100px;
-  background:#f2f4f8; color:#3a4756; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
-.tc-tab svg{ width:14px; height:14px; }
-.tc-tab em{ font-style:normal; font-size:12px; color:#b5651d; background:#fff; border-radius:100px; padding:0 6px; }
-.tc-tab.on{ background:#16202a; color:#fff; }
-.tc-tab.on em{ background:#EAB393; color:#16202a; }
-.tc-tab:focus-visible{ outline:2px solid #b5651d; outline-offset:2px; }
 /* نوار پیشرفت چرخش خودکار زیر زبانه‌ی فعال؛ هنگام مکث متوقف */
-.today-col.is-rotating .tc-tab.on::after{ content:''; position:absolute; inset:auto 12px 3px 12px; height:2px; border-radius:2px; background:#EAB393; transform-origin:right; animation: tcProgress var(--tc-rotate, 10s) linear forwards; }
-.today-col.is-paused .tc-tab.on::after{ animation-play-state:paused; }
 @keyframes tcProgress{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
-.tc-body{ display:flex; flex-direction:column; flex:1; animation: tcFade .35s ease; }
 @keyframes tcFade{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
-.tc-body a{ color:inherit; text-decoration:none; }
-.tc-body a:hover{ text-decoration:underline; text-underline-offset:3px; }
-.tc-feat{ position:relative; margin:14px 0 4px; border-radius:14px; overflow:hidden; background:#16202a; color:#fff; }
-.tc-feat.no-img{ padding-top:14px; }
-.tc-feat.t-claim.no-img{ background:#3a1f22; } .tc-feat.t-pos.no-img{ background:#2f2a1a; } .tc-feat.t-hawza.no-img{ background:#1e2b21; } .tc-feat.t-note.no-img{ background:#1c2838; }
-.tc-feat-img{ height:110px; }
-.tc-feat-img img{ width:100%; height:100%; object-fit:cover; display:block; }
-.tc-feat-ic{ display:inline-flex; width:30px; height:30px; margin:0 14px 0 6px; color:rgba(234,179,147,0.75); vertical-align:middle; }
-.tc-feat-ic svg{ width:100%; height:100%; }
-.tc-feat-lbl{ display:inline-block; font-size:12px; font-weight:800; background:#EAB393; color:#16202a; border-radius:100px; padding:2px 10px; vertical-align:middle; }
-.tc-feat:not(.no-img) .tc-feat-lbl{ position:absolute; top:84px; right:12px; }
-.tc-feat-tx{ padding:10px 14px 14px; }
-.tc-feat-tx p{ margin:0; font-size:15px; line-height:1.85; font-weight:700; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; }
-.tc-feat-tx small{ display:block; margin-top:6px; font-size:12px; color:rgba(255,255,255,0.62); }
-.tc-it{ display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; padding:11px 0; border-top:1px solid #eef0f3; }
-.tc-feat + .tc-it{ border-top:none; }
-.tc-it[hidden]{ display:none; }
-.tc-th{ width:64px; height:50px; border-radius:10px; overflow:hidden; background:#e9ecf0; }
-.tc-th img{ width:100%; height:100%; object-fit:cover; display:block; }
-.tc-tic{ width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:#fbefe4; color:#b5651d; }
-.tc-tic svg{ width:20px; height:20px; }
-.tc-it.t-claim .tc-tic{ background:#fdecec; color:#c0392b; } .tc-it.t-pos .tc-tic{ background:#f8f0d8; color:#7a5c12; }
-.tc-it.t-hawza .tc-tic{ background:#e9f3e9; color:#3d5a3d; } .tc-it.t-note .tc-tic{ background:#e8f0f9; color:#2a4a6d; }
-.tc-it p{ margin:0; font-size:13px; line-height:1.75; font-weight:700; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.tc-it small{ font-size:12px; color:#646f80; }
-.tc-bd{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:3px; }
-.tc-bd span{ font-size:12px; font-weight:700; padding:1px 8px; border-radius:100px; background:#16202a; color:#fff; }
-.tc-feat .tc-bd span{ background:rgba(255,255,255,0.14); }
-.tc-bd span.w{ background:#fbefe4; color:#8a4a12; }
-.tc-bd span.f{ background:#fdecec; color:#b42318; }
-.tc-bd span.g{ background:#f8f0d8; color:#7a5c12; }
-.tc-more{ margin:auto -16px 0; padding:12px; min-height:44px; border:none; border-top:1px solid #eef0f3; background:none; font:inherit; font-size:13px; font-weight:700; color:#a0561a; cursor:pointer; }
-.tc-more:hover{ background:#faf6f2; }
 /* پایین ستون دقیقاً هم‌تراز پایین کاشی‌ها: ستون در اندازه‌گیری ارتفاع ردیف شرکت نمی‌کند (height:0) و تمام ردیف را پر می‌کند؛
    مطالبی که جا نشوند در today-col.js کنار گذاشته می‌شوند (fitTodayCol) — پس ارتفاع با چرخش زبانه‌ها هم ثابت می‌ماند */
-@media (min-width:901px){
-  .home-split:not(.no-col) > .today-col{ height:0; min-height:100%; box-sizing:border-box; overflow:hidden; }
-  .tc-body{ min-height:0; overflow:hidden; }
-  /* اجزا جمع نشوند (وگرنه متن مطلب برجسته بریده می‌شد) — سرریز را fitTodayCol با پنهان کردن مطلب کامل حل می‌کند */
-  .tc-body > *{ flex-shrink:0; }
-}
-@media (max-width:900px){
-  .home-split{ grid-template-columns:minmax(0,1fr); }
-}
-@media (prefers-reduced-motion: reduce){ .tc-body{ animation:none; } .today-col.is-rotating .tc-tab.on::after{ display:none; } }
 
 /* ---- ۴) کانون توجه = کاشی‌های عرصه‌ها (۵.۳۶.۰): ستون آرام‌تر، کاشی‌ها پررنگ‌تر ---- */
-.today-col.is-rotating .tc-tab.on::after{ opacity:.45; }
-.tc-body{ animation-duration:.5s; }
 /* هاله‌ی هلویی پشت آیکون + آیکون بزرگ‌تر در کاشی‌های باریک */
-.domain-orbits.is-bento .domain-icon.is-illustrated{ position:relative; isolation:isolate; }
-.domain-orbits.is-bento .domain-icon.is-illustrated::before{ content:''; position:absolute; inset:8%; z-index:-1; border-radius:50%;
-  background:radial-gradient(circle, rgba(234,179,147,0.32), rgba(234,179,147,0) 70%); transition: transform .3s ease, opacity .3s ease; }
-.domain-orbits.is-bento .domain-icon.is-illustrated img{ transition: transform .3s ease; }
-.domain-orbits.is-bento .domain-card:hover .domain-icon.is-illustrated img,
-.domain-orbits.is-bento .domain-card:focus-visible .domain-icon.is-illustrated img{ transform:translateY(-4px) scale(1.05); }
-.domain-orbits.is-bento .domain-card:hover .domain-icon.is-illustrated::before{ transform:scale(1.18); opacity:1; }
-@media (min-width:641px){
-  .home-split:not(.no-col) .domain-orbits.is-bento .domain-card:not(.is-wide) .domain-icon.is-illustrated,
-  .home-split:not(.no-col) .domain-orbits.is-bento .domain-card:not(.is-wide) .domain-icon.is-illustrated img{ width:88px; height:88px; max-width:88px; }
-}
 /* عدد زنده: درشت‌تر، در قرص هلویی */
-.domain-orbits.is-bento .dc-live{ font-size:12px; font-weight:700; padding:2px 10px; border-radius:100px;
-  background:rgba(234,179,147,0.14); border:1px solid rgba(234,179,147,0.35); }
-.domain-orbits.is-bento .domain-card:hover .dc-live{ background: var(--accent); color:#16202a; border-color: var(--accent); }
-@media (max-width:640px){ .domain-orbits.is-bento .dc-live{ font-size:12px; padding:2px 8px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis; } }
-@media (prefers-reduced-motion: reduce){
-  .domain-orbits.is-bento .domain-icon.is-illustrated::before, .domain-orbits.is-bento .domain-icon.is-illustrated img{ transition:none; }
-  .domain-orbits.is-bento .domain-card:hover .domain-icon.is-illustrated img{ transform:none; }
-}
