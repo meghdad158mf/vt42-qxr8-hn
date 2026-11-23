@@ -9,7 +9,7 @@
 .login-visual{ display:flex; align-items:center; justify-content:center; padding:40px; text-align:center;
   background: radial-gradient(60% 60% at 80% 20%, rgba(234,179,147,.14), transparent 60%), linear-gradient(160deg,#1a2532,#121b24); }
 .lv-content{ display:flex; flex-direction:column; align-items:center; max-width:360px; }
-.lv-logo{ width:120px; height:120px; margin:0 0 22px; }
+.lv-logo{ width:auto; height:104px; margin:0 0 26px; }
 .lv-content h1{ font-size:26px; font-weight:800; line-height:1.4; margin:0; color:#fff; letter-spacing:0; }
 .lv-content p{ margin:14px 0 0; max-width:30ch; font-size:12px; line-height:1.9; color: rgba(245,247,250,.55); }
 
@@ -36,7 +36,7 @@
   .login-inner{ grid-template-columns:1fr; grid-template-rows:auto 1fr; }
   .login-visual{ display:flex; padding:16px 20px; justify-content:flex-start; text-align:start; }
   .lv-content{ flex-direction:row; align-items:center; gap:12px; max-width:none; }
-  .lv-logo{ width:44px; height:44px; margin:0; }
+  .lv-logo{ width:auto; height:36px; margin:0; }
   .lv-content h1{ font-size:17px; }
   .lv-content p{ display:none; }
   .login-panel{ padding:20px 16px; align-items:flex-start; }

@@ -39,7 +39,7 @@
    ستون ۲۳۶px؛ سر ستون فقط نام + شعار کوتاه؛ فهرست با تیترهای بازشو (هم‌زمان یکی، ui/side-nav.js)؛
    پایین ستون یک ردیف آیکون (تازگی داده، ارتباط با ما، درباره‌ی سامانه، نمای سایت، مدیریت، خروج) ---- */
 .sn-brand{ display:flex; align-items:center; gap:10px; min-width:0; padding:2px; margin:0; background:none; border:none; color:#fff; font:inherit; text-align:start; cursor:pointer; border-radius:12px; }
-.sn-brand img{ width:34px; height:34px; flex:none; }
+.sn-brand img{ width:auto; height:30px; flex:none; }
 .sn-brand > span{ min-width:0; }
 .sn-brand b{ display:block; font-size:13px; font-weight:800; white-space:nowrap; }
 .sn-brand small{ display:block; font-size:12px; font-weight:500; color: var(--accent); margin-top:1px; white-space:nowrap; }

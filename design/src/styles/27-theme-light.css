@@ -147,3 +147,7 @@
 .theme-menu button[aria-checked="true"]{ background:#fbefe4; color:#8a4a12; }
 .theme-menu svg{ width:18px; height:18px; flex:none; }
 .theme-menu small{ display:block; font-size:12px; font-weight:500; color:#646f80; }
+
+/* ۶.۱.۰: لوگوتایپ «جریان» روی زمینه‌ی روشن (نوار بالا و فوتر بیرون از ستون سرمه‌ای) نسخه‌ی سرمه‌ای می‌گیرد */
+:root[data-theme="light"] #view-dash .topbar-logo,
+:root[data-theme="light"] #view-dash .app-footer-logo:not(#side-nav *){ content:url("../../icons/jarian-mark-navy.svg"); }

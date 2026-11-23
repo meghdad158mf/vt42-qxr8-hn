@@ -12,7 +12,7 @@ body.is-admin .vis-off{ opacity:.6; }
   background: radial-gradient(120% 90% at 25% 0%, rgba(234,179,147,0.08), transparent 55%), radial-gradient(90% 70% at 100% 100%, rgba(142,163,184,0.11), transparent 55%), linear-gradient(160deg, var(--primary), var(--primary-2)); }
 #ss-maint-msg{ width:100%; resize:vertical; font:inherit; font-size:13px; background: var(--surface-2); border:1px solid var(--border-strong); color: var(--text); padding:10px 12px; border-radius: var(--radius-control); box-sizing:border-box; line-height:1.9; }
 .maint-card{ width:100%; max-width:460px; text-align:center; padding:36px 28px 28px; background: var(--surface); border-radius: var(--radius-card); box-shadow: 0 30px 70px -24px rgba(0,0,0,0.5); }
-.maint-logo{ width:76px; height:76px; margin:0 auto 14px; display:block; }
+.maint-logo{ width:auto; height:60px; margin:0 auto 14px; display:block; }
 .maint-card h1{ font-size:20px; font-weight:800; color: var(--text); margin:0 0 10px; }
 .maint-msg{ font-size:13px; line-height:2; color: var(--text-dim); margin:0 0 8px; white-space:pre-line; }
 .maint-until{ display:inline-block; font-size:13px; font-weight:700; color:#b5651d; background: rgba(234,179,147,0.16); border-radius:999px; padding:4px 14px; margin:4px 0 0; }
