@@ -1,0 +1,40 @@
+/* صفحه‌ی نخست — چینش «عرصه‌ها بالا» (۵.۴۱.۰، انتخاب کاربر از ۵ چینش): رایانه‌ی پهن
+   ردیف ۱: شش عرصه کنار هم (اخبار پهن‌تر) | ردیف ۲: «امروز در جریان» پهن با مطالب دوستونه + بسته‌ی تحلیلی عمودی.
+   تصویرهای خطی تازه‌ی عرصه‌ها همه هم‌قد (خواست کاربر): قاب یکسان ۱۳۰×۱۰۴ با object-fit — طرح پهن
+   (درباره حوزه) عرض بیشتری می‌گیرد، نه ارتفاع کمتر. قانون‌های 32-home-v3.css را بازنویسی می‌کند. */
+@media (min-width:1280px){
+  #sec-dashboard .hm-body{ height:auto; grid-template-columns:minmax(0,1fr) 270px; grid-template-areas:"lbl lbl" "dom dom" "today pkg"; row-gap:14px; }
+  #sec-dashboard .hm-main{ display:contents; }
+  #sec-dashboard .hm-main > .hm-sx{ grid-area:lbl; }
+  #sec-dashboard .hm-domains{ grid-area:dom; }
+  #sec-dashboard .hm-today{ grid-area:today; order:0; height:auto; max-height:calc(100vh - 455px); min-height:300px; }
+  #sec-dashboard .hm-pkg{ justify-content:center; }
+  #sec-dashboard .hm-today .hm-items{ display:grid; grid-template-columns:1fr 1fr; column-gap:22px; align-content:start; }
+  #sec-dashboard .hm-today .dg-card{ grid-column:1 / -1; }
+  #sec-dashboard .hm-today .dg-row{ flex:none; overflow:visible; }
+
+  /* بسته‌ی تحلیلی: کارت عمودی کنار «امروز» */
+  #sec-dashboard .hm-pkg{ grid-area:pkg; flex-direction:column; align-items:center; gap:12px; padding:16px; text-align:center; }
+  #sec-dashboard .hm-pkg-cv{ width:110px; }
+  #sec-dashboard .hm-pkg-tx{ align-items:center; }
+  #sec-dashboard .hm-pkg-acts{ flex-direction:column; gap:8px; }
+  #sec-dashboard .hm-pkg-prev{ border-inline-start:none; padding-inline-start:0; }
+
+  /* شش عرصه در یک ردیف؛ اخبار پهن‌تر، بقیه به ترتیب اهمیت */
+  #sec-dashboard .hm-domains .domain-grid{ height:auto; grid-template-columns:1.6fr 1.25fr 1.1fr 1fr 1fr 1fr; grid-template-rows:auto; grid-template-areas:"news pos haw peo pst sch"; }
+  #sec-dashboard .hm-domains .domain-card,
+  #sec-dashboard .hm-domains .domain-card:is([data-go="overview"],[data-go="positions"],[data-go="hawza"],[data-go="people"],[data-go="posts"],[data-go="schools"]){
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; gap:6px; padding:14px 10px 16px; min-height:170px; }
+  #sec-dashboard .hm-domains .domain-card h3,
+  #sec-dashboard .hm-domains .domain-card:is([data-go="overview"],[data-go="positions"],[data-go="hawza"],[data-go="people"],[data-go="posts"],[data-go="schools"]) h3{ font-size:15px; font-weight:800; }
+  #sec-dashboard .hm-domains .domain-card .dc-desc{ display:none; }
+  #sec-dashboard .hm-domains .domain-card::after{ display:none; }
+}
+/* همه‌ی اندازه‌ها: تصویر هر شش عرصه در قاب یکسان */
+#sec-dashboard .hm-domains .domain-card img,
+#sec-dashboard .hm-domains .domain-card:is([data-go="overview"],[data-go="positions"],[data-go="hawza"],[data-go="people"],[data-go="posts"],[data-go="schools"]) img{
+  grid-row:auto; margin:0; align-self:center; width:130px; height:104px; object-fit:contain; }
+@media (max-width:1279px){
+  #sec-dashboard .hm-domains .domain-card img,
+  #sec-dashboard .hm-domains .domain-card:is([data-go="overview"],[data-go="positions"],[data-go="hawza"],[data-go="people"],[data-go="posts"],[data-go="schools"]) img{ grid-row:1 / 4; width:90px; height:72px; }
+}
