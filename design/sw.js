@@ -6,7 +6,7 @@
 // v9 (۵.۴۰.۱): تصویرهای کاشی عرصه‌ها بدون سایه‌ی بریده (همان نام)
 // v8 (۵.۴۰.۰): تصویرهای تازه‌ی کاشی عرصه‌ها (domain-icon-*.webp) با همان نام
 // v7 (۵.۳۲.۰): ساخت با Vite — فونت و تصویرهای HTML/CSS با نام hash‌دار در assets/
-const CACHE = 'jarian-static-v9';
+const CACHE = 'jarian-static-v10';
 const PRECACHE = [
   'ita-monitoring-prototype.html',
   'manifest.webmanifest',
