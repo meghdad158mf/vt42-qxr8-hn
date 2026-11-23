@@ -27,17 +27,18 @@
 | `src/core/` | هسته‌ی خالص: تنظیمات و شماره‌ی نسخه، نشست، `api()`، گزارش خطا، متن امن (`escHtml`/`safeUrl`)، جست‌وجوی فارسی، تاریخ شمسی، اعتبارسنجی، ناوبری و «برگشت» | هیچ وابستگی به بقیه‌ی برنامه؛ وابستگی با hook (`setErrorContext`، `startRouter`، `setAdminHook`) |
 | `src/data/` | داده‌ی مشترک: منابع، موضوع‌ها، مناطق، کش پست‌ها، تنظیمات سایت، عنوان بخش‌ها | binding زنده‌ی فقط‌خواندنی؛ تغییر فقط با setter (`setChannels`…) |
 | `src/ui/` | اجزای رابط: پنجره، پیام/تأیید، منوها، تب‌بار، نمایشگر سند و عکس، صفحه‌بندی، انتخاب‌گر تاریخ شمسی، نمای روشن/تیره (`theme.js`)، ستون ثابت کناری رایانه‌ی پهن (`side-nav.js`، ۵.۳۸.۰؛ از ۵.۴۰.۰ تیترهای بازشو، بدون اسکرول، «ارتباط با ما» و «درباره‌ی سامانه» در پنجره‌ی کوچک کنار ستون؛ پنل «نمایش کامل» حذف شد)… | هر جزء با `setupX()` راه می‌افتد |
-| `src/features/<عرصه>/` | هر عرصه‌ی سایت: `news`، `cyberspace`، `people`، `positions`، `hawza`، `schools`، `reports`، `announcements`، `home` (صفحه‌ی نخست؛ از ۵.۴۰.۰ صفحه‌ی «منتخب مطالب امروز» `today-page.js` در بخش `#today`) | دو عرصه هم را دوطرفه import نمی‌کنند؛ برای برگشت از hook (`onX(fn)`) استفاده می‌شود |
+| `src/features/<عرصه>/` | هر عرصه‌ی سایت: `news`، `cyberspace`، `people`، `positions`، `hawza`، `schools`، `reports`، `announcements`، `home` (صفحه‌ی نخست `home-v3.js` — از ۵.۴۲.۰ ردیف شش عرصه بالا و «امروز در جریان» + بسته‌ی تحلیلی زیر آن؛ صفحه‌ی خوش‌آمد `welcome.js` با شمارش آمار؛ صفحه‌ی «منتخب مطالب امروز» `today-page.js` در بخش `#today`) | دو عرصه هم را دوطرفه import نمی‌کنند؛ برای برگشت از hook (`onX(fn)`) استفاده می‌شود |
 | `src/features/news/news-reader.js` | نمای «خواندن» (۵.۴۱.۰): `createReader(cfg)` برای هر فید — فهرست دوخطی + ستون متن کامل، کلیدهای ↑↓، خوانده‌شده‌ها در localStorage، «مطالب دیگر همین منبع»؛ کارت/ردیف/صفحه‌بندی را از خودِ فید می‌گیرد (هیچ feature دیگری را import نمی‌کند). اخبار سه نمای خودش را دارد؛ پرونده‌ها، درباره حوزه، کنشگری و فید منبع یادداشت‌ها/مواضع نمای مشترک «خواندن/کارت» (`[data-rv]`، `feedsReaderOn`، `onFeedsView`) | فقط ≥۱۱۰۰px |
 | `src/admin/` | همه‌ی بخش‌های مدیریت (`status/`، `settings/`، کاربران، بارگذاری، خروجی، گزارش فعالیت…) | **بسته‌ی جدا**: فقط برای مدیر با `import('./admin/admin.js')` بار می‌شود؛ هیچ ماژول بیننده‌ای از `admin/` import نمی‌کند — کاری که از مدیریت لازم دارد با `adminHook(name)` (`core/admin-hooks.js`) |
-| `src/styles/` | CSS به ترتیب آبشاری (`main.css` همه را به ترتیب import می‌کند) | ترتیب import عوض نشود؛ نمای روشن فقط در `27-theme-light.css` |
+| `src/styles/` | CSS به ترتیب آبشاری (`main.css` همه را به ترتیب import می‌کند): `01-tokens` … `36-home-tiles-top`؛ فایل‌های تازه‌تر پایین‌تر بازنویسی می‌کنند (مثلاً `32-home-v3` صفحه‌ی نخست، `34-login-b1` صفحه‌ی ورود، `35-news-reader` نمای خواندن، `36-home-tiles-top` چینش صفحه‌ی نخست روی رایانه) | ترتیب import عوض نشود؛ نمای روشن فقط در `27-theme-light.css`؛ CSS تازه = فایل شماره‌دار بعدی ته `main.css` |
 | `src/app.js` | ورود، ناوبری بین بخش‌ها، بارگذاری داده (`loadAll`)، اتصال اجزا | فقط تابع export‌شده‌ی این فایل را ماژول‌های features/admin می‌توانند import کنند (ارجاع موقت) |
 
 قاعده‌های مهم:
 - **هیچ دستگیره‌ی درون HTML** (`onclick=`، `onsubmit=`…) نیست؛ هر دکمه با `addEventListener` در setup ماژول خودش یا delegation با `data-*`.
 - هر متن بیرونی قبل از `innerHTML` با `escHtml`/`escAttr`/`claimsTextDisplay` و هر لینک با `safeUrl`.
 - هیچ اسکریپت یا فونت از CDN؛ کتابخانه‌ها در `design/vendor/` و فقط وقتی لازم‌اند بار می‌شوند.
-- PWA: `design/sw.js` (فایل ثابت cache-first، صفحه network-first).
+- PWA: `design/sw.js` (فایل ثابت cache-first، صفحه network-first)؛ با عوض شدن فایل ثابتی با همان نام (مثل تصویرها) شماره‌ی `CACHE` بالا برود.
+- شماره‌ی نسخه: `APP_VERSION` در `src/core/config.js` + دو `<span class="app-version">` در HTML (fallback پیش از اجرای JS).
 
 ### افزودن …
 
@@ -52,7 +53,7 @@
 | `npm run build` | Vite → `dist/` با همان ساختار آدرس‌ها؛ بسته‌ی بیننده و بسته‌ی جدای `assets/admin-<hash>.js` |
 | `npm run lint` | ESLint |
 | `npm run test:unit` | Vitest (`tests/unit/`): تاریخ شمسی، کد ملی، متن امن، جست‌وجو، ساختار importها، نبودن دستگیره‌ی درون HTML |
-| `npm test` / `npm run test:dist` | Playwright (`tests/e2e/`) با سوپابیس ساختگی (`tests/e2e/support/mock-supabase.js`) روی رایانه و گوشی — خام یا ساخته‌شده |
+| `npm test` / `npm run test:dist` | Playwright (`tests/e2e/`، ۲۶۲ آزمون در ۱۰ فایل) با سوپابیس ساختگی (`tests/e2e/support/mock-supabase.js`) روی رایانه و گوشی — خام یا ساخته‌شده؛ روی رایانه نمای خواندن پیش‌فرض است، آزمون کارتی اول نمای کارت را می‌زند |
 | `python -m unittest discover -s tests/python` | آزمون‌های پایتون کالکتورها، بدون شبکه |
 
 - `.github/workflows/tests.yml` همه‌ی این‌ها را روی هر PR به شاخه‌ی زنده اجرا می‌کند؛ آزمون‌های مرورگر بین ۴ ماشین هم‌زمان تقسیم می‌شوند (`--shard`) و job `site-ok` نتیجه‌ی واحد است.
