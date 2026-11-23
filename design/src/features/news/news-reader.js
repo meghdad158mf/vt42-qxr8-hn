@@ -92,7 +92,7 @@ export function createReader(cfg){
     return `<button type="button" class="nr-row${READ.has(x.id) ? ' is-read' : ''}${x.id === SEL ? ' on' : ''}" data-nr="${x.id}" aria-current="${x.id === SEL}">
     <span class="nr-meta">${r.src ? `<b>${escHtml(r.src)}</b>` : ''}${r.plat ? `<i>${escHtml(r.plat)}</i>` : ''}<time>${when(timeOf(x))}</time></span>
     ${r.title ? `<span class="nr-t is-head" dir="auto">${escHtml(plainText(r.title, 200))}</span>${r.text ? `<span class="nr-x" dir="auto">${escHtml(plainText(r.text, 200))}</span>` : ''}`
-      : `<span class="nr-t" dir="auto">${escHtml(plainText(r.text))}</span>`}</button>`;
+      : `<span class="nr-t" dir="auto">${escHtml(plainText(r.text) || (x.media_type === 'video' ? 'ویدئو بدون متن' : x.media_path ? 'تصویر بدون متن' : 'بدون متن'))}</span>`}</button>`;
   }
   function barHtml(){
     const unread = CTX.list.filter(x => !READ.has(x.id)).length;
@@ -104,7 +104,7 @@ export function createReader(cfg){
     if(!rel || !rel.items.length) return '';
     const inList = new Set(CTX.list.map(x => x.id));
     return `<section class="nr-rel"><h4>${escHtml(rel.title)}</h4>${rel.items.map(x => { const r = row(x);
-      return `<button type="button" class="nr-rel-it"${inList.has(x.id) ? ` data-nr="${x.id}"` : ' disabled'}><span dir="auto">${escHtml(plainText(r.title || r.text))}</span><time>${when(timeOf(x))}</time></button>`; }).join('')}</section>`;
+      return `<button type="button" class="nr-rel-it"${inList.has(x.id) ? ` data-nr="${x.id}"` : ' disabled'}><span dir="auto">${escHtml(plainText(r.title || r.text) || (x.media_type === 'video' ? 'ویدئو بدون متن' : x.media_path ? 'تصویر بدون متن' : 'بدون متن'))}</span><time>${when(timeOf(x))}</time></button>`; }).join('')}</section>`;
   }
   function paintPane(){
     const pane = $('pane');
@@ -130,6 +130,8 @@ export function createReader(cfg){
     // ظرف فید: کلاس reader-view می‌گیرد؛ پاک کردن کلاس و بازسازی کارت‌ها با خودِ فید است
     render(feed, list, opts){
       READERS.set(feed, api);
+      // فهرست خالی: کادر خالی نما نه — پیام «پیدا نشد» خودِ فید دیده شود
+      if(!list.length){ CTX = null; feed.classList.remove('reader-view'); feed.innerHTML = ''; return; }
       CTX = { feed, list, opts };
       feed.classList.add('reader-view');
       if(!list.some(x => x.id === SEL)) SEL = list[0] ? list[0].id : null;

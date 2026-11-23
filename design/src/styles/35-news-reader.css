@@ -63,3 +63,20 @@
 @media (max-width:1099px){ .rv-toggle{ display:none !important; } #news-view-reader-btn{ display:none !important; } }
 /* پرونده‌ها: ستون موضوعات کنار فهرست و ستون خواندن */
 .dossier-content .reader-view{ top:68px; }
+
+/* ۵.۴۲.۱ (خواست کاربر: مرز روشن بین خبرها): هر ردیف کارت جدا روی زمینه‌ی کم‌رنگ */
+.nr-rows{ display:flex; flex-direction:column; gap:8px; padding:10px; background:#f1f4ef; flex:1; }
+.nr-row{ border:1px solid #e1e7df; border-radius:12px; background:#fff; padding:11px 16px; }
+.nr-row:hover{ background:#fff; border-color:#c9d3c8; box-shadow:0 6px 16px -12px rgba(22,32,42,.45); }
+.nr-row.on{ background:#fff; border-color:#EAB393; box-shadow: inset -4px 0 0 #EAB393, 0 8px 20px -14px rgba(22,32,42,.5); }
+.nr-row.is-read:not(.on){ background:#f8faf7; }
+.nr-pag{ background:#f1f4ef; }
+
+/* «مطالب دیگر همین منبع»: کادر جدا با زمینه‌ی کم‌رنگ زیر متن خبر، هر مطلب کارت کوچک */
+.nr-rel{ margin-top:28px; padding:16px; border:none; border-radius:14px; background:#f1f4ef; }
+.nr-rel h4{ display:flex; align-items:center; gap:8px; margin:0 0 12px; font-size:15px; font-weight:800; color:#22302c; }
+.nr-rel h4::before{ content:''; width:4px; height:16px; border-radius:2px; background:#EAB393; }
+.nr-rel-it{ align-items:center; padding:10px 14px; margin:0 0 8px; border:1px solid #e1e7df; border-radius:10px; background:#fff; }
+.nr-rel-it:last-child{ margin-bottom:0; border-bottom:1px solid #e1e7df; }
+.nr-rel-it:not(:disabled):hover{ border-color:#c9d3c8; }
+.nr-rel-it time{ padding-top:0; }

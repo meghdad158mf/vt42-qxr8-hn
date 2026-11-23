@@ -89,7 +89,9 @@ export async function renderDashHeroStats(){
   setHomeTodayCount(todayCount);
   const wl = document.getElementById('wl-stats');
   if(wl) wl.innerHTML = [[todayCount, 'رصد امروز'], [sourceCount, 'منبع رصد'], [trackedContentCount, 'محتوای رصد شده'], [magazinesCount, 'شماره‌ی بسته تحلیلی']]
-    .map(([v, l]) => `<div><b>${fmtHeroStat(v)}</b><span>${l}</span></div>`).join('');
+    .map(([v, l]) => `<div><b data-value="${v}">${fmtHeroStat(v)}</b><span>${l}</span></div>`).join('');
+  // ۶.۰.۰ (خواست کاربر): شمارش سریع از صفر تا عدد، اگر صفحه‌ی خوش‌آمد همین حالا باز است
+  if(wl && !document.getElementById('welcome')?.hidden) animateWelcomeStats();
   // ستون کناری (۵.۳۸.۰، طرح «دونیمه‌ی عمودی»): سه عدد اصلی همین پنل (پنهان در ستون از ۵.۳۹.۰)
   const k = (v, l) => `<div class="sn-kpi"><b>${fmtHeroStat(v)}</b><span>${l}</span></div>`;
   const three = k(todayCount, 'رصد امروز') + k(sourceCount, 'منبع رصد') + k(trackedContentCount, 'محتوای رصد شده');
@@ -98,15 +100,16 @@ export async function renderDashHeroStats(){
 }
 // «۳۷٬۹۶۶» — جداکننده‌ی هزارگان فارسی برای خوانایی عددهای بزرگ
 export function fmtHeroStat(n){ return toFaDigits(String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '٬')); }
-export function animateHeroStatCounters(wrap){
+export function animateHeroStatCounters(wrap, sel = '.dash-hero-stat b'){
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  wrap.querySelectorAll('.dash-hero-stat b').forEach((el, i) => {
+  wrap.querySelectorAll(sel).forEach((el, i) => {
     const target = Number(el.dataset.value) || 0;
     if(reduceMotion || typeof gsap === 'undefined' || !target){
       el.textContent = fmtHeroStat(target);
       return;
     }
     const counter = { val: 0 };
+    el.textContent = fmtHeroStat(0);   // بدون چشمک عدد نهایی پیش از شروع شمارش
     gsap.to(counter, {
       val: target, duration: 1.1, delay: 0.15 + i * 0.05, ease: 'power2.out',
       onUpdate: () => { el.textContent = fmtHeroStat(Math.round(counter.val)); },
@@ -114,3 +117,9 @@ export function animateHeroStatCounters(wrap){
   });
 }
 
+
+// آمار صفحه‌ی خوش‌آمد (#wl-stats): همان شمارش سریع کارت‌های آمار (از صفر، ~۱ ثانیه، پشت‌سرهم)
+export function animateWelcomeStats(){
+  const wl = document.getElementById('wl-stats');
+  if(wl) animateHeroStatCounters(wl, 'b[data-value]');
+}
