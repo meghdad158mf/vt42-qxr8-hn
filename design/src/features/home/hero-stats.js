@@ -1,4 +1,4 @@
-// پنل آماری هروی صفحه‌ی نخست (۵.۳۰.۰): منبع رصد، محتوای رصدشده، رصد امروز، بخش رصد، بسته تحلیلی — با شمارش GSAP
+// پنل آماری هروی صفحه‌ی نخست (۵.۳۰.۰): منبع رصد، محتوای رصدشده، رصد امروز، بخش رصد، بسته تحلیلی — با شمارش از صفر (بدون کتابخانه از ۶.۰.۲)
 import { api, fetchExactCount } from '../../core/api.js';
 import { CHANNELS } from '../../data/store.js';
 import { iranTodayStartMs } from '../../core/date.js';
@@ -23,18 +23,62 @@ import { visHidden } from '../../app.js';
 // منابع فعال «مدیریت منابع» + روزنامه‌های ۳۰ روز اخیر + سایت‌های خزنده‌ی «درباره حوزه» که در
 // «مدیریت منابع» نیستن — RPC monitored_source_counts (migration_049؛ crawl_sites فقط برای مدیر
 // خواندنیه). تا migration اجرا نشده: منابع فعال + روزنامه‌های ۳۰ روز اخیر از NEWSPAPERS.
-export async function fetchMonitoredSourceCount(){
+async function fetchSourceRpc(){
   try{
     const r = await api('/rpc/monitored_source_counts', { method:'POST', body:'{}' });
     if(r.ok){
       const d = await r.json();
       if(d && typeof d.channels === 'number') return d.channels + (+d.newspapers || 0) + (+d.crawl || 0);
     }
-  }catch(e){}
+  }catch(e){ /* بدون migration_049 → شمارش سمت کلاینت */ }
+  return null;
+}
+function sourceFallback(){
   const since = new Date(iranTodayStartMs() - 30 * 864e5).toISOString().slice(0, 10);
   return CHANNELS.filter(c=>c.active !== false).length
     + new Set(NEWSPAPERS.filter(n=>n.edition_date >= since).map(n=>n.slug)).size;
 }
+export async function fetchMonitoredSourceCount(){
+  const n = await fetchSourceRpc();
+  return n === null ? sourceFallback() : n;
+}
+
+// ۶.۰.۲ (کارت‌های آمار صفحه‌ی خوش‌آمد دیر می‌آمدند): این ۷ درخواست شمارش قبلاً فقط بعد از
+// پایان کل loadAll شروع می‌شدند؛ حالا loadAll همان اول prefetchHeroCounts() را صدا می‌زند تا
+// هم‌زمان با بقیه‌ی داده‌ها برسند. نیازی به داده‌ی دیگر ندارند (جز جایگزین «منبع رصد» بدون RPC
+// که پس از loadAll حساب می‌شود).
+const CRAWL_ONLY = '/hawza_mentions?post_id=is.null&hidden_at=is.null';
+function tehranDay(){ return new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Tehran', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date()); }
+function fetchHeroCounts(){
+  const todayIso = encodeURIComponent(new Date(iranTodayStartMs()).toISOString());
+  return Promise.all([
+    fetchExactCount('/posts'),
+    fetchExactCount('/newspapers'),
+    fetchExactCount(CRAWL_ONLY),
+    fetchExactCount('/posts?scraped_at=gte.' + todayIso),
+    fetchExactCount('/newspapers?edition_date=eq.' + tehranDay()),
+    fetchExactCount(CRAWL_ONLY + '&scraped_at=gte.' + todayIso),
+    fetchSourceRpc(),
+  ]);
+}
+let HERO_PREFETCH = null;
+export function prefetchHeroCounts(){ HERO_PREFETCH = fetchHeroCounts(); }
+
+// آخرین عددهای صفحه‌ی خوش‌آمد (همان روز تهران) — تا عددهای تازه برسند، خوش‌آمد خالی نماند
+const WL_CACHE = 'jarian_wl_stats';
+const WL_LABELS = ['رصد امروز', 'منبع رصد', 'محتوای رصد شده', 'شماره‌ی بسته تحلیلی'];
+function wlHtml(values, from){
+  return values.map((v, i) => `<div><b data-value="${v}"${from && from[i] != null ? ` data-from="${from[i]}"` : ''}>${fmtHeroStat(v)}</b><span>${WL_LABELS[i]}</span></div>`).join('');
+}
+export function renderWelcomeStatsFromCache(){
+  const wl = document.getElementById('wl-stats');
+  if(!wl || wl.children.length) return;
+  try{
+    const c = JSON.parse(localStorage.getItem(WL_CACHE) || 'null');
+    if(c && c.day === tehranDay() && Array.isArray(c.v) && c.v.length === 4) wl.innerHTML = wlHtml(c.v);
+  }catch(e){ /* storage در دسترس نیست */ }
+}
+
 export async function renderDashHeroStats(){
   // ۵.۳۹.۰: پنل آمار هرو از صفحه‌ی نخست برداشته شد — عددها به صفحه‌ی خوش‌آمد (#wl-stats)، زیرعنوان سرصفحه و پنل «نمایش کامل» می‌روند
   const wrap = document.getElementById('dash-hero-stats');
@@ -48,18 +92,10 @@ export async function renderDashHeroStats(){
   // (hawza_mentions با post_id خالی؛ یافته‌های شبکه‌های اجتماعی خودشون پست‌ان و دوباره شمرده نمی‌شن).
   // scraped_at فقط موقع درج اول پر می‌شه (کالکتورها روی upsert دوباره‌اش نمی‌نویسن)، پس پست
   // قدیمیِ دوباره‌اسکن‌شده در «رصد امروز» نمیاد.
-  const todayIso = encodeURIComponent(new Date(iranTodayStartMs()).toISOString());
-  const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Tehran', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
-  const CRAWL_ONLY = '/hawza_mentions?post_id=is.null&hidden_at=is.null';
-  const [postsTotal, newspapersTotal, crawlTotal, postsToday, newspapersToday, crawlToday, sources] = await Promise.all([
-    fetchExactCount('/posts'),
-    fetchExactCount('/newspapers'),
-    fetchExactCount(CRAWL_ONLY),
-    fetchExactCount('/posts?scraped_at=gte.' + todayIso),
-    fetchExactCount('/newspapers?edition_date=eq.' + todayStr),
-    fetchExactCount(CRAWL_ONLY + '&scraped_at=gte.' + todayIso),
-    fetchMonitoredSourceCount(),
-  ]);
+  const pending = HERO_PREFETCH || fetchHeroCounts();
+  HERO_PREFETCH = null;
+  const [postsTotal, newspapersTotal, crawlTotal, postsToday, newspapersToday, crawlToday, rpcSources] = await pending;
+  const sources = rpcSources === null ? sourceFallback() : rpcSources;
   const trackedContentCount = postsTotal + newspapersTotal + crawlTotal;
   const todayCount = postsToday + newspapersToday + crawlToday;
   const sourceCount = sources;
@@ -88,8 +124,11 @@ export async function renderDashHeroStats(){
   if(wrap) animateHeroStatCounters(wrap);
   setHomeTodayCount(todayCount);
   const wl = document.getElementById('wl-stats');
-  if(wl) wl.innerHTML = [[todayCount, 'رصد امروز'], [sourceCount, 'منبع رصد'], [trackedContentCount, 'محتوای رصد شده'], [magazinesCount, 'شماره‌ی بسته تحلیلی']]
-    .map(([v, l]) => `<div><b data-value="${v}">${fmtHeroStat(v)}</b><span>${l}</span></div>`).join('');
+  const wlValues = [todayCount, sourceCount, trackedContentCount, magazinesCount];
+  // اگر خوش‌آمد همین حالا عددهای قبلی (کش یا بار قبل) را نشان می‌دهد، شمارش از همان‌ها ادامه می‌یابد نه از صفر
+  const shown = wl && !document.getElementById('welcome')?.hidden ? [...wl.querySelectorAll('b[data-value]')].map(b => Number(b.dataset.value)) : null;
+  if(wl) wl.innerHTML = wlHtml(wlValues, shown && shown.length === 4 ? shown : null);
+  try{ localStorage.setItem(WL_CACHE, JSON.stringify({ day: tehranDay(), v: wlValues })); }catch(e){ /* storage در دسترس نیست */ }
   // ۶.۰.۰ (خواست کاربر): شمارش سریع از صفر تا عدد، اگر صفحه‌ی خوش‌آمد همین حالا باز است
   if(wl && !document.getElementById('welcome')?.hidden) animateWelcomeStats();
   // ستون کناری (۵.۳۸.۰، طرح «دونیمه‌ی عمودی»): سه عدد اصلی همین پنل (پنهان در ستون از ۵.۳۹.۰)
@@ -104,17 +143,28 @@ export function animateHeroStatCounters(wrap, sel = '.dash-hero-stat b'){
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   wrap.querySelectorAll(sel).forEach((el, i) => {
     const target = Number(el.dataset.value) || 0;
-    if(reduceMotion || typeof gsap === 'undefined' || !target){
+    const from = Number(el.dataset.from) || 0;
+    if(reduceMotion || !target || from === target){
       el.textContent = fmtHeroStat(target);
       return;
     }
-    const counter = { val: 0 };
-    el.textContent = fmtHeroStat(0);   // بدون چشمک عدد نهایی پیش از شروع شمارش
-    gsap.to(counter, {
-      val: target, duration: 1.1, delay: 0.15 + i * 0.05, ease: 'power2.out',
-      onUpdate: () => { el.textContent = fmtHeroStat(Math.round(counter.val)); },
-    });
+    el.textContent = fmtHeroStat(from);   // بدون چشمک عدد نهایی پیش از شروع شمارش
+    countUp(el, from, target, from ? 600 : 1100, from ? 0 : 150 + i * 50);
   });
+}
+// شمارش از صفر (یا عدد قبلی) تا عدد با منحنی power2.out (همان حرکت GSAP قبلی، بدون کتابخانه — ۶.۰.۲)؛
+// فراخوانی دوباره روی همان عنصر شمارش قبلی را کنار می‌گذارد
+function countUp(el, from, target, duration, delay){
+  const token = (el._countToken = (el._countToken || 0) + 1);
+  let start = 0;
+  const step = (now) => {
+    if(el._countToken !== token) return;
+    if(!start) start = now + delay;
+    const t = Math.min(1, Math.max(0, (now - start) / duration));
+    el.textContent = fmtHeroStat(Math.round(from + (target - from) * (1 - (1 - t) * (1 - t))));
+    if(t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 

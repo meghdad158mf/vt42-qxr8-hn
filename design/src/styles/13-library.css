@@ -19,8 +19,6 @@
 /* ---------- magazines library (بخش تحلیلی) ---------- */
 .magazine-grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
 .magazine-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:18px; display:flex; flex-direction:column; gap:8px; box-shadow: var(--shadow); }
-.mag-icon{ width:38px; height:38px; border-radius: var(--radius-control); background: var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.mag-icon svg{ width:19px; height:19px; }
 .mag-title{ font-size:13px; font-weight:700; color: var(--text); }
 .mag-meta{ font-size:12px; color: var(--text-faint); }
 .mag-actions{ margin-top:auto; padding-top:6px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
@@ -58,14 +56,7 @@
    (۱۷۸/۲=۸۹px از بالای ردیف) = y=۷۴ در viewBox → top:-85px. قوس قرینه‌ی حول y=۷۴؛ طول مسیر
    همون ≈۱۱۳۹ پس مقادیر dash شهاب همون‌هاست. زیر ۹۰۰px مخفی. */
 .pkg-flow{ position:relative; }
-.pkg-orbit{ position:absolute; left:50%; top:-101px; width:1200px; max-width:none; height:360px; margin-left:-600px; z-index:-1; pointer-events:none; overflow:visible;
-  -webkit-mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px));
-          mask-image: linear-gradient(to right, transparent calc(600px - 50vw + 16px), #000 calc(600px - 50vw + 110px), #000 calc(600px + 50vw - 110px), transparent calc(600px + 50vw - 16px)); }
-@media (max-width:900px){ .pkg-orbit{ display:none; } }
-@media (prefers-reduced-motion: reduce){ .pkg-orbit .flow{ display:none; } }
 .pkg-covers{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; }
-.pkg-row{ position:relative; z-index:0; }
-.pkg-row + .pkg-row{ margin-top:38px; }
 .pkg-tile{ width:170px; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; }
 /* گوشی: یک ردیف افقی اسکرول‌خور با جلدهای کوچک‌تر (۵ جلد دوستونه خیلی بلند می‌شد) */
 @media (max-width:900px){ .pkg-covers{ flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; padding:6px 4px 10px; } .pkg-covers::-webkit-scrollbar{ display:none; } .pkg-tile{ width:128px; flex-shrink:0; scroll-snap-align:start; } .pkg-cover{ width:110px; height:146px; } }
@@ -76,20 +67,8 @@
 .pkg-tile:hover .pkg-cover{ transform: translateY(-6px); box-shadow: 0 28px 40px -16px rgba(0,0,0,0.8), 0 0 26px -6px rgba(234,179,147,0.45); }
 .pkg-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
 .pkg-cover svg{ width:34%; height:34%; }
-.pkg-title{ font-size:15px; font-weight:700; color:#fff; text-align:center; line-height:24px; max-width:170px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.pkg-empty{ font-size:13px; color: rgba(255,255,255,0.55); padding:40px 0; }
 /* قرینه‌ی عرصه‌ها: آن‌جا توضیح زیر آیکون‌هاست، این‌جا بالای جلدها */
-.pkg-caption{ margin:-8px auto 16px; }
 /* فهرست ۱۰ بخش بسته — فقط نمایشی، بدون قاب؛ دو ردیف ۵تایی روی دسکتاپ */
-.pkg-parts{ display:grid; grid-template-columns:repeat(5,auto); justify-content:center; gap:12px 26px; margin:0 auto 54px; }
-@media (max-width:900px){ .pkg-parts{ display:flex; flex-wrap:wrap; } }
-.pkg-part{ display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:500; color: rgba(255,255,255,0.78); white-space:nowrap; }
-.pkg-part svg{ width:15px; height:15px; color:#EAB393; flex-shrink:0; }
-@media (max-width:640px){ .pkg-parts{ gap:10px 16px; margin-bottom:34px; } .pkg-part{ font-size:12px; } }
-.pkg-more{ display:flex; justify-content:center; margin:30px 0 0; }
-.pkg-more-btn{ display:inline-flex; align-items:center; gap:6px; font:700 13px 'IRANSansX',Tahoma,sans-serif; color:#EAB393; background:none; border:1px solid rgba(234,179,147,0.45); border-radius:999px; padding:8px 16px; cursor:pointer; transition: background .2s ease, color .2s ease; }
-.pkg-more-btn:hover{ background:#EAB393; color:#16202a; }
-.pkg-more-btn svg{ width:14px; height:14px; }
 
 /* کارت همیشه‌نمایان «ثبت نظر و پیشنهاد» — ته صفحه‌ی نخست، قبل از فوتر.
    طبق خواسته‌ی صریح کاربر، مثل .notify-card کناریش قاب/زمینه‌ی روشن
@@ -116,4 +95,3 @@
 .newspaper-card:hover .newspaper-cover{ transform:translateY(-5px) scale(1.02); box-shadow: var(--shadow-hover); }
 .newspaper-cover img{ width:100%; height:100%; object-fit:contain; display:block; }
 .newspaper-title{ font-size:12px; font-weight:500; color: rgba(255,255,255,0.82); text-align:center; line-height:1.5; }
-.mag-empty-hint{ font-size:13px; color: var(--text-faint); padding:6px 4px; }

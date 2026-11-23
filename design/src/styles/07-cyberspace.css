@@ -92,22 +92,6 @@
 
 /* posts page: mobile-tile grid of vertical (portrait) cards */
 .posts-empty{ text-align:center; color: rgba(255,255,255,0.5); font-size:13px; padding:40px 0; }
-.posts-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:16px; }
-@media (max-width:520px){ .posts-grid{ grid-template-columns: repeat(2,1fr); gap:10px; } }
-
-.post-tile{
-  background: var(--surface);
-  border:1px solid var(--border);
-  border-inline-start:3px solid var(--accent);
-  border-radius: var(--radius);
-  padding:16px;
-  aspect-ratio: 3 / 4.4;
-  display:flex; flex-direction:column;
-  box-shadow: var(--shadow);
-  cursor:pointer;
-  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-}
-.post-tile:hover{ transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--primary); }
 .pt-head{ display:flex; align-items:center; gap:8px; margin-bottom:12px; }
 .pt-head .avatar{ width:28px; height:28px; font-size:12px; background-size:cover; background-position:center; }
 .pt-who{ min-width:0; }
@@ -123,16 +107,6 @@
 .pt-media-badge svg{ width:12px; height:12px; }
 .pt-media-link{ position:absolute; bottom:0; inset-inline-start:0; inset-inline-end:0; display:flex; align-items:center; justify-content:center; gap:4px; padding:5px 4px; font-size:12px; font-weight:500; color:#fff; background:linear-gradient(0deg, rgba(15,20,26,.78), rgba(15,20,26,0)); text-decoration:none; }
 .pt-media-link svg{ width:11px; height:11px; }
-.pt-text{ flex:1; font-size:13px; line-height:1.6; color: var(--text-dim); overflow:hidden; display:-webkit-box; -webkit-line-clamp:7; -webkit-box-orient:vertical; white-space:pre-wrap; }
-.pt-text.compact{ -webkit-line-clamp:3; }
-.pt-foot{ margin-top:12px; padding-top:10px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:12px; color: var(--text-faint); }
-.pt-foot .cat{ color: var(--accent-strong); font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.pt-foot .time{ flex-shrink:0; }
 
 .post{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); padding:14px 16px; margin-bottom:10px; border-inline-start:3px solid var(--accent); }
-.post-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px; }
-.post-chan{ font-size:12px; color:#fff; background: var(--navy); padding:2px 9px; border-radius:100px; font-weight:500; }
-.post-time{ font-size:12px; color: var(--text-faint); }
 .post p{ margin:0; font-size:13px; color: var(--text); }
-.post-foot{ margin-top:9px; font-size:12px; color: var(--text-faint); display:flex; gap:6px; align-items:center; }
-.post-foot .cat{ color: var(--accent-strong); font-weight:500; }

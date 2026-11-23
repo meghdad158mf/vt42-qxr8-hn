@@ -43,17 +43,15 @@
 /* صفحه‌ی نخست */
 /* هرو سه‌اسلایدی (۵.۳۷.۰) عمداً تیره می‌ماند؛ فقط محوشدن پایینش به رنگ بوم روشن */
 :root[data-theme="light"] #view-dash .hs{ --hs-fade:#eef2f6; }
-:root[data-theme="light"] #view-dash .dash-hero-grid{ background: linear-gradient(160deg, #16202a, #24323f); border-color: transparent; box-shadow: 0 24px 44px -26px rgba(22,32,42,0.55); }
 :root[data-theme="light"] #view-dash .datebar .db-top{ color: var(--cv-dim); }
 :root[data-theme="light"] #view-dash .datebar .db-top b, :root[data-theme="light"] #view-dash .datebar .db-clock{ color: var(--cv-ink); }
-:root[data-theme="light"] #view-dash .section-label, :root[data-theme="light"] #view-dash #pkg-flow, :root[data-theme="light"] #view-dash .domain-card h3, :root[data-theme="light"] #view-dash .feedback-card h3, :root[data-theme="light"] #view-dash .notify-card-text h3, :root[data-theme="light"] #view-dash .pkg-title{ color: var(--cv-ink); }
-:root[data-theme="light"] #view-dash .domain-caption, :root[data-theme="light"] #view-dash .notify-card-text p{ color: var(--cv-dim); }
-:root[data-theme="light"] #view-dash .pkg-part{ color: var(--cv-dim); }
-:root[data-theme="light"] #view-dash .pkg-part svg, :root[data-theme="light"] #view-dash .pkg-more-btn svg{ color: var(--accent-strong); }
-:root[data-theme="light"] #view-dash .pkg-more-btn{ color: var(--accent-strong); border-color: rgba(181,101,29,0.4); }
+:root[data-theme="light"] #view-dash .section-label,
+:root[data-theme="light"] #view-dash #pkg-flow,
+:root[data-theme="light"] #view-dash .domain-card h3,
+:root[data-theme="light"] #view-dash .feedback-card h3,
+:root[data-theme="light"] #view-dash .notify-card-text h3{ color: var(--cv-ink); }
+:root[data-theme="light"] #view-dash .notify-card-text p{ color: var(--cv-dim); }
 :root[data-theme="light"] #view-dash .pkg-cover{ border-color: var(--cv-line); box-shadow: 0 18px 30px -16px rgba(22,32,42,0.45); }
-:root[data-theme="light"] #view-dash .pkg-empty{ color: var(--cv-dim); }
-:root[data-theme="light"] #view-dash .home-bottom-divider{ background: rgba(181,101,29,0.3); }
 
 /* تب‌بار و زیرنویس */
 :root[data-theme="light"] #view-dash .news-page-tabs button{ color: var(--cv-faint); }
@@ -79,7 +77,9 @@
 :root[data-theme="light"] #view-dash .news-topic-label{ color: var(--cv-faint); }
 :root[data-theme="light"] #view-dash .news-pagination button{ background: var(--cv-ctl); border-color: var(--cv-ctl-line); color: var(--cv-dim); }
 :root[data-theme="light"] #view-dash .news-pagination .dots{ color: var(--cv-faint); }
-:root[data-theme="light"] #view-dash .news-empty, :root[data-theme="light"] #view-dash .posts-empty, :root[data-theme="light"] #view-dash .upl-empty, :root[data-theme="light"] #view-dash .pkg-empty{ color: var(--cv-dim); }
+:root[data-theme="light"] #view-dash .news-empty,
+:root[data-theme="light"] #view-dash .posts-empty,
+:root[data-theme="light"] #view-dash .upl-empty{ color: var(--cv-dim); }
 
 /* متن «خالی» با رنگ inline در HTML */
 :root[data-theme="light"] #view-dash #school-reports-empty, :root[data-theme="light"] #view-dash #archive-reports-empty{ color: var(--cv-dim) !important; }
@@ -129,11 +129,6 @@
 :root[data-theme="light"] #view-dash .topbar-theme-btn .ic-sun{ display:none; }
 :root[data-theme="light"] #view-dash .topbar-theme-btn .ic-moon{ display:block; }
 /* ۵.۳۵.۰: صفحه‌ی نخست — کاشی‌های بنتو و «شماره‌ی تازه»ی بسته روی بوم روشن (29-home-v2.css) */
-:root[data-theme="light"] #view-dash .domain-orbits.is-bento .domain-grid > .domain-card{ background:#fff; border-color: var(--cv-line); box-shadow:0 12px 28px -22px rgba(22,32,42,0.35); }
-:root[data-theme="light"] #view-dash .domain-orbits.is-bento .domain-card:first-child{ background:linear-gradient(160deg,#fff,#fbefe4); border-color:#EAB393; }
-:root[data-theme="light"] #view-dash .domain-orbits.is-bento .dc-desc{ color: var(--cv-dim); }
-:root[data-theme="light"] #view-dash .domain-orbits.is-bento .dc-live{ color:#a0561a; background:#fbefe4; border-color:#efc9ab; }
-:root[data-theme="light"] #view-dash .domain-orbits.is-bento .domain-card:hover .dc-live{ background:#EAB393; color:#16202a; border-color:#EAB393; }
 :root[data-theme="light"] #view-dash .pkg-spot-info h3{ color: var(--cv-ink); }
 :root[data-theme="light"] #view-dash .pkg-spot-meta, :root[data-theme="light"] #view-dash .pkg-prev-lb, :root[data-theme="light"] #view-dash .pkg-spot-empty{ color: var(--cv-dim); }
 :root[data-theme="light"] #view-dash .pkg-spot-sub{ color: var(--cv-ink); }

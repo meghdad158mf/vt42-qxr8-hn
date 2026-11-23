@@ -10,9 +10,7 @@
   /* پاپ‌آور «بازه‌ی زمانی» (چپ‌ترین دکمه‌ی ردیف زمان) از لبه‌ی چپ صفحه بیرون می‌زد */
   .news-daterange-details .news-daterange-popover{ inset-inline-start:auto; inset-inline-end:auto; left:0; right:auto; }
   /* فاصله‌های خیلی بزرگ دسکتاپ بین بلوک‌های صفحه‌ی نخست روی گوشی فضای خالی زیادی می‌ساخت */
-  .why-jarian-card{ margin-top:110px; }
   .section-label{ margin-top:80px; }
-  .home-bottom-row{ margin-top:90px; }
 }
 @media (max-width:560px){
   /* قاب تصویر خالی کارت‌های بدون رسانه روی گوشی فقط جا می‌گیره */

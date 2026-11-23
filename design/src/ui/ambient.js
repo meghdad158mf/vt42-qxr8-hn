@@ -30,8 +30,24 @@ export function setupAmbient(){
     }
     size();
     window.addEventListener('resize', ()=>{ size(); if(reduced) draw(0); });
-    if(reduced){ draw(0); }
-    else{ requestAnimationFrame(function loop(t){ draw(t); requestAnimationFrame(loop); }); }
+    // ۶.۰.۲: وقتی زمینه‌ی کدرِ نمای فعال (مثلاً #view-dash در نمای روشن) کل بوم را پوشانده،
+    // کشیدن ۶۰ بار در ثانیه فقط پردازنده و باتری را مصرف می‌کرد — حالا هر ثانیه یک‌بار
+    // بررسی می‌شود و فقط وقتی دیده می‌شود حرکت می‌کند (ظاهر عوض نمی‌شود)
+    function covered(){
+      const v = document.querySelector('.view.active');
+      if(!v) return false;
+      const m = getComputedStyle(v).backgroundColor.match(/[\d.]+/g);
+      return !!m && (m.length < 4 || Number(m[3]) >= 0.99);
+    }
+    let hidden = covered();
+    setInterval(()=>{
+      const c = covered();
+      if(c === hidden) return;
+      hidden = c;
+      if(!c){ if(reduced) draw(0); else requestAnimationFrame(loop); }
+    }, 1000);
+    function loop(t){ if(hidden) return; draw(t); requestAnimationFrame(loop); }
+    if(!hidden){ if(reduced) draw(0); else requestAnimationFrame(loop); }
   })();
 }
 
