@@ -15,21 +15,15 @@
 
 .login-visual{ position:relative; overflow:hidden; display:flex; align-items:center; padding:24px; color:#fff; }
 .lv-content{ position:relative; z-index:2; max-width:600px; }
-/* لوگوی «جریان» (مدار باز + شهاب) — صفحه‌ی ورود با حرکت ورود یک‌باره، نوار بالا و فوتر ثابت */
-.lv-logo{ display:block; width:96px; height:96px; margin:0 0 22px; overflow:visible; }
-.lv-logo .lv-comet{ transform-box:view-box; transform-origin:144px 144px; animation: lvSpin 1.8s cubic-bezier(.16,.84,.3,1) .2s both; }
-.lv-logo .lv-bar{ transform-box:fill-box; transform-origin:50% 100%; animation: lvRise .7s cubic-bezier(.34,1.56,.64,1) both; }
-.lv-logo .lv-bar1{ animation-delay:.6s; } .lv-logo .lv-bar2{ animation-delay:.75s; } .lv-logo .lv-bar3{ animation-delay:.9s; }
-@keyframes lvSpin{ from{ transform:rotate(-420deg); opacity:0; } 15%{ opacity:1; } to{ transform:none; opacity:1; } }
-@keyframes lvRise{ from{ transform:scaleY(0); } to{ transform:none; } }
-@media (prefers-reduced-motion: reduce){ .lv-logo .lv-comet, .lv-logo .lv-bar{ animation:none; } }
-.topbar-logo{ width:26px; height:26px; align-self:center; flex-shrink:0; }
+/* لوگوتایپ خوشنویسی «جریان» (۶.۱.۰، انتخاب کاربر) — افقی (نسبت ~۱٫۴۳)، پس همه‌جا ارتفاع ثابت و عرض خودکار */
+.lv-logo{ display:block; width:auto; height:72px; margin:0 0 22px; }
+.topbar-logo{ width:auto; height:24px; align-self:center; flex-shrink:0; }
 /* خط جداکننده بین دکمه‌ی منو (مربع) و «لوگو + نام» — انتخاب کاربر (مدل ب)، تا دو شکل ناهم‌جنس به هم نچسبن */
 .topbar .topbar-brand{ gap:14px; }
 .topbar .topbar-brand-text{ gap:9px; padding-inline-start:14px; border-inline-start:1px solid rgba(255,255,255,0.16); }
 @media (max-width:640px){ .topbar .topbar-brand{ gap:11px; } .topbar .topbar-brand-text{ padding-inline-start:11px; } }
 .app-footer-title-row{ display:flex; align-items:center; gap:10px; }
-.app-footer-logo{ width:34px; height:34px; flex-shrink:0; }
+.app-footer-logo{ width:auto; height:28px; flex-shrink:0; }
 .lv-content h1{ font-size:clamp(28px,3.8vw,46px); font-weight:500; line-height:1.1; letter-spacing:-0.01em; color:#fff; margin-top:0; }
 .lv-content p{ color: rgba(255,255,255,0.62); font-size:15px; line-height:1.7; margin-top:18px; max-width:360px; }
 

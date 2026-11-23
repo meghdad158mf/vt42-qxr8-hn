@@ -102,7 +102,7 @@ body:not(.is-admin) .soon-item{ display:none !important; }
 .modal-card p{ font-size:13px; line-height:1.9; color: var(--text-dim); }
 .modal-card p + p{ margin-top:12px; }
 .intro-card{ max-width:480px; }
-.intro-mark{ width:44px; height:auto; margin-bottom:12px; }
+.intro-mark{ width:auto; height:40px; margin-bottom:12px; }
 .intro-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; font-size:13px; line-height:1.8; color: var(--text-dim); }
 .intro-list b{ color: var(--text); }
 .intro-foot{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap; }

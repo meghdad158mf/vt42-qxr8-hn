@@ -15,7 +15,7 @@ https://meghdad158mf.github.io/vt42-qxr8-hn/brand-kit/%D9%81%D9%87%D8%B1%D8%B3%D
 | پوشه | محتوا |
 |---|---|
 | `00-فهرست اجزای بسته.png` | تصویر فهرست اجزای بسته (یک نسخه‌اش کنار همین فایل در ریپو هم هست) |
-| `01-logo` | لوگوی سایت (نشان «مدار باز + شهاب»): `marks/` نشان تنها ۴ رنگ‌بندی؛ `lockups/` لوگوی کامل عمودی/افقی ۴ رنگ‌بندی با/بدون شعار (نوشته‌ها منحنی‌شده)؛ `animation-layers/` لایه‌های جدا؛ `intro-sample/` موشن لوگو (۹۰ فریم PNG شفاف Full HD برای زمینه‌ی تیره و روشن + فیلم/html نمونه)؛ `previous-site-icon/` آیکون قبلی سایت |
+| `01-logo` | لوگوی سایت از ۶.۱.۰ = **لوگوتایپ خوشنویسی «جریان»**: `logotype/` SVG + PNG شفاف ۲۰۴۸ (navy، peach، white، on-navy-bg، on-light-bg)؛ `app-icons/` همان فایل‌های `design/icons` (favicon.ico ۱۶/۳۲/۴۸، icon، maskable، apple-touch) + app-icon-1024؛ `source/` فایل‌های اصلی کاربر (آبرنگی + تخت)؛ `previous-logo-orbit/` لوگوی قبلی «مدار باز + شهاب» با همه‌ی اجزایش (marks، lockups، لایه‌های انیمیشن، موشن، آیکون قدیمی‌تر) برای مرجع |
 | `02-illustrations` | تصویرهای `design/images` (PNG شفاف + WebP اصلی) |
 | `03-icons` | ۴۰ آیکون خطی سایت (هلویی/سفید SVG + PNG هلویی ۵۱۲) — `stat-*` آمار هرو، `pkg-*` بخش‌های بسته، `tab-*` تب‌ها (`TAB_ICONS`)، `quicknav-*`، `ui-*` |
 | `04-shapes` | قوس‌های مدار صفحه‌ی نخست، شهاب، خط تزئینی |
@@ -43,7 +43,8 @@ https://meghdad158mf.github.io/vt42-qxr8-hn/brand-kit/%D9%81%D9%87%D8%B1%D8%B3%D
 
 اسکریپت‌هایی که اجزای بسته با آن‌ها ساخته شده‌اند (Python + Playwright؛ `NODE_PATH=/opt/node22/lib/node_modules`، مرورگر `/opt/pw-browsers/chromium`). مسیرها با متغیر محیطی/نسبی‌اند؛ قبل از اجرا نگاهی به بالای هر فایل بینداز.
 
-- `flowmark.py` — هندسه‌ی نشان (مدار باز، شهاب باریک‌شونده با ماسک، سه ستون) روی بوم ۲۸۸؛ پایه‌ی همه‌ی نسخه‌های لوگو.
+- `logotype-trace.js` → `logotype-icons.js` → `logotype-kit.js` (۶.۱.۰، Node + `sharp` و `potrace`) — برداری کردن لوگوتایپ از PNG تخت کاربر (`node logotype-trace.js <png> path.txt`)، ساخت فایل‌های `design/icons` و favicon.ico (`node logotype-icons.js path.txt <out>`)، و پوشه‌ی تازه‌ی `01-logo` بسته (`node logotype-kit.js path.txt <ریشه‌ی بسته> design/icons <out>`).
+- (لوگوی قبلی) `flowmark.py` — هندسه‌ی نشان (مدار باز، شهاب باریک‌شونده با ماسک، سه ستون) روی بوم ۲۸۸؛ پایه‌ی همه‌ی نسخه‌های لوگو.
 - `build.py` (+ `build_text.py`) — نشان‌ها، لایه‌های انیمیشن و لوگوهای کامل عمودی/افقی؛ متن فارسی با HarfBuzz به منحنی تبدیل می‌شود (`pip install uharfbuzz fonttools`؛ env: `K`=پوشه‌ی باز بسته، `OUT`، `LK=.`). `png.js` خروجی PNG (env `O`)، `lockup-preview.js` تصویر پیش‌نمایش.
 - `intro.py` — موشن لوگو (html)؛ `V=light` نسخه‌ی زمینه‌ی روشن. `rec.js`/`recl.js` فیلم webm، `seq.js`/`seql.js` دنباله‌ی ۹۰ فریم PNG شفاف (env `OUT`).
 - `site_icons.py` — آیکون‌های سایت (`design/icons`: jarian-mark.svg، icon.svg، icon-maskable.svg)؛ PNGها از روی همین SVGها.

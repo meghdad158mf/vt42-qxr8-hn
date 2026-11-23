@@ -7,7 +7,7 @@
 // v8 (۵.۴۰.۰): تصویرهای تازه‌ی کاشی عرصه‌ها (domain-icon-*.webp) با همان نام
 // v7 (۵.۳۲.۰): ساخت با Vite — فونت و تصویرهای HTML/CSS با نام hash‌دار در assets/
 // v11 (۶.۰.۲): GSAP حذف شد و دو تصویر بلااستفاده برداشته شدند
-const CACHE = 'jarian-static-v11';
+const CACHE = 'jarian-static-v12';
 const PRECACHE = [
   'ita-monitoring-prototype.html',
   'manifest.webmanifest',

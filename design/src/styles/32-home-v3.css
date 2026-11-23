@@ -117,7 +117,7 @@ html.wl-open{ overflow:hidden; }
 .wl-in{ position:absolute; inset:0; display:grid; grid-template-columns:1fr 32% 1fr; align-items:center; transition: opacity .18s cubic-bezier(.23,1,.32,1); }
 .wl-txt{ padding:0 7vw 0 40px; }
 .wl-brand{ display:flex; align-items:center; gap:10px; margin-bottom:40px; }
-.wl-brand img{ width:42px; height:42px; }
+.wl-brand img{ width:auto; height:36px; }
 .wl-brand b{ font-size:15px; font-weight:800; }
 .welcome h1{ margin:0; font-size:34px; font-weight:800; line-height:1.4; color:#fff; }
 .welcome h1 span{ display:block; background:linear-gradient(180deg,#f6dccb,#EAB393); -webkit-background-clip:text; background-clip:text; color:transparent; }
