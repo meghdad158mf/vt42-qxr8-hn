@@ -46,8 +46,10 @@ function api(req, res, a, body) {
   if (a === 'data') {
     const s = st.sessions[req.headers['x-demo-token'] || ''];
     if (!s || expired(cfg, st.codes[s.id], t)) return json(res, 401, { error: 'session' });
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
-    return res.end(priv('data.php'));
+    // مثل api.php: داده‌ی از پیش gzip شده، با سربرگ فشرده‌سازی و ۱۰ دقیقه کش مرورگر
+    const raw = readFileSync(resolve(ROOT, 'private', 'data.php'));
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Encoding': 'gzip', 'Cache-Control': 'private, max-age=600', Vary: 'Accept-Encoding, X-Demo-Token' });
+    return res.end(raw.subarray(raw.indexOf(10) + 1));
   }
   return json(res, 404, { error: 'not_found' });
 }

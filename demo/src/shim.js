@@ -50,7 +50,7 @@ async function ensureData() {
   DB_TOKEN = token();
   if (!loading) {
     loading = (async () => {
-      const r = await realFetch(API + '?a=data', { headers: { 'X-Demo-Token': token() }, cache: 'no-store' });
+      const r = await realFetch(API + '?a=data', { headers: { 'X-Demo-Token': token() } });
       if (!r.ok) return false;
       const d = await r.json();
       const now = Date.now();

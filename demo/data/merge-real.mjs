@@ -210,6 +210,24 @@ export function mergeReal(fake, real) {
   out.site_settings = [{ key: 'hidden_sections', value: [...hidden] }, { key: 'viewer_password_login', value: true }];
   out.announcements = [{ id: 1, message: 'به نسخه‌ی نمایشی سامانه‌ی جریان خوش آمدید. مطالب این نسخه نمونه‌ای از داده‌های واقعی سامانه است.', level: 'info', active: true, expires_at: null, created_at: new Date(cap - 2 * H).toISOString() }];
 
+  // ۶.۱.۵ (دمو روی هاست کُند بود): فقط پست‌هایی که سایت واقعاً می‌خواند — ۵۰ ساعت اخیر (مقایسه با دیروز ۴۸ ساعت
+  // را می‌خواند)، ۲۰۰ مطلب آخر هر منبع کم‌تکرار، ادعاها، اخبار حوزه و هر پستی که جای دیگر ارجاع شده
+  {
+    const since = cap - 50 * H;
+    const rareIds = new Set(out.channels.filter((c) => !c.show_in_news || c.show_in_hawza || c.platform === 'bale').map((c) => c.id));
+    const ref = new Set([...(out.newsletter_posts || []), ...(out.dossier_topic_posts || []), ...(out.news_pick_edits || [])].map((x) => x.post_id));
+    (out.news_ai_insights || []).forEach((i) => (i.selected_posts || []).forEach((sp) => ref.add(Number(sp.id))));
+    (out.hawza_mentions || []).forEach((m) => m.post_id && ref.add(m.post_id));
+    const perCh = new Map();
+    out.posts = out.posts.sort((a, b) => (a.scraped_at < b.scraped_at ? 1 : -1)).filter((p) => {
+      if (ref.has(p.id) || Date.parse(p.scraped_at) >= since) return true;
+      if (!rareIds.has(p.channel_id)) return false;
+      const n = (perCh.get(p.channel_id) || 0) + 1; perCh.set(p.channel_id, n);
+      return n <= 200;
+    });
+    // ستون‌هایی که سایت نشان نمی‌دهد
+    out.posts.forEach((p) => { delete p.raw; delete p.platform_post_id; delete p.ai_keywords_extracted_at; });
+  }
   const c = real.meta.counts || {};
   const historic = {};
   for (const [t, n] of Object.entries(c)) historic[t] = Math.max(0, n - (out[t] || []).length);

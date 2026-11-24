@@ -3,6 +3,7 @@ import { readdirSync, readFileSync, statSync, rmSync } from 'node:fs';
 import { resolve, dirname, relative, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { gunzipSync } from 'node:zlib';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = resolve(ROOT, 'dist-demo');
@@ -22,7 +23,10 @@ let files = 0, bytes = 0;
 for (const f of walk(OUT)) {
   files++; bytes += statSync(f).size;
   if (!TEXT.has(extname(f))) continue;
-  const s = readFileSync(f, 'utf8');
+  // private/data.php = یک سطر PHP + داده‌ی gzip شده → برای بررسی نشت باز می‌شود
+  const raw = readFileSync(f);
+  const isData = relative(OUT, f).split(/[\/]/).join('/') === 'private/data.php';
+  const s = isData ? gunzipSync(raw.subarray(raw.indexOf(10) + 1)).toString('utf8') : raw.toString('utf8');
   // کتابخانه‌های بیرونی (vendor) در سرآغاز مجوزشان نشانی گیت‌هاب خودشان را دارند — ربطی به این پروژه ندارد
   const vendor = relative(OUT, f).split(/[\\/]/)[0] === 'vendor';
   // داده‌ی واقعی (private/data.php) خبرهای عمومی درباره‌ی حوزه‌ی خراسان را دارد — قاعده‌ی نام نهاد فقط برای متن خودِ سایت

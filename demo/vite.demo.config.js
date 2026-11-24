@@ -8,6 +8,7 @@
 import { defineConfig } from 'vite';
 import { cpSync, readFileSync, renameSync, rmSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { gzipSync } from 'node:zlib';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const DEMO = resolve(ROOT, 'demo');
@@ -90,7 +91,8 @@ function demoPlugin() {
       // فایل‌های خصوصی با «<?php exit; ?>» شروع می‌شوند تا مستقیم خوانده نشوند (api.php سطر اول را رد می‌کند)
       const GUARD = '<?php http_response_code(404); exit; ?>\n';
       mkdirSync(resolve(OUT, 'private'), { recursive: true });
-      writeFileSync(resolve(OUT, 'private/data.php'), GUARD + readFileSync(resolve(build, 'data.json'), 'utf8'));
+      // داده از پیش فشرده (gzip ۹) تا سرور هر بار فشرده‌سازی نکند (۶.۱.۵ — دمو روی هاست کُند بود)
+      writeFileSync(resolve(OUT, 'private/data.php'), Buffer.concat([Buffer.from(GUARD), gzipSync(readFileSync(resolve(build, 'data.json')), { level: 9 })]));
       const codes = resolve(DEMO, '.local/codes.json');
       if (!existsSync(codes)) throw new Error('رمزها ساخته نشده‌اند: npm run demo:codes');
       writeFileSync(resolve(OUT, 'private/codes.php'), GUARD + readFileSync(codes, 'utf8'));
