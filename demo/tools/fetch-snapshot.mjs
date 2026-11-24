@@ -27,6 +27,7 @@ sh('openssl', ['pkeyutl', '-decrypt', '-inkey', KEY, '-pkeyopt', 'rsa_padding_mo
 sh('openssl', ['enc', '-d', '-aes-256-cbc', '-pbkdf2', '-in', resolve(TMP, 'snapshot.tgz.enc'), '-out', resolve(TMP, 'snapshot.tgz'), '-pass', 'file:' + resolve(TMP, 'key.txt')]);
 rmSync(REAL, { recursive: true, force: true });
 mkdirSync(REAL, { recursive: true });
-sh('tar', ['xzf', resolve(TMP, 'snapshot.tgz').replace(/\\/g, '/'), '-C', REAL.replace(/\\/g, '/')], { env: { ...process.env, MSYS_NO_PATHCONV: '1' } });
+// tar گنو «C:» را نشانی رایانه‌ی دیگر می‌فهمد → از داخل پوشه و با مسیر نسبی
+sh('tar', ['xzf', '../../.local/snapshot-dl/snapshot.tgz'], { cwd: REAL });
 rmSync(TMP, { recursive: true, force: true });
 console.log('داده‌ی واقعی آماده است: demo/build/real');

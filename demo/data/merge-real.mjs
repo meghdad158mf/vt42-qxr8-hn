@@ -36,6 +36,10 @@ function norm(s) {
   return String(s || '').replace(/<[^>]+>/g, ' ').replace(/https?:\S+|@\w+/g, ' ').replace(/[ي]/g, 'ی').replace(/[ك]/g, 'ک')
     .replace(/[ً-ْـ]/g, '').replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
 }
+// جمع‌بندی‌های روزانه («سرخط خبرها»…) خبر نیستند
+const ROUNDUP = /سرخط|خلاصه[‌ ]?ی? (اخبار|خبر)|مهم[‌ ]?ترین (اخبار|خبرها)|تیتر (یک )?روزنامه|اخبار (مهم )?امروز|صفحه[‌ ]?ی? اول/;
+const LATIN = /[A-Za-z]{4,}.*[A-Za-z]{4,}.*[A-Za-z]{4,}/;
+const rank = (c) => ({ 1: 0, 2: 1, 3: 2 })[c && c.region_id] ?? 3;
 const STOP = new Set(['و', 'در', 'به', 'از', 'که', 'این', 'با', 'را', 'برای', 'است', 'آن', 'یک', 'تا', 'بر', 'می', 'شد', 'های', 'ها']);
 function shingles(s) {
   const w = norm(s).split(' ').filter((x) => x && !STOP.has(x));
@@ -74,7 +78,32 @@ function clusters(posts, channels, sinceMs) {
     ps.sort((a, b) => (a.scraped_at < b.scraped_at ? -1 : 1));
     const rep = ps.find((p) => p.title) || ps[0];
     return { posts: ps, rep, sources: new Set(ps.map((p) => p.channel_id)).size, headline: headlineOf(rep) };
-  }).filter((c) => c.headline.length > 20).sort((a, b) => b.sources - a.sources || b.posts.length - a.posts.length);
+  }).filter((c) => c.headline.length > 20 && !ROUNDUP.test(c.headline) && !LATIN.test(c.headline))
+    // تعداد منابع، بعد منطقه‌ی منبع به ترتیب برچسب‌های خودِ سامانه: داخلی، منطقه‌ای، بین‌المللی، بقیه
+    .sort((a, b) => b.sources - a.sources || rank(ch.get(a.rep.channel_id)) - rank(ch.get(b.rep.channel_id)) || b.posts.length - a.posts.length);
+}
+
+// موضوعات پرتکرار بدون هوش مصنوعی: عبارت‌های دوکلمه‌ای که در بیشترین منابع متفاوت تکرار شده‌اند
+const WEAK = new Set([...'ها های می نمی هم خود اما یا اگر هر چه چرا کرد کرده کند کنند شود شده بود باید دارد ایران امروز گفت گفته اعلام خبر سال روز ساعت درصد هزار میلیون پس پیش بین روی زیر بعد قبل نیز همه دیگر یکی وی او ما شما آنها گذشته ساعات ندارد وجود الله آیت جمهوری اسلامی'.split(' ')]);
+function phraseTopics(posts) {
+  const seen = new Map();
+  for (const p of posts) {
+    const w = norm(headlineOf(p) + ' ' + String(p.text || '').slice(0, 300)).split(' ');
+    const mine = new Set();
+    for (let i = 0; i + 1 < w.length; i++) {
+      const a = w[i], b = w[i + 1];
+      if (a.length < 3 || b.length < 3 || STOP.has(a) || STOP.has(b) || WEAK.has(a) || WEAK.has(b) || /\d/.test(a + b)) continue;
+      mine.add(a + ' ' + b);
+    }
+    for (const g of mine) { if (!seen.has(g)) seen.set(g, new Set()); seen.get(g).add(p.channel_id); }
+  }
+  const out = [];
+  for (const [g, chs] of [...seen].sort((x, y) => y[1].size - x[1].size)) {
+    if (chs.size < 3 || out.some((o) => o.name.includes(g.split(' ')[0]) || o.name.includes(g.split(' ')[1]))) continue;
+    out.push({ name: g, weight: chs.size });
+    if (out.length === 8) break;
+  }
+  return out;
 }
 
 export function mergeReal(fake, real) {
@@ -106,6 +135,9 @@ export function mergeReal(fake, real) {
   const posIds = new Set(out.channels.filter((c) => c.show_in_positions).map((c) => c.id));
   out.posts.forEach((p) => { if (posIds.has(p.channel_id) && p.section_relevant == null) p.section_relevant = true; });
   const posOk = (p) => p.section_relevant !== false;
+  // اخبار حوزه: همین وضع برای hawza_relevant (بررسی‌نشده‌های سایت‌های حوزوی دیده شوند)
+  const hawIds = new Set(out.channels.filter((c) => c.show_in_hawza).map((c) => c.id));
+  out.posts.forEach((p) => { if (hawIds.has(p.channel_id) && p.hawza_relevant == null) p.hawza_relevant = true; });
   for (const tab of ['maraji', 'hawza', 'imams', 'orgs']) {
     if (postsOf((c) => c.show_in_positions && c.positions_tab === tab, posOk).length < 3) addFakeChannels((c) => c.show_in_positions && c.positions_tab === tab, 'مواضع/' + tab);
   }
@@ -136,15 +168,19 @@ export function mergeReal(fake, real) {
 
   // اخبار منتخب، پرونده‌ها و خبرنامه — اگر تحلیل هوش مصنوعی کهنه است، از خوشه‌بندی خودِ داده‌ی واقعی
   const cl = clusters(out.posts, out.channels, cap - 12 * H);
+  const ch = new Map(out.channels.map((c) => [c.id, c]));
   const ins = (out.news_ai_insights || [])[0];
   const postIds = new Set(out.posts.map((p) => p.id));
   const fresh = ins && cap - Date.parse(ins.computed_at) < 36 * H && (ins.selected_posts || []).some((s) => postIds.has(Number(s.id)));
   if (!fresh && cl.length) {
-    const top = cl.slice(0, 10);
+    // حداکثر دو مطلب از هر منبع تا فهرست متنوع باشد (مثل انتخاب ویراستار)
+    const per = new Map();
+    // منابعی که سامانه «معاند» یا بی‌منطقه برچسب زده در فید هستند، ولی «منتخب» نمی‌شوند
+    const top = cl.filter((c) => rank(ch.get(c.rep.channel_id)) < 3).filter((c) => { const n = per.get(c.rep.channel_id) || 0; if (n >= 2) return false; per.set(c.rep.channel_id, n + 1); return true; }).slice(0, 8);
     const words = new Map();
     out.posts.filter((p) => Date.parse(p.scraped_at) >= cap - 12 * H).forEach((p) => (p.ai_keywords || []).forEach((k) => words.set(k, (words.get(k) || 0) + 1)));
     let topics = [...words].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([name, weight]) => ({ name, weight }));
-    if (topics.length < 4) topics = top.slice(0, 8).map((c) => ({ name: c.headline.split(/\s+/).slice(0, 4).join(' '), weight: c.posts.length }));
+    if (topics.length < 4) topics = phraseTopics(out.posts.filter((p) => Date.parse(p.scraped_at) >= cap - 12 * H));
     out.news_ai_insights = [{
       id: 1, computed_at: new Date(cap - 1.2 * H).toISOString(), window_hours: 6,
       selected_posts: top.map((c, i) => ({ id: c.rep.id, headline: c.headline, score: 10 - i * 0.6, tags: [], sources: c.sources, posts: c.posts.length,
