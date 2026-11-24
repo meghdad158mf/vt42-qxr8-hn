@@ -181,8 +181,9 @@ test('صفحه‌ی نخست: «اطلاع از انتشار» با دکمه و 
   expect(page.appErrors).toEqual([]);
 });
 
-test('معرفی سامانه: باز شدن از فوتر، قبلی/بعدی و رفتن به «در یک نگاه»', async ({ page }) => {
-  await openAs(page, 'viewer');
+test('معرفی سامانه: باز شدن از فوتر، قبلی/بعدی و رفتن به صفحه‌ی نخست', async ({ page }) => {
+  // از بخشی غیر از صفحه‌ی نخست، تا رفتن به صفحه‌ی نخست واقعاً سنجیده شود
+  await openAs(page, 'viewer', 'overview/claims');
   // رایانه‌ی پهن (۵.۴۰.۰): فوتر در پنجره‌ی «درباره‌ی سامانه» کنار ستون
   if (await page.locator('#side-nav').isVisible()) await page.click('#sn-info-btn');
   await page.locator('.app-footer-intro').click();
@@ -197,7 +198,8 @@ test('معرفی سامانه: باز شدن از فوتر، قبلی/بعدی �
   await page.locator('#intro-next').click();
   await page.locator('#intro-next').click();
   await expect(modal).not.toHaveClass(/active/);
-  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#overview/analytics');
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#dashboard');
   expect(page.appErrors).toEqual([]);
 });
 

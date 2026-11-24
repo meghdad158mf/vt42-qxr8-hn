@@ -1,20 +1,20 @@
 // معرفی بار اول (۵.۲۱.۰، #intro-modal): سه مرحله، فقط بیننده و یک‌بار در هر مرورگر؛ پیوند «آشنایی با سامانه» در فوتر
 import { bindModal } from '../../ui/modal.js';
 import { currentRole } from '../../core/session.js';
-import { goToNewsTab } from '../news/news-tabs.js';
+import { switchSection } from '../../app.js';
 
 export let INTRO_STEP = 0;
 export function introRender(){
   document.querySelectorAll('#intro-modal .intro-step').forEach(el=>{ el.hidden = Number(el.dataset.step) !== INTRO_STEP; });
   document.querySelectorAll('#intro-modal .intro-dots span').forEach((d, i)=>d.classList.toggle('on', i === INTRO_STEP));
   document.getElementById('intro-prev').style.visibility = INTRO_STEP ? 'visible' : 'hidden';
-  document.getElementById('intro-next').textContent = INTRO_STEP === 2 ? 'رفتن به «در یک نگاه»' : 'بعدی';
+  document.getElementById('intro-next').textContent = INTRO_STEP === 2 ? 'رفتن به صفحه‌ی نخست' : 'بعدی';
 }
 export function introGo(d){
   if(INTRO_STEP === 2 && d > 0){
-    // بستن پنجره یه history.back() می‌زنه (ورودی «modal» دکمه‌ی برگشت)؛ رفتن به تب باید بعد از
-    // اون popstate باشه، وگرنه برگشت دوباره صفحه‌ی قبلی رو برمی‌گردونه
-    let done = false; const go = ()=>{ if(done) return; done = true; goToNewsTab('analytics'); };
+    // بستن پنجره یه history.back() می‌زنه (ورودی «modal» دکمه‌ی برگشت)؛ رفتن به صفحه‌ی نخست باید بعد از
+    // اون popstate باشه، وگرنه برگشت دوباره صفحه‌ی قبلی رو برمی‌گردونه (۶.۱.۴: صفحه‌ی نخست به‌جای «در یک نگاه»، خواست کاربر)
+    let done = false; const go = ()=>{ if(done) return; done = true; switchSection('dashboard'); };
     window.addEventListener('popstate', ()=>setTimeout(go, 0), { once:true });
     closeIntro(); setTimeout(go, 600);
     return;
