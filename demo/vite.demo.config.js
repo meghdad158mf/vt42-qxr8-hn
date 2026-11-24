@@ -33,10 +33,11 @@ const HTML_EDITS = [
       </div>
     </footer>`],
   ['<script type="module" src="src/main.js"></script>', '<script type="module" src="/@demo-entry"></script>'],
-  ['<body>', `<body>
-<div class="demo-strip" role="note">نسخه‌ی نمایشی سامانه‌ی جریان — نمونه‌ای از داده‌ها، بدون اتصال به سامانه‌ی اصلی</div>`],
+  // برچسب «نسخه‌ی نمایشی» پایین ستون کناری (نه نوار بالای صفحه — خواست کاربر: جای مطالب جابه‌جا نشود)
+  ['<div class="sn-bottom">', `<div class="demo-note" role="note"><b>نسخه‌ی نمایشی</b><span>نمونه‌ای از داده‌ها، بدون اتصال به سامانه‌ی اصلی</span></div>
+    <div class="sn-bottom">`],
   ['</head>', `<style>
-.demo-strip{position:relative;z-index:200;background:#EAB393;color:#16202a;font:500 12px/26px IRANSansX,Tahoma,sans-serif;text-align:center;height:26px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 12px}
+.demo-note{margin:auto 14px 10px;padding:8px 12px;border:1px solid rgba(234,179,147,.45);border-radius:10px;color:#EAB393;font:500 12px/1.7 IRANSansX,Tahoma,sans-serif}.demo-note b{display:block;font-weight:800}.demo-note span{color:rgba(255,255,255,.6)}
 #demo-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:300;background:#16202a;color:#fff;font:500 13px/1.6 IRANSansX,Tahoma,sans-serif;padding:10px 18px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:.25s}
 #demo-toast.show{opacity:1;transform:translate(-50%,0)}
 </style>
