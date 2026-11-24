@@ -67,7 +67,7 @@ export function renderTopicGrid(){
   topicGridEl.innerHTML = '';
   NEWS_TOPICS.forEach(t=>{
     const el=document.createElement('div'); el.className='cat-card';
-    el.innerHTML = `<span class="name"><b>${escAttr(t.name)}</b><div style="font-size:11px;font-weight:500;color:var(--text-faint);margin-top:2px;">${escAttr(t.keywords)}</div></span><span class="cc-actions"></span>`;
+    el.innerHTML = `<span class="name"><b>${escAttr(t.name)}</b><div style="font-size:12px;font-weight:500;color:var(--text-faint);margin-top:2px;">${escAttr(t.keywords)}</div></span><span class="cc-actions"></span>`;
     const del=document.createElement('button'); del.className='del-btn'; del.textContent='✕'; del.title='حذف موضوع'; del.setAttribute('aria-label','حذف موضوع‌ی '+t.name);
     del.addEventListener('click', async ()=>{
       if(!await uiConfirm('موضوع «' + t.name + '» حذف شود؟')) return;

@@ -18,7 +18,7 @@ export function renderProfileGroupAdmin(){
   PROFILE_GROUPS.forEach(g=>{
     const n = CHANNEL_PROFILE_GROUPS.filter(x=>x.group_id===g.id).length;
     const el=document.createElement('div'); el.className='cat-card';
-    el.innerHTML = `<span class="name"><b class="pg-name">${escAttr(g.name)}</b><div style="font-size:11px;font-weight:500;color:var(--text-faint);margin-top:2px;">${PROFILE_GROUP_KIND_LABEL[g.kind]||g.kind} · ${toFaDigits(n)} منبع</div></span><span class="cc-actions"></span>`;
+    el.innerHTML = `<span class="name"><b class="pg-name">${escAttr(g.name)}</b><div style="font-size:12px;font-weight:500;color:var(--text-faint);margin-top:2px;">${PROFILE_GROUP_KIND_LABEL[g.kind]||g.kind} · ${toFaDigits(n)} منبع</div></span><span class="cc-actions"></span>`;
     makeRenamable(el.querySelector('.pg-name'), g.name, async val=>{
       await patchOk('/profile_groups?id=eq.'+g.id, {name: val});
       await loadProfileGroups(); renderProfileGroupAdmin(); renderPoliticalFigures();

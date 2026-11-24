@@ -1,7 +1,11 @@
 // تب «افراد و مجموعه‌ها» (کنشگری مجازی): جدول کانال‌های کنشگر با مرتب‌سازی و فیلتر طلاب خراسان
 import { CATEGORIES, CHANNELS, POSTS_CACHE } from '../../data/store.js';
-import { escAttr, escHtml, toFaDigits } from '../../core/text.js';
+import { escAttr, escHtml, safeUrl, toFaDigits } from '../../core/text.js';
 import { ICONS } from '../../ui/icons.js';
+import { NEWS_PLATFORM_LABEL, channelPublicUrl } from '../../ui/platforms.js';
+
+// قبلاً هر منبعی جز تلگرام «ایتا» نوشته می‌شد و وب‌سایت‌ها لینک خراب eitaa.com/https%3A… می‌گرفتند
+const platformLabel = (ch) => NEWS_PLATFORM_LABEL[ch.platform] || ch.platform || '';
 import { matchesActivistGroup, openPersonFeed } from './posts-feed.js';
 
 // ---- channels & people page ----
@@ -25,7 +29,7 @@ export function renderChannelCards(){
     el.innerHTML = `<div class="cc-photo"><div class="cc-portrait">${ICONS.person}</div></div>
       <div class="cc-body">
         <div class="cc-name">${escHtml(ch.title || ch.username)}</div>
-        <div class="cc-admin">${ch.platform==='telegram'?'تلگرام':'ایتا'} · <span class="mono">@${escHtml(ch.username)}</span></div>
+        <div class="cc-admin">${escHtml(platformLabel(ch))} ·<span class="mono">@${escHtml(ch.username)}</span></div>
         <div class="cc-activity ${act.level}"><span class="dot"></span>فعالیت ${act.label}</div>
         <div class="cc-cats">${cat?`<span>${escHtml(cat.name)}</span>`:''}<span>${ch.type==='news_agency'?'خبرگزاری':'شخصیت'}</span></div>
       </div>`;
@@ -48,7 +52,7 @@ export function syncCyberPeopleSortSelect(){
 export function cyberPeopleSortValue(ch, field){
   switch(field){
     case 'name': return ch.title || ch.username || '';
-    case 'platform': return ch.platform==='telegram' ? 'تلگرام' : 'ایتا';
+    case 'platform': return platformLabel(ch);
     case 'owner': return ch.owner_name || '';
     case 'subscribers': return ch.subscriber_count == null ? null : ch.subscriber_count;
     case 'activity': return activityOf(ch.id).n;
@@ -101,7 +105,10 @@ export function renderCyberPeopleGrid(){
     const cat = CATEGORIES.find(c=>c.id===ch.category_id);
     const el=document.createElement('div'); el.className='cpt-row';
     el.title = 'مشاهده‌ی پست‌های ' + (ch.title || ch.username);
-    const channelUrl = ch.platform==='telegram' ? `https://t.me/${encodeURIComponent(ch.username||'')}` : `https://eitaa.com/${encodeURIComponent(ch.username||'')}`;
+    const channelUrl = channelPublicUrl(ch);
+    const channelLink = channelUrl
+      ? `<a class="cpt-platform-link mono" href="${safeUrl(channelUrl)}" target="_blank" rel="noopener">${escHtml(channelUrl.replace(/^https?:\/\//,''))}</a>`
+      : '';
     el.innerHTML = `<div class="cpt-who">
         <div class="cpt-avatar-wrap">
           <div class="cpt-avatar">${ch.avatar_url ? `<img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" />` : ICONS.person}</div>
@@ -112,8 +119,8 @@ export function renderCyberPeopleGrid(){
         </div>
       </div>
       <div class="cpt-platform">
-        <span class="cpt-platform-name">${ch.platform==='telegram'?'تلگرام':'ایتا'}</span>
-        <a class="cpt-platform-link mono" href="${escAttr(channelUrl)}" target="_blank" rel="noopener">${escHtml(channelUrl.replace('https://',''))}</a>
+        <span class="cpt-platform-name">${escHtml(platformLabel(ch))}</span>
+        ${channelLink}
       </div>
       <div class="cpt-owner">${ch.owner_name ? ICONS.userLine + `<span>${escHtml(ch.owner_name)}</span>` : ''}</div>
       <div class="cpt-num">${ch.subscriber_count ? `<span class="cpt-num-val">${ICONS.users}${toFaDigits(ch.subscriber_count)}</span>` : ''}</div>
@@ -121,7 +128,7 @@ export function renderCyberPeopleGrid(){
       <div class="cpt-tagcol">${cat ? `<span class="cpt-tag">${escHtml(cat.name)}</span>` : ''}</div>
       <div class="cpt-groupcol"><span class="cpt-tag${ch.is_khorasan_talabeh ? ' cpt-tag-khorasan' : ''}">${ch.is_khorasan_talabeh ? 'طلاب خراسان' : 'سایر کنشگران'}</span></div>
       <span class="cpt-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></span>`;
-    el.querySelector('.cpt-platform-link').addEventListener('click', e => e.stopPropagation());
+    el.querySelector('.cpt-platform-link')?.addEventListener('click', e => e.stopPropagation());
     el.addEventListener('click', ()=> openPersonFeed(ch.id));
     wrap.appendChild(el);
   });

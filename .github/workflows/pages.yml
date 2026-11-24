@@ -3,7 +3,9 @@ name: Publish site
 # انتشار سایت روی GitHub Pages از خروجی Vite (dist/) — جایگزین انتشار مستقیم شاخه.
 # ⚠️ یک‌بار لازم است: Settings ← Pages ← Build and deployment ← Source = «GitHub Actions».
 # آدرس‌ها همان قبلی‌اند: /design/ita-monitoring-prototype.html، /brand-kit/، /feature-kit/
-# اگر آزمون‌ها شکست بخورند، چیزی منتشر نمی‌شود و نسخه‌ی قبلی سر جایش می‌ماند.
+# اگر بررسی‌ها شکست بخورند، چیزی منتشر نمی‌شود و نسخه‌ی قبلی سر جایش می‌ماند.
+# ۵.۳۶.۱: آزمون‌های مرورگر اینجا تکرار نمی‌شوند — همان کد پیش از مرج در tests.yml کامل آزموده شده
+# (شرط: شاخه‌ی PR پیش از مرج با شاخه‌ی زنده به‌روز باشد، CLAUDE.md). lint، آزمون واحد و ساخت می‌مانند.
 on:
   push:
     branches: [claude/new-project-8ekywm]
@@ -20,8 +22,8 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,16 +34,6 @@ jobs:
       - run: npm run lint
       - run: npm run test:unit
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:dist
-        env:
-          CI: "1"
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

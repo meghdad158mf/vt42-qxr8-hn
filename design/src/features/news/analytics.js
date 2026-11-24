@@ -6,6 +6,8 @@ import { loadScriptOnce, scriptRequested } from '../../core/load-script.js';
 import { NEWS_AI_INSIGHTS } from './insights.js';
 import { renderNewsPicks } from './picks.js';
 import { WAVE_LIVE_H, WAVE_STATE, onWavesComputed, renderNewsWaves, waveTime } from './waves.js';
+import { deltaInfo, ensureCompareData, hourlyWithPrevDay, onCompareReady, todayVsYesterday } from './compare.js';
+import { renderTopicBubbles } from './topic-bubbles.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
 import { topChannelsByCount } from '../../app.js';
 
@@ -27,7 +29,13 @@ export function newsAnalyticsPosts(hours){
     return t >= cutoff;
   });
 }
-export let newsTrendChart, newsSourcesChart, newsTopicsChart;
+export let newsTrendChart, newsSourcesChart;
+// کلیک روی نمودارها → فید خبرهای همان منبع/ساعت (۵.۳۵.۰)؛ news-tabs.js مقصد را ثبت می‌کند (بدون import دوطرفه)
+let CHART_DRILL_FN = () => {};
+// یک قدم بعد: ناوبری نمودارها را دوباره می‌سازد و Chart.js وسط رسیدگی به همان کلیک روی نمودار از‌بین‌رفته خطا می‌داد
+const CHART_DRILL = (d) => setTimeout(() => CHART_DRILL_FN(d), 0);
+export function onChartDrill(fn){ CHART_DRILL_FN = fn; }
+const pointerOnHover = (e, els) => { const c = e.native?.target; if(c) c.style.cursor = els.length ? 'pointer' : 'default'; };
 export let chartDefaultsApplied = false;
 export function applyChartDefaultsOnce(){
   if(chartDefaultsApplied || typeof Chart === 'undefined') return;
@@ -65,10 +73,24 @@ export function renderNgaKpis(){
   if(!el) return;
   const todayStartMs = iranTodayStartMs();
   const isToday = p=>new Date(p.posted_at || p.scraped_at).getTime() >= todayStartMs;
-  const todayPosts = newsAnalyticsPosts().filter(isToday);
+  const newsIds = new Set(newsAnalyticsChannels().map(c=>c.id));
+  // با رسیدن داده‌ی مقایسه (۴۸ ساعت اخیر، کامل‌تر از کش ۱۰۰۰تایی) عددها هم از همان خوانده می‌شوند
+  const cmpNews = todayVsYesterday(p=>newsIds.has(p.channel_id));
+  const cmpClaims = todayVsYesterday(p=>p.platform === 'bale');
+  const todayPosts = cmpNews ? cmpNews.today : newsAnalyticsPosts().filter(isToday);
   const activeCh = new Set(todayPosts.map(p=>p.channel_id)).size;
-  const allCh = newsAnalyticsChannels().length;
-  const claimsToday = POSTS_CACHE.filter(p=>p.platform === 'bale' && isToday(p)).length;
+  const allCh = newsIds.size;
+  const claimsToday = cmpClaims ? cmpClaims.today.length : POSTS_CACHE.filter(p=>p.platform === 'bale' && isToday(p)).length;
+  // «دیروز تا همین ساعت» زیر هر شاخص (الهام از داشبوردهای رصد رسانه)
+  const delta = (t, y) => {
+    const d = deltaInfo(t, y);
+    const arrow = d.dir === 'up' ? '▲' : d.dir === 'down' ? '▼' : '•';
+    return `<span class="k-delta is-${d.dir}" title="دیروز تا همین ساعت: ${toFaDigits(y)}">${arrow} ${toFaDigits(d.text)}</span>`;
+  };
+  const yNews = cmpNews ? cmpNews.yest.length : null;
+  const yActive = cmpNews ? new Set(cmpNews.yest.map(p=>p.channel_id)).size : null;
+  const yClaims = cmpClaims ? cmpClaims.yest.length : null;
+  const vsTxt = (y, fallback) => y == null ? fallback : 'دیروز تا این ساعت: ' + toFaDigits(y);
   const waves = WAVE_STATE.loading ? null : (WAVE_STATE.result || []);
   const live = waves ? waves.filter(w=>Date.now() - waveTime(w.last) <= WAVE_LIVE_H * 3600 * 1000).length : 0;
   const now = new Date();
@@ -77,15 +99,16 @@ export function renderNgaKpis(){
   const aiTxt = NEWS_AI_INSIGHTS ? ('تحلیل هوشمند: ' + newsRelTime(NEWS_AI_INSIGHTS.computed_at)) : 'تحلیل هوشمند هنوز آماده نشده';
   el.innerHTML = `
     <div class="nga-kpi is-date"><span class="k-label">${escHtml(weekday)}</span><span class="k-val">${escHtml(dateTxt)}</span><span class="k-sub">${escHtml(aiTxt)}</span></div>
-    <div class="nga-kpi"><span class="k-label">اخبار امروز</span><span class="k-val">${toFaDigits(todayPosts.length)}</span><span class="k-sub">از نیمه‌شب تا الان</span></div>
-    <div class="nga-kpi"><span class="k-label">منابع فعال امروز</span><span class="k-val">${toFaDigits(activeCh)} <small>از ${toFaDigits(allCh)}</small></span><span class="k-sub">منبعی که امروز خبر داده</span></div>
+    <div class="nga-kpi"><span class="k-label">اخبار امروز</span><span class="k-val">${toFaDigits(todayPosts.length)}${yNews != null ? delta(todayPosts.length, yNews) : ''}</span><span class="k-sub">${vsTxt(yNews, 'از نیمه‌شب تا الان')}</span></div>
+    <div class="nga-kpi"><span class="k-label">منابع فعال امروز</span><span class="k-val">${toFaDigits(activeCh)} <small>از ${toFaDigits(allCh)}</small>${yActive != null ? delta(activeCh, yActive) : ''}</span><span class="k-sub">${vsTxt(yActive, 'منبعی که امروز خبر داده')}</span></div>
     <button type="button" class="nga-kpi${live ? ' is-alert' : ''}" data-scroll-to="news-waves-panel">
       <span class="k-label">موج‌های خبری</span><span class="k-val">${waves ? toFaDigits(waves.length) : '…'}</span>
       <span class="k-sub">${!waves ? 'در حال بررسی…' : live ? toFaDigits(live) + ' موج در حال گسترش' : '۱۲ ساعت اخیر'}</span></button>
-    <button type="button" class="nga-kpi" data-news-go="claims"><span class="k-label">ادعا و شایعه امروز</span><span class="k-val">${toFaDigits(claimsToday)}</span><span class="k-sub">مشاهده‌ی همه ←</span></button>`;
+    <button type="button" class="nga-kpi" data-news-go="claims"><span class="k-label">ادعا و شایعه امروز</span><span class="k-val">${toFaDigits(claimsToday)}${yClaims != null ? delta(claimsToday, yClaims) : ''}</span><span class="k-sub">مشاهده‌ی همه ←</span></button>`;
 }
 export function renderNewsAnalytics(){
   renderNewsWaves();
+  ensureCompareData();
   // معیار محاسبات ۳ ویجت آماری این تب (روند/منابع/ابرکلمات): ۲۴ ساعت
   // اخیر، سمت کلاینت. دو ویجت دیگه («اخبار منتخب»/«موضوعات پرتکرار») از
   // هوش مصنوعی میان و مستقل از این متغیرن — NEWS_AI_INSIGHTS رو
@@ -137,9 +160,10 @@ export function renderNewsAnalytics(){
   if(!hasChart) return; // بارگذاری Chart.js از CDN شکست خورده — بقیه‌ی نمودارها رو رد کن
 
   // روند حجم اخبار — ۲۴ ساعت اخیر، به تفکیک ساعت
-  const hourLabels = [], hourCounts = [];
+  const hourLabels = [], hourCounts = [], hourStarts = [];
   for(let i=23;i>=0;i--){
     const d = new Date(); d.setMinutes(0,0,0); d.setHours(d.getHours()-i);
+    hourStarts.push(d.getTime());
     const next = new Date(d); next.setHours(d.getHours()+1);
     const n = posts.filter(p=>{
       const t = new Date(p.posted_at || p.scraped_at).getTime();
@@ -148,11 +172,24 @@ export function renderNewsAnalytics(){
     hourLabels.push(d.toLocaleTimeString('fa-IR', {hour:'2-digit'}));
     hourCounts.push(n);
   }
+  // ۲۴ ساعتِ پیش از آن به‌صورت خط‌چین کم‌رنگ (۵.۳۵.۰)؛ با رسیدن داده‌ی مقایسه، خط امروز هم از همان
+  // داده‌ی کامل‌تر شمرده می‌شود (کش ۱۰۰۰تایی گاهی ۲۴ ساعت را نمی‌پوشاند)
+  const newsIdsH = new Set(newsAnalyticsChannels().map(c=>c.id));
+  const hw = hourlyWithPrevDay(p=>newsIdsH.has(p.channel_id));
+  const curCounts = hw ? hw.cur : hourCounts;
+  const prevSet = hw ? [{
+    label: '۲۴ ساعتِ قبل', data: hw.prev, borderColor: 'rgba(91,100,114,0.55)', borderWidth: 1.6,
+    borderDash: [5, 4], fill: false, tension: 0, pointRadius: 0, pointHoverRadius: 4,
+    pointHoverBackgroundColor: '#5b6472', order: 2,
+  }] : [];
+  const trendLegend = document.getElementById('news-trend-legend');
+  if(trendLegend) trendLegend.hidden = !hw;
   if(newsTrendChart) newsTrendChart.destroy();
   newsTrendChart = new Chart(document.getElementById('news-trend-chart'), {
     type: 'line',
-    data: { labels: hourLabels, datasets: [{
-      data: hourCounts,
+    data: { labels: hourLabels, datasets: [...prevSet, {
+      label: '۲۴ ساعت اخیر', order: 1,
+      data: curCounts,
       borderColor: '#b5651d',
       borderWidth: 2.5,
       backgroundColor: (context)=>{
@@ -162,13 +199,22 @@ export function renderNewsAnalytics(){
         g.addColorStop(0, 'rgba(234,179,147,0.5)'); g.addColorStop(1, 'rgba(234,179,147,0.02)');
         return g;
       },
-      fill: true, tension: 0.35,
+      // tension صفر: منحنی نرم بین دو ساعت قله/دره‌ی ساختگی می‌ساخت (تعداد خبر عدد صحیح است)
+      fill: true, tension: 0,
       pointRadius: 2, pointBackgroundColor: '#b5651d', pointBorderColor: '#fff', pointBorderWidth: 1.5,
       pointHoverRadius: 6, pointHoverBackgroundColor: '#b5651d', pointHoverBorderWidth: 2,
     }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display:false } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display:false }, tooltip: { displayColors: !!hw, callbacks: { footer: () => 'کلیک: خبرهای همین ساعت ←' } } },
+      onHover: pointerOnHover,
+      onClick: (e, els) => {
+        if(!els.length) return;
+        const from = hourStarts[els[0].index];
+        const hh = new Date(from).toLocaleTimeString('fa-IR', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Tehran' });
+        CHART_DRILL({ tab: 'study', range: { from, to: from + 3600000 }, label: 'یک ساعت از ' + hh });
+      },
       scales: {
         y: { beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'rgba(20,27,36,0.06)' } },
         x: { grid:{ display:false }, ticks:{ maxRotation:0, autoSkip:true, maxTicksLimit:8 } },
@@ -191,7 +237,15 @@ export function renderNewsAnalytics(){
     },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display:false } },
+      plugins: { legend: { display:false }, tooltip: { callbacks: { footer: () => 'کلیک: خبرهای این منبع ←' } } },
+      onHover: pointerOnHover,
+      onClick: (e, els) => {
+        if(!els.length) return;
+        const id = String(topSources[els[0].index][0]);
+        const ch = chById(Number(id));
+        CHART_DRILL({ tab: ch && ch.platform === 'website' ? 'website' : 'study', source: id,
+          range: { from: Date.now() - 24 * 3600000, to: Date.now() + 60000 }, label: '«' + (ch ? (ch.title || ch.username) : id) + '»، ۲۴ ساعت اخیر' });
+      },
       scales: {
         x: { beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'rgba(20,27,36,0.06)' } },
         y: { grid:{ display:false } },
@@ -199,43 +253,33 @@ export function renderNewsAnalytics(){
     },
   });
 
-  // موضوعات پرتکرار — تشخیص هوش مصنوعی (همون news_ai_insights بالا)؛ دونات
-  // چون درباره‌ی «سهم» موضوعات از هم‌دیگه‌ست، نه رتبه‌بندی مطلق
-  const topicCounts = (NEWS_AI_INSIGHTS?.topics || []).map(t=>[t.name, t.weight]);
+  // موضوعات پرتکرار — تشخیص هوش مصنوعی (همون news_ai_insights بالا)؛ از ۵.۳۵.۰ حباب‌هایی به
+  // اندازه‌ی وزن هر موضوع با نام داخل خودِ حباب (به‌جای دونات + راهنمای رنگ)
+  const topicCounts = (NEWS_AI_INSIGHTS?.topics || []).map(t=>[t.name ?? t.label ?? '', t.weight]);
   const topicsBox = document.getElementById('news-topics-chart-box');
-  const topicsCanvas = document.getElementById('news-topics-chart');
   const topicsEmpty = document.getElementById('news-topics-empty');
   const topicsUpdatedEl = document.getElementById('news-topics-updated');
   topicsUpdatedEl.textContent = NEWS_AI_INSIGHTS ? ('به‌روزرسانی: ' + newsRelTime(NEWS_AI_INSIGHTS.computed_at)) : '';
-  if(newsTopicsChart){ newsTopicsChart.destroy(); newsTopicsChart = null; }
   if(!topicCounts.length){
     topicsBox.style.display = 'none';
     topicsEmpty.style.display = '';
   }else{
     topicsBox.style.display = '';
     topicsEmpty.style.display = 'none';
-    newsTopicsChart = new Chart(topicsCanvas, {
-      type: 'doughnut',
-      data: {
-        labels: topicCounts.map(([name])=>name),
-        datasets: [{
-          data: topicCounts.map(([,n])=>n),
-          backgroundColor: TOPIC_DONUT_COLORS.slice(0, topicCounts.length),
-          borderColor: '#fff', borderWidth: 2, hoverOffset: 6,
-        }],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '62%',
-        plugins: { legend: { display:true, position:'bottom', rtl:true, labels:{ boxWidth:11, padding:12, font:{ size:12 } } } },
-      },
-    });
+    renderTopicBubbles(topicsBox, topicCounts, TOPIC_DONUT_COLORS);
   }
 }
 
 export function setupNewsAnalytics(){
-  document.getElementById('nga-kpis').addEventListener('click', e=>{
+  // کارت‌های شاخص و دکمه‌ی حالت خالی «اخبار منتخب» → اسکرول به موج‌ها
+  document.getElementById('news-analytics-panel').addEventListener('click', e=>{
     const b = e.target.closest('[data-scroll-to]');
     if(b) document.getElementById(b.dataset.scrollTo).scrollIntoView({behavior:'smooth'});
   });
   onWavesComputed(renderNgaKpis);
+  // داده‌ی مقایسه با دیروز ناهمگام می‌رسد → شاخص‌ها و نمودار ساعتی دوباره (اگر تب باز است)
+  onCompareReady(()=>{
+    if(document.getElementById('news-analytics-panel')?.offsetParent) renderNewsAnalytics();
+    else renderNgaKpis();
+  });
 }

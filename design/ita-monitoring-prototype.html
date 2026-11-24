@@ -7,6 +7,7 @@
 <!-- PWA: نصب روی گوشی (manifest + service worker در sw.js) -->
 <link rel="manifest" href="manifest.webmanifest" vite-ignore>
 <meta name="theme-color" content="#16202a">
+<link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -18,6 +19,8 @@
   // رفرش با نشست معتبر: صفحه‌ی ورود حتی لحظه‌ای (تا اجرای اسکریپت اصلی ته صفحه) دیده نشه
   try{ if(sessionStorage.getItem('jarian_token')) document.documentElement.classList.add('has-session'); }catch(e){}
   try{ history.scrollRestoration = 'manual'; }catch(e){}
+  // نمای روشن/تیره‌ی انتخاب‌شده پیش از رسم صفحه (ui/theme.js)
+  try{ var jt=localStorage.getItem('jarian_theme'); if(jt!=='dark' && !(jt==='auto' && !matchMedia('(prefers-color-scheme: light)').matches)) document.documentElement.dataset.theme='light'; }catch(e){ document.documentElement.dataset.theme='light'; }
 </script>
 <style>html.has-session #view-login{ display:none !important; }
 </style>
@@ -33,15 +36,17 @@
   <div class="login-inner">
     <div class="login-visual">
       <div class="lv-content">
-        <svg class="lv-logo" viewBox="0 0 288 288" aria-hidden="true"><defs><mask id="jt-login" maskUnits="userSpaceOnUse" x="0" y="0" width="288" height="288"><rect width="288" height="288" fill="#000"/><path d="M203.14 73.52Q208.14 77.72 212.50 82.59" stroke="rgb(1,1,1)" stroke-width="4.02" stroke-linecap="round" fill="none"/><path d="M210.46 80.38Q214.98 85.10 218.78 90.41" stroke="rgb(2,2,2)" stroke-width="4.21" stroke-linecap="round" fill="none"/><path d="M216.99 87.99Q220.97 93.18 224.17 98.87" stroke="rgb(3,3,3)" stroke-width="4.40" stroke-linecap="round" fill="none"/><path d="M222.65 96.27Q226.04 101.86 228.61 107.87" stroke="rgb(5,5,5)" stroke-width="4.59" stroke-linecap="round" fill="none"/><path d="M227.38 105.12Q230.14 111.04 232.04 117.29" stroke="rgb(7,7,7)" stroke-width="4.78" stroke-linecap="round" fill="none"/><path d="M231.12 114.43Q233.22 120.62 234.42 127.04" stroke="rgb(9,9,9)" stroke-width="4.97" stroke-linecap="round" fill="none"/><path d="M233.82 124.09Q235.23 130.47 235.73 136.98" stroke="rgb(12,12,12)" stroke-width="5.16" stroke-linecap="round" fill="none"/><path d="M235.45 133.98Q236.16 140.48 235.95 147.01" stroke="rgb(15,15,15)" stroke-width="5.35" stroke-linecap="round" fill="none"/><path d="M236.00 144.00Q236.00 150.53 235.08 157.00" stroke="rgb(18,18,18)" stroke-width="5.54" stroke-linecap="round" fill="none"/><path d="M235.45 154.02Q234.74 160.51 233.12 166.84" stroke="rgb(21,21,21)" stroke-width="5.73" stroke-linecap="round" fill="none"/><path d="M233.82 163.91Q232.40 170.29 230.10 176.41" stroke="rgb(24,24,24)" stroke-width="5.92" stroke-linecap="round" fill="none"/><path d="M231.12 173.57Q229.02 179.76 226.06 185.59" stroke="rgb(28,28,28)" stroke-width="6.11" stroke-linecap="round" fill="none"/><path d="M227.38 182.88Q224.62 188.80 221.05 194.28" stroke="rgb(32,32,32)" stroke-width="6.30" stroke-linecap="round" fill="none"/><path d="M222.65 191.73Q219.26 197.31 215.12 202.36" stroke="rgb(36,36,36)" stroke-width="6.49" stroke-linecap="round" fill="none"/><path d="M216.99 200.01Q213.01 205.19 208.34 209.76" stroke="rgb(40,40,40)" stroke-width="6.68" stroke-linecap="round" fill="none"/><path d="M210.46 207.62Q205.94 212.34 200.80 216.37" stroke="rgb(44,44,44)" stroke-width="6.87" stroke-linecap="round" fill="none"/><path d="M203.14 214.48Q198.13 218.68 192.58 222.13" stroke="rgb(48,48,48)" stroke-width="7.06" stroke-linecap="round" fill="none"/><path d="M195.11 220.50Q189.68 224.12 183.79 226.95" stroke="rgb(53,53,53)" stroke-width="7.25" stroke-linecap="round" fill="none"/><path d="M186.48 225.60Q180.68 228.62 174.52 230.79" stroke="rgb(58,58,58)" stroke-width="7.44" stroke-linecap="round" fill="none"/><path d="M177.34 229.74Q171.25 232.11 164.89 233.60" stroke="rgb(63,63,63)" stroke-width="7.63" stroke-linecap="round" fill="none"/><path d="M167.81 232.87Q161.50 234.56 155.01 235.34" stroke="rgb(68,68,68)" stroke-width="7.81" stroke-linecap="round" fill="none"/><path d="M158.00 234.93Q151.54 235.92 145.00 235.99" stroke="rgb(73,73,73)" stroke-width="8.00" stroke-linecap="round" fill="none"/><path d="M148.01 235.91Q141.49 236.20 134.98 235.56" stroke="rgb(79,79,79)" stroke-width="8.19" stroke-linecap="round" fill="none"/><path d="M137.98 235.80Q131.46 235.38 125.07 234.03" stroke="rgb(84,84,84)" stroke-width="8.38" stroke-linecap="round" fill="none"/><path d="M128.02 234.60Q121.59 233.47 115.38 231.43" stroke="rgb(90,90,90)" stroke-width="8.57" stroke-linecap="round" fill="none"/><path d="M118.26 232.32Q111.98 230.50 106.03 227.80" stroke="rgb(96,96,96)" stroke-width="8.76" stroke-linecap="round" fill="none"/><path d="M108.79 229.00Q102.76 226.50 97.13 223.17" stroke="rgb(102,102,102)" stroke-width="8.95" stroke-linecap="round" fill="none"/><path d="M99.75 224.66Q94.02 221.52 88.79 217.60" stroke="rgb(108,108,108)" stroke-width="9.14" stroke-linecap="round" fill="none"/><path d="M91.23 219.36Q85.88 215.61 81.11 211.15" stroke="rgb(114,114,114)" stroke-width="9.33" stroke-linecap="round" fill="none"/><path d="M83.34 213.17Q78.43 208.86 74.17 203.90" stroke="rgb(120,120,120)" stroke-width="9.52" stroke-linecap="round" fill="none"/><path d="M76.17 206.15Q71.76 201.34 68.07 195.94" stroke="rgb(127,127,127)" stroke-width="9.71" stroke-linecap="round" fill="none"/><path d="M69.81 198.40Q65.94 193.13 62.86 187.37" stroke="rgb(133,133,133)" stroke-width="9.90" stroke-linecap="round" fill="none"/><path d="M64.33 190.00Q61.06 184.34 58.62 178.28" stroke="rgb(140,140,140)" stroke-width="10.09" stroke-linecap="round" fill="none"/><path d="M59.79 181.05Q57.16 175.07 55.40 168.78" stroke="rgb(147,147,147)" stroke-width="10.28" stroke-linecap="round" fill="none"/><path d="M56.26 171.66Q54.29 165.43 53.23 158.99" stroke="rgb(154,154,154)" stroke-width="10.47" stroke-linecap="round" fill="none"/><path d="M53.77 161.95Q52.49 155.54 52.14 149.02" stroke="rgb(161,161,161)" stroke-width="10.66" stroke-linecap="round" fill="none"/><path d="M52.35 152.02Q51.78 145.51 52.14 138.98" stroke="rgb(168,168,168)" stroke-width="10.85" stroke-linecap="round" fill="none"/><path d="M52.02 141.99Q52.17 135.46 53.23 129.01" stroke="rgb(175,175,175)" stroke-width="11.04" stroke-linecap="round" fill="none"/><path d="M52.79 131.99Q53.64 125.51 55.40 119.22" stroke="rgb(183,183,183)" stroke-width="11.23" stroke-linecap="round" fill="none"/><path d="M54.64 122.13Q56.19 115.79 58.62 109.72" stroke="rgb(190,190,190)" stroke-width="11.42" stroke-linecap="round" fill="none"/><path d="M57.55 112.53Q59.78 106.39 62.86 100.63" stroke="rgb(198,198,198)" stroke-width="11.61" stroke-linecap="round" fill="none"/><path d="M61.49 103.31Q64.38 97.45 68.07 92.06" stroke="rgb(206,206,206)" stroke-width="11.80" stroke-linecap="round" fill="none"/><path d="M66.41 94.57Q69.92 89.06 74.17 84.10" stroke="rgb(214,214,214)" stroke-width="11.99" stroke-linecap="round" fill="none"/><path d="M72.25 86.42Q76.34 81.32 81.11 76.85" stroke="rgb(222,222,222)" stroke-width="12.18" stroke-linecap="round" fill="none"/><path d="M78.95 78.95Q83.57 74.33 88.79 70.40" stroke="rgb(230,230,230)" stroke-width="12.36" stroke-linecap="round" fill="none"/><path d="M86.42 72.25Q91.51 68.16 97.13 64.83" stroke="rgb(238,238,238)" stroke-width="12.55" stroke-linecap="round" fill="none"/><path d="M94.57 66.41Q100.08 62.90 106.03 60.20" stroke="rgb(247,247,247)" stroke-width="12.74" stroke-linecap="round" fill="none"/><path d="M103.31 61.49Q110.59 58.11 112.53 57.55" stroke="rgb(255,255,255)" stroke-width="12.93" stroke-linecap="round" fill="none"/></mask></defs><g class="lv-comet"><rect width="288" height="288" fill="#EAB393" mask="url(#jt-login)"/><circle cx="112.53" cy="57.55" r="29.25" fill="#F3CDB4" fill-opacity=".18"/><circle cx="112.53" cy="57.55" r="16.25" fill="#F3CDB4"/></g><g stroke="#EAB393" stroke-width="22" stroke-linecap="round" fill="none"><path class="lv-bar lv-bar1" d="M104 182V138"/><path class="lv-bar lv-bar2" d="M144 182V102"/><path class="lv-bar lv-bar3" d="M184 182V148"/></g></svg>
+        <img class="lv-logo" src="icons/jarian-mark.svg" alt="جریان">
+        <!-- ۵.۴۱.۰ (مدل «ب۱»، انتخاب کاربر): فقط نام سامانه و نهاد مسئول — شعار، معرفی و آمار فقط در صفحه‌ی خوش‌آمد -->
         <h1>سامانه هوشمند جریان</h1>
-        <p>رصد و تحلیل فضای سیاسی اجتماعی<br>به روایت حوزه علمیه خراسان</p>
-        <span class="badge" style="margin-top:16px;display:inline-block;font-family:'IRANSansX',Tahoma,sans-serif;color:var(--accent);border-color:rgba(234,179,147,0.32);background:rgba(234,179,147,0.08);">ویرایش <span class="app-version">۵.۳۲.۱۰</span></span>
+        <p>اداره‌ی رصد و راهبری سیاسی‌اجتماعی حوزه‌ی علمیه‌ی خراسان</p>
       </div>
     </div>
     <div class="login-panel">
       <div class="login-form-wrap">
         <div id="login-maint" class="login-maint" role="status" hidden></div>
+        <h2 class="login-title">ورود به سامانه</h2>
+        <p class="login-lede">کد ملی خود را وارد کنید؛ کد ورود پیامک می‌شود.</p>
         <!-- ورود با کد ملی و رمز یک‌بارمصرف پیامکی (۵.۳۱.۰، migration_050): مرحله‌ی ۱ کد ملی،
              مرحله‌ی ۲ کد پیامک‌شده. بیننده‌ها فقط از این راه وارد می‌شوند؛ مدیر هر دو راه را دارد -->
         <form id="otp-form" autocomplete="off">
@@ -105,6 +110,7 @@
         <p id="login-error" role="alert" style="display:none;color:var(--danger);font-size:12px;margin:12px 0 0;"></p>
         <button type="button" id="login-retry-btn" class="btn" style="display:none;width:100%;margin:10px 0 0;">تلاش دوباره</button>
         <button type="button" class="otp-link otp-mode-switch" id="login-mode-switch" hidden>ورود با رمز مشترک</button>
+        <small class="login-ver">ویرایش <span class="app-version">۶.۱.۱</span></small>
       </div>
     </div>
   </div>
@@ -126,8 +132,106 @@
   </div>
 </div>
 
-<!-- =================== DASHBOARD SHELL (no sidebar — topbar carries admin shortcuts) =================== -->
+<!-- =================== DASHBOARD SHELL =================== -->
 <div id="view-dash" class="view">
+  <!-- ۵.۳۸.۰: ستون ثابت «دونیمه‌ی عمودی» (انتخاب کاربر) — فقط رایانه‌ی پهن (≥۱۲۸۰px)، جای منوی «بخش‌ها»؛
+       گوشی و رایانه‌ی باریک همان منوی نوار بالا. رفتن با data-nav (ui/menus.js)، عددها از hero-stats و domain-live -->
+  <aside class="side-nav" id="side-nav" aria-label="بخش‌ها">
+    <div class="sn-head">
+      <button type="button" class="sn-brand" data-nav="dashboard">
+        <img src="icons/jarian-mark.svg" alt="" aria-hidden="true">
+        <span><b>سامانه هوشمند جریان</b><small>نبض فضای سیاسی اجتماعی</small></span>
+      </button>
+    </div>
+    <div class="sn-kpis" id="sn-kpis" aria-label="آمار رصد"></div>
+    <nav class="sn-list">
+      <div class="sn-group sn-g-home" data-sn="dashboard">
+        <button type="button" class="sn-item sn-top" data-nav="dashboard"><span class="sn-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span><span class="sn-name">صفحه نخست</span></button>
+      </div>
+      <div class="sn-label">تحلیل</div>
+      <div class="sn-group sn-g-reports" data-sn="reports">
+        <button type="button" class="sn-item sn-top" data-nav="reports"><span class="sn-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5c2.5-1 6-1 10 1.5 4-2.5 7.5-2.5 10-1.5V19c-2.5-1-6-1-10 1.5C8 18 4.5 18 2 19z"/><path d="M12 7v13.5"/></svg></span><span class="sn-name">بسته تحلیلی جریان</span><small class="sn-live" data-live="reports"></small></button><button type="button" class="sn-exp" aria-expanded="false" aria-label="زیرمجموعه‌های بسته تحلیلی جریان" title="زیرمجموعه‌ها"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <!-- شماره‌های تازه (همان فهرست منوی «بخش‌ها»، renderNavMenuIssues) — کلیک = نمایشگر سند -->
+        <div class="sn-subs sn-issues" id="sn-issues"></div>
+      </div>
+      <div class="sn-label">عرصه‌های رصد</div>
+      <div class="sn-group" data-sn="overview">
+        <button type="button" class="sn-item" data-nav="overview"><span class="sn-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14H6a2 2 0 01-2-2V5z"/><path d="M17 9h3v8a2 2 0 01-2 2M8 9h5M8 13h5"/></svg></span><span class="sn-name">اخبار و رویدادها</span><small class="sn-live" data-live="overview"></small></button><button type="button" class="sn-exp" aria-expanded="false" aria-label="زیرمجموعه‌های اخبار و رویدادها" title="زیرمجموعه‌ها"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="sn-subs">
+          <button type="button" data-nav="overview/analytics">در یک نگاه</button>
+          <button type="button" data-nav="overview/claims">ادعاها و شایعات</button>
+          <button type="button" data-nav="overview/study">شبکه‌های اجتماعی</button>
+          <button type="button" data-nav="overview/website">وب‌سایت‌ها</button>
+          <button type="button" data-nav="overview/newspapers">روزنامه‌ها</button>
+          <button type="button" data-nav="overview/dossier">پرونده‌های موضوعی</button>
+          <button type="button" data-nav="overview/newsletter">خبرنامه مدارس</button>
+        </div>
+      </div>
+      <div class="sn-group" data-sn="people">
+        <button type="button" class="sn-item" data-nav="people"><span class="sn-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8l-5-5zM14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="sn-name">یادداشت‌ها</span><small class="sn-live" data-live="people"></small></button><button type="button" class="sn-exp" aria-expanded="false" aria-label="زیرمجموعه‌های یادداشت‌ها" title="زیرمجموعه‌ها"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="sn-subs">
+          <button type="button" data-nav="people/orgs">تحلیل سازمان‌ها</button>
+          <button type="button" data-nav="people/figures">چهره‌ها و فعالان سیاسی</button>
+          <button type="button" data-nav="people/thinktanks">اندیشکده‌ها و پژوهشگاه‌ها</button>
+          <button type="button" data-nav="people/archive">بسته‌های تحلیلی</button>
+        </div>
+      </div>
+      <div class="sn-group" data-sn="hawza">
+        <button type="button" class="sn-item" data-nav="hawza"><span class="sn-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V11a8 8 0 0116 0v10M4 21h16M12 3v2M9 21v-5a3 3 0 016 0v5"/></svg></span><span class="sn-name">درباره حوزه</span><small class="sn-live" data-live="hawza"></small></button><button type="button" class="sn-exp" aria-expanded="false" aria-label="زیرمجموعه‌های درباره حوزه" title="زیرمجموعه‌ها"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="sn-subs">
+          <button type="button" data-nav="hawza/news">اخبار حوزه</button>
+          <button type="button" data-nav="hawza/about">آنچه درباره حوزه گفته می‌شود</button>
+        </div>
+      </div>
+      <div class="sn-group" data-sn="posts">
+        <button type="button" class="sn-item" data-nav="posts"><span class="sn-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></svg></span><span class="sn-name">کنشگری مجازی</span><small class="sn-live" data-live="posts"></small></button>
+      </div>
+      <div class="sn-group" data-sn="schools">
+        <button type="button" class="sn-item" data-nav="schools"><span class="sn-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11.5v4.5c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v6"/></svg></span><span class="sn-name">برنامه مدارس</span><small class="sn-live" data-live="schools"></small></button>
+      </div>
+      <div class="sn-group" data-sn="positions">
+        <button type="button" class="sn-item" data-nav="positions"><span class="sn-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3M8 21h8"/></svg></span><span class="sn-name">مواضع مراجع و علماء</span><small class="sn-live" data-live="positions"></small></button><button type="button" class="sn-exp" aria-expanded="false" aria-label="زیرمجموعه‌های مواضع مراجع و علماء" title="زیرمجموعه‌ها"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="sn-subs">
+          <button type="button" data-nav="positions/leader">رهبر انقلاب</button>
+          <button type="button" data-nav="positions/maraji">مراجع و علماء</button>
+          <button type="button" data-nav="positions/hawza">حوزه‌های علمیه</button>
+          <button type="button" data-nav="positions/imams">ائمه جمعه</button>
+          <button type="button" data-nav="positions/orgs">تشکل‌ها و نخبگان</button>
+        </div>
+      </div>
+    </nav>
+    <!-- ۵.۴۰.۰ (خواست کاربر: «سایدبار اسکرول نداشته باشد»): پایین ستون فقط یک ردیف آیکون — ابزارهای نوار بالا
+         (تازگی داده، مدیریت، نمای سایت، خروج) + «ارتباط با ما» و «درباره‌ی سامانه» که پنجره‌ی کوچک کنار ستون باز می‌کنند -->
+    <div class="sn-bottom">
+      <div class="sn-tools" id="sn-tools"></div>
+      <button type="button" class="sn-dock-btn" id="sn-contact-btn" aria-controls="sn-contact" aria-expanded="false" aria-label="ارتباط با ما" title="ارتباط با ما"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></button>
+      <button type="button" class="sn-dock-btn" id="sn-info-btn" aria-controls="sn-foot" aria-expanded="false" aria-label="درباره‌ی سامانه" title="درباره‌ی سامانه"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.2"/></svg></button>
+    </div>
+    <!-- ارتباط با ما (اطلاع از انتشار + نظر و پیشنهاد) و فوتر سایت روی رایانه‌ی پهن اینجا منتقل می‌شوند -->
+    <div class="sn-pop sn-contact" id="sn-contact" hidden></div>
+    <div class="sn-pop sn-foot" id="sn-foot" hidden></div>
+  </aside>
+  <!-- صفحه‌ی خوش‌آمد بعد از ورود (۵.۳۹.۰، features/home/welcome.js): راست متن، وسط جلد نشریه، چپ آمار؛ «شروع» = جمع شدن به ستون راست -->
+  <section class="welcome" id="welcome" aria-label="خوش‌آمد" hidden>
+    <div class="wl-in">
+      <div class="wl-txt">
+        <div class="wl-brand"><img src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b>سامانه هوشمند جریان</b></div>
+        <h1>نبض <span>فضای سیاسی اجتماعی</span></h1>
+        <h2>به روایت حوزه علمیه خراسان</h2>
+        <p>هر روز اخبار و مطالب سیاسی اجتماعی را رصد می‌کنیم تا گزیده‌ای از آنچه برای یک حوزوی مهم است، یک‌جا و در یک نگاه پیش رویش قرار دهیم.</p>
+        <!-- ۵.۴۰.۱ (خواست کاربر): تیترهای سه کارت «چرا جریان» قبلی -->
+        <ul class="wl-why" aria-label="چرا جریان">
+          <li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>رصد لحظه‌ای</li>
+          <li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>تحلیل تخصصی</li>
+          <li><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg></span>دسترسی اختصاصی</li>
+        </ul>
+        <div class="wl-date"></div>
+        <button type="button" class="wl-go" id="wl-go">شروع <span aria-hidden="true">←</span></button>
+      </div>
+      <div class="wl-mid" aria-hidden="true"></div>
+      <div class="wl-stats" id="wl-stats" aria-label="آمار رصد"></div>
+    </div>
+  </section>
   <main class="main">
     <div class="topbar">
       <div class="topbar-brand">
@@ -136,7 +240,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
           <div class="admin-menu-list nav-menu-grid" id="nav-menu-list">
-            <div class="nav-menu-col">
+            <div class="nav-menu-col nav-menu-col-domains">
               <div class="nav-menu-toplevel-title">عرصه‌های رصد</div>
 
               <button class="nav-menu-group-title-btn" data-nav="overview">اخبار و رویدادها</button>
@@ -169,17 +273,14 @@
               <button class="nav-menu-sub" data-nav="positions/hawza">حوزه‌های علمیه</button>
               <button class="nav-menu-sub" data-nav="positions/imams">ائمه جمعه</button>
               <button class="nav-menu-sub" data-nav="positions/orgs">تشکل‌ها و نخبگان</button>
-
-              <button class="nav-menu-group-title-btn" data-nav="public">درباره مردم</button>
-              <button class="nav-menu-sub" data-nav="public/trends">جست‌وجوهای داغ مردم</button>
-
-              <button class="nav-menu-group-title-btn" data-nav="laws">قوانین و مصوبات</button>
-
-              <button class="nav-menu-group-title-btn soon-item" data-nav="ask">از جریان بپرس<span class="news-soon">به‌زودی</span></button>
             </div>
             <div class="nav-menu-col nav-menu-col-top">
               <button class="nav-menu-toplevel-btn" data-nav="dashboard">صفحه نخست</button>
+              <!-- رایانه: زبانه‌ی «عرصه‌های رصد» که به کادر زیرمجموعه‌هایش (ستون چپ) وصل است؛ روی گوشی پنهان (تیتر خودِ فهرست دیده می‌شود) -->
+              <div class="nav-menu-domains-tab" aria-hidden="true"><span>عرصه‌های رصد</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></div>
               <button class="nav-menu-toplevel-btn" data-nav="reports">بسته تحلیلی جریان</button>
+              <!-- شماره‌های بارگذاری‌شده (۵.۳۳.۰، خواست کاربر) — renderNavMenuIssues() در features/reports/magazines.js -->
+              <div class="nav-menu-issues" id="nav-menu-issues"></div>
             </div>
           </div>
         </div>
@@ -195,7 +296,7 @@
         <div class="admin-menu" id="admin-menu">
           <button class="chip-btn" id="admin-menu-btn" aria-haspopup="true" aria-expanded="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.8-1.6L13.3 2h-2.6l-.4 2.8a7 7 0 00-2.8 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12c0 .5 0 1 .2 1.6l-2 1.6 2 3.4 2.3-1a7 7 0 002.8 1.7l.4 2.7h2.6l.4-2.7a7 7 0 002.8-1.7l2.3 1 2-3.4-2-1.6c.2-.6.2-1.1.2-1.6z"/></svg>
-            مدیریت
+            <span class="am-tx">مدیریت</span>
             <span class="am-btn-dot" id="am-btn-dot" aria-hidden="true"></span>
             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </button>
@@ -232,8 +333,20 @@
             </button>
           </div>
         </div>
+        <span class="theme-wrap">
+        <button type="button" class="topbar-theme-btn" id="theme-btn" aria-label="نمای سایت: تیره" title="نمای سایت: تیره" aria-pressed="false" aria-haspopup="true" aria-expanded="false">
+          <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
+          <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/></svg>
+        </button>
+        <!-- ۵.۳۵.۰: روشن / تیره / خودکار (ui/theme.js) -->
+        <div class="theme-menu" id="theme-menu" role="menu" hidden>
+          <button type="button" role="menuitemradio" data-theme-set="light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>روشن</button>
+          <button type="button" role="menuitemradio" data-theme-set="dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/></svg>تیره</button>
+          <button type="button" role="menuitemradio" data-theme-set="auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span>خودکار<small>هماهنگ با گوشی یا رایانه</small></span></button>
+        </div>
+        </span>
         <div class="topbar-divider"></div>
-        <button class="chip-btn ghost" data-logout>خروج</button>
+        <button class="chip-btn ghost" data-logout aria-label="خروج" title="خروج"><svg class="lo-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 012 2v12a2 2 0 01-2 2h-4M10 16l-4-4 4-4M6 12h10"/></svg><span class="lo-tx">خروج</span></button>
       </div>
     </div>
     <div class="maint-admin-bar" id="maint-admin-bar" role="status" hidden>
@@ -267,7 +380,6 @@
             <li><b>کنشگری مجازی</b> — پست‌های کنشگران و طلاب در فضای مجازی</li>
             <li><b>برنامه مدارس</b> — گزارش‌های برنامه‌های مدارس علمیه</li>
             <li><b>مواضع مراجع و علماء</b> — بیانات و مواضع رسمی رهبر انقلاب، مراجع، حوزه‌ها، ائمه جمعه و تشکل‌های حوزوی</li>
-            <li><b>درباره مردم</b> و <b>قوانین و مصوبات</b> — آنچه مردم جست‌وجو می‌کنند و مصوبات و اطلاعیه‌های رسمی</li>
           </ul>
         </div>
         <div class="intro-step" data-step="2" hidden>
@@ -336,8 +448,8 @@
         </button>
         <h3 id="pw-modal-title">تغییر رمز</h3>
         <p class="pw-modal-warn" id="pw-modal-warn"></p>
-        <div class="field"><label>رمز جدید</label><input type="password" id="pw-new" autocomplete="new-password" /></div>
-        <div class="field"><label>تکرار رمز جدید</label><input type="password" id="pw-new2" autocomplete="new-password" /></div>
+        <div class="field"><label for="pw-new">رمز جدید</label><input type="password" id="pw-new" autocomplete="new-password" /></div>
+        <div class="field"><label for="pw-new2">تکرار رمز جدید</label><input type="password" id="pw-new2" autocomplete="new-password" /></div>
         <label class="ce-check"><input type="checkbox" id="pw-show" /> نمایش رمز</label>
         <p class="pw-modal-error" id="pw-modal-error"></p>
         <div class="ce-actions">
@@ -403,9 +515,9 @@
               <small>تغییر عکس</small>
             </label>
             <div class="ce-fields">
-              <div class="field"><label>نام نمایشی</label><input type="text" id="ce-name" placeholder="مثلاً خبرگزاری فارس" /></div>
+              <div class="field"><label for="ce-name">نام نمایشی</label><input type="text" id="ce-name" placeholder="مثلاً خبرگزاری فارس" /></div>
               <div class="ce-fields-row">
-                <div class="field"><label>بستر</label>
+                <div class="field"><label for="ce-platform">بستر</label>
                   <select id="ce-platform">
                     <option value="eitaa">ایتا</option>
                     <option value="telegram">تلگرام</option>
@@ -468,162 +580,54 @@
       </div>
     </div>
 
-    <!-- DASHBOARD: hero (pitch + illustration) + three feature cards to posts / analytics / channels & people -->
+    <!-- صفحه‌ی نخست (۵.۳۹.۰، انتخاب کاربر بعد از چند دور ماکت؛ الگوی داشبورد «Planti»): روی رایانه‌ی پهن بدون اسکرول —
+         سرصفحه‌ی خوش‌آمد + جست‌وجو؛ ستون «امروز در جریان» (مطلب اصلی روی دیوار روزنامه‌ها + فهرست تازه‌ترین‌ها)؛
+         شش کارت عرصه؛ کارت باریک «بسته تحلیلی جریان». داده و رسم: features/home/home-v3.js. گوشی: همین‌ها زیر هم. -->
     <section class="section active" id="sec-dashboard">
-      <div class="dash-hero-grid">
-        <div class="dash-hero-text">
-          <h2>نبض <span class="hl">فضای سیاسی اجتماعی</span><br><span class="hero-subline">به روایت حوزه علمیه خراسان</span></h2>
-          <div class="quicknav">
-            <div class="qn-capsule">
-              <button type="button" class="qn-btn" data-home-scroll="domains"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6.4-6.4"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="15.6" cy="15" r="1.1" fill="currentColor" stroke="none"/></svg><span>عرصه‌های رصد</span><svg class="qn-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
-              <span class="qn-sep" aria-hidden="true"></span>
-              <button type="button" class="qn-btn" data-home-scroll="package"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5.5c2.5-1 6-1 10 1.5 4-2.5 7.5-2.5 10-1.5V19c-2.5-1-6-1-10 1.5C8 18 4.5 18 2 19z"/><path d="M12 7v13.5"/></svg><span>بسته‌های تحلیلی</span><svg class="qn-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="hm">
+        <header class="hm-hd">
+          <div class="hm-hi">
+            <h1>سلام، به جریان خوش آمدید</h1>
+            <p id="hm-sub">مهم‌ترین‌های امروز از همه‌ی عرصه‌ها</p>
+          </div>
+          <form class="hm-search" id="hm-search" role="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input type="search" id="hm-search-input" aria-label="جست‌وجو در اخبار" placeholder="جست‌وجو در اخبار و رویدادها…" />
+          </form>
+        </header>
+        <div class="hm-body">
+          <aside class="hm-today" id="hm-today" aria-label="امروز در جریان">
+            <!-- ۵.۴۰.۰ (خواست کاربر): بدون «مهم‌ترین مطلب» بالای ستون — فقط فهرست امروز (home-v3.js) -->
+            <div class="hm-list">
+              <div class="hm-sx"><h2>امروز در جریان</h2><button type="button" class="hm-more" data-go="today">منتخب امروز ←</button></div>
+              <div class="hm-tabs" id="hm-tabs"></div>
+              <div class="hm-items" id="hm-items"></div>
+              <div class="hm-today-foot" id="hm-today-foot"></div>
+            </div>
+          </aside>
+          <div class="hm-main">
+            <div class="hm-pkg" id="pkg-flow" data-vis="reports"></div>
+            <div class="hm-sx section-label"><h2>عرصه‌های رصد</h2></div>
+            <div class="domain-orbits hm-domains">
+            <div class="domain-grid">
+              <div class="domain-card" data-vis="overview" data-go="overview" role="button" tabindex="0"><img src="images/domain-icon-news.webp" alt="" loading="lazy" decoding="async" /><h3>اخبار و رویدادها</h3><p class="dc-desc">خبرگزاری‌ها، شبکه‌های اجتماعی، روزنامه‌ها و شایعات</p><span class="dc-live" data-live="overview"></span></div>
+              <div class="domain-card" data-vis="positions" data-go="positions" role="button" tabindex="0"><img src="images/domain-icon-positions.webp" alt="" loading="lazy" decoding="async" /><h3>مواضع مراجع و علماء</h3><p class="dc-desc">رهبر انقلاب، مراجع، حوزه‌ها و ائمه جمعه</p><span class="dc-live" data-live="positions"></span></div>
+              <div class="domain-card" data-vis="hawza" data-go="hawza" role="button" tabindex="0"><img src="images/domain-icon-hawza.webp" alt="" loading="lazy" decoding="async" /><h3>درباره حوزه</h3><p class="dc-desc">اخبار حوزه و آنچه درباره‌ی آن گفته می‌شود</p><span class="dc-live" data-live="hawza"></span></div>
+              <div class="domain-card" data-vis="people" data-go="people" role="button" tabindex="0"><img src="images/domain-icon-people.webp" alt="" loading="lazy" decoding="async" /><h3>یادداشت‌ها</h3><p class="dc-desc">تحلیل سازمان‌ها، چهره‌ها و اندیشکده‌ها</p><span class="dc-live" data-live="people"></span></div>
+              <div class="domain-card" data-vis="posts" data-go="posts" role="button" tabindex="0"><img src="images/domain-icon-cyberspace.webp" alt="" loading="lazy" decoding="async" /><h3>کنشگری مجازی</h3><p class="dc-desc">کانال‌ها و کنشگران فضای مجازی</p><span class="dc-live" data-live="posts"></span></div>
+              <div class="domain-card" data-vis="schools" data-go="schools" role="button" tabindex="0"><img src="images/domain-icon-schools.webp" alt="" loading="lazy" decoding="async" /><h3>برنامه مدارس</h3><p class="dc-desc">گزارش‌های برنامه‌ی مدارس علمیه</p><span class="dc-live" data-live="schools"></span></div>
+            </div>
             </div>
           </div>
         </div>
-        <img class="dash-hero-img" src="images/dashboard-hero.webp" alt="" loading="lazy" decoding="async" />
       </div>
 
-      <div class="dash-hero-stats" id="dash-hero-stats"></div>
-      <!-- نوار تاریخ/ساعت/مناسبت (مهر ۱۴۰۵، خواست کاربر: «زیر هرو») — renderDatebar() -->
-      <div class="datebar" id="datebar" aria-live="off"></div>
-
-      <div class="section-label">عرصه‌های رصد و پایش</div>
-      <div class="domain-orbits">
-      <div class="domain-grid">
-        <svg class="dom-orbit" viewBox="-600 -100 1200 360" aria-hidden="true">
-          <defs>
-            <radialGradient id="dom-orbit-hole"><stop offset=".55" stop-color="#000"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
-            <mask id="dom-orbit-mask" maskUnits="userSpaceOnUse" x="-600" y="-100" width="1200" height="360">
-              <rect x="-600" y="-100" width="1200" height="360" fill="#fff"/>
-              <circle cx="-372" cy="74" r="58" fill="url(#dom-orbit-hole)"/><circle cx="-186" cy="74" r="58" fill="url(#dom-orbit-hole)"/><circle cx="0" cy="74" r="58" fill="url(#dom-orbit-hole)"/><circle cx="186" cy="74" r="58" fill="url(#dom-orbit-hole)"/><circle cx="372" cy="74" r="58" fill="url(#dom-orbit-hole)"/>
-            </mask>
-            <path id="dom-orbit-path" d="M -562 124 Q 0 -36, 562 124"/>
-            <path id="dom-orbit-path2" d="M -512 146 Q 0 26, 512 146"/>
-          </defs>
-          <g mask="url(#dom-orbit-mask)">
-            <use href="#dom-orbit-path" fill="none" stroke="#EAB393" stroke-opacity=".32" stroke-width="1.3"/>
-            <use href="#dom-orbit-path2" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="1"/>
-            <g class="flow" fill="none" stroke="#EAB393" stroke-linecap="round">
-              <use href="#dom-orbit-path" stroke-width="3" stroke-opacity="1" stroke-dasharray="18 2278"><animate attributeName="stroke-dashoffset" values="-1159;130;130" keyTimes="0;.65;1" dur="9s" repeatCount="indefinite"/></use>
-              <use href="#dom-orbit-path" stroke-width="2" stroke-opacity="0.45" stroke-dasharray="55 2278"><animate attributeName="stroke-dashoffset" values="-1159;130;130" keyTimes="0;.65;1" dur="9s" repeatCount="indefinite"/></use>
-              <use href="#dom-orbit-path" stroke-width="1.4" stroke-opacity="0.18" stroke-dasharray="110 2278"><animate attributeName="stroke-dashoffset" values="-1159;130;130" keyTimes="0;.65;1" dur="9s" repeatCount="indefinite"/></use>
-            </g>
-          </g>
-          <circle cx="-562" cy="124" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="-562" cy="124" r="2.2" fill="#EAB393" fill-opacity=".5"/>
-          <circle cx="562" cy="124" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="562" cy="124" r="2.2" fill="#EAB393" fill-opacity=".5"/>
-        </svg>
-        <div class="domain-card" data-vis="overview" data-go="overview" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-news.webp" alt="" loading="lazy" decoding="async" /></div>
-          <h3>اخبار و رویدادها</h3>
-        </div>
-        <div class="domain-card" data-vis="people" data-go="people" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-people.webp" alt="" loading="lazy" decoding="async" /></div>
-          <h3>یادداشت‌ها</h3>
-        </div>
-        <div class="domain-card" data-vis="hawza" data-go="hawza" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-hawza.webp" alt="" loading="lazy" decoding="async" /></div>
-          <h3>درباره حوزه</h3>
-        </div>
-        <div class="domain-card" data-vis="posts" data-go="posts" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-cyberspace.webp" alt="" loading="lazy" decoding="async" /></div>
-          <h3>کنشگری مجازی</h3>
-        </div>
-        <div class="domain-card" data-vis="schools" data-go="schools" role="button" tabindex="0">
-          <div class="domain-icon is-illustrated"><img src="images/domain-icon-schools.webp" alt="" loading="lazy" decoding="async" /></div>
-          <h3>برنامه مدارس</h3>
-        </div>
-      </div>
-        <!-- مدار دوم (۵.۲۸.۰، خواست کاربر): چهار عرصه‌ی تازه زیر پنج عرصه‌ی اصلی؛ قوس، کوچک‌شده‌ی
-             هم‌شکل قوس بالاست (۰٫۷۵ حول خط مرکز آیکون‌ها) و شهابش هم‌جهت (راست به چپ). جای سوراخ‌های
-             mask پشت آیکون‌ها با layoutOrbit2() از روی کارت‌های دیده‌شده ساخته می‌شه. -->
-        <div class="domain-grid domain-grid-2">
-          <svg class="dom-orbit dom-orbit-2" viewBox="-600 -100 1200 360" aria-hidden="true">
-            <defs>
-              <radialGradient id="dom-orbit2-hole"><stop offset=".55" stop-color="#000"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
-              <mask id="dom-orbit2-mask" maskUnits="userSpaceOnUse" x="-600" y="-100" width="1200" height="360">
-                <rect x="-600" y="-100" width="1200" height="360" fill="#fff"/>
-                <g id="dom-orbit2-holes"></g>
-              </mask>
-              <path id="dom-orbit2-path" d="M -421.5 111.5 Q 0 -8.5, 421.5 111.5"/>
-              <path id="dom-orbit2-path2" d="M -384 128 Q 0 38, 384 128"/>
-            </defs>
-            <g mask="url(#dom-orbit2-mask)">
-              <use href="#dom-orbit2-path" fill="none" stroke="#EAB393" stroke-opacity=".32" stroke-width="1.3"/>
-              <use href="#dom-orbit2-path2" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="1"/>
-              <g class="flow" fill="none" stroke="#EAB393" stroke-linecap="round">
-                <use href="#dom-orbit2-path" stroke-width="3" stroke-opacity="1" stroke-dasharray="18 2278"><animate attributeName="stroke-dashoffset" values="-874;130;130" keyTimes="0;.51;1" dur="9s" repeatCount="indefinite"/></use>
-                <use href="#dom-orbit2-path" stroke-width="2" stroke-opacity="0.45" stroke-dasharray="55 2278"><animate attributeName="stroke-dashoffset" values="-874;130;130" keyTimes="0;.51;1" dur="9s" repeatCount="indefinite"/></use>
-                <use href="#dom-orbit2-path" stroke-width="1.4" stroke-opacity="0.18" stroke-dasharray="110 2278"><animate attributeName="stroke-dashoffset" values="-874;130;130" keyTimes="0;.51;1" dur="9s" repeatCount="indefinite"/></use>
-              </g>
-            </g>
-            <circle cx="-421.5" cy="111.5" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="-421.5" cy="111.5" r="2.2" fill="#EAB393" fill-opacity=".5"/>
-            <circle cx="421.5" cy="111.5" r="5.7" fill="#EAB393" fill-opacity=".09"/><circle cx="421.5" cy="111.5" r="2.2" fill="#EAB393" fill-opacity=".5"/>
-          </svg>
-          <div class="domain-card" data-vis="positions" data-go="positions" role="button" tabindex="0">
-            <div class="domain-icon is-illustrated"><img src="images/domain-icon-positions.webp" alt="" loading="lazy" decoding="async" /></div>
-            <h3>مواضع مراجع و علماء</h3>
-          </div>
-          <div class="domain-card" data-vis="public" data-go="public" role="button" tabindex="0">
-            <div class="domain-icon is-illustrated"><img src="images/domain-icon-public.webp" alt="" loading="lazy" decoding="async" /></div>
-            <h3>درباره مردم</h3>
-          </div>
-          <div class="domain-card" data-vis="laws" data-go="laws" role="button" tabindex="0">
-            <div class="domain-icon is-illustrated"><img src="images/domain-icon-laws.webp" alt="" loading="lazy" decoding="async" /></div>
-            <h3>قوانین و مصوبات</h3>
-          </div>
-          <div class="domain-card soon-item" data-vis="ask" data-go="ask" role="button" tabindex="0">
-            <div class="domain-icon is-illustrated"><img src="images/domain-icon-ask.webp" alt="" loading="lazy" decoding="async" /></div>
-            <h3>از جریان بپرس<span class="news-soon">به‌زودی</span></h3>
-          </div>
-        </div>
-      </div>
-      <p class="domain-caption">جریان هر عرصه را به‌صورت جداگانه رصد و پایش می‌کند: اخبار و رویدادهای خبرگزاری‌ها، یادداشت‌های افراد، سازمان‌ها و اندیشکده‌های تأثیرگذار، اخبار پایگاه‌های حوزوی همراه با آنچه درباره‌ی حوزه گفته می‌شود، کنشگری فضای مجازی، برنامه‌های مدارس، مواضع مراجع و علماء، آنچه مردم دنبال می‌کنند و قوانین و مصوبات. هر عرصه با منبع داده و روش پایش مخصوص به خودش دنبال می‌شود.</p>
-
-      <div class="why-jarian-card">
-        <div class="why-jarian-grid">
-          <div class="why-jarian-item">
-            <div class="why-jarian-tag">رصد لحظه‌ای</div>
-            <div class="why-jarian-bar"></div>
-            <p>اخبار و رویدادها، کنشگری مجازی، مدارس و افراد را در یک سامانه‌ی واحد و به‌روز دنبال می‌کنیم. هر عرصه با روش پایش مخصوص به خودش رصد می‌شود تا هیچ تحولی در فضای سیاسی‌اجتماعی از دید جریان دور نماند.</p>
-          </div>
-          <div class="why-jarian-item">
-            <div class="why-jarian-tag">تحلیل تخصصی</div>
-            <div class="why-jarian-bar"></div>
-            <p>با نگاه جامعه‌شناسی سیاسی، رویدادها را از دل داده‌ها استخراج و تحلیل می‌کنیم. حاصل این تحلیل در قالب بسته‌ی تحلیلی جریان، هر شماره در اختیار مخاطب قرار می‌گیرد.</p>
-          </div>
-          <div class="why-jarian-item">
-            <div class="why-jarian-tag">دسترسی اختصاصی</div>
-            <div class="why-jarian-bar"></div>
-            <p>با سطح‌بندی دقیق نقش‌ها، اطلاعات حساس فقط در اختیار افراد مجاز قرار می‌گیرد. مدیران و بینندگان هرکدام دسترسی متناسب با نیاز خود را دارند، بدون افشای داده‌های حساس.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-label pkg-flow-label" id="pkg-flow">بسته تحلیلی جریان</div>
-      <p class="domain-caption pkg-caption">بسته تحلیلی جریان، خلاصه‌ای تحلیلی، دقیق و چندلایه از تحولات سیاسی‌اجتماعی است که سعی دارد نگاهی جامع را در اختیار مخاطب قرار دهد. این بسته شامل ۱۰ بخش است.</p>
-      <div class="pkg-parts" aria-label="بخش‌های بسته">
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4a16 16 0 0116 16M4 11a9 9 0 019 9"/><circle cx="5" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>خط خبری</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.6" fill="currentColor" stroke="none"/></svg>تحلیل اخبار روز</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l2.6 5.6 6.2.6-4.6 4.2 1.3 6.1L12 16.8 6.5 19.5l1.3-6.1L3.2 9.2l6.2-.6L12 3z"/></svg>مهم‌ترین اخبار</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="5.5" r="2.5"/><circle cx="5" cy="17.5" r="2.5"/><circle cx="19" cy="17.5" r="2.5"/><path d="M10.7 7.7l-4.4 7.6M13.3 7.7l4.4 7.6M7.5 17.5h9"/></svg>نگاه جامعه‌شناسی سیاسی</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8M10.5 8v3.2M10.5 13.6h.01"/></svg>اصل ماجرا</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/></svg>تحلیل سازمان‌ها</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 21H6.5A1.5 1.5 0 015 19.5v-15A1.5 1.5 0 016.5 3H14l4 4v2"/><path d="M8.5 8.5h5M8.5 12.5h3.5"/><path d="M20.4 11.6a1.6 1.6 0 00-2.3 0L12.5 17.2V20h2.8l5.1-5.1a1.6 1.6 0 000-2.3z"/></svg>یادداشت طلاب</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M6.7 6.7C4.6 8.1 3 12 3 12s2.4 4.2 6.3 5.9M14 5.1c5.4.7 7 6.9 7 6.9a12.9 12.9 0 01-2.2 3"/></svg>خارج از دید</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>نبض افکار</span>
-        <span class="pkg-part"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>تحلیل اندیشگده‌ها</span>
-      </div>
-      <div class="pkg-flow">
-        <div id="pkg-covers"></div>
-      </div>
-      <div class="pkg-more" data-vis="reports"><button type="button" class="pkg-more-btn" data-go="reports">مشاهده‌ی همه‌ی شماره‌ها<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button></div>
-
-      <div class="home-bottom-row">
+      <!-- ارتباط با ما: روی رایانه‌ی پهن خودِ این بخش به ستون کناری منتقل می‌شود (ui/side-nav.js)؛ گوشی: ته صفحه‌ی نخست -->
+      <section class="home-contact" id="home-contact" aria-label="ارتباط با ما">
+        <h2 class="hc-title">ارتباط با ما</h2>
         <div class="notify-card">
           <div class="notify-card-text">
             <h3>اطلاع از انتشار بسته تحلیلی جریان</h3>
-            <div class="home-bottom-bar"></div>
             <p>شماره موبایل خود را ثبت کنید تا هر وقت شماره‌ی جدید «بسته تحلیلی جریان» منتشر شد، پیامک اطلاع‌رسانی برایتان ارسال شود.</p>
           </div>
           <div class="notify-card-form">
@@ -631,19 +635,20 @@
             <button type="button" class="btn primary" id="notify-subscribe-btn">ثبت</button>
           </div>
         </div>
-
-        <div class="home-bottom-divider"></div>
-
         <div class="feedback-card">
-          <h3>برای بهتر شدن بسته‌های جریان به ما کمک کنید</h3>
-          <div class="home-bottom-bar"></div>
+          <h3>نظر و پیشنهاد</h3>
           <form class="feedback-form">
             <input type="text" id="feedback-name" aria-label="نام (اختیاری)" placeholder="نام (اختیاری)" />
             <textarea id="feedback-message" aria-label="متن نظر یا پیشنهاد" placeholder="نظر یا پیشنهاد خود را بنویسید..." required></textarea>
             <button type="submit" class="btn primary" id="feedback-submit-btn">ارسال</button>
           </form>
         </div>
-      </div>
+      </section>
+    </section>
+
+    <!-- ۵.۴۰.۰: «منتخب مطالب امروز جریان» (features/home/today-page.js) — از ستون «امروز در جریان» صفحه‌ی نخست -->
+    <section class="section" id="sec-today">
+      <div class="td" id="today-page"></div>
     </section>
 
     <!-- OVERVIEW / SCHOOLS / PEOPLE — placeholders, غیرفعال به‌خواست کاربر -->
@@ -705,16 +710,21 @@
               <div class="news-source-list" id="news-source-list"></div>
             </details>
             <div class="news-view-toggle">
+              <!-- ۵.۴۱.۰: نمای «خواندن» — فهرست فشرده + ستون متن کامل (features/news/news-reader.js) -->
+              <button id="news-view-reader-btn" title="نمای خواندن" aria-label="نمای خواندن">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16M17 8h1.5M17 12h1.5M6 8h5M6 12h5M6 16h3"/></svg>
+              </button>
               <button id="news-view-list-btn" title="نمایش فهرستی">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
               </button>
-              <button class="active" id="news-view-grid-btn" title="نمایش چندستونه">
+              <button id="news-view-grid-btn" title="نمایش چندستونه">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
               </button>
             </div>
           </div>
         </div>
 
+        <div class="news-drill-chip" id="news-drill-chip" hidden><span class="ndc-label"></span><button type="button" class="ndc-x" id="news-drill-clear" aria-label="برداشتن فیلتر نمودار" title="برداشتن فیلتر نمودار">✕</button></div>
         <div class="news-feed grid-view social-tab" id="news-feed"></div>
         <p class="news-empty" id="news-empty" style="display:none;">هنوز خبری از منابع خبری جمع‌آوری نشده.</p>
         <div class="news-pagination" id="news-pagination"></div>
@@ -755,6 +765,7 @@
               <button data-t="yesterday">دیروز</button>
               <button data-t="week">هفته گذشته</button>
             </div>
+            <div class="news-view-toggle rv-toggle" role="group" aria-label="نوع نمایش"><button type="button" data-rv="reader" title="نمای خواندن" aria-label="نمای خواندن"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16M17 8h1.5M17 12h1.5M6 8h5M6 12h5M6 16h3"/></svg></button><button type="button" data-rv="cards" title="نمای کارت" aria-label="نمای کارت"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button></div>
           </div>
         </div>
         <div class="dossier-layout">
@@ -822,7 +833,12 @@
               <span class="ai-updated-note" id="news-selected-updated"></span>
             </div>
             <div class="rank-list" id="news-analytics-selected-list"></div>
-            <p id="news-analytics-selected-empty" style="display:none;color:var(--text-faint);font-size:13px;">تحلیل هوش مصنوعی هنوز آماده نشده — طبق زمان‌بندی روزی ۴ بار (۲، ۸، ۱۴ و ۲۰) به‌روز می‌شود.</p>
+            <div id="news-analytics-selected-empty" class="nga-empty" style="display:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z"/><path d="M19 15l.8 1.7 1.7.8-1.7.8L19 20l-.8-1.7-1.7-.8 1.7-.8z"/></svg>
+              <p class="nga-empty-title">تحلیل هوشمند هنوز آماده نشده است</p>
+              <p class="nga-empty-sub">این فهرست طبق زمان‌بندی روزی ۴ بار (۲، ۸، ۱۴ و ۲۰) به‌روز می‌شود. تا آن زمان، خبرهایی که در چند کانال هم‌زمان منتشر شده‌اند در «موج‌های خبری» دیده می‌شوند.</p>
+              <button type="button" class="btn btn-sm nga-empty-btn" data-scroll-to="news-waves-panel">مشاهده‌ی موج‌های خبری</button>
+            </div>
           </div>
           <div class="nga-side">
             <div class="panel">
@@ -830,7 +846,7 @@
                 <span class="panel-pill">موضوعات پرتکرار</span>
                 <span class="ai-updated-note" id="news-topics-updated"></span>
               </div>
-              <div class="chart-box nga-donut" id="news-topics-chart-box"><canvas id="news-topics-chart"></canvas></div>
+              <div class="chart-box nga-donut topic-bubbles" id="news-topics-chart-box"></div>
               <p id="news-topics-empty" style="display:none;color:var(--text-faint);font-size:13px;">تحلیل هوش مصنوعی هنوز آماده نشده — طبق زمان‌بندی روزی ۴ بار (۲، ۸، ۱۴ و ۲۰) به‌روز می‌شود.</p>
             </div>
             <div class="panel">
@@ -857,6 +873,7 @@
               <span class="panel-pill">پراکندگی زمانی انتشار خبر</span>
               <span class="ai-updated-note">۲۴ ساعت اخیر، ساعتی</span>
             </div>
+            <div class="trend-legend" id="news-trend-legend" hidden><span class="tl-cur">۲۴ ساعت اخیر</span><span class="tl-prev">۲۴ ساعتِ قبل از آن</span></div>
             <div class="chart-box"><canvas id="news-trend-chart"></canvas></div>
           </div>
           <div class="panel">
@@ -929,6 +946,7 @@
               <input type="text" id="political-figures-search" placeholder="جست‌وجو در متن مطالب…" aria-label="جست‌وجو در مطالب" />
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
             </div>
+            <div class="news-view-toggle rv-toggle" role="group" aria-label="نوع نمایش"><button type="button" data-rv="reader" title="نمای خواندن" aria-label="نمای خواندن"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16M17 8h1.5M17 12h1.5M6 8h5M6 12h5M6 16h3"/></svg></button><button type="button" data-rv="cards" title="نمای کارت" aria-label="نمای کارت"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button></div>
           </div>
           <p class="posts-empty" id="political-figures-empty" style="display:none;">مطلبی با این فیلتر پیدا نشد.</p>
           <div class="news-feed grid-view social-tab" id="political-figures-list"></div>
@@ -984,6 +1002,7 @@
               <button data-s="title">اشاره در تیتر</button>
             </div>
             <select id="hab-site" class="m-collapse" aria-label="منبع خبر"><option value="">همه‌ی منابع</option></select>
+            <div class="news-view-toggle rv-toggle" role="group" aria-label="نوع نمایش"><button type="button" data-rv="reader" title="نمای خواندن" aria-label="نمای خواندن"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16M17 8h1.5M17 12h1.5M6 8h5M6 12h5M6 16h3"/></svg></button><button type="button" data-rv="cards" title="نمای کارت" aria-label="نمای کارت"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button></div>
           </div>
         </div>
         <p class="hab-summary" id="hab-summary"></p>
@@ -1006,59 +1025,6 @@
       </div>
       <p class="news-tab-subtitle" id="positions-tab-subtitle"><span></span></p>
       <div id="positions-pf-slot"></div>
-    </section>
-
-    <!-- «درباره مردم» (۵.۲۸.۰): تب «جست‌وجوهای داغ مردم» (داده‌اش در مرحله‌ی بعد) + «حال‌وهوای جامعه» به‌زودی -->
-    <section class="section" id="sec-public">
-      <div class="news-page-tabs" id="public-page-tabs">
-        <button class="active" data-public-tab="trends" data-ic="trends">جست‌وجوهای داغ مردم</button>
-        <button disabled class="soon-item" data-ic="mood">حال‌وهوای جامعه<span class="news-soon">به‌زودی</span></button>
-      </div>
-      <p class="news-tab-subtitle" id="public-tab-subtitle"><span>پرجست‌وجوترین موضوع‌های روز ایران در گوگل؛ نشان می‌دهد مردم واقعاً دنبال چه هستند.</span></p>
-      <div class="soon-panel" id="public-trends-panel">
-        <span class="soon-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8M7.5 12l2-2.2 1.8 1.6 2.2-2.6"/></svg></span>
-        <h3>در حال راه‌اندازی</h3>
-        <p>فهرست پرجست‌وجوترین موضوع‌های هر روز به‌زودی به‌صورت خودکار در این بخش نمایش داده می‌شود.</p>
-      </div>
-    </section>
-
-    <!-- «قوانین و مصوبات» (۵.۲۸.۰): بدون تب؛ یک فید با فیلتر مرجع صادرکننده (channels.laws_source) -->
-    <section class="section" id="sec-laws">
-      <p class="news-tab-subtitle sec-intro"><span>قوانین، مصوبات، بخشنامه‌ها و مواضع رسمی؛ هر مطلب با مرجع صادرکننده‌اش.</span></p>
-      <div class="news-filters laws-filters">
-        <div class="news-filter-row">
-          <div class="news-search-box">
-            <input type="text" id="laws-search" aria-label="جست‌وجو در قوانین و مصوبات" placeholder="جستجو در عنوان و متن…" />
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          </div>
-          <div class="news-seg" id="laws-time-seg" role="group" aria-label="بازه‌ی زمانی">
-            <button type="button" class="active" data-t="">همه</button>
-            <button type="button" data-t="today">امروز</button>
-            <button type="button" data-t="yesterday">دیروز</button>
-            <button type="button" data-t="week">هفته گذشته</button>
-          </div>
-        </div>
-        <div class="news-topic-chips laws-source-chips" id="laws-source-chips"></div>
-      </div>
-      <p class="news-empty" id="laws-empty" style="display:none;"></p>
-      <div class="news-feed laws-feed" id="laws-feed"></div>
-      <div class="news-pagination" id="laws-pagination"></div>
-    </section>
-
-    <!-- «از جریان بپرس» (۵.۲۸.۰): به‌زودی — کاملاً به هوش مصنوعی وابسته‌ست -->
-    <section class="section" id="sec-ask">
-      <div class="ask-wrap">
-        <span class="soon-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-5 4v-4H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M12 7.5v5M9.5 10h5"/></svg></span>
-        <h3>از جریان بپرس<span class="news-soon">به‌زودی</span></h3>
-        <p>پرسش خود را درباره‌ی فضای رسانه‌ای بنویسید؛ پاسخ از روی مطالب جمع‌آوری‌شده‌ی سامانه و همراه با منابع آن داده می‌شود.</p>
-        <div class="ask-box"><input type="text" disabled aria-label="پرسش" placeholder="مثلاً: این هفته درباره‌ی حجاب چه گفته شد؟" /><button type="button" class="btn primary" disabled>بپرس</button></div>
-        <div class="ask-examples">
-          <span>مهم‌ترین موج‌های خبری امروز کدام بود؟</span>
-          <span>رسانه‌ها درباره‌ی حوزه چه گفتند؟</span>
-          <span>مواضع ائمه جمعه این هفته</span>
-        </div>
-        <p class="ask-note">این بخش پس از راه‌اندازی دوباره‌ی سرویس هوش مصنوعی فعال می‌شود.</p>
-      </div>
     </section>
 
     <section class="section" id="sec-reports">
@@ -1099,11 +1065,11 @@
         <div class="panel" id="magazine-upload-panel">
           <div class="panel-head"><span class="panel-pill">بارگذاری شماره‌ی جدید «بسته تحلیلی جریان»</span></div>
           <div class="form-grid">
-            <div class="field"><label>عنوان</label><input type="text" id="mag-title" /></div>
-            <div class="field"><label>شماره</label><input type="text" id="mag-issue" /></div>
-            <div class="field"><label>تاریخ انتشار</label><input type="date" id="mag-date" /></div>
+            <div class="field"><label for="mag-title">عنوان</label><input type="text" id="mag-title" /></div>
+            <div class="field"><label for="mag-issue">شماره</label><input type="text" id="mag-issue" /></div>
+            <div class="field"><label for="mag-date">تاریخ انتشار</label><input type="date" id="mag-date" /></div>
             <div class="field">
-              <label>نوع فایل</label>
+              <label for="mag-file-type">نوع فایل</label>
               <select id="mag-file-type">
                 <option value="pdf">PDF</option>
                 <option value="images">چند عکس</option>
@@ -1127,11 +1093,11 @@
         <div class="panel" id="archive-report-upload-panel">
           <div class="panel-head"><span class="panel-pill">بارگذاری بسته‌ی تحلیلی یک نهاد</span></div>
           <div class="form-grid">
-            <div class="field"><label>عنوان</label><input type="text" id="arc-title" /></div>
-            <div class="field"><label>نهاد تولیدکننده</label><input type="text" id="arc-source-org" /></div>
-            <div class="field"><label>تاریخ انتشار</label><input type="date" id="arc-date" /></div>
+            <div class="field"><label for="arc-title">عنوان</label><input type="text" id="arc-title" /></div>
+            <div class="field"><label for="arc-source-org">نهاد تولیدکننده</label><input type="text" id="arc-source-org" /></div>
+            <div class="field"><label for="arc-date">تاریخ انتشار</label><input type="date" id="arc-date" /></div>
             <div class="field">
-              <label>نوع فایل</label>
+              <label for="arc-file-type">نوع فایل</label>
               <select id="arc-file-type">
                 <option value="pdf">PDF</option>
                 <option value="images">چند عکس</option>
@@ -1143,7 +1109,7 @@
             <input type="file" id="arc-files" multiple accept=".pdf,image/*" />
           </div>
           <div class="field">
-            <label>تصویر جلد (اختیاری)</label>
+            <label for="arc-cover">تصویر جلد (اختیاری)</label>
             <input type="file" id="arc-cover" accept="image/*" />
           </div>
           <button class="btn primary" id="arc-upload-btn" style="margin-top:8px">بارگذاری</button>
@@ -1154,7 +1120,7 @@
       <div class="upl-pane" id="upl-pane-schools" style="display:none;">
         <div class="panel" id="school-report-upload-panel">
           <div class="panel-head"><span class="panel-pill">بارگذاری گزارش جدید مدارس</span></div>
-          <div class="field"><label>عنوان (اختیاری)</label><input type="text" id="school-report-title" /></div>
+          <div class="field"><label for="school-report-title">عنوان (اختیاری)</label><input type="text" id="school-report-title" /></div>
           <div class="field">
             <label>فایل (تصویر، PDF یا اکسل) <span class="upl-hint">(حداکثر ۵۰ مگابایت)</span></label>
             <input type="file" id="school-report-file" accept="image/*,.pdf,.xlsx,.xls,.csv" />
@@ -1257,6 +1223,7 @@
             جستجوی هوشمند
             <span class="sw"></span>
           </div>
+          <div class="news-view-toggle rv-toggle" role="group" aria-label="نوع نمایش"><button type="button" data-rv="reader" title="نمای خواندن" aria-label="نمای خواندن"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16M17 8h1.5M17 12h1.5M6 8h5M6 12h5M6 16h3"/></svg></button><button type="button" data-rv="cards" title="نمای کارت" aria-label="نمای کارت"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button></div>
         </div>
         <p class="posts-empty" id="posts-empty" style="display:none;">پستی با این فیلتر پیدا نشد.</p>
         <div class="news-feed grid-view social-tab" id="posts-list"></div>
@@ -1705,7 +1672,7 @@
           <div class="app-footer-title-row"><img class="app-footer-logo" src="icons/jarian-mark.svg" alt="" aria-hidden="true"><b class="app-footer-title">سامانه هوشمند جریان</b></div>
           <span class="app-footer-tagline">رصد و تحلیل فضای سیاسی‌اجتماعی</span>
           <button type="button" class="app-footer-intro">آشنایی با سامانه</button>
-          <small>ویرایش <span class="app-version">۵.۳۲.۱۰</span></small>
+          <small>ویرایش <span class="app-version">۶.۱.۱</span></small>
         </div>
         <div class="app-footer-org">
           <div class="afo-item">
@@ -1736,9 +1703,6 @@
      شکننده می‌شد -->
 <div id="newsletter-print-view"></div>
 
-<!-- برای انیمیشن شمارش اعداد در پنل آماری هرو صفحه‌ی نخست — از ۵.۲۱.۰ کپی محلی (همون 3.12.5 از npm):
-     قبلاً از cdnjs و همگام (sync) بود و اگه اون سرور از ایران کُند/قطع بود کل برنامه منتظر می‌موند -->
-<script src="vendor/gsap.min.js"></script>
 <!-- برنامه: ES moduleها در src/ (نقطه‌ی ورود src/main.js؛ npm run build همه رو در یک فایل فشرده‌ی hash‌دار می‌سازه).
      Chart.js و html2canvas/jsPDF تگ ثابت ندارن — src/core/load-script.js فقط وقتی لازم شدن می‌گیردشون. -->
 <script type="module" src="src/main.js"></script>

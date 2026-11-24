@@ -6,7 +6,8 @@ const ago = (h) => new Date(Date.now() - h * 3600e3).toISOString();
 
 test('صفحه‌بندی فید اخبار', async ({ page }) => {
   await openAs(page, 'viewer', 'overview/study');
-  const pager = page.locator('#news-pagination');
+  // ۵.۴۱.۰: در نمای «خواندن» (پیش‌فرض رایانه) شماره‌ها پایین ستون فهرست‌اند
+  const pager = page.locator('#nr-pag:visible, #news-pagination:visible').first();
   await pager.locator('button[data-page="2"]').first().click();
   await expect(pager.locator('button.active')).toHaveText('۲');
   await pager.getByRole('button', { name: 'قبلی' }).click();

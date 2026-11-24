@@ -9,7 +9,6 @@
   display:inline-flex; align-items:center; justify-content:center; min-height:32px; padding-block:0; border-radius:999px; box-sizing:border-box;
 }
 .upl-goto{ border-radius:999px; min-height:40px; }
-.pkg-more-btn{ min-height:40px; }
 .fmt{ min-height:40px; border-radius: var(--radius-control); }
 .del-btn{ border-radius:999px; }
 .news-seg{ border-radius: var(--radius-control); }

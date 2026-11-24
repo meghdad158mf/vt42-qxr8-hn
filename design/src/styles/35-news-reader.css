@@ -1,0 +1,82 @@
+/* نمای «خواندن» فید اخبار (۵.۴۱.۰، features/news/news-reader.js): دو ستون هم‌قد صفحه با اسکرول جدا —
+   فهرست فشرده‌ی دوخطی راست (۵ سهم)، متن کامل مطلب انتخاب‌شده چپ (۷ سهم). فقط ≥۱۱۰۰px. */
+/* هر فیدی که خواننده دارد (اخبار، پرونده‌ها، درباره حوزه، کنشگری، یادداشت‌ها/مواضع) */
+.news-feed.reader-view, .reader-view{ display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:16px; align-items:stretch;
+  position:sticky; top:68px; height:calc(100vh - 84px); min-height:460px; margin:4px 0 0; max-width:none; }
+.nr-list, .nr-pane{ min-height:0; overflow-y:auto; overscroll-behavior:contain; border-radius:16px; background:#fbfcfa; border:1px solid #dfe5de;
+  scrollbar-width:thin; scrollbar-color:#cfd7ce transparent; }
+.nr-list{ display:flex; flex-direction:column; align-self:start; max-height:100%; }  /* فهرست کوتاه: کادر به اندازه‌ی خودش */
+
+/* نوار بالای فهرست: تعداد، خوانده‌نشده، «علامت همه» — چسبان */
+.nr-bar{ position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:10px; white-space:nowrap; padding:12px 18px; background:#fbfcfa; border-bottom:1px solid #e6ebe5; font-size:12px; color:#7a867f; }
+.nr-bar b{ font-size:13px; font-weight:700; color:#22302c; }
+.nr-readall{ margin-inline-start:auto; padding:4px 0; border:none; background:none; font:inherit; font-size:12px; font-weight:700; color:#16202a; cursor:pointer; }
+.nr-readall:hover{ text-decoration:underline; text-underline-offset:4px; }
+
+
+/* ردیف دوخطی */
+.nr-row{ display:flex; flex-direction:column; align-items:stretch; gap:3px; width:100%; padding:10px 18px; margin:0; border:none; border-bottom:1px solid #eef1ec; background:none;
+  font:inherit; text-align:start; color:#22302c; cursor:pointer; transition: background .12s ease; }
+.nr-row:hover{ background:#f3f6f2; }
+.nr-row.on{ background:#eaefe8; box-shadow: inset -3px 0 0 #EAB393; }
+.nr-row:focus-visible{ outline:2px solid #16202a; outline-offset:-2px; }
+.nr-meta{ display:flex; align-items:center; gap:8px; min-width:0; font-size:12px; color:#7a867f; }
+.nr-meta b{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:700; color:#5c6a64; }
+.nr-meta i{ font-style:normal; }
+.nr-meta time{ margin-inline-start:auto; flex:none; font-variant-numeric:tabular-nums; }
+.nr-t{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:13px; font-weight:700; line-height:1.8; }
+.nr-t.is-head{ -webkit-line-clamp:1; }
+.nr-x{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; line-height:1.8; color:#5c6a64; }
+.nr-row.is-read:not(.on) .nr-x{ color:#9aa59f; }
+/* خوانده‌شده: کم‌رنگ */
+.nr-row.is-read:not(.on) .nr-t{ font-weight:500; color:#7a867f; }
+.nr-pag{ padding:12px 10px 14px; margin:0 !important; }
+
+/* ستون خواندن: همان کارت، تمام‌متن و بزرگ‌تر */
+.nr-pane{ padding:26px 30px; align-self:start; max-height:100%; }
+/* مطالب دیگر همین منبع */
+.nr-rel{ margin-top:22px; padding-top:16px; border-top:1px solid #e6ebe5; }
+.nr-rel h4{ margin:0 0 8px; font-size:13px; font-weight:700; color:#5c6a64; }
+.nr-rel-it{ display:flex; align-items:flex-start; gap:12px; width:100%; padding:9px 0; margin:0; border:none; border-bottom:1px solid #eef1ec; background:none; font:inherit; text-align:start; color:#22302c; cursor:pointer; }
+.nr-rel-it:last-child{ border-bottom:none; }
+.nr-rel-it span{ flex:1; min-width:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:13px; line-height:1.8; }
+.nr-rel-it time{ flex:none; font-size:12px; color:#7a867f; font-variant-numeric:tabular-nums; padding-top:3px; }
+.nr-rel-it:not(:disabled):hover span{ color:#9a4f12; }
+.nr-rel-it:disabled{ cursor:default; }
+.nr-pane:empty{ display:none; }
+.nr-pane .news-card{ display:block !important; border:none !important; box-shadow:none !important; background:none !important; padding:0 !important; height:auto !important; min-height:0 !important; }
+.nr-pane .news-thumb{ width:100% !important; height:300px !important; max-height:none !important; aspect-ratio:auto !important; border-radius:12px; overflow:hidden; margin:0 0 18px !important; }
+.nr-pane .news-thumb img{ width:100%; height:100%; object-fit:cover; }
+.nr-pane .news-body{ padding:0 !important; }
+.nr-pane .news-title{ font-size:17px !important; font-weight:800; line-height:1.7; margin:12px 0 0 !important; }
+.nr-pane .news-text{ display:block !important; -webkit-line-clamp:unset !important; max-height:none !important; overflow:visible !important; font-size:15px; line-height:2.1; margin:14px 0 18px !important; }
+.nr-pane .news-more{ display:none !important; }
+.nr-pane .news-foot{ border-top:1px solid #eef1ec !important; padding-top:14px !important; }
+
+/* کارت‌های بی‌عکس (نمای فهرستی/چندستونه): بدون کادر خالی تصویر */
+.news-card.no-thumb{ min-height:0 !important; }
+
+/* کارت ستون خواندن: نشان منبع یا کادر خالی به‌جای عکس، بزرگ دیده نشود */
+.nr-pane .news-thumb.is-avatar, .nr-pane .news-thumb.placeholder{ display:none !important; }
+.nr-pane .hab-excerpt{ font-size:15px; line-height:2.1; -webkit-line-clamp:unset !important; display:block !important; overflow:visible !important; }
+/* دکمه‌ی «خواندن/کارت» فید‌های دیگر فقط وقتی نمای خواندن ممکن است */
+@media (max-width:1099px){ .rv-toggle{ display:none !important; } #news-view-reader-btn{ display:none !important; } }
+/* پرونده‌ها: ستون موضوعات کنار فهرست و ستون خواندن */
+.dossier-content .reader-view{ top:68px; }
+
+/* ۵.۴۲.۱ (خواست کاربر: مرز روشن بین خبرها): هر ردیف کارت جدا روی زمینه‌ی کم‌رنگ */
+.nr-rows{ display:flex; flex-direction:column; gap:8px; padding:10px; background:#f1f4ef; flex:1; }
+.nr-row{ border:1px solid #e1e7df; border-radius:12px; background:#fff; padding:11px 16px; }
+.nr-row:hover{ background:#fff; border-color:#c9d3c8; box-shadow:0 6px 16px -12px rgba(22,32,42,.45); }
+.nr-row.on{ background:#fff; border-color:#EAB393; box-shadow: inset -4px 0 0 #EAB393, 0 8px 20px -14px rgba(22,32,42,.5); }
+.nr-row.is-read:not(.on){ background:#f8faf7; }
+.nr-pag{ background:#f1f4ef; }
+
+/* «مطالب دیگر همین منبع»: کادر جدا با زمینه‌ی کم‌رنگ زیر متن خبر، هر مطلب کارت کوچک */
+.nr-rel{ margin-top:28px; padding:16px; border:none; border-radius:14px; background:#f1f4ef; }
+.nr-rel h4{ display:flex; align-items:center; gap:8px; margin:0 0 12px; font-size:15px; font-weight:800; color:#22302c; }
+.nr-rel h4::before{ content:''; width:4px; height:16px; border-radius:2px; background:#EAB393; }
+.nr-rel-it{ align-items:center; padding:10px 14px; margin:0 0 8px; border:1px solid #e1e7df; border-radius:10px; background:#fff; }
+.nr-rel-it:last-child{ margin-bottom:0; border-bottom:1px solid #e1e7df; }
+.nr-rel-it:not(:disabled):hover{ border-color:#c9d3c8; }
+.nr-rel-it time{ padding-top:0; }

@@ -13,7 +13,7 @@
 .sys-cap-tile{ border:1px solid var(--border); border-radius:12px; background: var(--surface-2); padding:10px 12px; display:flex; flex-direction:column; gap:2px; }
 .sys-cap-tile span{ font-size:12px; color: var(--text-dim); }
 .sys-cap-tile b{ font-size:17px; color: var(--text); }
-.sys-cap-tile small{ font-size:11px; color: var(--text-faint); }
+.sys-cap-tile small{ font-size:12px; color: var(--text-faint); }
 .sys-cap-grid{ display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:20px; }
 .sys-cap-sub{ font-size:12px; font-weight:700; color: var(--text-dim); margin-bottom:8px; }
 .sys-cap-cat{ display:grid; grid-template-columns: 150px minmax(0,1fr) 150px; align-items:center; gap:10px; font-size:12px; padding:5px 0; }
@@ -21,7 +21,7 @@
 .sys-cap-cat-bar{ height:8px; background: var(--surface-2); border-radius:999px; overflow:hidden; }
 .sys-cap-cat-bar i{ display:block; height:100%; background: var(--accent); border-radius:999px; }
 .sys-cap-cat-val{ color: var(--text-dim); white-space:nowrap; text-align:left; }
-.sys-cap-cat-val em{ display:block; font-style:normal; font-size:11px; color: var(--text-faint); }
+.sys-cap-cat-val em{ display:block; font-style:normal; font-size:12px; color: var(--text-faint); }
 .sys-cap-chart{ height:120px; }
 .sys-cap-proj{ margin:14px 0 0; font-size:13px; color: var(--text-dim); line-height:1.8; padding:8px 12px; border-radius:10px; background: var(--surface-2); }
 .sys-cap-proj.warn{ background: rgba(217,154,30,0.12); color:#8a5d06; }

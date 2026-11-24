@@ -81,7 +81,7 @@ export function renderNewsletterAdminPanel(){
     wrap.innerHTML = ids.length ? ids.map(id=>`
       <div class="newsletter-draft-item">
         <span class="txt">${escAttr(newsletterDraftLabel(id))}</span>
-        <button class="del-btn" style="min-width:24px;min-height:24px;font-size:11px;" title="حذف از خبرنامه" data-nl-remove="${id}" data-nl-section="${section}">✕</button>
+        <button class="del-btn" style="min-width:24px;min-height:24px;font-size:12px;" title="حذف از خبرنامه" data-nl-remove="${id}" data-nl-section="${section}">✕</button>
       </div>`).join('') : '<p class="dossier-topic-empty">خبری انتخاب نشده.</p>';
   });
 }

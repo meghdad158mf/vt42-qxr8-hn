@@ -63,6 +63,16 @@ test.describe('پرونده‌های موضوعی', () => {
     await page.locator('#dossier-time-seg button').last().click();
     expect(page.appErrors).toEqual([]);
   });
+  test('نمای خواندن پرونده‌ها و برگشت به نمای کارت', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'نمای خواندن فقط رایانه');
+    await openAs(page, 'viewer', 'overview/dossier');
+    await expect(page.locator('#dossier-feed')).toHaveClass(/reader-view/);
+    await page.locator('#dossier-feed .nr-row').last().click();
+    await expect(page.locator('#dossier-feed .nr-row').last()).toHaveClass(/on/);
+    await page.locator('[data-rv="cards"]:visible').click();
+    await expect(page.locator('#dossier-groups .dossier-feed')).toHaveClass(/grid-view/);
+    expect(page.appErrors).toEqual([]);
+  });
 });
 
 test('مدیر: خبرنامه — پیشنهاد، حذف، جست‌وجوی دستی، افزودن و انتشار', async ({ page }) => {

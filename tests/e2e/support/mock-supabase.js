@@ -25,7 +25,7 @@ function buildData(now = Date.now()) {
       subscriber_count: 1200 * i, is_khorasan_talabeh: i % 4 === 0,
       show_in_news: i <= 14, show_in_cyberspace: i > 10, show_in_people: i > 6 && i < 16, show_in_orgs: i > 15,
       show_in_hawza: i === 6, show_in_positions: i > 18, positions_tab: 'maraji', show_in_thinktanks: i === 9,
-      show_in_laws: i === 12, laws_source: 'majles', active: true, type: 'news_agency',
+      active: true, type: 'news_agency',
     });
   }
   const posts = [];
@@ -40,17 +40,18 @@ function buildData(now = Date.now()) {
       ai_keywords: ['تورم', 'دولت', 'مشهد'], hawza_relevant: true, section_relevant: true, hidden_at: null,
     });
   }
-  const today = new Date(now).toISOString().slice(0, 10);
+  // تاریخ امروزِ تهران (مثل خودِ سایت) — با تاریخ UTC، بین ۲۰:۳۰ تا ۲۴ UTC «امروز» روزنامه‌ها خالی می‌شد
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tehran' }).format(new Date(now));
   return {
     channels, posts,
     categories: [{ id: 1, name: 'خبرگزاری' }, { id: 2, name: 'سیاسی' }, { id: 3, name: 'فرهنگی' }],
     regions: [{ id: 1, name: 'ملی' }, { id: 2, name: 'خراسان رضوی' }],
     news_topics: [{ id: 1, label: 'اقتصاد', keywords: ['تورم'] }, { id: 2, label: 'غزه', keywords: ['غزه'] }],
-    magazines: Array.from({ length: 6 }, (_, i) => ({ id: i + 1, title: 'بسته تحلیلی جریان', issue_no: String(i + 1), sort_order: i, cover_path: null, cover_url: null, file_paths: [], published_at: iso(168 * i), created_at: iso(168 * i) })),
+    magazines: Array.from({ length: 6 }, (_, i) => ({ id: i + 1, title: 'بسته تحلیلی جریان', issue_no: String(i + 1), sort_order: i, file_type: 'pdf', files: i < 4 ? ['m' + (i + 1) + '.pdf'] : [], cover_path: null, cover_url: null, file_paths: [], published_at: iso(168 * i), created_at: iso(168 * i) })),
     news_ai_insights: [{
       id: 1, computed_at: iso(2), window_hours: 6,
       picks: posts.slice(0, 6).map((p, k) => ({ id: p.id, headline: 'خبر منتخب ' + (k + 1), score: 9 - k, tags: ['تنش سیاسی'], sources: 6 - k, posts: 8, channel_id: p.channel_id, time: p.posted_at, link: p.link })),
-      topics: [{ label: 'اقتصاد', weight: 30 }, { label: 'سیاست خارجی', weight: 20 }],
+      topics: [{ name: 'اقتصاد', weight: 30 }, { name: 'سیاست خارجی', weight: 20 }],
     }],
     newspapers: Array.from({ length: 8 }, (_, i) => ({ id: i + 1, slug: 'np' + i, title: 'روزنامه ' + (i + 1), edition_date: today, cover_url: 'images/analysis-illustration.webp', cover_storage_path: null })),
     app_users: [

@@ -1,0 +1,52 @@
+name: Demo snapshot
+
+# عکس فوری از داده‌ی واقعی برای نسخه‌ی نمایشی (demo/README.md) — فقط دستی، فقط خواندن.
+# خروجی با کلید عمومی demo/snapshot-key.pub.pem رمزنگاری می‌شود؛ ریپو عمومی است و
+# خروجی کارها برای همه دانلودشدنی — باز کردنش فقط با کلید خصوصی روی رایانه‌ی سازنده‌ی دمو.
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "چند روز اخیر"
+        default: "3"
+
+concurrency:
+  group: demo-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r scripts/requirements.txt
+
+      - run: python scripts/demo_snapshot.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          SNAPSHOT_DAYS: ${{ inputs.days }}
+
+      - name: Encrypt
+        run: |
+          set -e
+          mkdir enc
+          tar czf snapshot.tgz -C snapshot .
+          openssl rand -hex 32 > key.txt
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in snapshot.tgz -out enc/snapshot.tgz.enc -pass file:key.txt
+          openssl pkeyutl -encrypt -pubin -inkey demo/snapshot-key.pub.pem -pkeyopt rsa_padding_mode:oaep -in key.txt -out enc/key.enc
+          rm -rf snapshot snapshot.tgz key.txt
+          ls -la enc
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: demo-snapshot
+          path: enc/
+          retention-days: 2

@@ -1,4 +1,4 @@
-// عرصه‌ها و صفحه‌ی نخست که در مرحله‌ی ۷ ماژولار شدن (design/src/features/{hawza,laws,home,schools,reports,announcements}):
+// عرصه‌ها و صفحه‌ی نخست که در مرحله‌ی ۷ ماژولار شدن (design/src/features/{hawza,home,schools,reports,announcements}):
 // دکمه‌هایی که از onclick به listener رفتن، تب‌های «درباره حوزه»، معرفی سامانه و گزارش‌های مدارس
 import { test, expect, openAs } from './support/fixtures.js';
 
@@ -34,8 +34,21 @@ test.describe('آنچه درباره حوزه گفته می‌شود', () => {
     expect(page.appErrors).toEqual([]);
   });
 
+  test('نمای خواندن: فهرست، انتخاب و مطالب دیگر همین منبع', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'نمای خواندن فقط رایانه');
+    await openAs(page, 'viewer', 'hawza/about');
+    await expect(page.locator('#hab-feed')).toHaveClass(/reader-view/);
+    const rows = page.locator('#hab-feed .nr-row');
+    await expect(rows).toHaveCount(2);
+    await rows.nth(1).click();
+    await expect(page.locator('#nrh-pane #hab-title-2')).toBeVisible();
+    expect(page.appErrors).toEqual([]);
+  });
+
   test('مدیر: پنهان کردن خبر بعد از تأیید', async ({ page }) => {
     await openAs(page, 'admin', 'hawza/about');
+    const cards = page.locator('[data-rv="cards"]:visible');   // ۵.۴۱.۰: رایانه با نمای خواندن باز می‌شود
+    if(await cards.count()) await cards.click();
     await expect(page.locator('#hab-feed article')).toHaveCount(2);
     await page.locator('#hab-feed [data-hab-hide="2"]').click();
     await expect(page.locator('#ui-confirm-modal')).toHaveClass(/active/);
@@ -49,36 +62,115 @@ test.describe('آنچه درباره حوزه گفته می‌شود', () => {
   });
 });
 
-test.describe('قوانین و مصوبات', () => {
-  test.use({ mockPatch: { apply(data) { data.posts.forEach((p) => { p.text = Array(8).fill(p.text).join(' '); }); } } });
-  test('«نمایش بیشتر» متن مصوبه را باز و بسته می‌کند', async ({ page }) => {
-    await openAs(page, 'viewer', 'laws');
-    const more = page.locator('#laws-feed [data-lw-more]:visible').first();
-    const text = page.locator('#lw-post-text-' + (await more.getAttribute('data-lw-more')));
-    await more.click();
-    await expect(text).toHaveClass(/expanded/);
-    await more.click();
-    await expect(text).not.toHaveClass(/expanded/);
-    expect(page.appErrors).toEqual([]);
-  });
+// ۵.۳۳.۰: «درباره مردم»، «قوانین و مصوبات» و «از جریان بپرس» حذف شدند (خواست کاربر)
+test('صفحه‌ی نخست: شش کارت عرصه و بدون عرصه‌های حذف‌شده در منو', async ({ page }) => {
+  await openAs(page, 'admin');
+  await expect(page.locator('.domain-orbits .domain-card')).toHaveCount(6);
+  await expect(page.locator('.domain-grid')).toHaveCount(1);
+  await expect(page.locator('#nav-menu [data-nav^="laws"], #nav-menu [data-nav^="public"], #nav-menu [data-nav^="ask"]')).toHaveCount(0);
+  expect(page.appErrors).toEqual([]);
 });
 
-test('صفحه‌ی نخست: دکمه‌های دسترسی سریع به عرصه‌ها و بسته‌ها اسکرول می‌کنند', async ({ page }) => {
+// ۵.۳۹.۰: صفحه‌ی نخست تازه (features/home/home-v3.js) و صفحه‌ی خوش‌آمد (welcome.js)
+test('صفحه‌ی نخست: «امروز در جریان»، کارت بسته و رفتن به عرصه', async ({ page }) => {
   await openAs(page, 'viewer');
-  const inView = (sel) => page.evaluate((s) => {
-    const r = document.querySelector(s).getBoundingClientRect();
-    return r.top < window.innerHeight && r.bottom > 0;
-  }, sel);
-  await page.locator('[data-home-scroll="package"]').click();
-  await expect.poll(() => inView('#pkg-flow')).toBe(true);
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.locator('[data-home-scroll="domains"]').click();
-  await expect.poll(() => inView('.section-label')).toBe(true);
+  // ۵.۴۰.۰: «خلاصه‌ی روز» — کارت شمار امروز + یک ردیف برای هر نوع مطلب؛ همه به صفحه‌ی «منتخب مطالب امروز»
+  await expect(page.locator('#hm-lead')).toHaveCount(0);
+  await expect(page.locator('#hm-tabs .dg-card b')).not.toBeEmpty();
+  expect(await page.locator('#hm-items .dg-row').count()).toBeGreaterThan(2);
+  await expect(page.locator('#hm-today-foot .hm-today-go')).toBeVisible();
+  await expect(page.locator('#pkg-flow .hm-pkg-tx')).toContainText('بسته تحلیلی جریان');
+  await expect(page.locator('#hm-sub')).toContainText('امروز');
+  await page.locator('.hm-domains .domain-card[data-go="positions"]').click();
+  await expect(page.locator('#sec-positions')).toHaveClass(/active/);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('منتخب مطالب امروز: رفتن از ستون «امروز در جریان»، پرش به هر قسمت و برگشت', async ({ page }) => {
+  await openAs(page, 'viewer');
+  await page.locator('#hm-today-foot .hm-today-go').click();
+  await expect(page.locator('#sec-today')).toHaveClass(/active/);
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#today');
+  await expect(page.locator('#today-page .td-hero h1')).not.toBeEmpty();
+  expect(await page.locator('#today-page .td-news article').count()).toBeGreaterThan(1);
+  await expect(page.locator('#td-claim')).toBeVisible();
+  await page.locator('[data-td-jump="td-note"]').click();
+  await expect(page.locator('#td-note')).toBeInViewport();
+  // ردیف «شایعه» ستون، مستقیم به همان قسمت صفحه
+  await page.goBack();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  await page.locator('#hm-items .dg-row[data-td-scroll="td-claim"]').click();
+  await expect(page.locator('#sec-today')).toHaveClass(/active/);
+  await expect(page.locator('#td-claim')).toBeInViewport();
+  expect(page.appErrors).toEqual([]);
+});
+
+test('صفحه‌ی نخست: جست‌وجوی سرصفحه به اخبار و رویدادها می‌برد', async ({ page }) => {
+  await openAs(page, 'viewer');
+  await page.fill('#hm-search-input', 'مجلس');
+  await page.press('#hm-search-input', 'Enter');
+  await expect(page.locator('#sec-overview')).toHaveClass(/active/);
+  await expect(page.locator('#news-search-input')).toHaveValue('مجلس');
+  expect(page.appErrors).toEqual([]);
+});
+
+test('صفحه‌ی خوش‌آمد: بعد از ورود، آمار و «شروع»؛ با رفرش دوباره نمی‌آید', async ({ page }) => {
+  await openAs(page, 'viewer');
+  // ستاپ آزمون‌ها صفحه‌ی خوش‌آمد را «دیده‌شده» می‌گذارد؛ این آزمون آن را می‌خواهد
+  await page.evaluate(() => { sessionStorage.setItem('jarian_test_show_welcome', '1'); sessionStorage.removeItem('jarian_welcome_seen'); });
+  await page.reload();
+  const wl = page.locator('#welcome');
+  await expect(wl).toBeVisible();
+  await expect(page.locator('#wl-stats > div')).toHaveCount(4);
+  await page.click('#wl-go');
+  await expect(wl).toBeHidden();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  await page.reload();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  await expect(wl).toBeHidden();
+  expect(page.appErrors).toEqual([]);
+});
+
+test('منوی بخش‌ها: شماره‌های بسته تحلیلی زیر «بسته تحلیلی جریان» و باز شدن در نمایشگر سند', async ({ page }) => {
+  await openAs(page, 'viewer');
+  // رایانه‌ی پهن: همان شماره‌ها در ستون کناری (۵.۳۸.۰)؛ بعد منوی نوار بالا در پهنای کمتر
+  if (await page.locator('#side-nav').isVisible()) {
+    const side = page.locator('#sn-issues .sn-issue');
+    await expect(side).toHaveCount(4);
+    // ۵.۴۰.۰: تیترهای ستون بازشو هستند — شماره‌ها با فلش «بسته تحلیلی جریان» دیده می‌شوند
+    await expect(side.first()).toBeHidden();
+    const exp = page.locator('#side-nav .sn-group[data-sn="reports"] .sn-exp');
+    await exp.click();
+    await expect(exp).toHaveAttribute('aria-expanded', 'true');
+    await side.first().click();
+    await expect(page.locator('#doc-viewer')).toHaveClass(/active/);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#doc-viewer')).not.toHaveClass(/active/);
+    await page.setViewportSize({ width: 1100, height: page.viewportSize().height });
+  }
+  await page.click('#nav-menu-btn');
+  const items = page.locator('#nav-menu-issues .nav-menu-issue');
+  await expect(items).toHaveCount(4); // فقط شماره‌های دارای فایل
+  await expect(items.first()).toHaveText('شماره ۱');
+  await items.first().click();
+  await expect(page.locator('#doc-viewer')).toHaveClass(/active/);
+  await expect(page.locator('#nav-menu')).not.toHaveClass(/open/);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('پیوند قدیمی عرصه‌های حذف‌شده به صفحه‌ی نخست می‌رود', async ({ page }) => {
+  test.slow(); // سه بار باز کردن کامل صفحه
+  for (const old of ['laws', 'public/trends', 'ask']) {
+    await openAs(page, 'viewer', old);
+    await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  }
   expect(page.appErrors).toEqual([]);
 });
 
 test('صفحه‌ی نخست: «اطلاع از انتشار» با دکمه و با Enter ثبت می‌شود', async ({ page }) => {
   await openAs(page, 'viewer');
+  // رایانه‌ی پهن (۵.۴۰.۰): «ارتباط با ما» در پنجره‌ی کوچک کنار ستون
+  if (await page.locator('#side-nav').isVisible()) await page.click('#sn-contact-btn');
   const phone = page.locator('#notify-phone');
   await phone.fill('۰۹۱۲ ۱۲۳ ۴۵۶۷');
   const isPost = (r) => r.url().includes('/rest/v1/notify_subscribers') && r.method() === 'POST';
@@ -91,6 +183,8 @@ test('صفحه‌ی نخست: «اطلاع از انتشار» با دکمه و 
 
 test('معرفی سامانه: باز شدن از فوتر، قبلی/بعدی و رفتن به «در یک نگاه»', async ({ page }) => {
   await openAs(page, 'viewer');
+  // رایانه‌ی پهن (۵.۴۰.۰): فوتر در پنجره‌ی «درباره‌ی سامانه» کنار ستون
+  if (await page.locator('#side-nav').isVisible()) await page.click('#sn-info-btn');
   await page.locator('.app-footer-intro').click();
   const modal = page.locator('#intro-modal');
   await expect(modal).toHaveClass(/active/);

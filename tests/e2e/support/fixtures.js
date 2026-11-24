@@ -23,6 +23,8 @@ export const test = base.extend({
       try {
         localStorage.setItem('jarian_intro_seen', '1');
         localStorage.setItem('jarian_install_dismissed', '1');
+        // صفحه‌ی خوش‌آمد (۵.۳۹.۰) هم — مگر آزمونی که خودش آن را می‌خواهد (jarian_test_show_welcome)
+        if (!sessionStorage.getItem('jarian_test_show_welcome')) sessionStorage.setItem('jarian_welcome_seen', '1');
       } catch (e) { /* storage در دسترس نیست */ }
     });
     const errors = [];

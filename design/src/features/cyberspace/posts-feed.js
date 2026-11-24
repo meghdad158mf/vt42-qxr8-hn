@@ -10,6 +10,7 @@ import { scrollToListTop } from '../../ui/scroll.js';
 import { searchHay, searchNorm } from '../../core/search.js';
 import { setupJalaliRange } from '../../ui/jalali-range.js';
 import { wireMediaViewerClicks } from '../../ui/media-viewer.js';
+import { READER_PAGE_SIZE, createReader, feedsReaderOn, onFeedsView, postRelated } from '../news/news-reader.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
 import { postHideBtnHtml, updateMobileFilterBadges } from '../../app.js';
 
@@ -161,11 +162,31 @@ export function renderPosts(){
   postsEmpty.style.display = filtered.length ? 'none' : 'block';
   const sig = postsFilterKey();
   if(sig !== postsFilterSig){ postsFilterSig = sig; postsPage = 1; }
-  const totalPages = Math.max(1, Math.ceil(filtered.length / NEWS_PAGE_SIZE));
+  const reader = feedsReaderOn();
+  const size = reader ? READER_PAGE_SIZE : NEWS_PAGE_SIZE;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / size));
   postsPage = Math.min(Math.max(1, postsPage), totalPages);
-  const list = filtered.slice((postsPage - 1) * NEWS_PAGE_SIZE, postsPage * NEWS_PAGE_SIZE);
-  renderPagination('posts-pagination', postsPage, totalPages, goPostsPage);
-  postsList.innerHTML = list.map(p=>{
+  const list = filtered.slice((postsPage - 1) * size, postsPage * size);
+  renderPagination('posts-pagination', postsPage, reader ? 1 : totalPages, goPostsPage);
+  // ۵.۴۱.۰: نمای «خواندن» روی رایانه (news-reader.js)
+  if(reader){
+    postsList.classList.remove('grid-view');
+    postsReader().render(postsList, list, { total: filtered.length, page: postsPage, totalPages });
+    return;
+  }
+  postsList.classList.remove('reader-view');
+  postsList.classList.add('grid-view');
+  postsList.innerHTML = list.map(postCardHtml).join('');
+  wireMediaViewerClicks(postsList);
+  updatePostMoreButtons(list);
+  if(document.fonts && document.fonts.status !== 'loaded'){
+    document.fonts.ready.then(()=> updatePostMoreButtons(list));
+  }
+}
+var POSTS_READER_I = null;
+function postsReader(){ return POSTS_READER_I || (POSTS_READER_I = createReader({ key: 'nrp', readKey: 'jarian_news_read', related: postRelated,
+  cardHtml: (p) => postCardHtml(p), goPage: (p) => goPostsPage(p) })); }
+export function postCardHtml(p){
     const ch = chById(p.channel_id) || {};
     const topic = catNameOf(p.channel_id);
     const isRealVideo = p.media_type === 'video' && p.media_path && /\.mp4($|\?)/i.test(p.media_path);
@@ -174,7 +195,7 @@ export function renderPosts(){
     const thumbHtml = hasThumb
       ? `<div class="news-thumb" style="position:relative">${thumbBadge}<img src="${escAttr(p.media_path)}" alt="" loading="lazy" data-viewer-kind="image" data-viewer-src="${escAttr(p.media_path)}"${p.media_type==='video' && p.link ? ` data-viewer-link="${escAttr(p.link)}"` : ''} /></div>`
       : ch.avatar_url
-        ? `<div class="news-thumb"><img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" /></div>`
+        ? `<div class="news-thumb is-avatar"><img src="${escAttr(ch.avatar_url)}" alt="" loading="lazy" /></div>`
         : `<div class="news-thumb placeholder">${ICONS.doc}</div>`;
     return `
     <div class="news-card">
@@ -201,12 +222,6 @@ export function renderPosts(){
         ${currentRole === 'app_admin' ? `<div class="post-admin-row">${postHideBtnHtml(p)}</div>` : ''}
       </div>
     </div>`;
-  }).join('');
-  wireMediaViewerClicks(postsList);
-  updatePostMoreButtons(list);
-  if(document.fonts && document.fonts.status !== 'loaded'){
-    document.fonts.ready.then(()=> updatePostMoreButtons(list));
-  }
 }
 export function updatePostMoreButtons(list){
   list.forEach(p=>{
@@ -239,6 +254,7 @@ export function clearPostsRange(){
 }
 export const postsGroupSegEl = document.getElementById('posts-group-seg');
 export function setupPostsFeed(){
+  onFeedsView(renderPosts);
   filterCatEl.addEventListener('change', renderPosts);
   document.getElementById('posts-time-seg').addEventListener('click', e=>{
     const b = e.target.closest('button'); if(!b || b.dataset.t === undefined) return;

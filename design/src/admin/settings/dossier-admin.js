@@ -90,7 +90,7 @@ export function dossierTopicAdminCardHtml(t){
       <span class="txt">${escAttr(label)}</span>
       <span style="display:flex;gap:8px;flex-shrink:0;">
         <button class="btn btn-sm" data-dt-act="exclude" data-id="${dp.id}">${dp.excluded?'نمایش':'پنهان'}</button>
-        <button class="del-btn" style="min-width:24px;min-height:24px;font-size:11px;" title="حذف کامل" data-dt-act="del-post" data-id="${dp.id}">✕</button>
+        <button class="del-btn" style="min-width:24px;min-height:24px;font-size:12px;" title="حذف کامل" data-dt-act="del-post" data-id="${dp.id}">✕</button>
       </span>
     </div>`;
   }).join('') : '<p class="dossier-topic-empty">هنوز خبری برای این موضوع ثبت نشده.</p>';
@@ -102,7 +102,7 @@ export function dossierTopicAdminCardHtml(t){
       <span class="dossier-topic-card-actions">
         <button class="btn btn-sm" data-dt-act="edit-kw" data-id="${t.id}">ویرایش کلیدواژه</button>
         <button class="btn btn-sm" title="پست‌های موجود دوباره با کلیدواژه‌های این موضوع تطبیق داده شوند" data-dt-act="auto" data-id="${t.id}">جست‌وجوی خودکار</button>
-        <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
           <input type="checkbox" ${t.active?'checked':''} data-dt-active="${t.id}" />
           فعال
         </label>

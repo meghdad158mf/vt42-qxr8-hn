@@ -3,7 +3,7 @@ import { lsGet, lsSet } from '../../core/local-store.js';
 import { navMark } from '../../core/router.js';
 import { newsState, populateNewsSourceOptions, renderNewsFeed, updateNewsTopicVisibility } from './news-feed.js';
 import { renderDossierTab } from './dossier.js';
-import { renderNewsAnalytics } from './analytics.js';
+import { onChartDrill, renderNewsAnalytics } from './analytics.js';
 import { renderNewsletterTab } from './newsletter.js';
 import { renderNewspapers } from './newspapers.js';
 // ⚠️ ارجاع موقت به app.js (فقط تابع — tests/unit/app-back-refs.test.js)
@@ -112,5 +112,14 @@ export function setupNewsTabs(){
   document.addEventListener('click', e=>{
     const a = e.target.closest('[data-news-go]');
     if(a) goToNewsTab(a.dataset.newsGo);
+  });
+  // کلیک روی نمودارهای «در یک نگاه» (۵.۳۵.۰): بقیه‌ی فیلترهای زمان برداشته می‌شوند تا نتیجه دقیقاً همان نمودار باشد
+  onChartDrill(d=>{
+    newsState.drill = { label: d.label, range: d.range || null, source: d.source || null };
+    newsState.sources = d.source ? [d.source] : [];
+    newsState.time = 'all'; newsState.dateFrom = ''; newsState.dateTo = ''; newsState.page = 1;
+    document.querySelectorAll('#news-time-seg > button').forEach(x=>x.classList.toggle('active', x.dataset.t === 'all'));
+    goToNewsTab(d.tab);
+    window.scrollTo(0, 0);
   });
 }
