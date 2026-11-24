@@ -2,7 +2,7 @@
 //   dist/design/ita-monitoring-prototype.html  (آدرس سایت عوض نمی‌شود)
 //   dist/brand-kit/، dist/feature-kit/          (لینک‌های دانلود بسته‌ها)
 import { defineConfig } from 'vite';
-import { cpSync } from 'node:fs';
+import { cpSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname);
@@ -18,7 +18,10 @@ function copyStatic() {
       const out = resolve(ROOT, 'dist');
       for (const f of VERBATIM) cpSync(resolve(ROOT, 'design', f), resolve(out, 'design', f), { recursive: true });
       for (const k of KITS) {
-        cpSync(resolve(ROOT, k), resolve(out, k), { recursive: true, filter: (src) => !src.includes('/tools') });
+        // روی ویندوز cpSync نمی‌تواند zip با نام فارسی را در ساخت دوم بازنویسی کند → اول پاک
+        rmSync(resolve(out, k), { recursive: true, force: true });
+        // جداکننده‌ی مسیر روی ویندوز \ است
+        cpSync(resolve(ROOT, k), resolve(out, k), { recursive: true, filter: (src) => !/[\\/]tools(?:[\\/]|$)/.test(src) });
       }
       // GitHub Pages: بدون پردازش Jekyll
       cpSync(resolve(ROOT, '.nojekyll'), resolve(out, '.nojekyll'));

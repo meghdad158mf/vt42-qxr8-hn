@@ -9,7 +9,8 @@ const SRC = new URL('../../design/src/', import.meta.url);
 const read = (f) => readFileSync(new URL(f, SRC), 'utf8');
 const app = read('app.js');
 const appFns = new Set([...app.matchAll(/^export (?:async )?function (\w+)\s*\(/gm)].map((m) => m[1]));
-const files = readdirSync(SRC, { recursive: true }).filter((f) => f.endsWith('.js') && f !== 'app.js' && f !== 'main.js');
+// روی ویندوز readdirSync مسیرها رو با \ برمی‌گردونه → یکسان‌سازی به /
+const files = readdirSync(SRC, { recursive: true }).map((f) => f.replaceAll('\\', '/')).filter((f) => f.endsWith('.js') && f !== 'app.js' && f !== 'main.js');
 
 const backRefs = files.flatMap((f) =>
   [...read(f).matchAll(/^import \{([^}]*)\} from '((?:\.\.?\/)+app\.js)';/gm)].map((m) => ({

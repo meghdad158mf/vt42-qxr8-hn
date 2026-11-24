@@ -5,6 +5,7 @@ const sectionOf = (page) => page.evaluate(() => (document.querySelector('.sectio
 
 test('منوی بخش‌ها: هر گزینه به بخش و تب خودش می‌برد و منو بسته می‌شود', async ({ page }) => {
   test.setTimeout(120_000); // ~۳۰ گزینه، هر کدوم یه جابه‌جایی کامل
+  await page.setViewportSize({ width: Math.min(page.viewportSize().width, 1100), height: page.viewportSize().height }); // منوی نوار بالا زیر ۱۲۸۰px
   await openAs(page, 'viewer');
   // گزینه‌های «به‌زودی» برای بیننده پنهان‌ان
   const keys = await page.$$eval('#nav-menu button[data-nav]:not(.soon-item)', (bs) => bs.map((b) => b.dataset.nav));
@@ -16,13 +17,88 @@ test('منوی بخش‌ها: هر گزینه به بخش و تب خودش می�
     await expect(page.locator('#nav-menu')).not.toHaveClass(/open/);
     const [s, t] = key.split('/');
     expect(await sectionOf(page), key).toBe('sec-' + s);
-    // posts/feed و public/trends فقط خودِ بخش رو باز می‌کنن (تب آخر/پیش‌فرض)
-    if (t && !['posts', 'public'].includes(s)) await expect.poll(() => page.evaluate(() => location.hash), key).toContain(`#${s}/${t}`);
+    // posts/feed فقط خودِ بخش رو باز می‌کنه (تب آخر/پیش‌فرض)
+    if (t && s !== 'posts') await expect.poll(() => page.evaluate(() => location.hash), key).toContain(`#${s}/${t}`);
   }
   expect(page.appErrors).toEqual([]);
 });
 
+// ۵.۳۸.۰: رایانه‌ی پهن (≥۱۲۸۰px) به‌جای منوی «بخش‌ها» ستون ثابت کناری دارد
+test('ستون کناری (رایانه‌ی پهن): هر گزینه به بخش و تب خودش می‌برد و جای فعلی پررنگ است', async ({ page }) => {
+  test.setTimeout(120_000);
+  await openAs(page, 'viewer');
+  test.skip(!(await page.locator('#side-nav').isVisible()), 'ستون کناری فقط روی رایانه‌ی پهن');
+  await expect(page.locator('#nav-menu-btn')).toBeHidden();
+  await expect(page.locator('#sn-kpis .sn-kpi:visible')).toHaveCount(0); // ۵.۳۹.۰: آمار در صفحه‌ی خوش‌آمد، نه در ستون
+  const keys = [...new Set(await page.$$eval('#side-nav button[data-nav]:not(.soon-item)', (bs) => bs.map((b) => b.dataset.nav)))];
+  expect(keys.length).toBeGreaterThan(20);
+  for (const key of keys) {
+    const [s, t] = key.split('/');
+    // زیرتب‌ها فقط زیر عرصه‌ی فعلی باز است
+    if (t) await page.locator(`#side-nav .sn-item[data-nav="${s}"]`).click();
+    const btn = page.locator(`#side-nav button[data-nav="${key}"]`).last();
+    await btn.click();
+    expect(await sectionOf(page), key).toBe('sec-' + s);
+    if (t && s !== 'posts') await expect.poll(() => page.evaluate(() => location.hash), key).toContain(`#${s}/${t}`);
+    // عرصه: ردیفش باز (هلویی)؛ زیرتب و صفحه نخست/بسته: خودِ دکمه پررنگ
+    const group = page.locator(`#side-nav .sn-group[data-sn="${s}"]`);
+    if (!t && await group.count()) await expect(group, key).toHaveClass(/is-open/);
+    else await expect(btn, key).toHaveClass(/is-current/);
+  }
+  expect(page.appErrors).toEqual([]);
+});
+
+test('ستون کناری: هدر و فوتر داخل ستون', async ({ page }) => {
+  await openAs(page, 'admin');
+  test.skip(!(await page.locator('#side-nav').isVisible()), 'ستون کناری فقط روی رایانه‌ی پهن');
+  // ابزارهای نوار بالا و فوتر خودشان (نه کپی) به ستون منتقل شده‌اند
+  await expect(page.locator('#sn-tools #theme-btn')).toBeVisible();
+  await expect(page.locator('#sn-tools #admin-menu-btn')).toBeVisible();
+  await expect(page.locator('#sn-foot .app-footer')).toHaveCount(1);
+  await expect(page.locator('.topbar')).toBeHidden();
+  await page.click('#admin-menu-btn');
+  await page.locator('#admin-menu [data-admin-go="status"]').click();
+  await expect(page.locator('#sec-status')).toHaveClass(/active/);
+  // ۵.۴۰.۰: دکمه و پنل «نمایش کامل» حذف شد (خواست کاربر)
+  await expect(page.locator('#sn-toggle, #sn-detail')).toHaveCount(0);
+  await page.locator('#side-nav .sn-group[data-sn="positions"] .sn-exp').click();
+  await page.locator('#side-nav button[data-nav="positions/imams"]').click();
+  await expect(page.locator('#sec-positions')).toHaveClass(/active/);
+  await expect.poll(() => page.evaluate(() => location.hash)).toContain('#positions/imams');
+  // پهنای کمتر: ابزارها و فوتر به جای اصلی برمی‌گردند
+  await page.setViewportSize({ width: 1100, height: 800 });
+  await expect(page.locator('.topbar #theme-btn')).toBeVisible();
+  await expect(page.locator('main > .app-footer')).toHaveCount(1);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('ستون کناری: بدون اسکرول، تیترهای بازشو و پنجره‌های «ارتباط با ما» و «درباره‌ی سامانه»', async ({ page }) => {
+  await openAs(page, 'viewer', 'positions/imams');
+  test.skip(!(await page.locator('#side-nav').isVisible()), 'ستون کناری فقط روی رایانه‌ی پهن');
+  const side = page.locator('#side-nav');
+  // ۵.۴۰.۰: ستون اسکرول ندارد؛ تیترها باز/بسته می‌شوند (هم‌زمان یکی)؛ «ارتباط با ما» و «درباره‌ی سامانه» پنجره‌ی کوچک
+  const pos = side.locator('.sn-group[data-sn="positions"]'), news = side.locator('.sn-group[data-sn="overview"]');
+  await expect(pos).toHaveClass(/is-exp/);
+  await news.locator('.sn-exp').click();
+  await expect(news).toHaveClass(/is-exp/);
+  await expect(pos).not.toHaveClass(/is-exp/);
+  await expect(news.locator('button[data-nav="overview/dossier"]')).toBeVisible();
+  expect(await side.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(0);
+  await news.locator('.sn-exp').click();
+  await expect(news.locator('button[data-nav="overview/dossier"]')).toBeHidden();
+  await expect(page.locator('#sn-contact #notify-phone')).toBeHidden();
+  await page.click('#sn-contact-btn');
+  await expect(page.locator('#sn-contact #notify-phone')).toBeVisible();
+  await page.click('#sn-info-btn');
+  await expect(page.locator('#sn-contact')).toBeHidden();
+  await expect(page.locator('#sn-foot .afo-item').first()).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#sn-foot')).toBeHidden();
+  expect(page.appErrors).toEqual([]);
+});
+
 test('منو با کلیک بیرون و Esc بسته می‌شود', async ({ page }) => {
+  await page.setViewportSize({ width: Math.min(page.viewportSize().width, 1100), height: page.viewportSize().height }); // منوی نوار بالا زیر ۱۲۸۰px
   await openAs(page, 'viewer');
   await page.click('#nav-menu-btn');
   await expect(page.locator('#nav-menu')).toHaveClass(/open/);
@@ -34,6 +110,7 @@ test('منو با کلیک بیرون و Esc بسته می‌شود', async ({ p
 });
 
 test('منوی مدیریت: هر گزینه بخش خودش را باز می‌کند', async ({ page }) => {
+  test.setTimeout(60_000); // ۷ بخش مدیریت، «وضعیت سامانه» سنگین‌ترینشان — زیر بار موازی از ۳۰ ثانیه می‌گذشت
   await openAs(page, 'admin');
   const keys = await page.$$eval('#admin-menu button[data-admin-go]', (bs) => bs.map((b) => b.dataset.adminGo));
   expect(keys).toEqual(['status', 'activity', 'settings', 'announce', 'users', 'uploads', 'export']);
@@ -117,10 +194,45 @@ test('دکمه‌ی «فیلترها» روی گوشی باز و بسته می�
 });
 
 test('دکمه‌ی «بالای صفحه»', async ({ page }) => {
-  await openAs(page, 'viewer');
+  // صفحه‌ی نخست روی رایانه‌ی پهن از ۵.۳۹.۰ اسکرول ندارد — صفحه‌ی بلند اخبار
+  await openAs(page, 'viewer', 'overview/study');
+  // ۵.۴۱.۰: نمای خواندن هم‌قد صفحه است — نمای فهرستی صفحه را بلند می‌کند
+  const list = page.locator('#news-view-list-btn');
+  if(await list.isVisible()) await list.click();
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await expect(page.locator('#to-top')).toHaveClass(/show/);
   await page.click('#to-top');
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  expect(page.appErrors).toEqual([]);
+});
+
+test('نمای روشن/تیره: پیش‌فرض روشن، دکمه عوض می‌کند و بعد از رفرش می‌ماند', async ({ page }) => {
+  await openAs(page, 'viewer');
+  const theme = () => page.evaluate(() => document.documentElement.dataset.theme || 'dark');
+  const canvas = () => page.evaluate(() => getComputedStyle(document.getElementById('view-dash')).backgroundColor + getComputedStyle(document.getElementById('view-dash')).backgroundImage);
+  // ۵.۳۹.۰: پیش‌فرض روشن (مریم‌گلی)
+  expect(await theme()).toBe('light');
+  const lightBg = await canvas();
+  const pick = async (t) => { await page.click('#theme-btn'); await page.click(`#theme-menu [data-theme-set="${t}"]`); };
+  await pick('dark');
+  expect(await theme()).toBe('dark');
+  await expect(page.locator('#theme-btn')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#theme-menu')).toBeHidden();
+  expect(await canvas()).not.toBe(lightBg);
+  await page.reload();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  expect(await theme()).toBe('dark');
+  await pick('light');
+  expect(await theme()).toBe('light');
+  expect(await canvas()).toBe(lightBg);
+  // «خودکار» از تنظیم دستگاه پیروی می‌کند و با عوض شدنش هم‌زمان عوض می‌شود
+  await page.emulateMedia({ colorScheme: 'light' });
+  await pick('auto');
+  expect(await theme()).toBe('light');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect.poll(theme).toBe('dark');
+  await page.reload();
+  await expect(page.locator('#sec-dashboard')).toHaveClass(/active/);
+  expect(await theme()).toBe('dark');
   expect(page.appErrors).toEqual([]);
 });

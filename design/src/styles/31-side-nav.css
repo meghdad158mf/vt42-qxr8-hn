@@ -1,0 +1,164 @@
+/* ستون ثابت کناری «دونیمه‌ی عمودی» (۵.۳۸.۰، انتخاب کاربر از ماکت‌های هویت بصری — کل سایت، محتوای تیره):
+   فقط رایانه‌ی پهن (≥۱۲۸۰px تا ستون محتوا دست‌کم ~۹۹۰px بماند و چینش‌های رایانه‌ای نشکنند)؛ زیر آن
+   همان منوی «بخش‌ها»ی نوار بالا. ستون در نمای روشن هم سرمه‌ای می‌ماند (برند). رفتن با data-nav در ui/menus.js،
+   جای فعلی با updateSideNavCurrent (بعد از هر ثبت router)، عددها از hero-stats.js و domain-live.js */
+:root{ --sn-w:236px; }
+.side-nav{ display:none; }
+
+@media (min-width:1280px){
+  #view-dash.active{ display:grid; grid-template-columns:var(--sn-w) minmax(0,1fr); align-items:start; }
+  #view-dash > .main{ width:100%; }
+
+  .side-nav{
+    display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow:hidden;
+    padding:16px 12px 12px; color:#fff; z-index:40;
+    background: radial-gradient(120% 40% at 100% 0%, rgba(234,179,147,0.1), transparent 60%), linear-gradient(180deg, #121b24, #1b2733);
+    border-inline-end:1px solid rgba(255,255,255,0.08);
+    scrollbar-width:thin; scrollbar-color: rgba(255,255,255,0.18) transparent;
+  }
+
+  /* هدر و فوتر در ستون‌اند (ui/side-nav.js) — ستون محتوا فقط خودِ بخش‌ها را دارد و جدا اسکرول می‌خورد */
+  #view-dash .topbar{ display:none; }
+  #view-dash > .main{ padding-top:28px; }
+
+  /* هرو صفحه‌ی نخست: به‌جای تمام‌عرض پنجره، هم‌عرض ستون محتوا با گوشه‌ی گرد */
+  .hs{ width:auto; margin:-6px 0 0; border-radius:22px; overflow:clip; }   /* همان شعار بالای ستون کناری */
+  /* سه عدد اصلی پنل آمار در ستون کناری است */
+  #dash-hero-stats{ display:none; }
+  .hs + .dash-hero-stats + .datebar{ margin-top:36px; }
+
+  /* دکمه‌ی «بالای صفحه» روی ستون کناری نیفتد */
+  .to-top{ right:calc(var(--sn-w) + 22px); }
+
+}
+
+/* ---- سر ستون: نام سامانه (دکمه‌ی «نمایش کامل» در ۵.۴۰.۰ حذف شد) ---- */
+.sn-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+
+/* ---- ۵.۴۰.۰ (خواست کاربر: «سایدبار جمع‌تر و کوچک‌تر، بدون اسکرول؛ تیترها باز و بسته شوند»):
+   ستون ۲۳۶px؛ سر ستون فقط نام + شعار کوتاه؛ فهرست با تیترهای بازشو (هم‌زمان یکی، ui/side-nav.js)؛
+   پایین ستون یک ردیف آیکون (تازگی داده، ارتباط با ما، درباره‌ی سامانه، نمای سایت، مدیریت، خروج) ---- */
+.sn-brand{ display:flex; align-items:center; gap:10px; min-width:0; padding:2px; margin:0; background:none; border:none; color:#fff; font:inherit; text-align:start; cursor:pointer; border-radius:12px; }
+.sn-brand img{ width:auto; height:30px; flex:none; }
+.sn-brand > span{ min-width:0; }
+.sn-brand b{ display:block; font-size:13px; font-weight:800; white-space:nowrap; }
+.sn-brand small{ display:block; font-size:12px; font-weight:500; color: var(--accent); margin-top:1px; white-space:nowrap; }
+.sn-brand:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.sn-head{ padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08); }
+
+.sn-kpis{ display:none; }
+.sn-list{ flex:1; min-height:0; display:flex; flex-direction:column; gap:1px; margin-top:10px; }
+.sn-label{ margin:10px 10px 4px; font-size:12px; font-weight:700; color: rgba(255,255,255,0.45); }
+.sn-group{ position:relative; }
+.sn-item{
+  display:flex; align-items:center; gap:10px; width:100%; min-height:38px; padding:4px 10px; margin:0;
+  background:none; border:none; border-radius:10px; color: rgba(255,255,255,0.86); font:inherit; font-size:13px; font-weight:500; text-align:start; cursor:pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.sn-group:has(.sn-exp) > .sn-item{ padding-inline-end:40px; }
+.sn-item:hover{ background: rgba(255,255,255,0.06); color:#fff; }
+.sn-item:focus-visible, .sn-subs button:focus-visible, .sn-exp:focus-visible, .sn-dock-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+.sn-ic{ width:22px; height:22px; flex:none; display:flex; align-items:center; justify-content:center; background:none; color: rgba(255,255,255,0.55); transition: color .15s ease; }
+.sn-ic svg{ width:19px; height:19px; }
+.sn-item:hover .sn-ic{ color: rgba(255,255,255,0.85); }
+.sn-group.is-open > .sn-item .sn-ic{ color:#EAB393; }
+.sn-name{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sn-live{ display:none; }
+
+/* دکمه‌ی باز/بسته‌ی تیتر (فلش) */
+.sn-exp{ position:absolute; top:5px; inset-inline-end:6px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; padding:0; margin:0;
+  border:none; border-radius:8px; background:none; color: rgba(255,255,255,0.55); cursor:pointer; transition: background .15s ease, color .15s ease; }
+.sn-exp:hover{ background: rgba(255,255,255,0.1); color:#fff; }
+.sn-exp svg{ width:16px; height:16px; transition: transform .2s cubic-bezier(.23,1,.32,1); }
+.sn-group.is-exp > .sn-exp svg{ transform:rotate(180deg); }
+
+/* بخش فعلی: زمینه‌ی کم‌رنگ + لبه‌ی هلویی */
+.sn-group.is-open > .sn-item, .sn-item.sn-top.is-current{ background: rgba(255,255,255,0.1); color:#fff; font-weight:700; box-shadow: inset -3px 0 0 #EAB393; }
+.sn-item.sn-top.is-current .sn-ic{ color:#EAB393; }
+
+/* زیرمجموعه‌ها: فقط وقتی تیتر باز است */
+.sn-subs{ display:none; flex-direction:column; gap:0; margin:2px 0 4px; padding-inline-start:30px; }
+.sn-group.is-exp .sn-subs{ display:flex; }
+.sn-group .sn-subs:empty{ display:none; }
+.sn-subs button{
+  position:relative; min-width:0; min-height:28px; padding:3px 12px; margin:0; background:none; border:none; border-radius:8px;
+  color: rgba(255,255,255,0.68); font:inherit; font-size:12px; font-weight:500; text-align:start; cursor:pointer;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.sn-subs button::before{ content:''; position:absolute; inset-inline-start:2px; top:50%; width:4px; height:4px; margin-top:-2px; border-radius:50%; background: rgba(255,255,255,0.25); }
+.sn-subs button:hover{ color:#fff; background: rgba(255,255,255,0.05); }
+.sn-subs button.is-current{ color: var(--accent); font-weight:800; }
+.sn-subs button.is-current::before{ background: var(--accent); }
+.sn-issues button > span{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ---- پایین ستون: ردیف آیکون ---- */
+.sn-bottom{ flex:none; display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:8px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08); }
+.sn-tools, .sn-tools .topbar-right{ display:contents; }
+.sn-tools .topbar-status{ flex:1 0 100%; order:-1; margin:0 4px 6px; font-size:12px; color: rgba(255,255,255,0.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sn-tools .topbar-status.is-stale{ color:#fbbf24; }
+.sn-tools .topbar-divider{ display:none; }
+.sn-dock-btn, .sn-tools .chip-btn, .sn-tools .topbar-theme-btn{
+  position:relative; width:36px; height:36px; min-width:0; min-height:0; display:inline-flex; align-items:center; justify-content:center; gap:0; padding:0; margin:0;
+  border:none; border-radius:10px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.78); font-size:0; cursor:pointer; box-shadow:none;
+  transition: background .15s ease, color .15s ease;
+}
+.sn-dock-btn:hover, .sn-tools .chip-btn:hover, .sn-tools .topbar-theme-btn:hover, .sn-dock-btn.is-on, .sn-tools .admin-menu.open .chip-btn{ background: rgba(255,255,255,0.14); color:#fff; }
+.sn-dock-btn svg, .sn-tools .chip-btn svg, .sn-tools .topbar-theme-btn svg{ width:18px; height:18px; flex:none; }
+.sn-tools .chip-btn .chev, .sn-tools .am-tx, .sn-tools .lo-tx{ display:none; }
+.topbar-right [data-logout] .lo-ic{ display:none; }
+.sn-tools .topbar-right [data-logout] .lo-ic{ display:block; }
+/* ترتیب: نمای سایت، مدیریت | ارتباط با ما، درباره‌ی سامانه | خروج (انتهای ردیف) */
+.sn-tools .theme-wrap{ order:1; } .sn-tools .admin-menu{ order:2; } #sn-contact-btn{ order:3; margin-inline-start:auto; } #sn-info-btn{ order:4; }
+.sn-tools [data-logout]{ order:5; }
+.sn-tools .admin-menu{ position:relative; display:inline-flex; }
+.sn-tools .am-btn-dot{ position:absolute; top:5px; inset-inline-end:5px; }
+.sn-tools .theme-wrap{ display:inline-flex; }
+
+/* فهرست «مدیریت»، «نمای سایت» و دو پنجره‌ی کوچک: کنار ستون، هم‌تراز پایین */
+.sn-tools .admin-menu-list, .sn-tools .theme-menu, .sn-pop{
+  position:fixed; top:auto; left:auto; bottom:12px; right:calc(var(--sn-w) + 8px); transform:none; margin:0; z-index:95;
+}
+.sn-tools .admin-menu-list{ display:none; min-width:220px; }
+.sn-tools .admin-menu.open .admin-menu-list{ display:flex; }
+.sn-tools .theme-menu{ width:230px; }
+.sn-pop{ width:340px; max-height:calc(100vh - 24px); overflow-y:auto; padding:16px; border-radius:16px; color:#fff;
+  background: linear-gradient(180deg, #1b2733, #121b24); border:1px solid rgba(255,255,255,0.1); box-shadow:0 24px 50px -18px rgba(0,0,0,0.55);
+  animation: snPop .18s cubic-bezier(.23,1,.32,1); }
+.sn-pop[hidden], .sn-pop:empty{ display:none; }
+@keyframes snPop{ from{ opacity:0; translate:10px 0; } }
+
+/* فوتر داخل پنجره‌ی «درباره‌ی سامانه» */
+.sn-foot .app-footer{ margin:0; padding:0; border:none; background:none; }
+.sn-foot .app-footer-top{ flex-direction:column; gap:14px; }
+.sn-foot .app-footer-brand{ flex-direction:row; flex-wrap:wrap; align-items:center; gap:4px 14px; max-width:none; }
+.sn-foot .app-footer-title-row{ flex:1 0 100%; }
+.sn-foot .app-footer-org{ flex-direction:column; gap:10px; }
+.sn-foot .afo-item{ max-width:none; }
+/* صفحه‌ی خیلی پهن: ستون محتوا کمی پهن‌تر تا فاصله‌ی خالی دو طرفش زیاد نشود */
+@media (min-width:1760px){ #view-dash > .main{ max-width:1340px; } }
+
+/* صفحه‌ی کوتاه: فاصله‌ها فشرده‌تر تا ستون باز هم بدون اسکرول جا شود */
+@media (min-width:1280px) and (max-height:760px){
+  .side-nav{ padding-top:12px; }
+  .sn-item{ min-height:34px; }
+  .sn-exp{ top:3px; }
+  .sn-subs button{ min-height:26px; }
+  .sn-label{ margin-top:6px; }
+}
+
+@media (prefers-reduced-motion: reduce){ .sn-item{ transition:none; } .sn-pop{ animation:none; } }
+
+/* نمای روشن: ستون سرمه‌ای می‌ماند — قانون‌های روشنِ نوار بالا و فوتر (27-theme-light) داخل ستون برگردانده می‌شوند */
+:root[data-theme="light"] #view-dash .sn-tools .topbar-status{ color: rgba(255,255,255,0.6); }
+:root[data-theme="light"] #view-dash .sn-tools .topbar-status.is-stale{ color:#fbbf24; }
+:root[data-theme="light"] #view-dash .sn-tools .topbar-theme-btn{ color: rgba(255,255,255,0.7); }
+:root[data-theme="light"] #view-dash .sn-tools .topbar-theme-btn:hover{ color:#fff; background: rgba(255,255,255,0.1); }
+:root[data-theme="light"] #view-dash .sn-foot .app-footer{ border-top-color: rgba(255,255,255,0.1); }
+:root[data-theme="light"] #view-dash .sn-foot .afo-item b{ color: rgba(255,255,255,0.85); }
+:root[data-theme="light"] #view-dash .sn-foot .afo-item span{ color: rgba(255,255,255,0.62); }
+:root[data-theme="light"] #view-dash .sn-foot .app-footer-brand small, :root[data-theme="light"] #view-dash .sn-foot .app-footer-brand small .app-version{ color: rgba(255,255,255,0.45); }
+:root[data-theme="light"] #view-dash .sn-foot .app-footer-intro{ color: var(--accent); }
+:root[data-theme="light"] #view-dash .sn-foot .app-footer-intro:hover{ color:#fff; }
+/* پنجره‌ی «درباره‌ی سامانه» سرمه‌ای است — نام و شعار فوتر روشن (۵.۴۰.۰) */
+.sn-foot .app-footer-title, :root[data-theme="light"] #view-dash .sn-foot .app-footer-title{ color:#fff; }
+.sn-foot .app-footer-tagline, :root[data-theme="light"] #view-dash .sn-foot .app-footer-tagline{ color: rgba(255,255,255,0.62); }

@@ -10,7 +10,13 @@
     "test": "playwright test",
     "test:unit": "vitest run",
     "test:dist": "SITE_DIR=dist/design playwright test",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "demo:codes": "node demo/tools/codes.mjs",
+    "demo:data": "node demo/data/generate.mjs",
+    "demo:media": "node demo/tools/media.mjs",
+    "demo:build": "node demo/data/generate.mjs && vite build --config demo/vite.demo.config.js && node demo/tools/pack.mjs",
+    "demo:serve": "node demo/tools/serve.mjs",
+    "demo:fetch": "node demo/tools/fetch-snapshot.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

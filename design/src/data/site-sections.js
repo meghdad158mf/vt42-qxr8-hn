@@ -8,8 +8,5 @@ export const SITE_VIS_ITEMS = [
   { key:'posts', name:'کنشگری مجازی', tabs:[['feed','پست‌های منتشر شده'],['people','افراد و مجموعه‌ها']] },
   { key:'schools', name:'برنامه مدارس', tabs:[] },
   { key:'positions', name:'مواضع مراجع و علماء', tabs:[['leader','رهبر انقلاب'],['maraji','مراجع و علماء'],['hawza','حوزه‌های علمیه'],['imams','ائمه جمعه'],['orgs','تشکل‌ها و نخبگان']] },
-  { key:'public', name:'درباره مردم', tabs:[['trends','جست‌وجوهای داغ مردم']] },
-  { key:'laws', name:'قوانین و مصوبات', tabs:[] },
-  { key:'ask', name:'از جریان بپرس', tabs:[] },
   { key:'reports', name:'بسته تحلیلی جریان', tabs:[] },
 ];

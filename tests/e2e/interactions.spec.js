@@ -3,8 +3,12 @@ import { test, expect, openAs } from './support/fixtures.js';
 
 test('منوی «بخش‌ها» به اخبار و رویدادها می‌برد', async ({ page }) => {
   await openAs(page, 'viewer');
-  await page.locator('#nav-menu-btn, [aria-controls="nav-menu"]').first().click();
-  await page.locator('#nav-menu [data-nav="overview/analytics"]').first().click();
+  // رایانه‌ی پهن: ستون کناری (۵.۳۸.۰)؛ بقیه: منوی نوار بالا
+  if (await page.locator('#side-nav').isVisible()) await page.locator('#side-nav .sn-item[data-nav="overview"]').click();
+  else {
+    await page.locator('#nav-menu-btn').click();
+    await page.locator('#nav-menu [data-nav="overview/analytics"]').first().click();
+  }
   await expect(page.locator('#sec-overview')).toHaveClass(/active/);
   expect(page.appErrors).toEqual([]);
 });

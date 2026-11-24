@@ -4,7 +4,7 @@ import { test, expect, openAs } from './support/fixtures.js';
 
 // همان فهرست تب‌های SITE_VIS_ITEMS سایت (+ صفحه‌ی نخست)
 const VIEWER_ROUTES = [
-  'dashboard',
+  'dashboard', 'today',
   'overview/analytics', 'overview/claims', 'overview/study', 'overview/website',
   'overview/newspapers', 'overview/dossier', 'overview/newsletter',
   'people/orgs', 'people/figures', 'people/thinktanks', 'people/archive',
@@ -12,15 +12,13 @@ const VIEWER_ROUTES = [
   'posts/feed', 'posts/people',
   'schools',
   'positions/leader', 'positions/maraji', 'positions/hawza', 'positions/imams', 'positions/orgs',
-  'public/trends',
-  'laws',
   'reports',
 ];
 const ADMIN_ROUTES = [
   'status', 'settings', 'users',
   'activity/views', 'activity/hidden', 'activity/audit',
   'uploads/magazines', 'uploads/archive', 'uploads/schools',
-  'announce', 'export', 'ask',
+  'announce', 'export',
 ];
 
 async function expectRoute(page, route) {

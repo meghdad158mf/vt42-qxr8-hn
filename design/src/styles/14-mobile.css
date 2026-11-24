@@ -10,9 +10,7 @@
   /* پاپ‌آور «بازه‌ی زمانی» (چپ‌ترین دکمه‌ی ردیف زمان) از لبه‌ی چپ صفحه بیرون می‌زد */
   .news-daterange-details .news-daterange-popover{ inset-inline-start:auto; inset-inline-end:auto; left:0; right:auto; }
   /* فاصله‌های خیلی بزرگ دسکتاپ بین بلوک‌های صفحه‌ی نخست روی گوشی فضای خالی زیادی می‌ساخت */
-  .why-jarian-card{ margin-top:110px; }
   .section-label{ margin-top:80px; }
-  .home-bottom-row{ margin-top:90px; }
 }
 @media (max-width:560px){
   /* قاب تصویر خالی کارت‌های بدون رسانه روی گوشی فقط جا می‌گیره */
@@ -25,7 +23,7 @@
 .m-filter-btn{ display:none; align-items:center; gap:6px; flex-shrink:0; background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.85); padding:0 14px; border-radius: var(--radius-control); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; }
 .m-filter-btn svg{ width:16px; height:16px; }
 .m-filter-btn.active{ border-color: var(--accent); color: var(--accent); }
-.m-filter-count:not(:empty){ background: var(--accent); color: var(--primary); border-radius:999px; min-width:18px; height:18px; padding:0 5px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; }
+.m-filter-count:not(:empty){ background: var(--accent); color: var(--primary); border-radius:999px; min-width:18px; height:18px; padding:0 5px; display:inline-flex; align-items:center; justify-content:center; font-size:12px; }
 @media (max-width:640px){
   .m-filter-btn{ display:inline-flex; align-self:stretch; }
   [data-mfilters]:not(.m-open) .m-collapse{ display:none !important; }
@@ -43,8 +41,8 @@
   .app-footer-brand{ align-items:center; max-width:none; }
   .app-footer-tagline{ display:none; }
   .app-footer-org{ gap:4px; flex-direction:column; align-items:center; }
-  .afo-item{ display:block; max-width:none; font-size:11px; text-align:center; line-height:1.8; }
-  .afo-item b{ font-size:11px; margin-inline-end:5px; }
+  .afo-item{ display:block; max-width:none; font-size:12px; text-align:center; line-height:1.8; }
+  .afo-item b{ font-size:12px; margin-inline-end:5px; }
   .afo-item b::after{ content:':'; }
   .news-smart-toggle{ display:none !important; }
   #news-time-seg{ gap:2px; }

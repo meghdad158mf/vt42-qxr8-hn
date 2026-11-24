@@ -23,6 +23,9 @@ body{
   font-family: 'IRANSansX','Inter',Tahoma,'Segoe UI',system-ui,sans-serif;
   direction: rtl;
   min-height: 100vh;
+  /* ۵.۴۱.۰ (خواست کاربر): پایه‌ی کل سایت ۱۳ متوسط؛ مقیاس ۱۲/۱۳/۱۵/۱۷/۲۰/۲۶/۳۴ — تأکید فقط با ضخامت یا پله‌ی بعد */
+  font-size: 13px;
+  font-weight: 500;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
@@ -38,7 +41,7 @@ img,svg{ max-width:100%; }
 #ambient{ position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
 .view{ position:relative; z-index:1; }
 
-.label-md{ font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; font-weight:600; letter-spacing:0.02em; }
+.label-md{ font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; font-weight:500; letter-spacing:0.02em; }
 .display-lg{ font-family:'IRANSansX','Inter',Tahoma,sans-serif; font-weight:500; line-height:1.04; letter-spacing:0; }
 
 @keyframes rise{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
@@ -47,9 +50,9 @@ img,svg{ max-width:100%; }
 .view.active{ display:block; }
 @keyframes pulse{ 0%,100%{ opacity:1;} 50%{ opacity:.3;} }
 
-.badge{ font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px; padding:3px 9px; border-radius: var(--radius-pill); border:1px solid var(--border-strong); color: var(--text-faint); white-space:nowrap; font-weight:600; }
+.badge{ font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12px; padding:3px 9px; border-radius: var(--radius-pill); border:1px solid var(--border-strong); color: var(--text-faint); white-space:nowrap; font-weight:500; }
 
-.btn{ appearance:none; border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); padding:10px 20px; border-radius: var(--radius-pill); font-size:14px; font-weight:700; cursor:pointer; transition: all .15s ease; }
+.btn{ appearance:none; border:1px solid var(--border-strong); background: var(--surface-2); color: var(--text); padding:10px 20px; border-radius: var(--radius-pill); font-size:13px; font-weight:700; cursor:pointer; transition: all .15s ease; }
 .btn.primary{ background: var(--primary); color:#ffffff; border-color: var(--primary); }
 .btn.danger{ background: var(--danger); color:#ffffff; border-color: var(--danger); }
 /* رنگ نوشته‌ی دکمه‌ی پررنگ در حالت hover باید سفید بمونه — قبلاً .btn:hover نوشته رو تیره (var(--text)) می‌کرد و

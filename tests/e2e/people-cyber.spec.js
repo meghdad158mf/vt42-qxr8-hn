@@ -4,6 +4,11 @@
 import { test, expect, openAs } from './support/fixtures.js';
 
 // متن بلند تا «نمایش بیشتر» روی همه‌ی کارت‌ها دیده بشه
+// ۵.۴۱.۰: رایانه با «نمای خواندن» باز می‌شود؛ آزمون‌های کارت اول نمای کارت را می‌زنند (گوشی دکمه ندارد)
+async function cardsView(page){
+  const b = page.locator('[data-rv="cards"]:visible').first();
+  if(await b.count()) await b.click();
+}
 const LONG_TEXT = { apply(data) { data.posts.forEach((p) => { p.text = Array(8).fill(p.text).join(' '); }); } };
 
 test.describe('متن بلند', () => {
@@ -11,6 +16,7 @@ test.describe('متن بلند', () => {
 
   test('کنشگری مجازی: «نمایش بیشتر» متن پست را باز و بسته می‌کند', async ({ page }) => {
     await openAs(page, 'viewer', 'posts/feed');
+    await cardsView(page);
     const more = page.locator('#posts-list [data-post-more]:visible').first();
     const text = page.locator('#post-text-' + (await more.getAttribute('data-post-more')));
     await more.click();
@@ -25,6 +31,7 @@ test.describe('متن بلند', () => {
     await openAs(page, 'viewer', 'people/figures');
     await page.locator('#pf-logo-grid > *').first().click();
     await expect(page.locator('#pf-feed-view')).toBeVisible();
+    await cardsView(page);
     const more = page.locator('#political-figures-list [data-pf-more]:visible').first();
     const text = page.locator('#pf-post-text-' + (await more.getAttribute('data-pf-more')));
     await more.click();
@@ -72,8 +79,36 @@ test('مواضع: تب‌ها گالری مشترک را نشان می‌دهن�
   await expect(page.locator('#pf-logo-grid > *').first()).toBeVisible();
   await page.goBack();
   await expect(page.locator('#positions-page-tabs [data-pos-tab="leader"]')).toHaveClass(/active/);
-  await page.click('#nav-menu-btn');
-  await page.locator('#nav-menu button[data-nav="people/figures"]').click();
+  if (await page.locator('#side-nav').isVisible()) { // رایانه‌ی پهن: ستون کناری (۵.۳۸.۰)
+    await page.locator('#side-nav .sn-item[data-nav="people"]').click();
+    await page.locator('#side-nav button[data-nav="people/figures"]').click();
+  } else {
+    await page.click('#nav-menu-btn');
+    await page.locator('#nav-menu button[data-nav="people/figures"]').click();
+  }
   await expect(page.locator('#sec-people #people-tab-figures')).toBeVisible();
+  expect(page.appErrors).toEqual([]);
+});
+
+// ۵.۴۱.۰: نمای خواندن در کنشگری و فید منبع یادداشت‌ها (فقط رایانه)
+test('نمای خواندن: پست‌های کنشگری و فید منبع یادداشت‌ها', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'نمای خواندن فقط رایانه');
+  await openAs(page, 'viewer', 'posts/feed');
+  await expect(page.locator('#posts-list')).toHaveClass(/reader-view/);
+  const rows = page.locator('#posts-list .nr-row');
+  await rows.nth(1).click();
+  await expect(rows.nth(1)).toHaveClass(/on/);
+  await expect(page.locator('#nrp-pane .news-card')).toBeVisible();
+  await page.keyboard.press('ArrowDown');
+  await expect(rows.nth(2)).toHaveClass(/on/);
+  await page.locator('[data-rv="cards"]:visible').click();
+  await expect(page.locator('#posts-list')).toHaveClass(/grid-view/);
+  await expect(page.locator('#posts-list .nr-row')).toHaveCount(0);
+  await page.locator('[data-rv="reader"]:visible').click();
+  await expect(page.locator('#posts-list')).toHaveClass(/reader-view/);
+  await page.goto(page.url().replace(/#.*$/, '#people/figures'));
+  await page.locator('#pf-logo-grid > *').first().click();
+  await expect(page.locator('#political-figures-list')).toHaveClass(/reader-view/);
+  await expect(page.locator('#nrf-pane .news-card')).toBeVisible();
   expect(page.appErrors).toEqual([]);
 });

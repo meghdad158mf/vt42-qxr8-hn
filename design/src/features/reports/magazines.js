@@ -10,6 +10,7 @@ import { signStoragePaths } from '../../core/signed-urls.js';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../core/config.js';
 import { uiConfirm } from '../../ui/confirm.js';
 import { adminHook } from '../../core/admin-hooks.js';
+import { closeNavMenu } from '../../ui/menus.js';
 
 export let MAGAZINES = [];   // {id, title, issue_no, publish_date, file_type, files, cover_url, uploaded_at}
 // بعد از هر رندر فهرست شماره‌ها؛ home.js جلدهای «بسته تحلیلی جریان» صفحه‌ی نخست رو ثبت می‌کنه (بدون import دوطرفه)
@@ -55,6 +56,30 @@ export function renderMagazines(){
     grid.appendChild(el);
   });
   if(MAGAZINES_RENDERED) MAGAZINES_RENDERED(); // جلدهای صفحه‌ی نخست (home.js)
+  renderNavMenuIssues();
+}
+// منوی «بخش‌ها»: شماره‌های بارگذاری‌شده زیر «بسته تحلیلی جریان» (۵.۳۳.۰، خواست کاربر) — به ترتیب
+// مدیر، حداکثر NAV_ISSUES_MAX تا؛ کلیک = همان «مطالعه». بقیه‌ی شماره‌ها با خودِ «بسته تحلیلی جریان».
+const NAV_ISSUES_MAX = 5;
+export function renderNavMenuIssues(){
+  const issues = MAGAZINES.filter(m=>Array.isArray(m.files) && m.files.length).slice(0, NAV_ISSUES_MAX);
+  // منوی «بخش‌ها» + ستون کناری رایانه‌ی پهن (۵.۳۸.۰، #sn-issues)
+  [['nav-menu-issues', 'nav-menu-sub nav-menu-issue'], ['sn-issues', 'sn-issue']].forEach(([id, cls])=>{
+    const box = document.getElementById(id);
+    if(!box) return;
+    box.innerHTML = '';
+    issues.forEach(m=>{
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = cls;
+      // «شماره ۱۲ — عنوان»؛ عنوان پیش‌فرض «بسته تحلیلی جریان» تکرار نمی‌شود
+      const title = faTitle(m.title || '').trim();
+      const label = [m.issue_no ? 'شماره ' + toFaDigits(m.issue_no) : '', title === 'بسته تحلیلی جریان' ? '' : title].filter(Boolean).join(' — ') || title;
+      b.innerHTML = `<span>${escHtml(label)}</span>`;
+      b.title = label;
+      b.addEventListener('click', ()=>{ closeNavMenu(); openMagazineViewer(m); });
+      box.appendChild(b);
+    });
+  });
 }
 export function openMagazineViewer(m){
   const files = Array.isArray(m.files) ? m.files : [];

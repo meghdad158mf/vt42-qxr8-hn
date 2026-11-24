@@ -5,6 +5,7 @@ import { escAttr, escHtml, needsTranslation, safeUrl, toFaDigits } from '../../c
 import { NEWS_PLATFORM_ICON, NEWS_PLATFORM_LABEL } from '../../ui/platforms.js';
 import { newsRelTime, tehranDayDiff } from '../../core/date.js';
 import { renderPagination } from '../../ui/pagination.js';
+import { READER_PAGE_SIZE, createReader, feedsReaderOn, onFeedsView } from '../news/news-reader.js';
 import { scrollToListTop } from '../../ui/scroll.js';
 import { searchNorm } from '../../core/search.js';
 import { setMobileFilterCount } from '../../ui/mobile-filters.js';
@@ -105,9 +106,11 @@ export function renderHawzaAbout(){
   }
   const list = filteredHawzaMentions();
   const total = (HAB_ROWS || []).length;
-  const totalPages = Math.max(1, Math.ceil(list.length / HAB_PAGE_SIZE));
+  const reader = feedsReaderOn();
+  const size = reader ? READER_PAGE_SIZE : HAB_PAGE_SIZE;
+  const totalPages = Math.max(1, Math.ceil(list.length / size));
   HAB_STATE.page = Math.min(Math.max(1, HAB_STATE.page), totalPages);
-  const page = list.slice((HAB_STATE.page - 1) * HAB_PAGE_SIZE, HAB_STATE.page * HAB_PAGE_SIZE);
+  const page = list.slice((HAB_STATE.page - 1) * size, HAB_STATE.page * size);
   const siteCount = new Set(list.map(habSourceKey)).size;
   sum.textContent = list.length
     ? toFaDigits(list.length) + ' مطلب از ' + toFaDigits(siteCount) + ' منبع' + (list.length !== total ? ' (از ' + toFaDigits(total) + ' مطلب)' : '')
@@ -116,8 +119,31 @@ export function renderHawzaAbout(){
   empty.textContent = HAB_ERROR === 'error' ? 'دریافت خبرها انجام نشد؛ اتصال اینترنت را بررسی و صفحه را دوباره باز کنید.'
     : total ? 'خبری با این فیلترها پیدا نشد.'
     : 'هنوز خبری پیدا نشده است؛ خزنده هر ۳ ساعت سایت‌های خبری و کانال‌ها را جست‌وجو می‌کند.';
+  // ۵.۴۱.۰: نمای «خواندن» روی رایانه (news-reader.js)
+  if(reader){
+    renderPagination('hab-pagination', 1, 1, goHabPage);
+    habReader().render(feed, page, { total: list.length, page: HAB_STATE.page, totalPages });
+    return;
+  }
+  feed.classList.remove('reader-view');
+  feed.innerHTML = page.map(habCardHtml).join('');
+  renderPagination('hab-pagination', HAB_STATE.page, totalPages, goHabPage);
+}
+var HAB_READER_I = null;
+function habReader(){
+  return HAB_READER_I || (HAB_READER_I = createReader({ key: 'nrh', readKey: 'jarian_hab_read',
+    row: (x) => ({ src: x.site_name || x.site, plat: x.kind === 'social' ? (NEWS_PLATFORM_LABEL[x.site] || x.site) : x.kind === 'link' ? 'یافته از لینک' : '', title: x.title || '', text: x.excerpt || '' }),
+    time: (x) => new Date(habTime(x)),
+    related: (sel) => {
+      const k = habSourceKey(sel);
+      const items = (HAB_ROWS || []).filter(x => x.id !== sel.id && habSourceKey(x) === k).slice(0, 4);
+      return { title: 'مطالب دیگر ' + (sel.site_name || sel.site || 'همین منبع'), items };
+    },
+    cardHtml: (x) => habCardHtml(x), goPage: (p) => goHabPage(p) }));
+}
+function habCardHtml(x){
   const isAdmin = currentRole === 'app_admin';
-  feed.innerHTML = page.map(x=>{
+  {
     const terms = (x.matched_terms || []).slice(0, 4);
     return `
     <article class="news-card hab-card">
@@ -141,8 +167,7 @@ export function renderHawzaAbout(){
         ${isAdmin ? `<div class="hab-admin"><button type="button" class="post-hide-btn" data-hab-hide="${Number(x.id)}" title="این خبر برای همه‌ی بیننده‌ها پنهان می‌شود (مثلاً اگر واقعاً درباره‌ی حوزه نیست)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c5 0 9 4.5 10 7a13.6 13.6 0 0 1-2.9 3.9M6.6 6.6C4.3 8 2.7 10.1 2 12c1 2.5 5 7 10 7 1.9 0 3.6-.6 5.1-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>پنهان کردن</button></div>` : ''}
       </div>
     </article>`;
-  }).join('');
-  renderPagination('hab-pagination', HAB_STATE.page, totalPages, goHabPage);
+  }
 }
 // ترجمه‌ی خبرهای خارجی (انگلیسی/عربی): فقط تیتر و گزیده — متن کامل ذخیره نمی‌شه.
 // ورودی تابع translate فقط شناسه است (mentionId)، مثل aiTranslate پست‌ها
@@ -194,6 +219,7 @@ export async function hideHawzaMention(id){
   showToast('خبر پنهان شد');
 }
 export function setupHawzaAbout(){
+  onFeedsView(()=>{ if(HAB_ROWS) renderHawzaAbout(); });
   const search = document.getElementById('hab-search');
   let t = null;
   search.addEventListener('input', ()=>{ clearTimeout(t); t = setTimeout(()=>{ HAB_STATE.q = search.value.trim(); HAB_STATE.page = 1; renderHawzaAbout(); }, 200); });

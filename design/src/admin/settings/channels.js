@@ -4,7 +4,6 @@ import { bindModal } from '../../ui/modal.js';
 import { CATEGORIES, CHANNELS, CHANNEL_PROFILE_GROUPS, PROFILE_GROUPS, REGIONS } from '../../data/store.js';
 import { escAttr, escHtml, faDigitsToEn, faNum, toFaDigits } from '../../core/text.js';
 import { ICONS } from '../../ui/icons.js';
-import { LAWS_SOURCES, lawsSourceOf, resetLawsCache } from '../../features/laws/laws.js';
 import { loadCrawlSites } from './crawl.js';
 import { openDeleteChannelModal } from './delete-channel.js';
 import { populateExportFilters } from '../export.js';
@@ -60,11 +59,9 @@ export const CHAN_SECTIONS = [
     hint:'تب «اخبار حوزه»: فقط برای خبرگزاری‌های حوزوی (وب‌سایت)؛ اخبار سیاسی‌اجتماعی‌شان به تشخیص هوش مصنوعی نمایش داده می‌شود.' },
   { field:'show_in_cyberspace', label:'کنشگری مجازی', short:'کنشگری',
     hint:'پست‌ها در «پست‌های منتشر شده» می‌آیند و منبع در جدول «افراد و مجموعه‌ها» معرفی می‌شود.' },
-  // ۵.۲۸.۰ — عرصه‌های مدار دوم (migration_047)
+  // ۵.۲۸.۰ — migration_047
   { field:'show_in_positions', label:'مواضع مراجع و علماء', short:'مواضع', needsMig:true, noBulk:true,
     hint:'لوگوی منبع در گالری تبی که انتخاب می‌کنید نمایش داده می‌شود؛ فقط مواضع سیاسی‌اجتماعی (به تشخیص هوش مصنوعی) می‌آیند.' },
-  { field:'show_in_laws', label:'قوانین و مصوبات', short:'قوانین', needsMig:true,
-    hint:'فقط مصوبه‌ها و مواضع رسمی منبع (به تشخیص هوش مصنوعی) در فید «قوانین و مصوبات» با برچسب مرجع صادرکننده می‌آیند.' },
 ];
 // ستون‌های migration_047 هنوز در پایگاه داده نیستند → این بخش‌ها غیرفعال (وگرنه ذخیره‌ی منبع خطا می‌دهد)
 export function newColsReady(){ return !CHANNELS.length || ('show_in_positions' in CHANNELS[0]); }
@@ -79,7 +76,6 @@ export function chanSectionsOf(ch){
     // کانال بله فقط تب «ادعاها و شایعات» رو تغذیه می‌کنه، نه فید عمومی اخبار
     sec.field === 'show_in_news' && ch.platform === 'bale' ? 'ادعاها و شایعات'
     : sec.field === 'show_in_positions' && POS_TAB_LABEL[ch.positions_tab] ? 'مواضع (' + POS_TAB_LABEL[ch.positions_tab] + ')'
-    : sec.field === 'show_in_laws' ? 'قوانین (' + lawsSourceOf(ch) + ')'
     : sec.short);
 }
 export function chanAvatarHtml(ch){
@@ -173,13 +169,6 @@ export function ceRenderSections(){
       <div class="field"><label>تب</label><select data-ce="positions_tab">
         ${Object.keys(POS_TAB_LABEL).map(k=>`<option value="${k}" ${val('positions_tab', ch.positions_tab || 'maraji') === k ? 'selected' : ''}>${POS_TAB_LABEL[k]}</option>`).join('')}
       </select></div>`,
-    show_in_laws: (()=>{
-      const cur = String(val('laws_source', ch.laws_source || '') || '');
-      const opts = LAWS_SOURCES.concat(cur && !LAWS_SOURCES.includes(cur) ? [cur] : []);
-      return `<div class="field"><label>مرجع صادرکننده (فیلتر)</label><select data-ce="laws_source">
-        ${opts.map(s=>`<option value="${escAttr(s === 'سایر' ? '' : s)}" ${(cur || '') === (s === 'سایر' ? '' : s) ? 'selected' : ''}>${escHtml(s)}</option>`).join('')}
-      </select></div>`;
-    })(),
   };
   wrap.innerHTML = CHAN_SECTIONS.map(sec=>{
     const noMig = !chanSecUsable(sec);
@@ -324,7 +313,7 @@ export async function bulkChanSave(){
     const added = (await r.json()).length;
     closeBulkChan();
     await loadChannels();
-    resetPfExtraCache(); resetLawsCache();
+    resetPfExtraCache();
     renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
     renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures();
     loadCrawlSites();
@@ -388,7 +377,6 @@ export function setupChannelsAdmin(){
     CHAN_SECTIONS.filter(chanSecUsable).forEach(sec=>{ body[sec.field] = !!get(sec.field); });
     if(newColsReady()){
       body.positions_tab = body.show_in_positions ? (get('positions_tab') || 'maraji') : null;
-      body.laws_source = body.show_in_laws ? ((get('laws_source') || '').trim() || null) : null;
     }
     if(platform !== 'website') body.show_in_hawza = false;
     // «درباره حوزه» توی دیتابیس show_in_news رو هم لازم داره (کلیدواژه و تشخیص
@@ -426,7 +414,7 @@ export function setupChannelsAdmin(){
       current.forEach(gid=>{ if(!wanted.has(gid)) ops.push(api('/channel_profile_groups?channel_id=eq.'+id+'&group_id=eq.'+gid, {method:'DELETE'})); });
       await Promise.all(ops);
       await Promise.all([loadChannels(), loadChannelProfileGroups()]);
-      resetPfExtraCache(); resetLawsCache(); // عضویت بخش‌های تازه عوض شده باشه، داده‌ی جدا دوباره گرفته بشه
+      resetPfExtraCache(); // عضویت بخش‌های تازه عوض شده باشه، داده‌ی جدا دوباره گرفته بشه
       closeChanEditor();
       renderChanList(); renderCatGrid(); renderChannelCards(); populatePostFilters(); populateExportFilters();
       renderNewsFeed(); renderPosts(); renderCyberPeopleGrid(); populatePoliticalFiguresSourceOptions(); renderPoliticalFigures(); renderProfileGroupAdmin();

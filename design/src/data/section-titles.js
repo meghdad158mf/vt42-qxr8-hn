@@ -2,6 +2,7 @@
 
 export const TITLES = {
   dashboard: 'صفحه نخست',
+  today: 'منتخب مطالب امروز جریان',
   posts: 'کنشگری مجازی',
   analytics: 'آنالیز',
   channels: 'کانال‌ها و افراد',
@@ -19,8 +20,5 @@ export const TITLES = {
   users: 'کاربران',
   activity: 'گزارش فعالیت',
   positions: 'مواضع مراجع و علماء',
-  public: 'درباره مردم',
-  laws: 'قوانین و مصوبات',
-  ask: 'از جریان بپرس',
 };
 
