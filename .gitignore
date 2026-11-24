@@ -4,3 +4,10 @@ node_modules/
 test-results/
 playwright-report/
 dist/
+
+# نسخه‌ی نمایشی: خروجی ساخت، داده/تصویرهای ساخته‌شده و هش رمزها (هرگز در گیت)
+dist-demo/
+dist-demo.zip
+demo/build/
+demo/.local/
+demo-preview/

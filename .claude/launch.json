@@ -4,8 +4,23 @@
     {
       "name": "jarian-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "5173", "--strictPort"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
       "port": 5173
+    },
+    {
+      "name": "jarian-demo",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "demo/tools/serve.mjs"
+      ],
+      "port": 8787
     }
   ]
 }
