@@ -6,13 +6,15 @@
 // دستگاه دیگر از نو شروع نمی‌شود). رمزی که هرگز استفاده نشود ۶۰ روز پس از ساخت نسخه باطل می‌شود.
 // گزارش استفاده: private/report.txt (از File Manager هاست دیده می‌شود).
 //
-// فایل‌های پوشه‌ی private با «<?php exit; ?>» شروع می‌شوند تا حتی بدون .htaccess مستقیم خوانده نشوند.
+// فایل‌های پوشه‌ی private با یک سطر PHP «خروج با ۴۰۴» شروع می‌شوند تا حتی بدون .htaccess مستقیم خوانده نشوند.
+// ⚠️ در این فایل هیچ‌جا (حتی در توضیح //) نشانه‌ی پایان PHP یعنی «؟>» لاتین ننویسید — PHP آنجا از کد بیرون می‌آید
+// و بقیه‌ی فایل را به‌جای اجرا، به‌صورت متن نشان می‌دهد.
 
 const VALID_DAYS = 10;
 const UNUSED_DAYS = 60;
 const MAX_FAILS = 5;          // رمز اشتباه از یک اتصال
 const FAIL_WINDOW = 900;      // در ۱۵ دقیقه
-const GUARD = "<?php http_response_code(404); exit; ?>\n";
+const GUARD = "<?php http_response_code(404); exit; ?" . ">\n";
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');

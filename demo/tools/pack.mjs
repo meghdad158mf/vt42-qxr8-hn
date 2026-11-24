@@ -29,6 +29,8 @@ for (const f of walk(OUT)) {
   const data = relative(OUT, f).split(/[\\/]/).join('/') === 'private/data.php';
   for (const [rx, what] of BANNED) if (!(vendor && /گیت‌هاب|source map/.test(what)) && !(data && /نهاد مسئول|کد پنل/.test(what)) && rx.test(s)) problems.push(`${relative(OUT, f)}: ${what}`);
 }
+// PHP «؟>» لاتین را حتی داخل توضیح // پایان کد می‌داند و بقیه‌ی فایل را به‌جای اجرا نشان می‌دهد (یک‌بار روی هاست رخ داد)
+if (readFileSync(resolve(OUT, 'api.php'), 'utf8').includes('?' + '>')) problems.push('api.php: نشانه‌ی پایان PHP داخل فایل — متن فایل به‌جای اجرا نمایش داده می‌شود');
 if (problems.length) { console.error('نسخه‌ی نمایشی نشت دارد:\n' + problems.join('\n')); process.exit(1); }
 
 const zip = resolve(ROOT, 'dist-demo.zip');
