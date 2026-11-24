@@ -157,14 +157,20 @@ if ($a === 'data') {
     return true;
   });
   if (!$ok) out(401, array('error' => 'session'));
+  // داده از پیش با gzip فشرده شده (ساخت دمو)؛ مرورگرها همه gzip می‌پذیرند — فقط اگر نپذیرفت باز می‌شود
   $data = read_private('data.php');
   if ($data === null) out(500, array('error' => 'data'));
   $enc = isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? $_SERVER['HTTP_ACCEPT_ENCODING'] : '';
-  if (function_exists('gzencode') && strpos($enc, 'gzip') !== false && !ini_get('zlib.output_compression')) {
+  if (strpos($enc, 'gzip') !== false) {
+    if (function_exists('ini_set')) @ini_set('zlib.output_compression', '0');
     header('Content-Encoding: gzip');
-    header('Vary: Accept-Encoding');
-    $data = gzencode($data, 6);
+  } else {
+    $data = gzdecode($data);
   }
+  // مرورگر تا ۱۰ دقیقه همین داده را دوباره دانلود نمی‌کند (رفرش و جابه‌جایی سریع‌تر)
+  header('Cache-Control: private, max-age=600');
+  header('Vary: Accept-Encoding, X-Demo-Token');
+  header('Content-Length: ' . strlen($data));
   http_response_code(200);
   echo $data;
   exit;
