@@ -2,7 +2,8 @@
 //   feature-kit/امکانات سامانه جریان.md  →  HTML مستقل (فونت داخل خودش) + PDF + زیپ
 //
 // اجرا از ریشه‌ی ریپو:
-//   NODE_PATH=/opt/node22/lib/node_modules node feature-kit/tools/build.js
+//   NODE_PATH=/opt/node22/lib/node_modules PW_CHROMIUM=/opt/pw-browsers/chromium node feature-kit/tools/build.js
+//   (ویندوز: node feature-kit/tools/build.js — مرورگر خودِ Playwright و python)
 // خروجی: feature-kit/فهرست امکانات سامانه جریان.zip (+ پیش‌نمایش صفحه‌ها در OUT اگه env OUT داده بشه)
 //
 // {{VERSION}} از APP_VERSION فرانت‌اند (design/src/core/config.js) و {{DATE}} تاریخ شمسی امروز (تهران) پر می‌شن.
@@ -181,7 +182,7 @@ ${body}
 }
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {});
   const lp = await browser.newPage({ deviceScaleFactor: 4 });
   await lp.setContent('<body style="margin:0;background:transparent">' + fs.readFileSync(path.join(ROOT, 'design', 'icons', 'jarian-mark.svg'), 'utf8').replace('<svg ', '<svg width="120" ') + '</body>');
   const logoPng = (await (await lp.$('svg')).screenshot({ omitBackground: true })).toString('base64');
@@ -219,7 +220,7 @@ ${body}
     fs.copyFileSync(path.join(dir, NAME + '.html'), path.join(process.env.OUT, 'feature-kit.html'));
   }
   const zipPath = path.join(KIT, NAME + '.zip');
-  execFileSync('python3', ['-c', `
+  execFileSync(process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3'), ['-c', `
 import zipfile, os, sys
 src, dst = sys.argv[1], sys.argv[2]
 base = os.path.dirname(src)
