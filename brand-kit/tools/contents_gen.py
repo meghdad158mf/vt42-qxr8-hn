@@ -1,31 +1,31 @@
 import os
-K=os.environ['K']; F=lambda p:'file://'+K+'/'+p
+K=os.environ['K']; F=lambda p:'file:///'+(K+'/'+p).replace(chr(92),'/').lstrip('/')
 fa=lambda n:str(n).translate(str.maketrans('0123456789','۰۱۲۳۴۵۶۷۸۹'))
 cnt=lambda d:sum(len(f) for _,_,f in os.walk(K+'/'+d))
-icons=sorted(os.listdir(K+'/03-icons/svg-peach'))[:21]
+_all=sorted(os.listdir(K+'/03-icons/svg-peach')); nic=len(_all)
+icons=[i for i in _all if i.startswith(('nav-','why-'))]+[i for i in _all if i.startswith('tab-')][:10]
 cards=[
  ('01-logo','لوگو',[
    'لوگوتایپ خوشنویسی «جریان» (لوگوی سایت از ۶.۱.۰) — SVG + PNG در ۵ رنگ‌بندی',
    'آیکون‌های سایت: favicon، آیکون برنامه و آیفون',
-   'فایل‌های اصلی (نسخه‌ی آبرنگی و تخت)',
-   'لوگوی قبلی «مدار و شهاب» با موشن (مرجع)'],
+   'فایل‌های اصلی طراح (نسخه‌ی آبرنگی و تخت)'],
   f'''<div class="row"><img src="{F('01-logo/logotype/png/jarian-logotype-peach-2048.png')}" style="height:120px">
    <div class="col"><img src="{F('01-logo/logotype/png/jarian-logotype-navy-2048.png')}" style="height:62px;background:#F4EEE8;border-radius:10px;padding:8px 12px">
    <img src="{F('01-logo/app-icons/icon-512.png')}" style="height:62px"></div></div>'''),
- ('02-illustrations','تصویرها',['تصویر اصلی صفحه‌ی نخست','۶ تصویر خطی عرصه‌ها','تصویر تحلیل و لوگوی بصیرت','PNG شفاف + فایل اصلی WebP'],
-  f'''<div class="row"><img src="{F('02-illustrations/png/dashboard-hero.png')}" style="height:160px">'''+''.join(f'<img src="{F("02-illustrations/png/domain-icon-"+n+"-on-dark.png")}" style="height:62px">' for n in ('news','positions'))+'</div>'),
- ('03-icons','آیکون‌های خطی',['۴۰ آیکون سایت: آمار، ۱۰ بخش بسته، تب‌ها','رنگ هلویی و سفید (SVG)','PNG هلویی ۵۱۲ پیکسل'],
+ ('02-illustrations','تصویرهای عرصه‌ها',['۶ تصویر خطی عرصه‌ها (کاشی‌های صفحه‌ی نخست)','خط سرمه‌ای برای زمینه‌ی روشن + خط سفید برای زمینه‌ی تیره','PNG شفاف + فایل اصلی WebP'],
+  '<div class="ill">'+''.join(f'<img src="{F("02-illustrations/png/domain-icon-"+n+".png")}">' for n in ('news','positions','hawza','people','cyberspace','schools'))+'</div>'),
+ ('03-icons','آیکون‌های خطی',[f'{fa(nic)} آیکون: منوی کناری، «چرا جریان»، تب‌ها و ابزارها','رنگ هلویی و سفید (SVG)','PNG هلویی ۵۱۲ پیکسل'],
   '<div class="ic">'+''.join(f'<div><img src="{F("03-icons/svg-peach/"+i)}"></div>' for i in icons)+'</div>'),
- ('04-shapes','اجزای تزئینی',['قوس‌های مدار صفحه‌ی نخست','شهاب نورانی و نقطه‌های ایستگاه','خط تزئینی ستاره‌دار'],
-  f'''<div class="col" style="gap:6px"><img src="{F('04-shapes/png/orbit-domains-arc-clean.png')}" style="width:92%"><img src="{F('04-shapes/png/meteor-streak.png')}" style="width:70%"><img src="{F('04-shapes/png/divider-ornament.png')}" style="width:92%"></div>'''),
- ('05-colors','پالت رنگ',['۱۷ رنگ واقعی سایت + گرادیان‌ها، نمای روشن و رنگ‌های وضعیت','فایل ASE برای ایلاستریتور، فتوشاپ و افتر افکت'],
-  '<div class="sw">'+''.join(f'<div style="background:{c}"><span style="color:{"#16202A" if c in ("#FFFFFF","#FFFAF5","#F1C4A8","#EAB393") else "#fff"}">{c}</span></div>' for c in ['#16202A','#24323F','#EAB393','#B5651D','#F1C4A8','#FFFAF5','#0E9968','#D9433C'])+'</div>'),
- ('06-fonts','فونت',['IRANSansX — فونت سایت','Regular، Medium، Bold، ExtraBold + Variable','⚠️ فونت تجاری؛ برای انتشار مجوز لازم است'],
+ ('04-colors','پالت رنگ',['۱۷ رنگ واقعی سایت: برند، ستون کناری، نمای روشن «مریم‌گلی» و وضعیت','فایل ASE برای ایلاستریتور، فتوشاپ و افتر افکت'],
+  '<div class="sw">'+''.join(f'<div style="background:{c}"><span style="color:{"#22302C" if c in ("#FBFCFA","#EDF1EC","#EAB393","#DFE5DE") else "#fff"}">{c}</span></div>' for c in ['#16202A','#EAB393','#B5651D','#121B24','#EDF1EC','#FBFCFA','#22302C','#0E9968'])+'</div>'),
+ ('05-fonts','فونت',['IRANSansX — فونت سایت','Regular، Medium، Bold، ExtraBold + Variable','⚠️ فونت تجاری؛ برای انتشار مجوز لازم است'],
   '<div class="fonts">'+''.join(f'<span style="font-family:F{w}">جریان</span>' for w in ('R','M','B','X'))+'<div class="fw"><span>Regular</span><span>Medium</span><span>Bold</span><span>ExtraBold</span></div></div>'),
- ('07-screenshots','تصویر صفحه‌های سایت',['۱۰ تصویر رایانه ۱۹۲۰×۱۰۸۰ (ویرایش ۶.۱.۰)','۴ تصویر گوشی با کیفیت بالا','همان صفحه‌ها در نمای روشن (۸ + ۴)','برای مرجع و استفاده در ویدئو'],
-  f'''<div class="row"><img src="{F('07-screenshots/light-desktop-1920x1080/01-home.png')}" class="shot" style="height:150px"><img src="{F('07-screenshots/light-mobile/01-home.png')}" class="shot" style="height:170px"><img src="{F('07-screenshots/desktop-1920x1080/02-today-picks.png')}" class="shot" style="height:150px"></div>'''),
- ('08-text','متن‌ها',['نام، شعار و متن‌های سایت','عرصه‌ها، «چرا جریان»، بسته‌ی تحلیلی','آماده‌ی کپی در موشن'],
+ ('06-screenshots','تصویر صفحه‌های سایت',['۱۰ تصویر رایانه ۱۹۲۰×۱۰۸۰ و ۴ تصویر گوشی','همان صفحه‌ها در نمای روشن (۸ + ۴)','برای مرجع و استفاده در ویدئو'],
+  f'''<div class="row"><img src="{F('06-screenshots/light-desktop-1920x1080/01-home.png')}" class="shot" style="height:150px"><img src="{F('06-screenshots/light-mobile/01-home.png')}" class="shot" style="height:170px"><img src="{F('06-screenshots/desktop-1920x1080/02-today-picks.png')}" class="shot" style="height:150px"></div>'''),
+ ('07-text','متن‌ها',['نام، شعار و متن‌های فعلی سایت','ورود، خوش‌آمد، صفحه‌ی نخست، عرصه‌ها و منو','آماده‌ی کپی در موشن'],
   '<div class="txt"><b>سامانه هوشمند جریان</b><span>نبض <i>فضای سیاسی اجتماعی</i></span><span>به روایت حوزه علمیه خراسان</span></div>'),
+ ('08-previous-designs','طرح‌های قبلی',['لوگوی قبلی «مدار و شهاب» با موشن','تصویر هرو، آیکون‌های آمار و بخش‌های بسته','قوس‌ها، شهاب، پالت و متن‌های قبلی — فقط مرجع'],
+  f'''<div class="row old"><img src="{F('08-previous-designs/logo-orbit/marks/png/jarian-mark-on-dark-1024.png')}" style="height:96px"><div class="col"><img src="{F('08-previous-designs/shapes/png/orbit-domains-arc-clean.png')}" style="width:220px"><img src="{F('08-previous-designs/shapes/png/meteor-streak.png')}" style="width:160px"></div></div>'''),
  ('README-FA.txt','راهنمای فارسی',['توضیح هر پوشه و هر فایل','کدام لوگو برای کدام زمینه','نکته‌های حرکت و رنگ'],
   '<div class="readme"><div class="doc"><i></i><i></i><i style="width:60%"></i><i></i><i style="width:75%"></i></div></div>'),
 ]
@@ -35,7 +35,7 @@ def card(folder,title,bul,thumb):
     return f'''<div class="card"><div class="hd"><span class="num">{fa(num)}</span><div><div class="t">{title}</div><div class="f">{folder}</div></div><span class="c">{fa(n)} فایل</span></div>
     <div class="th">{thumb}</div><ul>{''.join(f'<li>{b}</li>' for b in bul)}</ul></div>'''
 total=sum(len(f) for _,_,f in os.walk(K))
-ff=lambda n,f:f"@font-face{{font-family:{n};src:url({F('06-fonts/'+f)})}}"
+ff=lambda n,f:f"@font-face{{font-family:{n};src:url(\"{F('05-fonts/'+f)}\")}}"
 html=f'''<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><style>
 {ff('FR','IRANSansX-Regular.ttf')}{ff('FM','IRANSansX-Medium.ttf')}{ff('FB','IRANSansX-Bold.ttf')}{ff('FX','IRANSansX-ExtraBold.ttf')}
 *{{box-sizing:border-box}}body{{margin:0;width:1600px;background:#16202A;color:#fff;font-family:FM;padding:56px}}
@@ -54,6 +54,8 @@ ul{{margin:0;padding:0 18px 0 0;font-size:16px;line-height:1.85;color:rgba(255,2
 .ic{{display:grid;grid-template-columns:repeat(7,1fr);gap:12px 16px}}.ic div{{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center}}.ic img{{width:24px;height:24px}}
 .sw{{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:88%}}.sw div{{height:78px;border-radius:12px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:flex-end;padding:6px 8px}}.sw span{{font:12px monospace;direction:ltr}}
 .fonts{{display:grid;grid-template-columns:repeat(4,1fr);width:92%;text-align:center;font-size:32px;row-gap:10px}}.fw{{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);font:13px monospace;color:rgba(255,255,255,.45)}}
+.ill{{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;background:#EDF1EC;padding:14px 18px;border-radius:14px}}.ill img{{width:96px;height:72px;object-fit:contain}}
+.old{{opacity:.55;filter:grayscale(.4)}}
 .shot{{border-radius:8px;border:1px solid rgba(255,255,255,.15)}}
 .txt{{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:22px}}.txt b{{font-family:FX;font-size:30px;font-weight:normal}}.txt i{{font-style:normal;color:#EAB393}}.txt span:last-child{{font-size:17px;color:rgba(255,255,255,.6)}}
 .doc{{width:120px;height:150px;border-radius:12px;background:#F4EEE8;padding:26px 18px;display:flex;flex-direction:column;gap:12px;position:relative}}.doc i{{height:7px;border-radius:4px;background:#B5651D;opacity:.55;display:block}}.doc i:first-child{{background:#16202A;opacity:.85;width:70%}}
@@ -64,4 +66,4 @@ ul{{margin:0;padding:0 18px 0 0;font-size:16px;line-height:1.85;color:rgba(255,2
 <div class="orn"></div><div class="grid">{''.join(card(*c) for c in cards)}</div>
 <div class="foot"><span>همه‌ی PNGها با پس‌زمینه‌ی شفاف — SVGها برداری و بدون افت کیفیت</span><span>مجموع: <b>{fa(total)} فایل</b> در ۸ پوشه</span></div>
 </body></html>'''
-open('contents.html','w').write(html)
+open('contents.html','w',encoding='utf-8').write(html)
