@@ -1,0 +1,328 @@
+<title>نقشه‌ی فنی جریان</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* چینش: ستون خواندنی ۱۰۰۰px؛ هر بخش یک کارت، نمودارها با grid/flex خودِ HTML (راست‌به‌چپ) */
+:root{
+  --bg:#edf1ec; --card:#fbfcfa; --ink:#22302c; --dim:#5c6a64; --line:#dfe5de;
+  --navy:#16202a; --on-navy:#ffffff; --peach:#eab393; --brown:#b5651d; --soft:#f1f4ef;
+  --ok:#0e9968; --warn:#d99a1e;
+  --f-body:"Vazirmatn",Tahoma,system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#121b24; --card:#1b2733; --ink:#eef2ee; --dim:#a7b3ad; --line:#2c3a47;
+  --navy:#0d141b; --on-navy:#ffffff; --peach:#eab393; --brown:#f0b07f; --soft:#16212b; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#121b24; --card:#1b2733; --ink:#eef2ee; --dim:#a7b3ad; --line:#2c3a47;
+  --navy:#0d141b; --on-navy:#ffffff; --peach:#eab393; --brown:#f0b07f; --soft:#16212b; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.85;direction:rtl;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+code,.mono{font-family:var(--f-mono);font-size:.86em;direction:ltr;unicode-bidi:isolate}
+code{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:0 5px}
+h1,h2,h3{text-wrap:balance;margin:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
+
+/* سربرگ */
+.hero{background:var(--navy);color:var(--on-navy);border-radius:0 0 22px 22px;padding:34px 28px 26px;display:flex;flex-direction:column;gap:12px;
+  margin-top:calc(-1 * env(safe-area-inset-top,0px));padding-top:calc(env(safe-area-inset-top,0px) + 34px)}
+.hero .eyebrow{color:var(--peach);font-size:13px;font-weight:700;letter-spacing:.02em}
+.hero h1{font-size:34px;font-weight:800;line-height:1.35}
+.hero p{margin:0;color:rgba(255,255,255,.74);max-width:62ch}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.badge{border:1px solid rgba(234,179,147,.5);color:var(--peach);border-radius:99px;padding:2px 12px;font-size:13px}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.toc a{text-decoration:none;font-size:13px;color:rgba(255,255,255,.85);background:rgba(255,255,255,.07);border-radius:8px;padding:3px 10px}
+.toc a:hover{background:rgba(234,179,147,.18)}
+
+section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px 26px;display:flex;flex-direction:column;gap:14px;min-width:0;scroll-margin-top:12px}
+section h2{font-size:21px;font-weight:800;padding-inline-start:12px;border-inline-start:3px solid var(--peach);line-height:1.4}
+section > p{margin:0;color:var(--dim);max-width:70ch}
+h3{font-size:16px;font-weight:700}
+
+/* نمودار جریان داده */
+.flow{display:grid;grid-template-columns:1fr auto 1.25fr auto 1fr;gap:10px;align-items:stretch}
+.node{border:1px solid var(--line);background:var(--soft);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.node b{font-size:15px}
+.node small{color:var(--dim);font-size:13px;line-height:1.7}
+.node.core{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.node.core small{color:rgba(255,255,255,.72)}
+.node.core .chip{border-color:rgba(255,255,255,.22);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{border:1px solid var(--line);border-radius:99px;padding:0 9px;font-size:12px;line-height:22px;white-space:nowrap}
+.arrow{display:flex;align-items:center;justify-content:center;color:var(--peach);font-size:22px;font-weight:700}
+.flow-note{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.flow-note div{font-size:13px;color:var(--dim);border-top:2px solid var(--peach);padding-top:8px}
+.flow-note b{color:var(--ink);display:block;font-size:14px}
+
+/* لایه‌های فرانت‌اند */
+.layers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.layer{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.layer .hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.layer .hd code{font-weight:600}
+.layer p{margin:0;font-size:14px}
+.layer .rule{font-size:13px;color:var(--dim)}
+.layer.wide{grid-column:1 / -1}
+.layer.admin{border-style:dashed;border-color:var(--brown)}
+.depline{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;background:var(--soft);border-radius:12px;padding:10px 12px}
+.depline .arrow{font-size:15px}
+
+/* دو بسته */
+.bundles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.bundle{border-radius:14px;padding:14px 16px;border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.bundle .size{font-family:var(--f-mono);font-size:22px;font-weight:600;direction:ltr;text-align:right}
+.bundle.admin{border-color:var(--brown)}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;display:flex;direction:ltr}
+.bar i{display:block;height:100%}
+
+/* جدول‌ها */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:right;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--soft);font-weight:700;font-size:13px;color:var(--dim)}
+tr:last-child td{border-bottom:0}
+td.t{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* خط انتشار */
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;counter-reset:s}
+.step{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.step::before{counter-increment:s;content:counter(s,persian);width:24px;height:24px;border-radius:50%;background:var(--peach);color:#16202a;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px}
+.step b{font-size:14px}
+.step span{color:var(--dim)}
+
+ul.list{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px}
+ul.list li::marker{color:var(--peach)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.box{border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.servers{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.srv{border-radius:14px;padding:14px 16px;border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.srv.ir{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.srv.ir small{color:rgba(255,255,255,.72)}
+.srv small{color:var(--dim);font-size:13px}
+.link-col{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--dim);text-align:center}
+footer{text-align:center;color:var(--dim);font-size:13px}
+
+@media (max-width:760px){
+  .flow{grid-template-columns:1fr}
+  .flow .arrow{transform:rotate(-90deg);height:22px}
+  .flow-note,.layers,.bundles,.grid2{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .servers{grid-template-columns:1fr}
+  .link-col{flex-direction:row;justify-content:center}
+  .hero h1{font-size:27px}
+  section{padding:18px 16px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="eyebrow">سامانه هوشمند جریان</span>
+    <h1>نقشه‌ی فنی جریان</h1>
+    <p>ساختار سامانه برای برنامه‌نویسی که اولین بار روی پروژه کار می‌کند: داده از کجا می‌آید، کجا ذخیره می‌شود، فرانت‌اند چطور چیده شده و هر تغییر چطور آزموده و منتشر می‌شود.</p>
+    <div class="meta"><span class="badge">ویرایش ۶.۱.۷</span><span class="badge">آذر ۱۴۰۵</span><span class="badge">بدون هیچ کلید یا رمز</span></div>
+    <nav class="toc" aria-label="بخش‌ها">
+      <a href="#flow">جریان داده</a><a href="#frontend">لایه‌های فرانت‌اند</a><a href="#bundles">بسته‌ی بیننده و مدیر</a>
+      <a href="#server">سمت سرور</a><a href="#jobs">کارهای خودکار</a><a href="#release">آزمون و انتشار</a>
+      <a href="#add">افزودن چیز تازه</a><a href="#demo">نسخه‌ی نمایشی</a><a href="#future">دو سرور</a>
+    </nav>
+  </header>
+
+  <section id="flow">
+    <h2>جریان داده</h2>
+    <p>سرور میانی وجود ندارد: فرانت‌اند مستقیم با پایگاه داده حرف می‌زند و امنیت داده را نقش‌های پایگاه داده و RLS تضمین می‌کنند، نه پنهان بودن کد.</p>
+    <div class="flow">
+      <div class="node">
+        <b>منابع</b>
+        <div class="chips"><span class="chip">ایتا</span><span class="chip">تلگرام</span><span class="chip">بله</span><span class="chip">خوراک RSS</span><span class="chip">روزنامه‌ها</span><span class="chip">سایت‌های خبری</span></div>
+        <small>جمع‌آورنده‌های پایتون <code>scripts/*.py</code> روی GitHub Actions، فقط از شاخه‌ی <code>main</code></small>
+      </div>
+      <div class="arrow" aria-hidden="true">←</div>
+      <div class="node core">
+        <b>Supabase</b>
+        <div class="chips"><span class="chip">Postgres + RLS</span><span class="chip">PostgREST</span><span class="chip">Storage</span><span class="chip">Edge Functions</span><span class="chip">pg_cron</span></div>
+        <small>نقش‌های <code>app_admin</code> و <code>app_viewer</code>؛ ورود با کد ملی و پیامک؛ هوش مصنوعی فقط سمت سرور (لیارا)</small>
+      </div>
+      <div class="arrow" aria-hidden="true">←</div>
+      <div class="node">
+        <b>فرانت‌اند</b>
+        <div class="chips"><span class="chip">ES module</span><span class="chip">Vite</span><span class="chip">GitHub Pages</span><span class="chip">PWA</span></div>
+        <small><code>design/</code> با <code>fetch</code> مستقیم به PostgREST، Storage و Functions</small>
+      </div>
+    </div>
+    <div class="flow-note">
+      <div><b>زمان‌بندی</b>pg_cron سر وقت دقیق تابع <code>run-job</code> را صدا می‌زند و آن یک <code>workflow_dispatch</code> روی <code>main</code> می‌فرستد. هیچ ورک‌فلویی <code>schedule:</code> ندارد.</div>
+      <div><b>هوش مصنوعی</b>ترجمه، «اخبار منتخب»، کلیدواژه‌ها و فیلتر بخش‌ها در Edge Functionها؛ فرانت فقط شناسه می‌فرستد، هرگز متن آزاد.</div>
+      <div><b>فایل‌ها</b>رسانه‌ی پست‌ها و جلدها عمومی؛ مجلات، بسته‌ها و گزارش‌های مدارس خصوصی با لینک امضاشده.</div>
+    </div>
+  </section>
+
+  <section id="frontend">
+    <h2>لایه‌های فرانت‌اند</h2>
+    <p>صفحه‌ی اصلی <code>design/ita-monitoring-prototype.html</code> است و نشانی‌اش عمداً ثابت می‌ماند. جاوااسکریپت از <code>design/src/main.js</code> شروع می‌شود.</p>
+    <div class="depline" aria-label="جهت مجاز import">
+      <span>جهت مجاز import:</span>
+      <code>features/</code><span class="arrow">←</span><code>ui/</code><span class="arrow">←</span><code>data/</code><span class="arrow">←</span><code>core/</code>
+      <span>— لایه‌ی پایین‌تر هرگز لایه‌ی بالاتر را import نمی‌کند؛ برگشت با hook (<code>onX(fn)</code>).</span>
+    </div>
+    <div class="layers">
+      <div class="layer"><div class="hd"><code>src/core/</code><span class="chip">هسته‌ی خالص</span></div>
+        <p>تنظیمات و شماره‌ی نسخه، نشست، <code>api()</code>، گزارش خطا، متن امن، جست‌وجوی فارسی، تاریخ شمسی، اعتبارسنجی، ناوبری و «برگشت»</p>
+        <span class="rule">بدون وابستگی به بقیه‌ی برنامه؛ وابستگی فقط با hook</span></div>
+      <div class="layer"><div class="hd"><code>src/data/</code><span class="chip">داده‌ی مشترک</span></div>
+        <p>منابع، موضوع‌ها، مناطق، کش پست‌ها، تنظیمات سایت، عنوان بخش‌ها</p>
+        <span class="rule">فقط‌خواندنی برای بقیه؛ تغییر فقط با setter (<code>setChannels</code>…)</span></div>
+      <div class="layer"><div class="hd"><code>src/ui/</code><span class="chip">اجزای رابط</span></div>
+        <p>پنجره، پیام و تأیید، منوها، تب‌بار، نمایشگر سند و عکس، صفحه‌بندی، تاریخ شمسی، نمای روشن/تیره/خودکار، ستون ثابت کناری رایانه‌ی پهن</p>
+        <span class="rule">هر جزء با <code>setupX()</code> راه می‌افتد</span></div>
+      <div class="layer"><div class="hd"><code>src/features/&lt;عرصه&gt;/</code><span class="chip">عرصه‌ها</span></div>
+        <p><code>home</code>، <code>news</code>، <code>positions</code>، <code>hawza</code>، <code>people</code>، <code>cyberspace</code>، <code>schools</code>، <code>reports</code>، <code>announcements</code></p>
+        <span class="rule">دو عرصه هم را دوطرفه import نمی‌کنند</span></div>
+      <div class="layer wide"><div class="hd"><code>features/home/</code><span class="chip">صفحه‌ی نخست</span></div>
+        <p>صفحه‌ی خوش‌آمد بعد از ورود (<code>welcome.js</code>، آمار با شمارش از صفر و عددهای همان روز از حافظه)، صفحه‌ی نخست یک‌نگاه (<code>home-v3.js</code>: ردیف شش عرصه، «امروز در جریان»، بسته‌ی تحلیلی) و صفحه‌ی «منتخب مطالب امروز» (<code>today-page.js</code>، بخش <code>#today</code>)</p></div>
+      <div class="layer wide"><div class="hd"><code>features/news/news-reader.js</code><span class="chip">نمای خواندن</span></div>
+        <p><code>createReader(cfg)</code> برای هر فید: فهرست دوخطی کنار ستون متن کامل، کلیدهای ↑↓، خوانده‌شده‌ها در حافظه‌ی مرورگر، «مطالب دیگر همین منبع». اخبار سه نمای خودش را دارد؛ پرونده‌ها، درباره حوزه، کنشگری و فید منابع یادداشت‌ها و مواضع یک انتخاب مشترک «خواندن/کارت». فقط از ۱۱۰۰ پیکسل به بالا.</p></div>
+      <div class="layer admin"><div class="hd"><code>src/admin/</code><span class="chip">فقط مدیر</span></div>
+        <p>وضعیت سامانه، تنظیمات بخش‌ها، کاربران، بارگذاری، خروجی، گزارش فعالیت</p>
+        <span class="rule">بسته‌ی جدا؛ هیچ ماژول بیننده‌ای از آن import نمی‌کند (<code>adminHook(name)</code>)</span></div>
+      <div class="layer"><div class="hd"><code>src/app.js</code><span class="chip">اتصال</span></div>
+        <p>ورود، ناوبری بین بخش‌ها، بارگذاری داده (<code>loadAll</code>)، راه انداختن اجزا</p>
+        <span class="rule">feature/admin فقط تابع export‌شده‌ی آن را import می‌کنند</span></div>
+      <div class="layer wide"><div class="hd"><code>src/styles/</code><span class="chip">۳۶ فایل CSS</span></div>
+        <p><code>main.css</code> همه را به ترتیب آبشاری import می‌کند (<code>01-tokens</code> تا <code>36-home-tiles-top</code>)؛ فایل پایین‌تر بالایی را بازنویسی می‌کند. نمای روشن فقط در <code>27-theme-light.css</code>.</p>
+        <span class="rule">ترتیب import عوض نشود؛ CSS تازه = فایل شماره‌دار بعدی؛ طرحی که حذف می‌شود، CSSش هم همان‌جا حذف شود</span></div>
+    </div>
+    <div class="grid2">
+      <div class="box"><h3>قاعده‌های امنیت و نظم</h3>
+        <ul class="list">
+          <li>هیچ دستگیره‌ی درون HTML (<code>onclick=</code>…)؛ هر دکمه با <code>addEventListener</code> یا delegation با <code>data-*</code>.</li>
+          <li>هر متن بیرونی پیش از <code>innerHTML</code> با <code>escHtml</code>، و هر لینک با <code>safeUrl</code>.</li>
+          <li>هیچ اسکریپت یا فونت از CDN؛ Chart.js، jsPDF و html2canvas محلی و فقط هنگام نیاز.</li>
+        </ul></div>
+      <div class="box"><h3>نسخه و کش</h3>
+        <ul class="list">
+          <li>شماره‌ی نسخه: <code>APP_VERSION</code> در <code>core/config.js</code> + دو <code>span.app-version</code> در HTML.</li>
+          <li>سرویس‌ورکر <code>sw.js</code>: فایل ثابت cache-first، صفحه network-first.</li>
+          <li>عوض شدن فایل ثابتی با همان نام (تصویر، آیکون) = شماره‌ی <code>CACHE</code> بالا برود.</li>
+        </ul></div>
+    </div>
+  </section>
+
+  <section id="bundles">
+    <h2>بسته‌ی بیننده و بسته‌ی مدیر</h2>
+    <p>کد مدیریت هرگز برای بیننده دانلود نمی‌شود: <code>app.js</code> فقط برای مدیر <code>import('./admin/admin.js')</code> را صدا می‌زند و Vite آن را فایل جدای <code>assets/admin-&lt;hash&gt;.js</code> می‌سازد.</p>
+    <div class="bundles">
+      <div class="bundle"><b>بیننده</b><span class="size">~226 KB</span>
+        <div class="bar" aria-hidden="true"><i style="width:58%;background:var(--peach)"></i></div>
+        <small>هسته، رابط و همه‌ی عرصه‌ها</small></div>
+      <div class="bundle admin"><b>مدیر</b><span class="size">~226 + 166 KB</span>
+        <div class="bar" aria-hidden="true"><i style="width:58%;background:var(--peach)"></i><i style="width:42%;background:var(--brown)"></i></div>
+        <small>همان بسته + بسته‌ی مدیریت، پس از ورود مدیر</small></div>
+    </div>
+  </section>
+
+  <section id="server">
+    <h2>سمت سرور (Supabase)</h2>
+    <div class="grid2">
+      <div class="box"><h3>پایگاه داده و ورود</h3>
+        <ul class="list">
+          <li><code>db/schema.sql</code> + migrationهای شماره‌دار (تا <code>053</code>)، همه دستی در SQL Editor؛ <code>schema.sql</code> روی پروژه‌ی زنده دوباره اجرا نشود.</li>
+          <li>ورود: کد ملی + کد یک‌بارمصرف پیامکی (<code>otp_request</code>/<code>login_otp</code>) یا رمز مدیر همراه کد ملی (<code>login_admin</code>)؛ <code>login(password)</code> برای جمع‌آورنده‌ها و ورود اضطراری. خروجی JWT با نقش.</li>
+          <li>کد ملی خام ذخیره نمی‌شود (HMAC در جدولی بدون دسترسی).</li>
+          <li>تابع <code>security definer</code> تازه: چک نقش در بدنه + <code>revoke … from anon, authenticated</code>.</li>
+        </ul></div>
+      <div class="box"><h3>Edge Functions</h3>
+        <ul class="list">
+          <li><code>translate</code> ترجمه‌ی یک پست یا یافته</li>
+          <li><code>news-insights</code> خوشه‌بندی خبرها و «اخبار منتخب»</li>
+          <li><code>extract-post-keywords</code> کلیدواژه‌ها و فیلتر بخش‌ها</li>
+          <li><code>run-job</code> اجرای دستی، وضعیت و گزارش کارها</li>
+          <li><code>notify</code> هشدار ایمیلی و گزارش روزانه</li>
+          <li><code>_shared/</code> احراز هویت، هوش مصنوعی، خوشه‌بندی، فهرست کارها</li>
+        </ul></div>
+    </div>
+  </section>
+
+  <section id="jobs">
+    <h2>کارهای خودکار</h2>
+    <p>هر کار یک اسکریپت در <code>scripts/</code> و یک ورک‌فلوی فقط‌دستی دارد؛ زمان‌ها را pg_cron تعیین می‌کند. ساعت‌ها به وقت تهران‌اند.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>کار</th><th>فایل</th><th>زمان اجرا (تهران)</th></tr></thead>
+      <tbody>
+        <tr><td>ایتا</td><td><code>collect_eitaa.py</code></td><td class="t">هر ۲ ساعت، دقیقه‌ی ۳۰ ساعت‌های فرد</td></tr>
+        <tr><td>وب‌سایت‌ها (RSS)</td><td><code>collect_rss.py</code></td><td class="t">هر ۲ ساعت، دقیقه‌ی ۳۵ ساعت‌های فرد</td></tr>
+        <tr><td>تلگرام</td><td><code>collect_telegram.py</code></td><td class="t">هر ۲ ساعت، دقیقه‌ی ۴۵ ساعت‌های فرد</td></tr>
+        <tr><td>بله («رصد شایعات»)</td><td><code>collect_bale.py</code></td><td class="t">۰۵:۰۰، ۰۹:۰۰ و هر ۲ ساعت تا ۲۱:۰۰</td></tr>
+        <tr><td>روزنامه‌ها</td><td><code>collect_newspapers.py</code></td><td class="t">۰۴:۰۰، ۰۶:۰۰، ۰۸:۰۰، ۱۰:۰۰، ۱۴:۰۰</td></tr>
+        <tr><td>خزنده‌ی «درباره حوزه»</td><td><code>crawl_hawza.py</code></td><td class="t">هر ۳ ساعت از ۰۶:۱۵</td></tr>
+        <tr><td>کلیدواژه‌ها</td><td><code>extract_keywords.py</code></td><td class="t">هر ۲ ساعت، سر ساعت‌های زوج</td></tr>
+        <tr><td>«اخبار منتخب»</td><td><code>analyze_news_insights.py</code></td><td class="t">۰۲:۰۰، ۰۸:۰۰، ۱۴:۰۰، ۲۰:۰۰</td></tr>
+        <tr><td>پاک‌سازی رسانه</td><td><code>cleanup_media.py</code></td><td class="t">۰۹:۴۵ و ۲۱:۴۵</td></tr>
+        <tr><td>هشدار ایمیلی</td><td>Edge Function <code>notify</code></td><td class="t">هر ۳۰ دقیقه؛ گزارش روزانه ۰۷:۲۲</td></tr>
+        <tr><td>عکس شبانه‌ی حجم</td><td>تابع پایگاه داده</td><td class="t">۰۰:۲۰</td></tr>
+      </tbody>
+    </table></div>
+    <ul class="list">
+      <li>کتابخانه‌ی مشترک <code>jarian_common.py</code>: ورود، ذخیره‌ی پست‌ها، بارگذاری فایل، و «اگر همه‌ی منابع خطا دادند اجرا ناموفق» تا کارت وضعیت سامانه قرمز شود.</li>
+      <li>ورک‌فلوها از <code>main</code> اجرا می‌شوند؛ هر تغییر در <code>scripts/</code> باید جدا به <code>main</code> هم برسد.</li>
+      <li>اگر pg_cron یا توکن دیسپچ گیت‌هاب از کار بیفتد هیچ کاری اجرا نمی‌شود.</li>
+    </ul>
+  </section>
+
+  <section id="release">
+    <h2>آزمون و انتشار</h2>
+    <div class="steps">
+      <div class="step"><b>شاخه‌ی کاری</b><span>از شاخه‌ی زنده؛ نسخه بالا می‌رود</span></div>
+      <div class="step"><b>PR</b><span>به شاخه‌ی زنده، نه <code>main</code></span></div>
+      <div class="step"><b>tests.yml</b><span>lint، ۳۸ آزمون واحد، پایتون، ساخت و ۲۶۲ آزمون مرورگر روی ۴ ماشین</span></div>
+      <div class="step"><b>مرج</b><span>فقط با سبز بودن <code>site-ok</code> و شاخه‌ی به‌روز</span></div>
+      <div class="step"><b>pages.yml</b><span>lint، آزمون واحد، ساخت، انتشار روی GitHub Pages</span></div>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>فرمان</th><th>کار</th></tr></thead>
+      <tbody>
+        <tr><td><code>npm run build</code></td><td>Vite → <code>dist/</code> با همان نشانی‌ها؛ بسته‌ی بیننده و بسته‌ی جدای مدیر</td></tr>
+        <tr><td><code>npm run lint</code></td><td>ESLint</td></tr>
+        <tr><td><code>npm run test:unit</code></td><td>Vitest: تاریخ شمسی، کد ملی، متن امن، جست‌وجو، ساختار importها، نبودن دستگیره‌ی درون HTML</td></tr>
+        <tr><td><code>npm test</code></td><td>Playwright با سوپابیس ساختگی روی رایانه و گوشی (۱۰ فایل)</td></tr>
+        <tr><td><code>python -m unittest discover -s tests/python</code></td><td>آزمون جمع‌آورنده‌ها، بدون شبکه</td></tr>
+      </tbody>
+    </table></div>
+    <p>تغییر در <code>supabase/functions/**</code> با <code>deploy-edge-functions.yml</code> خودکار دیپلوی می‌شود.</p>
+  </section>
+
+  <section id="add">
+    <h2>افزودن چیز تازه</h2>
+    <div class="grid2">
+      <div class="box"><h3>تب یا بخش تازه</h3>
+        <ul class="list"><li>HTML + ماژول در <code>features/&lt;عرصه&gt;/</code> با <code>setupX()</code></li><li><code>navCurrentState</code>/<code>navApply</code> در <code>app.js</code></li><li><code>SITE_VIS_ITEMS</code>، منوی بخش‌ها و ستون کناری</li><li>فهرست <code>sections.spec.js</code></li></ul></div>
+      <div class="box"><h3>کار مدیریتی تازه</h3>
+        <ul class="list"><li>ماژول در <code>admin/</code> + setup در <code>admin/admin.js</code></li><li>صدا زدن از <code>app.js</code> با <code>admin()?.x()</code></li></ul></div>
+      <div class="box"><h3>جدول تازه</h3>
+        <ul class="list"><li><code>db/migration_0NN_*.sql</code> بعدی با GRANT صریح و RLS</li><li>جدول تنظیماتی → <code>BACKUP_TABLES</code> و trigger دفتر تغییرات</li></ul></div>
+      <div class="box"><h3>جمع‌آورنده یا کار تازه</h3>
+        <ul class="list"><li>تابع‌ها از <code>jarian_common</code></li><li>یک خط <code>cron.schedule</code> در migration بعدی</li><li>ردیف در <code>_shared/jobs.ts</code> و <code>SYS_STATUS_JOBS</code></li></ul></div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <h2>نسخه‌ی نمایشی (<code>demo/</code>)</h2>
+    <p>همین فرانت‌اند برای نشان دادن به خریدار: فقط نمای بیننده، بدون پنل مدیریت و بدون اتصال به سوپابیس. در ساخت، <code>core/config.js</code> و <code>admin/admin.js</code> جایگزین می‌شوند و <code>demo/src/shim.js</code> به درخواست‌ها از یک فایل داده جواب می‌دهد (عکس فوری رمزنگاری‌شده‌ی داده‌ی واقعی، بخش‌های خالی با داده‌ی ساختگی). ورود را <code>demo/server/api.php</code> روی هاست بررسی می‌کند. کد سایت اصلی برای دمو تغییری نمی‌کند.</p>
+  </section>
+
+  <section id="future">
+    <h2>برنامه‌ی آینده: دو سرور</h2>
+    <p>تا سایت در قطعی اینترنت بین‌الملل هم از داخل در دسترس بماند و منابع فیلترشده هم رصد شوند. API سازگار با PostgREST می‌ماند تا فرانت‌اند فقط نشانی را عوض کند.</p>
+    <div class="servers">
+      <div class="srv ir"><b>سرور ایران (اصلی)</b><small>سایت، پایگاه داده، فایل‌ها، ورود پیامکی؛ ایتا، بله، سایت‌های ایرانی، روزنامه‌ها، هوش مصنوعی داخلی؛ زمان‌بندی با crontab خودِ سرور</small></div>
+      <div class="link-col"><span class="arrow">⇄</span><span>ارسال مستقیم یا دریافت، صف یک‌هفته‌ای، بسته‌ی رمزنگاری‌شده‌ی دستی</span></div>
+      <div class="srv"><b>سرور خارج (فقط جمع‌آوری)</b><small>تلگرام و رسانه‌ها، سایت‌ها و خوراک‌های خارجی، بخش خارجی خزنده؛ کاربر هرگز مستقیم به آن وصل نمی‌شود</small></div>
+    </div>
+  </section>
+
+  <footer>ویرایش ۶.۱.۷ — نسخه‌ی متنی همین نقشه: <code>docs/ARCHITECTURE.md</code> در ریپو</footer>
+</div>
